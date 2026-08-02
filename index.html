@@ -381,11 +381,13 @@
     }
 
     .schedule-shell {
-      overflow: hidden;
+      max-height: clamp(430px, calc(100vh - 320px), 760px);
+      overflow: auto;
       border: 1px solid var(--line);
       border-radius: 10px;
       background: var(--panel);
       box-shadow: var(--shadow);
+      overscroll-behavior: contain;
     }
 
     .schedule-grid {
@@ -396,6 +398,9 @@
 
     .time-head,
     .day-head {
+      position: sticky;
+      top: 0;
+      z-index: 5;
       min-height: 70px;
       border-bottom: 1px solid var(--line);
       display: flex;
@@ -407,6 +412,7 @@
     .time-head {
       font-size: 36px;
       color: #1f477f;
+      background: #fff;
     }
 
     .day-head {
