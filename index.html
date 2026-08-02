@@ -1,0 +1,1487 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KidsSync Weekly Schedule</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17223b;
+      --muted: #64708a;
+      --line: #d7dfec;
+      --soft-line: #edf2f7;
+      --page: #f7fafc;
+      --panel: #ffffff;
+      --blue: #2f7fd3;
+      --blue-soft: #d9ebff;
+      --blue-line: #8eb9df;
+      --green: #3f9444;
+      --green-soft: #e2f0d7;
+      --green-line: #a6c68c;
+      --purple-soft: #eadfff;
+      --purple-line: #bda7dc;
+      --pink-soft: #fff1f3;
+      --yellow-soft: #fff7d6;
+      --shadow: 0 14px 36px rgba(31, 49, 86, 0.12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 10% 6%, rgba(255, 221, 105, 0.35), transparent 20rem),
+        radial-gradient(circle at 90% 0%, rgba(47, 127, 211, 0.16), transparent 18rem),
+        var(--page);
+      color: var(--ink);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1380px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 32px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(280px, 1.2fr) minmax(260px, 0.55fr) minmax(280px, 1fr) minmax(260px, 0.95fr);
+      gap: 16px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .calendar-mark {
+      flex: 0 0 auto;
+      width: 84px;
+      height: 84px;
+      border: 3px solid #1e72bd;
+      border-radius: 10px;
+      background: #eef7ff;
+      position: relative;
+      box-shadow: 0 6px 0 rgba(30, 114, 189, 0.15);
+    }
+
+    .calendar-mark::before {
+      content: "";
+      position: absolute;
+      inset: 14px 12px auto;
+      height: 10px;
+      border-radius: 5px;
+      background: #ff7d88;
+    }
+
+    .calendar-grid {
+      position: absolute;
+      left: 14px;
+      top: 32px;
+      display: grid;
+      grid-template-columns: repeat(2, 18px);
+      grid-auto-rows: 14px;
+      gap: 7px;
+    }
+
+    .calendar-grid span {
+      border-radius: 3px;
+      background: #b9d2e8;
+    }
+
+    .clock-hand {
+      position: absolute;
+      right: -12px;
+      bottom: -8px;
+      width: 42px;
+      height: 42px;
+      border: 4px solid #1f477f;
+      border-radius: 999px;
+      background: #fff;
+    }
+
+    .clock-hand::before,
+    .clock-hand::after {
+      content: "";
+      position: absolute;
+      left: 18px;
+      top: 8px;
+      width: 4px;
+      height: 14px;
+      border-radius: 3px;
+      background: #1f477f;
+      transform-origin: bottom center;
+    }
+
+    .clock-hand::after {
+      top: 18px;
+      height: 11px;
+      transform: rotate(90deg);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 6vw, 76px);
+      line-height: 0.95;
+      letter-spacing: 0;
+      color: #1d75cf;
+    }
+
+    h1 span {
+      color: #329036;
+    }
+
+    .ribbon {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 10px 24px;
+      color: #fff;
+      background: #1376cf;
+      border-radius: 6px;
+      font-size: clamp(18px, 2.5vw, 32px);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      box-shadow: 0 6px 0 rgba(16, 90, 160, 0.16);
+    }
+
+    .brand-subtitle {
+      max-width: 480px;
+      margin: 10px 0 0;
+      color: #35445f;
+      font-size: 17px;
+      line-height: 1.35;
+      font-weight: 750;
+    }
+
+    .ribbon span {
+      color: #ffe97a;
+      letter-spacing: 0;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow: 0 8px 22px rgba(31, 49, 86, 0.06);
+    }
+
+    .kids-panel {
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      justify-content: center;
+      min-height: 150px;
+    }
+
+    .kids-panel-title {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .kids-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .small-btn {
+      min-height: 32px;
+      padding: 0 10px;
+      border-radius: 8px;
+      color: #1f477f;
+      background: #eef5ff;
+      border: 1px solid #bed8ef;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .kid-toggle {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      min-height: 48px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--ink);
+      font-weight: 800;
+      font-size: 20px;
+      text-align: left;
+    }
+
+    .kid-toggle span:last-child {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .kids-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px 12px;
+      align-items: center;
+    }
+
+    .kid-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px 999px 8px 8px;
+      background: var(--kid-color);
+      position: relative;
+      box-shadow: inset 0 -10px 0 rgba(0, 0, 0, 0.08);
+    }
+
+    .kid-icon::before {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: -13px;
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: var(--kid-color);
+    }
+
+    .kid-toggle.is-off {
+      opacity: 0.38;
+    }
+
+    .tip-panel,
+    .note-panel {
+      padding: 18px 22px;
+    }
+
+    .tip-panel {
+      background: #f1f7ff;
+    }
+
+    .note-panel {
+      background: #fff3f3;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 10px;
+      font-size: 22px;
+      font-weight: 800;
+      color: #1f3c79;
+    }
+
+    .note-panel .panel-title {
+      color: #c93651;
+    }
+
+    .panel-title .emoji {
+      font-size: 30px;
+    }
+
+    .tip-panel ul,
+    .note-panel p {
+      margin: 0;
+      color: #26334f;
+      font-size: 16px;
+      line-height: 1.5;
+      font-weight: 650;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin: 0 0 14px;
+    }
+
+    .week-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .icon-btn,
+    .primary-btn,
+    .ghost-btn,
+    .danger-btn {
+      min-height: 42px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 800;
+    }
+
+    .icon-btn {
+      width: 42px;
+      color: var(--blue);
+      background: #e9f4ff;
+      border: 1px solid #bdd7ef;
+      font-size: 24px;
+    }
+
+    .primary-btn {
+      padding: 0 18px;
+      color: #fff;
+      background: #1976d2;
+      box-shadow: 0 6px 12px rgba(25, 118, 210, 0.22);
+    }
+
+    .ghost-btn {
+      padding: 0 16px;
+      color: #1f477f;
+      background: #eef5ff;
+      border: 1px solid #bed8ef;
+    }
+
+    .danger-btn {
+      padding: 0 16px;
+      color: #b2273c;
+      background: #fff0f1;
+      border: 1px solid #f0b9c0;
+    }
+
+    .week-label {
+      font-size: 18px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .schedule-shell {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: 106px repeat(5, minmax(150px, 1fr));
+      min-width: 900px;
+    }
+
+    .time-head,
+    .day-head {
+      min-height: 70px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 850;
+    }
+
+    .time-head {
+      font-size: 36px;
+      color: #1f477f;
+    }
+
+    .day-head {
+      gap: 10px;
+      border-left: 1px solid var(--line);
+      font-size: 22px;
+      color: #182755;
+    }
+
+    .day-head.blue {
+      background: #dcecff;
+    }
+
+    .day-head.green {
+      background: #eaf4dd;
+    }
+
+    .day-head .weather {
+      font-size: 30px;
+    }
+
+    .time-column {
+      position: relative;
+      min-height: 670px;
+      border-right: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .time-label {
+      position: absolute;
+      right: 16px;
+      transform: translateY(-50%);
+      color: #16203a;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .day-column {
+      position: relative;
+      min-height: 670px;
+      border-left: 1px solid var(--line);
+      background:
+        repeating-linear-gradient(to bottom, transparent 0, transparent 80px, var(--soft-line) 81px, transparent 82px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92));
+    }
+
+    .event {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      border-radius: 8px;
+      border: 2px solid var(--event-line);
+      background: var(--event-bg);
+      color: var(--event-ink);
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr);
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      box-shadow: 0 8px 18px rgba(41, 70, 110, 0.12);
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .event:hover {
+      outline: 3px solid rgba(25, 118, 210, 0.18);
+    }
+
+    .event-icon {
+      font-size: 34px;
+      line-height: 1;
+    }
+
+    .event-time {
+      display: block;
+      font-size: 14px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .event-title {
+      display: block;
+      margin-top: 6px;
+      font-size: 18px;
+      line-height: 1.08;
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+
+    .event-child {
+      display: block;
+      margin-top: 3px;
+      font-size: 14px;
+      line-height: 1.1;
+      font-weight: 800;
+    }
+
+    .event.conflict {
+      box-shadow: inset 0 0 0 3px rgba(198, 54, 81, 0.42), 0 8px 18px rgba(41, 70, 110, 0.12);
+    }
+
+    .event.small {
+      grid-template-columns: 36px minmax(0, 1fr);
+      padding: 4px 7px;
+      gap: 4px;
+    }
+
+    .event.small .event-icon,
+    .event.narrow .event-icon {
+      font-size: 24px;
+    }
+
+    .event.small .event-title {
+      margin-top: 1px;
+      font-size: 13px;
+    }
+
+    .event.small .event-child,
+    .event.small .event-time {
+      margin-top: 1px;
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .event.narrow {
+      grid-template-columns: 1fr;
+      justify-items: center;
+      gap: 2px;
+      padding-inline: 8px;
+    }
+
+    .event.narrow .event-icon {
+      display: none;
+    }
+
+    .event.narrow .event-time {
+      font-size: 13px;
+      white-space: normal;
+    }
+
+    .event.narrow .event-title {
+      font-size: 15px;
+    }
+
+    .goals {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .goal {
+      display: grid;
+      grid-template-columns: 62px 1fr;
+      gap: 12px;
+      align-items: center;
+      min-height: 112px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .goal:nth-child(1) { background: #fffdf8; }
+    .goal:nth-child(2) { background: #f8fff5; }
+    .goal:nth-child(3) { background: #f7f9ff; }
+    .goal:nth-child(4) { background: #fff7f7; }
+    .goal:nth-child(5) { background: #f5fbff; }
+
+    .goal-icon {
+      font-size: 44px;
+      text-align: center;
+    }
+
+    .goal h3 {
+      margin: 0 0 4px;
+      font-size: 17px;
+      color: #144876;
+    }
+
+    .goal p {
+      margin: 0;
+      color: #35445f;
+      font-size: 14px;
+      line-height: 1.35;
+      font-weight: 650;
+    }
+
+    .mobile-agenda {
+      display: none;
+      gap: 12px;
+    }
+
+    .day-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      overflow: hidden;
+    }
+
+    .day-card h2 {
+      margin: 0;
+      padding: 14px 16px;
+      font-size: 20px;
+      background: #eaf4ff;
+    }
+
+    .agenda-list {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .agenda-item {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 10px;
+      align-items: center;
+      border: 2px solid var(--event-line);
+      border-radius: 8px;
+      background: var(--event-bg);
+      color: var(--event-ink);
+      padding: 10px;
+    }
+
+    .agenda-title {
+      margin: 2px 0;
+      font-weight: 900;
+    }
+
+    .agenda-meta {
+      color: inherit;
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    dialog {
+      width: min(560px, calc(100% - 28px));
+      border: 0;
+      border-radius: 10px;
+      padding: 0;
+      box-shadow: 0 30px 80px rgba(12, 25, 48, 0.28);
+    }
+
+    dialog::backdrop {
+      background: rgba(23, 34, 59, 0.38);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .close-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: var(--muted);
+      background: #eef2f7;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    form {
+      padding: 20px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: #26334f;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #cbd7e6;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 78px;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .kid-editor-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .kid-editor-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 140px 40px;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .remove-kid {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      color: #b2273c;
+      background: #fff0f1;
+      border: 1px solid #f0b9c0;
+      font-size: 22px;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .right-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    @media (max-width: 1100px) {
+      .topbar {
+        grid-template-columns: 1fr 260px;
+      }
+
+      .tip-panel,
+      .note-panel {
+        grid-column: span 1;
+      }
+
+      .schedule-shell {
+        overflow-x: auto;
+      }
+
+      .goals {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 740px) {
+      .app {
+        width: min(100% - 20px, 620px);
+        padding-top: 14px;
+      }
+
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .brand {
+        gap: 12px;
+      }
+
+      .calendar-mark {
+        width: 64px;
+        height: 64px;
+      }
+
+      .clock-hand {
+        width: 34px;
+        height: 34px;
+      }
+
+      .calendar-grid {
+        transform: scale(0.76);
+        transform-origin: top left;
+      }
+
+      .ribbon {
+        padding: 8px 14px;
+      }
+
+      .kids-panel {
+        min-height: 0;
+      }
+
+      .kids-list {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .week-controls {
+        justify-content: space-between;
+      }
+
+      .primary-btn {
+        width: 100%;
+      }
+
+      .schedule-shell {
+        display: none;
+      }
+
+      .mobile-agenda {
+        display: grid;
+      }
+
+      .goals {
+        grid-template-columns: 1fr;
+      }
+
+      .goal {
+        min-height: 0;
+      }
+
+      .field-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-actions {
+        flex-direction: column-reverse;
+      }
+
+      .kid-editor-row {
+        grid-template-columns: 1fr;
+      }
+
+      .remove-kid {
+        width: 100%;
+      }
+
+      .right-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .danger-btn,
+      .ghost-btn,
+      .primary-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="topbar" aria-label="Family schedule overview">
+      <div class="brand">
+        <div class="calendar-mark" aria-hidden="true">
+          <div class="calendar-grid"><span></span><span></span><span></span><span></span></div>
+          <div class="clock-hand"></div>
+        </div>
+        <div>
+          <h1>Kids<span>Sync</span></h1>
+          <div class="ribbon"><span>★</span> Family Weekly Planner <span>★</span></div>
+          <p class="brand-subtitle">A shared schedule for parents managing school, activities, homework, and family time.</p>
+        </div>
+      </div>
+
+      <div class="panel kids-panel" id="kidFilters" aria-label="Child filters"></div>
+
+      <div class="panel tip-panel">
+        <p class="panel-title"><span class="emoji" aria-hidden="true">💡</span> Tips 小贴士</p>
+        <ul>
+          <li>See each child’s week at a glance.</li>
+          <li>Spot busy days before they become stressful.</li>
+          <li>Keep pickup, homework, and family time visible.</li>
+        </ul>
+      </div>
+
+      <div class="panel note-panel">
+        <p class="panel-title"><span class="emoji" aria-hidden="true">❤️</span> Parent Note</p>
+        <p>Start with a blank week. Add your children, pick their colors, then build the family schedule.</p>
+      </div>
+    </section>
+
+    <section class="toolbar" aria-label="Schedule controls">
+      <div class="week-controls">
+        <button class="icon-btn" type="button" id="prevWeek" aria-label="Previous week">‹</button>
+        <div class="week-label" id="weekLabel">Aug 3 - Aug 7</div>
+        <button class="icon-btn" type="button" id="nextWeek" aria-label="Next week">›</button>
+      </div>
+      <button class="primary-btn" type="button" id="addActivity">＋ Add Activity</button>
+    </section>
+
+    <section class="schedule-shell" aria-label="Weekly schedule">
+      <div class="schedule-grid" id="scheduleGrid"></div>
+    </section>
+
+    <section class="mobile-agenda" id="mobileAgenda" aria-label="Mobile weekly agenda"></section>
+
+    <section class="goals" aria-label="Family goals">
+      <article class="goal">
+        <div class="goal-icon" aria-hidden="true">🎯</div>
+        <div><h3>Learning</h3><p>Track classes, tutoring, homework, and practice blocks.</p></div>
+      </article>
+      <article class="goal">
+        <div class="goal-icon" aria-hidden="true">👟</div>
+        <div><h3>Activities</h3><p>Coordinate sports, clubs, lessons, and pickup times.</p></div>
+      </article>
+      <article class="goal">
+        <div class="goal-icon" aria-hidden="true">📚</div>
+        <div><h3>Routines</h3><p>Keep reading, chores, and recurring family habits visible.</p></div>
+      </article>
+      <article class="goal">
+        <div class="goal-icon" aria-hidden="true">👨‍👩‍👧‍👦</div>
+        <div><h3>Family Time</h3><p>Protect meals, weekend plans, and moments together.</p></div>
+      </article>
+      <article class="goal">
+        <div class="goal-icon" aria-hidden="true">🗓️</div>
+        <div><h3>Time Gaps</h3><p>Find open windows before adding another commitment.</p></div>
+      </article>
+    </section>
+  </main>
+
+  <dialog id="activityDialog">
+    <div class="modal-header">
+      <h2 id="dialogTitle">Add Activity</h2>
+      <button class="close-btn" type="button" id="closeDialog" aria-label="Close">×</button>
+    </div>
+    <form id="activityForm">
+      <input type="hidden" id="activityId">
+      <div class="field-grid">
+        <label>
+          Child
+          <select id="child" required></select>
+        </label>
+        <label>
+          Day
+          <select id="day" required></select>
+        </label>
+        <label>
+          Start time
+          <input id="startTime" type="time" required>
+        </label>
+        <label>
+          End time
+          <input id="endTime" type="time" required>
+        </label>
+      </div>
+      <label>
+        Activity
+        <input id="title" type="text" required placeholder="Soccer, Kumon, Robotics">
+      </label>
+      <div class="field-grid">
+        <label>
+          Icon
+          <select id="icon" required>
+            <option value="📖">📖 Reading / Kumon</option>
+            <option value="🤖">🤖 Robotics</option>
+            <option value="⚽">⚽ Soccer</option>
+            <option value="🥋">🥋 Kungfu</option>
+            <option value="√x">√x Math</option>
+            <option value="&lt;/&gt;">&lt;/&gt; Coding</option>
+            <option value="🎨">🎨 Art</option>
+          </select>
+        </label>
+        <label>
+          Color style
+          <select id="style" required>
+            <option value="child">Child color</option>
+            <option value="purple">Purple highlight</option>
+          </select>
+        </label>
+      </div>
+      <label>
+        Notes
+        <textarea id="notes" placeholder="Room, teacher, supplies, pickup notes"></textarea>
+      </label>
+      <div class="form-actions">
+        <button class="danger-btn" type="button" id="deleteActivity">Delete</button>
+        <div class="right-actions">
+          <button class="ghost-btn" type="button" id="cancelDialog">Cancel</button>
+          <button class="primary-btn" type="submit">Save</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="kidsDialog">
+    <div class="modal-header">
+      <h2>Manage Kids</h2>
+      <button class="close-btn" type="button" id="closeKidsDialog" aria-label="Close">×</button>
+    </div>
+    <form id="kidsForm">
+      <div class="kid-editor-list" id="kidEditorList"></div>
+      <button class="ghost-btn" type="button" id="addKidRow">＋ Add Child</button>
+      <div class="form-actions">
+        <span></span>
+        <div class="right-actions">
+          <button class="ghost-btn" type="button" id="cancelKidsDialog">Cancel</button>
+          <button class="primary-btn" type="submit">Save Kids</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    const days = [
+      { key: "monday", label: "Monday 周一", weather: "🌥️", theme: "blue" },
+      { key: "tuesday", label: "Tuesday 周二", weather: "☀️", theme: "green" },
+      { key: "wednesday", label: "Wednesday 周三", weather: "☁️", theme: "blue" },
+      { key: "thursday", label: "Thursday 周四", weather: "🌞", theme: "green" },
+      { key: "friday", label: "Friday 周五", weather: "", theme: "blue" }
+    ];
+
+    const palettes = {
+      blue: { label: "Blue", color: "#2f7fd3", soft: "#d9ebff", line: "#8eb9df", ink: "#142c66" },
+      green: { label: "Green", color: "#3f9444", soft: "#e2f0d7", line: "#a6c68c", ink: "#173f22" },
+      coral: { label: "Coral", color: "#d95f50", soft: "#ffe2dd", line: "#e59c91", ink: "#6c2119" },
+      gold: { label: "Gold", color: "#b98216", soft: "#fff0c7", line: "#d7b15d", ink: "#563707" }
+    };
+
+    const defaultKids = [
+      { id: "kid-1", name: "Child 1", palette: "blue" },
+      { id: "kid-2", name: "Child 2", palette: "green" }
+    ];
+
+    let kidProfiles = loadKids();
+    let kids = buildKids(kidProfiles);
+    let kidDraft = [];
+
+    const state = {
+      visibleKids: new Set(kidProfiles.map(kid => kid.name)),
+      activities: loadActivities()
+    };
+
+    const grid = document.getElementById("scheduleGrid");
+    const mobileAgenda = document.getElementById("mobileAgenda");
+    const kidFilters = document.getElementById("kidFilters");
+    const dialog = document.getElementById("activityDialog");
+    const kidsDialog = document.getElementById("kidsDialog");
+    const form = document.getElementById("activityForm");
+    const kidsForm = document.getElementById("kidsForm");
+    const kidEditorList = document.getElementById("kidEditorList");
+    const deleteButton = document.getElementById("deleteActivity");
+    const fields = {
+      id: document.getElementById("activityId"),
+      child: document.getElementById("child"),
+      day: document.getElementById("day"),
+      start: document.getElementById("startTime"),
+      end: document.getElementById("endTime"),
+      title: document.getElementById("title"),
+      icon: document.getElementById("icon"),
+      style: document.getElementById("style"),
+      notes: document.getElementById("notes")
+    };
+
+    function buildKids(profiles) {
+      return profiles.reduce((result, profile) => {
+        result[profile.name] = { ...palettes[profile.palette], id: profile.id, palette: profile.palette };
+        return result;
+      }, {});
+    }
+
+    function loadKids() {
+      try {
+        const stored = JSON.parse(localStorage.getItem("kidssync.v2.kids"));
+        if (Array.isArray(stored) && stored.length) {
+          return stored.filter(kid => kid.name && palettes[kid.palette]);
+        }
+      } catch {
+      }
+      return defaultKids;
+    }
+
+    function loadActivities() {
+      try {
+        const stored = JSON.parse(localStorage.getItem("kidssync.v2.activities"));
+        return Array.isArray(stored) ? stored : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveActivities() {
+      localStorage.setItem("kidssync.v2.activities", JSON.stringify(state.activities));
+    }
+
+    function saveKids() {
+      localStorage.setItem("kidssync.v2.kids", JSON.stringify(kidProfiles));
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      })[character]);
+    }
+
+    function minutes(time) {
+      const [hour, minute] = time.split(":").map(Number);
+      return hour * 60 + minute;
+    }
+
+    function timeLabel(time) {
+      const [hourText, minute] = time.split(":");
+      const hour = Number(hourText);
+      const displayHour = hour > 12 ? hour - 12 : hour;
+      return `${displayHour}:${minute}`;
+    }
+
+    function eventColors(activity) {
+      if (activity.style === "purple") {
+        return { soft: "var(--purple-soft)", line: "var(--purple-line)", ink: "#39205f" };
+      }
+      const kid = kids[activity.child] || Object.values(kids)[0] || palettes.blue;
+      return { soft: kid.soft, line: kid.line, ink: kid.ink };
+    }
+
+    function visibleActivities() {
+      return state.activities.filter(activity => state.visibleKids.has(activity.child));
+    }
+
+    function findConflicts(activities) {
+      const conflicts = new Set();
+      for (let i = 0; i < activities.length; i += 1) {
+        for (let j = i + 1; j < activities.length; j += 1) {
+          const first = activities[i];
+          const second = activities[j];
+          const sameDay = first.day === second.day;
+          const sameChild = first.child === second.child;
+          const overlaps = minutes(first.start) < minutes(second.end) && minutes(second.start) < minutes(first.end);
+          if (sameDay && sameChild && overlaps) {
+            conflicts.add(first.id);
+            conflicts.add(second.id);
+          }
+        }
+      }
+      return conflicts;
+    }
+
+    function renderKidFilters() {
+      kidFilters.innerHTML = "";
+      const title = document.createElement("p");
+      title.className = "kids-panel-title";
+      title.textContent = "Your Kids";
+      const manage = document.createElement("button");
+      manage.type = "button";
+      manage.className = "small-btn";
+      manage.textContent = "Edit";
+      manage.addEventListener("click", openKidsDialog);
+      const header = document.createElement("div");
+      header.className = "kids-header";
+      header.append(title, manage);
+      kidFilters.appendChild(header);
+      const list = document.createElement("div");
+      list.className = "kids-list";
+      Object.entries(kids).forEach(([name, kid]) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `kid-toggle${state.visibleKids.has(name) ? "" : " is-off"}`;
+        button.setAttribute("aria-pressed", state.visibleKids.has(name));
+        button.style.setProperty("--kid-color", kid.color);
+        button.innerHTML = `<span class="kid-icon" aria-hidden="true"></span><span>${name}</span>`;
+        button.addEventListener("click", () => {
+          if (state.visibleKids.has(name) && state.visibleKids.size > 1) {
+            state.visibleKids.delete(name);
+          } else {
+            state.visibleKids.add(name);
+          }
+          renderAll();
+        });
+        list.appendChild(button);
+      });
+      kidFilters.appendChild(list);
+    }
+
+    function renderGrid() {
+      const activities = visibleActivities();
+      const conflicts = findConflicts(activities);
+      grid.innerHTML = "";
+
+      const timeHead = document.createElement("div");
+      timeHead.className = "time-head";
+      timeHead.textContent = "◷";
+      grid.appendChild(timeHead);
+
+      days.forEach(day => {
+        const head = document.createElement("div");
+        head.className = `day-head ${day.theme}`;
+        head.innerHTML = `<span class="weather" aria-hidden="true">${day.weather}</span><span>${day.label}</span>`;
+        grid.appendChild(head);
+      });
+
+      const timeColumn = document.createElement("div");
+      timeColumn.className = "time-column";
+      for (let time = 13.5 * 60; time <= 19 * 60; time += 30) {
+        const label = document.createElement("div");
+        label.className = "time-label";
+        label.style.top = `${((time - 13.5 * 60) / (5.5 * 60)) * 100}%`;
+        label.textContent = time === 13.5 * 60 ? "1:30 PM" : `${timeLabel(`${Math.floor(time / 60).toString().padStart(2, "0")}:${(time % 60).toString().padStart(2, "0")}`)} ${time < 720 ? "AM" : "PM"}`;
+        timeColumn.appendChild(label);
+      }
+      grid.appendChild(timeColumn);
+
+      days.forEach(day => {
+        const column = document.createElement("div");
+        column.className = "day-column";
+        const dayActivities = activities
+          .filter(activity => activity.day === day.key)
+          .sort((a, b) => minutes(a.start) - minutes(b.start));
+
+        dayActivities.forEach((activity, index) => {
+          const start = minutes(activity.start);
+          const end = minutes(activity.end);
+          const overlapping = dayActivities.filter(other => minutes(other.start) < end && start < minutes(other.end));
+          const overlapIndex = overlapping.findIndex(other => other.id === activity.id);
+          const laneCount = Math.min(overlapping.length, 2);
+          const top = ((start - 13.5 * 60) / (5.5 * 60)) * 100;
+          const height = Math.max(((end - start) / (5.5 * 60)) * 100, 9);
+          const colors = eventColors(activity);
+          const event = document.createElement("button");
+          event.type = "button";
+          event.className = `event${height < 14 ? " small" : ""}${laneCount > 1 ? " narrow" : ""}${conflicts.has(activity.id) ? " conflict" : ""}`;
+          event.style.top = `${top}%`;
+          event.style.height = `${height}%`;
+          event.style.setProperty("--event-bg", colors.soft);
+          event.style.setProperty("--event-line", colors.line);
+          event.style.setProperty("--event-ink", colors.ink);
+          if (laneCount > 1) {
+            const lane = Math.max(0, overlapIndex % 2);
+            event.style.left = lane === 0 ? "8px" : "50%";
+            event.style.right = lane === 0 ? "50%" : "8px";
+          }
+          event.innerHTML = `
+            <span class="event-icon" aria-hidden="true">${activity.icon}</span>
+            <span>
+              <span class="event-time">${timeLabel(activity.start)} - ${timeLabel(activity.end)}</span>
+              <span class="event-title">${activity.title}</span>
+              <span class="event-child">(${activity.child})</span>
+            </span>
+          `;
+          event.addEventListener("click", () => openDialog(activity));
+          column.appendChild(event);
+        });
+
+        grid.appendChild(column);
+      });
+    }
+
+    function renderAgenda() {
+      const activities = visibleActivities();
+      const conflicts = findConflicts(activities);
+      mobileAgenda.innerHTML = "";
+      days.forEach(day => {
+        const card = document.createElement("article");
+        card.className = "day-card";
+        card.innerHTML = `<h2>${day.weather} ${day.label}</h2><div class="agenda-list"></div>`;
+        const list = card.querySelector(".agenda-list");
+        const items = activities
+          .filter(activity => activity.day === day.key)
+          .sort((a, b) => minutes(a.start) - minutes(b.start));
+
+        if (!items.length) {
+          list.innerHTML = `<p class="agenda-meta">No activities yet.</p>`;
+        }
+
+        items.forEach(activity => {
+          const colors = eventColors(activity);
+          const item = document.createElement("button");
+          item.type = "button";
+          item.className = "agenda-item";
+          item.style.setProperty("--event-bg", colors.soft);
+          item.style.setProperty("--event-line", conflicts.has(activity.id) ? "#c93651" : colors.line);
+          item.style.setProperty("--event-ink", colors.ink);
+          item.innerHTML = `
+            <span class="event-icon" aria-hidden="true">${activity.icon}</span>
+            <span>
+              <span class="agenda-meta">${timeLabel(activity.start)} - ${timeLabel(activity.end)} · ${activity.child}</span>
+              <span class="agenda-title">${activity.title}</span>
+              <span class="agenda-meta">${activity.notes || (conflicts.has(activity.id) ? "Schedule conflict" : "Weekly activity")}</span>
+            </span>
+          `;
+          item.addEventListener("click", () => openDialog(activity));
+          list.appendChild(item);
+        });
+        mobileAgenda.appendChild(card);
+      });
+    }
+
+    function populateFormOptions() {
+      fields.child.innerHTML = Object.keys(kids).map(name => `<option value="${name}">${name}</option>`).join("");
+      fields.day.innerHTML = days.map(day => `<option value="${day.key}">${day.label}</option>`).join("");
+    }
+
+    function openDialog(activity) {
+      const isEdit = Boolean(activity);
+      populateFormOptions();
+      document.getElementById("dialogTitle").textContent = isEdit ? "Edit Activity" : "Add Activity";
+      deleteButton.style.visibility = isEdit ? "visible" : "hidden";
+      fields.id.value = activity?.id || "";
+      fields.child.value = activity?.child || kidProfiles[0]?.name || "";
+      fields.day.value = activity?.day || "monday";
+      fields.start.value = activity?.start || "15:00";
+      fields.end.value = activity?.end || "15:30";
+      fields.title.value = activity?.title || "";
+      fields.icon.value = activity?.icon || "📖";
+      fields.style.value = activity?.style || "child";
+      fields.notes.value = activity?.notes || "";
+      dialog.showModal();
+    }
+
+    function renderKidEditor() {
+      kidEditorList.innerHTML = "";
+      kidDraft.forEach((kid, index) => {
+        const row = document.createElement("div");
+        row.className = "kid-editor-row";
+        row.dataset.id = kid.id;
+        row.dataset.originalName = kid.name;
+        row.innerHTML = `
+          <label>
+            Child name
+            <input class="kid-name-input" type="text" value="${escapeHtml(kid.name)}" required maxlength="28" placeholder="Child name">
+          </label>
+          <label>
+            Color
+            <select class="kid-palette-select">
+              ${Object.entries(palettes).map(([key, palette]) => `<option value="${key}"${kid.palette === key ? " selected" : ""}>${palette.label}</option>`).join("")}
+            </select>
+          </label>
+          <button class="remove-kid" type="button" aria-label="Remove ${escapeHtml(kid.name)}" ${kidDraft.length === 1 ? "disabled" : ""}>×</button>
+        `;
+        row.querySelector(".remove-kid").addEventListener("click", () => {
+          kidDraft.splice(index, 1);
+          renderKidEditor();
+        });
+        kidEditorList.appendChild(row);
+      });
+    }
+
+    function openKidsDialog() {
+      kidDraft = kidProfiles.map(kid => ({ ...kid }));
+      renderKidEditor();
+      kidsDialog.showModal();
+    }
+
+    function closeKidsDialog() {
+      kidsDialog.close();
+      renderAll();
+    }
+
+    function closeDialog() {
+      dialog.close();
+      form.reset();
+    }
+
+    function renderAll() {
+      renderKidFilters();
+      renderGrid();
+      renderAgenda();
+    }
+
+    document.getElementById("addActivity").addEventListener("click", () => openDialog());
+    document.getElementById("closeDialog").addEventListener("click", closeDialog);
+    document.getElementById("cancelDialog").addEventListener("click", closeDialog);
+    document.getElementById("closeKidsDialog").addEventListener("click", closeKidsDialog);
+    document.getElementById("cancelKidsDialog").addEventListener("click", closeKidsDialog);
+    document.getElementById("addKidRow").addEventListener("click", () => {
+      const nextNumber = kidDraft.length + 1;
+      const paletteKeys = Object.keys(palettes);
+      kidDraft.push({
+        id: crypto.randomUUID(),
+        name: `Child ${nextNumber}`,
+        palette: paletteKeys[(nextNumber - 1) % paletteKeys.length]
+      });
+      renderKidEditor();
+    });
+    document.getElementById("prevWeek").addEventListener("click", () => {
+      document.getElementById("weekLabel").textContent = "Jul 27 - Jul 31";
+    });
+    document.getElementById("nextWeek").addEventListener("click", () => {
+      document.getElementById("weekLabel").textContent = "Aug 10 - Aug 14";
+    });
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      if (minutes(fields.end.value) <= minutes(fields.start.value)) {
+        fields.end.setCustomValidity("End time must be after start time.");
+        fields.end.reportValidity();
+        return;
+      }
+      fields.end.setCustomValidity("");
+      const activity = {
+        id: fields.id.value || crypto.randomUUID(),
+        child: fields.child.value,
+        day: fields.day.value,
+        start: fields.start.value,
+        end: fields.end.value,
+        title: fields.title.value.trim(),
+        icon: fields.icon.value,
+        style: fields.style.value,
+        notes: fields.notes.value.trim()
+      };
+
+      const existingIndex = state.activities.findIndex(item => item.id === activity.id);
+      if (existingIndex >= 0) {
+        state.activities[existingIndex] = activity;
+      } else {
+        state.activities.push(activity);
+      }
+      saveActivities();
+      closeDialog();
+      renderAll();
+    });
+
+    kidsForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const rows = [...kidEditorList.querySelectorAll(".kid-editor-row")];
+      const seen = new Set();
+      const renamed = new Map();
+      const updatedKids = rows.map((row, index) => {
+        const originalName = row.dataset.originalName;
+        let name = row.querySelector(".kid-name-input").value.trim();
+        if (!name) name = `Child ${index + 1}`;
+        let uniqueName = name;
+        let suffix = 2;
+        while (seen.has(uniqueName.toLowerCase())) {
+          uniqueName = `${name} ${suffix}`;
+          suffix += 1;
+        }
+        seen.add(uniqueName.toLowerCase());
+        if (originalName && originalName !== uniqueName) {
+          renamed.set(originalName, uniqueName);
+        }
+        return {
+          id: row.dataset.id || crypto.randomUUID(),
+          name: uniqueName,
+          palette: row.querySelector(".kid-palette-select").value
+        };
+      });
+
+      kidProfiles = updatedKids.length ? updatedKids : defaultKids;
+      kids = buildKids(kidProfiles);
+      state.activities = state.activities
+        .map(activity => renamed.has(activity.child) ? { ...activity, child: renamed.get(activity.child) } : activity)
+        .filter(activity => kids[activity.child]);
+      state.visibleKids = new Set(kidProfiles.map(kid => kid.name));
+      saveKids();
+      saveActivities();
+      populateFormOptions();
+      closeKidsDialog();
+    });
+
+    deleteButton.addEventListener("click", () => {
+      if (!fields.id.value) return;
+      state.activities = state.activities.filter(activity => activity.id !== fields.id.value);
+      saveActivities();
+      closeDialog();
+      renderAll();
+    });
+
+    populateFormOptions();
+    renderAll();
+  </script>
+</body>
+</html>
