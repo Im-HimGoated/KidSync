@@ -332,6 +332,14 @@
       min-width: 0;
     }
 
+    .schedule-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
     .icon-btn,
     .primary-btn,
     .ghost-btn,
@@ -830,6 +838,11 @@
         width: 100%;
       }
 
+      .schedule-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
       .schedule-shell {
         display: none;
       }
@@ -903,7 +916,7 @@
 
       <div class="panel note-panel">
         <p class="panel-title"><span class="emoji" aria-hidden="true">❤️</span> Parent Note</p>
-        <p>Start with a blank week. Add your children, pick their colors, then build the family schedule.</p>
+        <p>Start with a blank week, or load the Andrew and Mark preset to see a fully editable example.</p>
       </div>
     </section>
 
@@ -913,7 +926,10 @@
         <div class="week-label" id="weekLabel">Aug 3 - Aug 7</div>
         <button class="icon-btn" type="button" id="nextWeek" aria-label="Next week">›</button>
       </div>
-      <button class="primary-btn" type="button" id="addActivity">＋ Add Activity</button>
+      <div class="schedule-actions">
+        <button class="ghost-btn" type="button" id="loadPreset">Load Andrew & Mark Preset</button>
+        <button class="primary-btn" type="button" id="addActivity">＋ Add Activity</button>
+      </div>
     </section>
 
     <section class="schedule-shell" aria-label="Weekly schedule">
@@ -1047,6 +1063,30 @@
     const defaultKids = [
       { id: "kid-1", name: "Child 1", palette: "blue" },
       { id: "kid-2", name: "Child 2", palette: "green" }
+    ];
+
+    const andrewMarkPresetKids = [
+      { id: "preset-andrew", name: "Andrew", palette: "blue" },
+      { id: "preset-mark", name: "Mark", palette: "green" }
+    ];
+
+    const andrewMarkPresetActivities = [
+      { id: "preset-a1", child: "Andrew", day: "monday", start: "15:00", end: "15:30", title: "Kumon", icon: "📖", style: "child", notes: "" },
+      { id: "preset-a2", child: "Mark", day: "monday", start: "15:00", end: "15:30", title: "Kumon", icon: "📖", style: "child", notes: "" },
+      { id: "preset-a3", child: "Andrew", day: "monday", start: "16:30", end: "18:00", title: "Soccer", icon: "⚽", style: "child", notes: "" },
+      { id: "preset-a4", child: "Mark", day: "monday", start: "17:00", end: "17:50", title: "Kungfu", icon: "🥋", style: "child", notes: "" },
+      { id: "preset-a5", child: "Andrew", day: "tuesday", start: "14:20", end: "16:20", title: "Robotics", icon: "🤖", style: "child", notes: "" },
+      { id: "preset-a6", child: "Mark", day: "tuesday", start: "15:45", end: "17:30", title: "AoPS", icon: "√x", style: "child", notes: "" },
+      { id: "preset-a7", child: "Andrew", day: "wednesday", start: "15:00", end: "15:30", title: "Kumon", icon: "📖", style: "child", notes: "" },
+      { id: "preset-a8", child: "Mark", day: "wednesday", start: "15:00", end: "15:30", title: "Kumon", icon: "📖", style: "child", notes: "" },
+      { id: "preset-a9", child: "Andrew", day: "wednesday", start: "16:30", end: "18:00", title: "Soccer", icon: "⚽", style: "child", notes: "" },
+      { id: "preset-a10", child: "Mark", day: "wednesday", start: "17:00", end: "17:50", title: "Kungfu", icon: "🥋", style: "child", notes: "" },
+      { id: "preset-a11", child: "Andrew", day: "thursday", start: "14:20", end: "16:20", title: "Robotics", icon: "🤖", style: "child", notes: "" },
+      { id: "preset-a12", child: "Mark", day: "thursday", start: "15:00", end: "15:30", title: "Kungfu", icon: "🥋", style: "child", notes: "" },
+      { id: "preset-a13", child: "Andrew", day: "friday", start: "14:45", end: "15:45", title: "Coding", icon: "</>", style: "child", notes: "" },
+      { id: "preset-a14", child: "Mark", day: "friday", start: "14:45", end: "15:45", title: "Coding", icon: "</>", style: "child", notes: "" },
+      { id: "preset-a15", child: "Mark", day: "friday", start: "16:00", end: "18:00", title: "Art", icon: "🎨", style: "purple", notes: "" },
+      { id: "preset-a16", child: "Mark", day: "friday", start: "16:30", end: "18:15", title: "AoPS", icon: "√x", style: "child", notes: "" }
     ];
 
     let kidProfiles = loadKids();
@@ -1376,6 +1416,22 @@
       renderAll();
     }
 
+    function loadAndrewMarkPreset() {
+      const hasExistingSchedule = state.activities.length > 0 || kidProfiles.some(kid => !["Child 1", "Child 2"].includes(kid.name));
+      if (hasExistingSchedule && !confirm("Load the Andrew and Mark preset? This will replace the current kids and schedule.")) {
+        return;
+      }
+
+      kidProfiles = andrewMarkPresetKids.map(kid => ({ ...kid }));
+      kids = buildKids(kidProfiles);
+      state.visibleKids = new Set(kidProfiles.map(kid => kid.name));
+      state.activities = andrewMarkPresetActivities.map(activity => ({ ...activity }));
+      saveKids();
+      saveActivities();
+      populateFormOptions();
+      renderAll();
+    }
+
     function closeDialog() {
       dialog.close();
       form.reset();
@@ -1388,6 +1444,7 @@
     }
 
     document.getElementById("addActivity").addEventListener("click", () => openDialog());
+    document.getElementById("loadPreset").addEventListener("click", loadAndrewMarkPreset);
     document.getElementById("closeDialog").addEventListener("click", closeDialog);
     document.getElementById("cancelDialog").addEventListener("click", closeDialog);
     document.getElementById("closeKidsDialog").addEventListener("click", closeKidsDialog);
