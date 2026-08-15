@@ -74,6 +74,62 @@
       min-width: 0;
     }
 
+    .brand-copy {
+      min-width: 0;
+    }
+
+    .language-switch {
+      flex: 0 0 auto;
+      display: inline-grid;
+      grid-template-columns: repeat(2, 1fr);
+      padding: 3px;
+      border: 1px solid #bed8ef;
+      border-radius: 8px;
+      background: #eef5ff;
+    }
+
+    .language-option {
+      min-width: 42px;
+      min-height: 32px;
+      padding: 0 8px;
+      border-radius: 6px;
+      color: #52617e;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .language-option.is-active {
+      color: #fff;
+      background: #1976d2;
+      box-shadow: 0 2px 6px rgba(25, 118, 210, 0.24);
+    }
+
+    .view-switch {
+      display: inline-grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 3px;
+      border: 1px solid #bed8ef;
+      border-radius: 8px;
+      background: #eef5ff;
+    }
+
+    .view-option {
+      min-height: 36px;
+      padding: 0 12px;
+      border-radius: 6px;
+      color: #52617e;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .view-option.is-active {
+      color: #fff;
+      background: #1976d2;
+      box-shadow: 0 2px 6px rgba(25, 118, 210, 0.24);
+    }
+
     .calendar-mark {
       flex: 0 0 auto;
       width: 84px;
@@ -141,7 +197,7 @@
 
     h1 {
       margin: 0;
-      font-size: clamp(42px, 6vw, 76px);
+      font-size: clamp(40px, 4vw, 54px);
       line-height: 0.95;
       letter-spacing: 0;
       color: #1d75cf;
@@ -160,7 +216,7 @@
       color: #fff;
       background: #1376cf;
       border-radius: 6px;
-      font-size: clamp(18px, 2.5vw, 32px);
+      font-size: clamp(18px, 2.1vw, 28px);
       font-weight: 800;
       letter-spacing: 0.08em;
       box-shadow: 0 6px 0 rgba(16, 90, 160, 0.16);
@@ -325,6 +381,13 @@
       margin: 0 0 14px;
     }
 
+    .toolbar-leading {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
     .week-controls {
       display: flex;
       align-items: center;
@@ -398,17 +461,182 @@
       overscroll-behavior: contain;
     }
 
-    .schedule-grid {
+    .calendar-view[hidden] {
+      display: none !important;
+    }
+
+    .today-view {
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .view-heading {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: #f1f7ff;
+    }
+
+    .view-heading h2 {
+      margin: 0;
+      color: #182755;
+      font-size: 24px;
+    }
+
+    .today-list {
       display: grid;
-      grid-template-columns: 106px repeat(5, minmax(150px, 1fr));
-      min-width: 900px;
+    }
+
+    .today-event,
+    .today-empty {
+      min-height: 70px;
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--soft-line);
+      color: var(--event-ink, var(--ink));
+      background: linear-gradient(to right, var(--event-bg, #fff) 0 7px, #fff 7px 100%);
+      text-align: left;
+    }
+
+    .today-event:last-child {
+      border-bottom: 0;
+    }
+
+    .today-event-icon {
+      font-size: 32px;
+      text-align: center;
+    }
+
+    .today-event-title {
+      display: block;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .today-event-meta,
+    .today-event-details {
+      display: block;
+      margin-top: 3px;
+      color: #52617e;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .today-event-time {
+      color: #1f477f;
+      font-size: 14px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .today-empty {
+      grid-template-columns: 1fr;
+      color: var(--muted);
+      font-weight: 750;
+    }
+
+    .month-view {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .month-weekdays,
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(132px, 1fr));
+      min-width: 924px;
+    }
+
+    .month-weekday {
+      padding: 10px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      color: #35445f;
+      background: #eaf4ff;
+      font-size: 13px;
+      font-weight: 850;
+      text-align: center;
+    }
+
+    .month-day {
+      min-height: 138px;
+      padding: 7px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .month-day.is-outside {
+      background: #f7f9fc;
+    }
+
+    .month-day.is-outside .month-date {
+      color: #929db0;
+    }
+
+    .month-day.is-today {
+      box-shadow: inset 0 0 0 2px #1976d2;
+    }
+
+    .month-date {
+      width: 30px;
+      height: 30px;
+      margin-bottom: 5px;
+      border-radius: 999px;
+      color: #182755;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .month-day.is-today .month-date {
+      color: #fff;
+      background: #1976d2;
+    }
+
+    .month-event {
+      width: 100%;
+      min-height: 28px;
+      display: block;
+      margin-top: 4px;
+      padding: 4px 6px;
+      overflow: hidden;
+      border-left: 4px solid var(--event-line);
+      border-radius: 5px;
+      color: var(--event-ink);
+      background: var(--event-bg);
+      font-size: 11px;
+      font-weight: 850;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .month-more {
+      margin: 5px 3px 0;
+      color: #52617e;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .schedule-grid {
+      --schedule-height: 1440px;
+      --half-hour-row: 60px;
+      display: grid;
+      grid-template-columns: 106px repeat(7, minmax(150px, 1fr));
+      min-width: 1180px;
     }
 
     .time-head,
     .day-head {
-      position: sticky;
-      top: 0;
-      z-index: 5;
+      position: relative;
+      z-index: 1;
       min-height: 70px;
       border-bottom: 1px solid var(--line);
       display: flex;
@@ -442,9 +670,65 @@
       font-size: 30px;
     }
 
+    .day-head small {
+      display: block;
+      margin-top: 3px;
+      color: #52617e;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .all-day-head,
+    .all-day-cell {
+      min-height: 52px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fbff;
+    }
+
+    .all-day-head {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      color: #52617e;
+      font-size: 12px;
+      font-weight: 850;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .all-day-cell {
+      display: grid;
+      align-content: start;
+      gap: 5px;
+      padding: 6px;
+      border-left: 1px solid var(--line);
+    }
+
+    .all-day-event {
+      min-width: 0;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 7px;
+      border: 2px solid var(--event-line);
+      border-radius: 7px;
+      color: var(--event-ink);
+      background: var(--event-bg);
+      font-size: 12px;
+      font-weight: 850;
+      text-align: left;
+    }
+
+    .all-day-event span:last-child {
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
     .time-column {
       position: relative;
-      min-height: 670px;
+      min-height: var(--schedule-height);
       border-right: 1px solid var(--line);
       background: #fff;
     }
@@ -460,10 +744,10 @@
 
     .day-column {
       position: relative;
-      min-height: 670px;
+      min-height: var(--schedule-height);
       border-left: 1px solid var(--line);
       background:
-        repeating-linear-gradient(to bottom, transparent 0, transparent 80px, var(--soft-line) 81px, transparent 82px),
+        repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--half-hour-row) - 1px), var(--soft-line) var(--half-hour-row)),
         linear-gradient(to bottom, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92));
     }
 
@@ -507,7 +791,7 @@
       font-size: 18px;
       line-height: 1.08;
       font-weight: 900;
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
     }
 
     .event-child {
@@ -563,6 +847,85 @@
 
     .event.narrow .event-title {
       font-size: 15px;
+    }
+
+    .event.overlap-offset {
+      grid-template-columns: minmax(0, 1fr);
+      padding-inline: 10px;
+      box-shadow: 0 10px 22px rgba(41, 70, 110, 0.18);
+    }
+
+    .event.overlap-offset .event-icon {
+      display: none;
+    }
+
+    .event.stack-front {
+      z-index: 30 !important;
+      box-shadow: 0 16px 32px rgba(31, 71, 127, 0.28);
+    }
+
+    .stack-switcher {
+      position: absolute;
+      left: 4px;
+      z-index: 45;
+      width: 36px;
+      height: 36px;
+      border: 2px solid #8eb9df;
+      border-radius: 8px;
+      color: #1f477f;
+      background: #fff;
+      box-shadow: 0 7px 16px rgba(31, 71, 127, 0.2);
+    }
+
+    .stack-switcher:hover,
+    .stack-switcher:focus-visible {
+      color: #fff;
+      background: #1976d2;
+      outline: 3px solid rgba(25, 118, 210, 0.2);
+    }
+
+    .stack-switcher-icon,
+    .stack-switcher-icon::before,
+    .stack-switcher-icon::after {
+      position: absolute;
+      width: 15px;
+      height: 11px;
+      border: 2px solid currentColor;
+      border-radius: 3px;
+      background: inherit;
+    }
+
+    .stack-switcher-icon {
+      left: 8px;
+      top: 8px;
+    }
+
+    .stack-switcher-icon::before,
+    .stack-switcher-icon::after {
+      content: "";
+      left: 2px;
+      top: 2px;
+    }
+
+    .stack-switcher-icon::after {
+      left: 5px;
+      top: 5px;
+    }
+
+    .stack-count {
+      position: absolute;
+      right: -5px;
+      top: -7px;
+      min-width: 19px;
+      height: 19px;
+      padding: 0 4px;
+      border-radius: 999px;
+      color: #fff;
+      background: #c93651;
+      font-size: 11px;
+      line-height: 19px;
+      font-weight: 900;
+      text-align: center;
     }
 
     .goals {
@@ -659,6 +1022,8 @@
 
     dialog {
       width: min(560px, calc(100% - 28px));
+      max-height: calc(100vh - 28px);
+      overflow: auto;
       border: 0;
       border-radius: 10px;
       padding: 0;
@@ -713,6 +1078,33 @@
       font-weight: 800;
     }
 
+    .check-field {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border: 1px solid #cbd7e6;
+      border-radius: 8px;
+      background: #f8fbff;
+    }
+
+    .check-field input {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+    }
+
+    .time-field.is-disabled {
+      opacity: 0.5;
+    }
+
+    .logistics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
     input,
     select,
     textarea {
@@ -741,6 +1133,41 @@
       gap: 12px;
     }
 
+    .preset-tools {
+      display: grid;
+      gap: 16px;
+    }
+
+    .preset-section {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fbff;
+    }
+
+    .preset-section h3 {
+      margin: 0;
+      color: #144876;
+      font-size: 17px;
+    }
+
+    .preset-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .preset-status {
+      min-height: 20px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
     .kid-editor-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 140px 40px;
@@ -767,7 +1194,7 @@
 
     @media (max-width: 1100px) {
       .topbar {
-        grid-template-columns: 1fr 260px;
+        grid-template-columns: minmax(0, 1fr) 260px;
       }
 
       .tip-panel,
@@ -796,6 +1223,12 @@
 
       .brand {
         gap: 12px;
+        align-items: flex-start;
+      }
+
+      .language-option {
+        min-width: 38px;
+        padding-inline: 6px;
       }
 
       .calendar-mark {
@@ -830,6 +1263,10 @@
         flex-direction: column;
       }
 
+      .toolbar-leading {
+        justify-content: space-between;
+      }
+
       .week-controls {
         justify-content: space-between;
       }
@@ -841,6 +1278,10 @@
       .schedule-actions {
         display: grid;
         grid-template-columns: 1fr;
+      }
+
+      .view-switch {
+        width: 100%;
       }
 
       .schedule-shell {
@@ -863,11 +1304,27 @@
         grid-template-columns: 1fr;
       }
 
+      .logistics-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .today-event {
+        grid-template-columns: 42px minmax(0, 1fr);
+      }
+
+      .today-event-time {
+        grid-column: 2;
+      }
+
       .form-actions {
         flex-direction: column-reverse;
       }
 
       .kid-editor-row {
+        grid-template-columns: 1fr;
+      }
+
+      .preset-row {
         grid-template-columns: 1fr;
       }
 
@@ -886,141 +1343,214 @@
         width: 100%;
       }
     }
+
+    @media (max-width: 420px) {
+      .toolbar-leading {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .language-switch {
+        align-self: flex-start;
+      }
+    }
   </style>
 </head>
 <body>
   <main class="app">
-    <section class="topbar" aria-label="Family schedule overview">
+    <section class="topbar" aria-label="Family schedule overview" data-i18n-aria="aria.overview">
       <div class="brand">
         <div class="calendar-mark" aria-hidden="true">
           <div class="calendar-grid"><span></span><span></span><span></span><span></span></div>
           <div class="clock-hand"></div>
         </div>
-        <div>
+        <div class="brand-copy">
           <h1>Kids<span>Sync</span></h1>
-          <div class="ribbon"><span>★</span> Family Weekly Planner <span>★</span></div>
-          <p class="brand-subtitle">A shared schedule for parents managing school, activities, homework, and family time.</p>
+          <div class="ribbon"><span>★</span><span data-i18n="brand.ribbon">Family Weekly Planner</span><span>★</span></div>
+          <p class="brand-subtitle" data-i18n="brand.subtitle">A shared schedule for parents managing school, activities, homework, and family time.</p>
         </div>
       </div>
 
-      <div class="panel kids-panel" id="kidFilters" aria-label="Child filters"></div>
+      <div class="panel kids-panel" id="kidFilters" aria-label="Child filters" data-i18n-aria="aria.childFilters"></div>
 
       <div class="panel tip-panel">
-        <p class="panel-title"><span class="emoji" aria-hidden="true">💡</span> Tips 小贴士</p>
+        <p class="panel-title"><span class="emoji" aria-hidden="true">💡</span><span data-i18n="tips.title">Tips</span></p>
         <ul>
-          <li>See each child’s week at a glance.</li>
-          <li>Spot busy days before they become stressful.</li>
-          <li>Keep pickup, homework, and family time visible.</li>
+          <li data-i18n="tips.one">See each child’s week at a glance.</li>
+          <li data-i18n="tips.two">Spot busy days before they become stressful.</li>
+          <li data-i18n="tips.three">Keep pickup, homework, and family time visible.</li>
         </ul>
       </div>
 
       <div class="panel note-panel">
-        <p class="panel-title"><span class="emoji" aria-hidden="true">❤️</span> Parent Note</p>
-        <p>Start with a blank week, or load the Andrew and Mark preset to see a fully editable example.</p>
+        <p class="panel-title"><span class="emoji" aria-hidden="true">❤️</span><span data-i18n="note.title">Parent Note</span></p>
+        <p data-i18n="note.body">Start with a blank week, or load the example to see a fully editable schedule.</p>
       </div>
     </section>
 
-    <section class="toolbar" aria-label="Schedule controls">
-      <div class="week-controls">
-        <button class="icon-btn" type="button" id="prevWeek" aria-label="Previous week">‹</button>
-        <div class="week-label" id="weekLabel">Aug 3 - Aug 7</div>
-        <button class="icon-btn" type="button" id="nextWeek" aria-label="Next week">›</button>
+    <section class="toolbar" aria-label="Schedule controls" data-i18n-aria="aria.scheduleControls">
+      <div class="toolbar-leading">
+        <div class="week-controls">
+          <button class="icon-btn" type="button" id="prevWeek" aria-label="Previous period" data-i18n-aria="aria.previousPeriod">‹</button>
+          <div class="week-label" id="weekLabel">Aug 3 - Aug 7</div>
+          <button class="icon-btn" type="button" id="nextWeek" aria-label="Next period" data-i18n-aria="aria.nextPeriod">›</button>
+        </div>
+        <div class="language-switch" role="group" aria-label="Language" data-i18n-aria="aria.language">
+          <button class="language-option" type="button" data-language="en" aria-pressed="true">EN</button>
+          <button class="language-option" type="button" data-language="zh" aria-pressed="false">中文</button>
+        </div>
       </div>
       <div class="schedule-actions">
-        <button class="ghost-btn" type="button" id="loadPreset">Load Andrew & Mark Preset</button>
-        <button class="primary-btn" type="button" id="addActivity">＋ Add Activity</button>
+        <div class="view-switch" role="tablist" aria-label="Calendar view" data-i18n-aria="aria.calendarView">
+          <button class="view-option" type="button" data-view="today" role="tab" aria-selected="false" data-i18n="view.today">Today</button>
+          <button class="view-option is-active" type="button" data-view="week" role="tab" aria-selected="true" data-i18n="view.week">Week</button>
+          <button class="view-option" type="button" data-view="month" role="tab" aria-selected="false" data-i18n="view.month">Month</button>
+        </div>
+        <button class="ghost-btn" type="button" id="loadPreset" data-i18n="actions.loadExample">Load Example</button>
+        <button class="ghost-btn" type="button" id="managePresets" data-i18n="actions.presets">Presets & Rewind</button>
+        <button class="primary-btn" type="button" id="addActivity" data-i18n="actions.addActivity">＋ Add Event</button>
       </div>
     </section>
 
-    <section class="schedule-shell" aria-label="Weekly schedule">
+    <section class="schedule-shell calendar-view" id="weekSchedule" aria-label="Weekly schedule" data-i18n-aria="aria.weeklySchedule">
       <div class="schedule-grid" id="scheduleGrid"></div>
     </section>
 
-    <section class="mobile-agenda" id="mobileAgenda" aria-label="Mobile weekly agenda"></section>
+    <section class="mobile-agenda calendar-view" id="mobileAgenda" aria-label="Mobile weekly agenda" data-i18n-aria="aria.mobileAgenda"></section>
 
-    <section class="goals" aria-label="Family goals">
+    <section class="today-view calendar-view" id="todayView" aria-label="Daily schedule" data-i18n-aria="aria.dailySchedule" hidden>
+      <div class="view-heading"><h2 id="todayHeading"></h2></div>
+      <div class="today-list" id="todayList"></div>
+    </section>
+
+    <section class="month-view calendar-view" id="monthView" aria-label="Monthly schedule" data-i18n-aria="aria.monthlySchedule" hidden>
+      <div class="month-weekdays" id="monthWeekdays"></div>
+      <div class="month-grid" id="monthGrid"></div>
+    </section>
+
+    <section class="goals" aria-label="Family goals" data-i18n-aria="aria.familyGoals">
       <article class="goal">
         <div class="goal-icon" aria-hidden="true">🎯</div>
-        <div><h3>Learning</h3><p>Track classes, tutoring, homework, and practice blocks.</p></div>
+        <div><h3 data-i18n="goals.learningTitle">Learning</h3><p data-i18n="goals.learningBody">Track classes, tutoring, homework, and practice blocks.</p></div>
       </article>
       <article class="goal">
         <div class="goal-icon" aria-hidden="true">👟</div>
-        <div><h3>Activities</h3><p>Coordinate sports, clubs, lessons, and pickup times.</p></div>
+        <div><h3 data-i18n="goals.activitiesTitle">Activities</h3><p data-i18n="goals.activitiesBody">Coordinate sports, clubs, lessons, and pickup times.</p></div>
       </article>
       <article class="goal">
         <div class="goal-icon" aria-hidden="true">📚</div>
-        <div><h3>Routines</h3><p>Keep reading, chores, and recurring family habits visible.</p></div>
+        <div><h3 data-i18n="goals.routinesTitle">Routines</h3><p data-i18n="goals.routinesBody">Keep reading, chores, and recurring family habits visible.</p></div>
       </article>
       <article class="goal">
         <div class="goal-icon" aria-hidden="true">👨‍👩‍👧‍👦</div>
-        <div><h3>Family Time</h3><p>Protect meals, weekend plans, and moments together.</p></div>
+        <div><h3 data-i18n="goals.familyTitle">Family Time</h3><p data-i18n="goals.familyBody">Protect meals, weekend plans, and moments together.</p></div>
       </article>
       <article class="goal">
         <div class="goal-icon" aria-hidden="true">🗓️</div>
-        <div><h3>Time Gaps</h3><p>Find open windows before adding another commitment.</p></div>
+        <div><h3 data-i18n="goals.gapsTitle">Time Gaps</h3><p data-i18n="goals.gapsBody">Find open windows before adding another commitment.</p></div>
       </article>
     </section>
   </main>
 
   <dialog id="activityDialog">
     <div class="modal-header">
-      <h2 id="dialogTitle">Add Activity</h2>
-      <button class="close-btn" type="button" id="closeDialog" aria-label="Close">×</button>
+      <h2 id="dialogTitle" data-i18n="dialog.addTitle">Add Event</h2>
+      <button class="close-btn" type="button" id="closeDialog" aria-label="Close" data-i18n-aria="aria.close">×</button>
     </div>
     <form id="activityForm">
       <input type="hidden" id="activityId">
       <div class="field-grid">
         <label>
-          Child
+          <span data-i18n="form.child">Child</span>
           <select id="child" required></select>
         </label>
         <label>
-          Day
-          <select id="day" required></select>
+          <span data-i18n="form.date">Date</span>
+          <input id="startDate" type="date" required>
         </label>
         <label>
-          Start time
+          <span data-i18n="form.eventType">Event type</span>
+          <select id="eventType" required>
+            <option value="activity" data-i18n="eventType.activity">Activity</option>
+            <option value="birthday" data-i18n="eventType.birthday">Birthday</option>
+            <option value="holiday" data-i18n="eventType.holiday">Holiday</option>
+          </select>
+        </label>
+        <label>
+          <span data-i18n="form.repeat">Repeat</span>
+          <select id="recurrence" required>
+            <option value="none" data-i18n="repeat.none">Does not repeat</option>
+            <option value="daily" data-i18n="repeat.daily">Every day</option>
+            <option value="weekly" data-i18n="repeat.weekly">Every week</option>
+            <option value="monthly" data-i18n="repeat.monthly">Every month</option>
+            <option value="yearly" data-i18n="repeat.yearly">Every year</option>
+          </select>
+        </label>
+      </div>
+      <div class="field-grid">
+        <label class="time-field" id="startTimeField">
+          <span data-i18n="form.start">Start time</span>
           <input id="startTime" type="time" required>
         </label>
-        <label>
-          End time
+        <label class="time-field" id="endTimeField">
+          <span data-i18n="form.end">End time</span>
           <input id="endTime" type="time" required>
         </label>
       </div>
+      <label class="check-field">
+        <input id="allDay" type="checkbox">
+        <span data-i18n="form.allDay">All-day event</span>
+      </label>
       <label>
-        Activity
-        <input id="title" type="text" required placeholder="Soccer, Kumon, Robotics">
+        <span data-i18n="form.eventName">Event name</span>
+        <input id="title" type="text" required placeholder="Soccer, birthday, holiday" data-i18n-placeholder="form.eventPlaceholder">
       </label>
       <div class="field-grid">
         <label>
-          Icon
+          <span data-i18n="form.icon">Icon</span>
           <select id="icon" required>
-            <option value="📖">📖 Reading / Kumon</option>
-            <option value="🤖">🤖 Robotics</option>
-            <option value="⚽">⚽ Soccer</option>
-            <option value="🥋">🥋 Kungfu</option>
-            <option value="√x">√x Math</option>
-            <option value="&lt;/&gt;">&lt;/&gt; Coding</option>
-            <option value="🎨">🎨 Art</option>
+            <option value="📖" data-i18n="icons.reading">📖 Reading / Kumon</option>
+            <option value="🤖" data-i18n="icons.robotics">🤖 Robotics</option>
+            <option value="⚽" data-i18n="icons.soccer">⚽ Soccer</option>
+            <option value="🥋" data-i18n="icons.kungfu">🥋 Kungfu</option>
+            <option value="√x" data-i18n="icons.math">√x Math</option>
+            <option value="&lt;/&gt;" data-i18n="icons.coding">&lt;/&gt; Coding</option>
+            <option value="🎨" data-i18n="icons.art">🎨 Art</option>
+            <option value="🎂" data-i18n="icons.birthday">🎂 Birthday</option>
+            <option value="🎉" data-i18n="icons.holiday">🎉 Holiday</option>
           </select>
         </label>
         <label>
-          Color style
+          <span data-i18n="form.colorStyle">Color style</span>
           <select id="style" required>
-            <option value="child">Child color</option>
-            <option value="purple">Purple highlight</option>
+            <option value="child" data-i18n="form.childColor">Child color</option>
+            <option value="purple" data-i18n="form.purple">Purple highlight</option>
           </select>
         </label>
       </div>
+      <div class="logistics-grid">
+        <label>
+          <span data-i18n="form.location">Location</span>
+          <input id="location" type="text" maxlength="100" placeholder="School, studio, field" data-i18n-placeholder="form.locationPlaceholder">
+        </label>
+        <label>
+          <span data-i18n="form.responsible">Responsible adult</span>
+          <input id="responsible" type="text" maxlength="60" placeholder="Mom, Dad, babysitter" data-i18n-placeholder="form.responsiblePlaceholder">
+        </label>
+      </div>
       <label>
-        Notes
-        <textarea id="notes" placeholder="Room, teacher, supplies, pickup notes"></textarea>
+        <span data-i18n="form.items">Bring / prepare</span>
+        <input id="items" type="text" maxlength="160" placeholder="Uniform, water bottle, homework" data-i18n-placeholder="form.itemsPlaceholder">
+      </label>
+      <label>
+        <span data-i18n="form.notes">Notes</span>
+        <textarea id="notes" placeholder="Room, teacher, supplies, pickup notes" data-i18n-placeholder="form.notesPlaceholder"></textarea>
       </label>
       <div class="form-actions">
-        <button class="danger-btn" type="button" id="deleteActivity">Delete</button>
+        <button class="danger-btn" type="button" id="deleteActivity" data-i18n="actions.delete">Delete</button>
         <div class="right-actions">
-          <button class="ghost-btn" type="button" id="cancelDialog">Cancel</button>
-          <button class="primary-btn" type="submit">Save</button>
+          <button class="ghost-btn" type="button" id="cancelDialog" data-i18n="actions.cancel">Cancel</button>
+          <button class="primary-btn" type="submit" data-i18n="actions.save">Save</button>
         </div>
       </div>
     </form>
@@ -1028,30 +1558,388 @@
 
   <dialog id="kidsDialog">
     <div class="modal-header">
-      <h2>Manage Kids</h2>
-      <button class="close-btn" type="button" id="closeKidsDialog" aria-label="Close">×</button>
+      <h2 data-i18n="kids.title">Manage Kids</h2>
+      <button class="close-btn" type="button" id="closeKidsDialog" aria-label="Close" data-i18n-aria="aria.close">×</button>
     </div>
     <form id="kidsForm">
       <div class="kid-editor-list" id="kidEditorList"></div>
-      <button class="ghost-btn" type="button" id="addKidRow">＋ Add Child</button>
+      <button class="ghost-btn" type="button" id="addKidRow" data-i18n="kids.add">＋ Add Child</button>
       <div class="form-actions">
         <span></span>
         <div class="right-actions">
-          <button class="ghost-btn" type="button" id="cancelKidsDialog">Cancel</button>
-          <button class="primary-btn" type="submit">Save Kids</button>
+          <button class="ghost-btn" type="button" id="cancelKidsDialog" data-i18n="actions.cancel">Cancel</button>
+          <button class="primary-btn" type="submit" data-i18n="kids.save">Save Kids</button>
         </div>
       </div>
     </form>
   </dialog>
 
+  <dialog id="presetDialog">
+    <div class="modal-header">
+      <h2 data-i18n="presets.title">Presets & Rewind</h2>
+      <button class="close-btn" type="button" id="closePresetDialog" aria-label="Close" data-i18n-aria="aria.close">×</button>
+    </div>
+    <form id="presetForm">
+      <div class="preset-tools">
+        <section class="preset-section">
+          <h3 data-i18n="presets.saveTitle">Save Current Schedule</h3>
+          <div class="preset-row">
+            <label>
+              <span data-i18n="presets.name">Preset name</span>
+              <input id="presetName" type="text" maxlength="40" placeholder="After-school routine" data-i18n-placeholder="presets.namePlaceholder">
+            </label>
+            <button class="primary-btn" type="button" id="saveCurrentPreset" data-i18n="presets.save">Save Preset</button>
+          </div>
+        </section>
+
+        <section class="preset-section">
+          <h3 data-i18n="presets.loadTitle">Load Saved Preset</h3>
+          <div class="preset-row">
+            <label>
+              <span data-i18n="presets.saved">Saved presets</span>
+              <select id="savedPresetSelect"></select>
+            </label>
+            <button class="ghost-btn" type="button" id="loadSavedPreset" data-i18n="actions.load">Load</button>
+          </div>
+          <button class="danger-btn" type="button" id="deleteSavedPreset" data-i18n="presets.delete">Delete Selected Preset</button>
+        </section>
+
+        <section class="preset-section">
+          <h3 data-i18n="presets.rewindTitle">Rewind</h3>
+          <p class="preset-status" id="rewindSummary" data-i18n="presets.noHistory">No previous schedule saved yet.</p>
+          <button class="ghost-btn" type="button" id="rewindSchedule" data-i18n="presets.restore">Restore Previous Schedule</button>
+        </section>
+
+        <p class="preset-status" id="presetStatus"></p>
+      </div>
+      <div class="form-actions">
+        <span></span>
+        <button class="primary-btn" type="button" id="donePresets" data-i18n="actions.done">Done</button>
+      </div>
+    </form>
+  </dialog>
+
   <script>
+    const translations = {
+      en: {
+        "document.title": "KidsSync Weekly Schedule",
+        "aria.overview": "Family schedule overview",
+        "aria.language": "Language",
+        "aria.childFilters": "Child filters",
+        "aria.scheduleControls": "Schedule controls",
+        "aria.previousWeek": "Previous week",
+        "aria.nextWeek": "Next week",
+        "aria.previousPeriod": "Previous period",
+        "aria.nextPeriod": "Next period",
+        "aria.calendarView": "Calendar view",
+        "aria.weeklySchedule": "Weekly schedule",
+        "aria.mobileAgenda": "Mobile weekly agenda",
+        "aria.dailySchedule": "Daily schedule",
+        "aria.monthlySchedule": "Monthly schedule",
+        "aria.familyGoals": "Family goals",
+        "aria.close": "Close",
+        "brand.ribbon": "Family Weekly Planner",
+        "brand.subtitle": "A shared schedule for parents managing school, activities, homework, and family time.",
+        "tips.title": "Tips",
+        "tips.one": "See each child’s week at a glance.",
+        "tips.two": "Spot busy days before they become stressful.",
+        "tips.three": "Keep pickup, homework, and family time visible.",
+        "note.title": "Parent Note",
+        "note.body": "Start with a blank week, or load the example to see a fully editable schedule.",
+        "actions.loadExample": "Load Example",
+        "actions.presets": "Presets & Rewind",
+        "actions.addActivity": "＋ Add Event",
+        "actions.delete": "Delete",
+        "actions.cancel": "Cancel",
+        "actions.save": "Save",
+        "actions.load": "Load",
+        "actions.done": "Done",
+        "actions.edit": "Edit",
+        "view.today": "Today",
+        "view.week": "Week",
+        "view.month": "Month",
+        "goals.learningTitle": "Learning",
+        "goals.learningBody": "Track classes, tutoring, homework, and practice blocks.",
+        "goals.activitiesTitle": "Activities",
+        "goals.activitiesBody": "Coordinate sports, clubs, lessons, and pickup times.",
+        "goals.routinesTitle": "Routines",
+        "goals.routinesBody": "Keep reading, chores, and recurring family habits visible.",
+        "goals.familyTitle": "Family Time",
+        "goals.familyBody": "Protect meals, weekend plans, and moments together.",
+        "goals.gapsTitle": "Time Gaps",
+        "goals.gapsBody": "Find open windows before adding another commitment.",
+        "dialog.addTitle": "Add Event",
+        "dialog.editTitle": "Edit Event",
+        "form.child": "Child",
+        "form.day": "Day",
+        "form.date": "Date",
+        "form.eventType": "Event type",
+        "form.repeat": "Repeat",
+        "form.allDay": "All-day event",
+        "form.start": "Start time",
+        "form.end": "End time",
+        "form.activity": "Activity",
+        "form.activityPlaceholder": "Soccer, Kumon, Robotics",
+        "form.eventName": "Event name",
+        "form.eventPlaceholder": "Soccer, birthday, holiday",
+        "form.icon": "Icon",
+        "form.colorStyle": "Color style",
+        "form.childColor": "Child color",
+        "form.purple": "Purple highlight",
+        "form.notes": "Notes",
+        "form.notesPlaceholder": "Room, teacher, supplies, pickup notes",
+        "form.location": "Location",
+        "form.locationPlaceholder": "School, studio, field",
+        "form.responsible": "Responsible adult",
+        "form.responsiblePlaceholder": "Mom, Dad, babysitter",
+        "form.items": "Bring / prepare",
+        "form.itemsPlaceholder": "Uniform, water bottle, homework",
+        "icons.reading": "📖 Reading / Kumon",
+        "icons.robotics": "🤖 Robotics",
+        "icons.soccer": "⚽ Soccer",
+        "icons.kungfu": "🥋 Kungfu",
+        "icons.math": "√x Math",
+        "icons.coding": "</> Coding",
+        "icons.art": "🎨 Art",
+        "icons.birthday": "🎂 Birthday",
+        "icons.holiday": "🎉 Holiday",
+        "eventType.activity": "Activity",
+        "eventType.birthday": "Birthday",
+        "eventType.holiday": "Holiday",
+        "repeat.none": "Does not repeat",
+        "repeat.daily": "Every day",
+        "repeat.weekly": "Every week",
+        "repeat.monthly": "Every month",
+        "repeat.yearly": "Every year",
+        "kids.title": "Manage Kids",
+        "kids.add": "＋ Add Child",
+        "kids.save": "Save Kids",
+        "kids.your": "Your Kids",
+        "kids.name": "Child name",
+        "kids.namePlaceholder": "Child name",
+        "kids.color": "Color",
+        "kids.remove": "Remove {name}",
+        "presets.title": "Presets & Rewind",
+        "presets.saveTitle": "Save Current Schedule",
+        "presets.name": "Preset name",
+        "presets.namePlaceholder": "After-school routine",
+        "presets.save": "Save Preset",
+        "presets.loadTitle": "Load Saved Preset",
+        "presets.saved": "Saved presets",
+        "presets.delete": "Delete Selected Preset",
+        "presets.rewindTitle": "Rewind",
+        "presets.noHistory": "No previous schedule saved yet.",
+        "presets.restore": "Restore Previous Schedule",
+        "presets.none": "No saved presets yet",
+        "presets.last": "Last rewind point: {label}, saved {date}.",
+        "presets.savedStatus": "Saved “{name}”.",
+        "presets.loadedStatus": "Loaded “{name}”. You can still edit every activity.",
+        "presets.deletedStatus": "Deleted “{name}”.",
+        "presets.restoredStatus": "Restored {label}.",
+        "presets.family": "Family schedule",
+        "presets.example": "Andrew and Mark schedule",
+        "presets.confirmDelete": "Delete preset “{name}”?",
+        "presets.confirmExample": "Load the Andrew and Mark preset? This will replace the current kids and schedule.",
+        "calendar.empty": "No activities yet.",
+        "calendar.conflict": "Schedule conflict",
+        "calendar.weekly": "Weekly activity",
+        "calendar.allDay": "All day",
+        "calendar.family": "Family",
+        "month.more": "+{count} more",
+        "stack.next": "Show next overlapping activity. {child} {title} is in front.",
+        "stack.tooltip": "Show next activity ({child}: {title})",
+        "validation.endAfter": "End time must be after start time.",
+        "day.monday": "Monday",
+        "day.tuesday": "Tuesday",
+        "day.wednesday": "Wednesday",
+        "day.thursday": "Thursday",
+        "day.friday": "Friday",
+        "day.saturday": "Saturday",
+        "day.sunday": "Sunday",
+        "color.blue": "Blue",
+        "color.green": "Green",
+        "color.coral": "Coral",
+        "color.gold": "Gold",
+        "activity.Kumon": "Kumon",
+        "activity.Soccer": "Soccer",
+        "activity.Kungfu": "Kungfu",
+        "activity.Robotics": "Robotics",
+        "activity.Coding": "Coding",
+        "activity.Art": "Art",
+        "activity.AoPS": "AoPS"
+      },
+      zh: {
+        "document.title": "KidsSync 每周日程",
+        "aria.overview": "家庭日程概览",
+        "aria.language": "语言",
+        "aria.childFilters": "孩子筛选",
+        "aria.scheduleControls": "日程控制",
+        "aria.previousWeek": "上一周",
+        "aria.nextWeek": "下一周",
+        "aria.previousPeriod": "上一个时间段",
+        "aria.nextPeriod": "下一个时间段",
+        "aria.calendarView": "日历视图",
+        "aria.weeklySchedule": "每周日程",
+        "aria.mobileAgenda": "手机版每周日程",
+        "aria.dailySchedule": "每日安排",
+        "aria.monthlySchedule": "每月安排",
+        "aria.familyGoals": "家庭目标",
+        "aria.close": "关闭",
+        "brand.ribbon": "家庭每周计划",
+        "brand.subtitle": "帮助家长共同管理上学、课外活动、作业和家庭时间。",
+        "tips.title": "小贴士",
+        "tips.one": "快速查看每个孩子一周的安排。",
+        "tips.two": "提前发现忙碌时段，减少压力。",
+        "tips.three": "清楚掌握接送、作业和家庭时间。",
+        "note.title": "家长备注",
+        "note.body": "从空白日程开始，或载入可完全编辑的示例日程。",
+        "actions.loadExample": "载入示例",
+        "actions.presets": "预设与恢复",
+        "actions.addActivity": "＋ 添加事件",
+        "actions.delete": "删除",
+        "actions.cancel": "取消",
+        "actions.save": "保存",
+        "actions.load": "载入",
+        "actions.done": "完成",
+        "actions.edit": "编辑",
+        "view.today": "今天",
+        "view.week": "周",
+        "view.month": "月",
+        "goals.learningTitle": "学习",
+        "goals.learningBody": "记录课程、辅导、作业和练习时间。",
+        "goals.activitiesTitle": "课外活动",
+        "goals.activitiesBody": "协调运动、社团、课程和接送时间。",
+        "goals.routinesTitle": "日常习惯",
+        "goals.routinesBody": "清楚安排阅读、家务和固定家庭习惯。",
+        "goals.familyTitle": "家庭时间",
+        "goals.familyBody": "留出用餐、周末计划和陪伴时间。",
+        "goals.gapsTitle": "空闲时段",
+        "goals.gapsBody": "添加新安排前先找到合适的空档。",
+        "dialog.addTitle": "添加事件",
+        "dialog.editTitle": "编辑事件",
+        "form.child": "孩子",
+        "form.day": "星期",
+        "form.date": "日期",
+        "form.eventType": "事件类型",
+        "form.repeat": "重复",
+        "form.allDay": "全天事件",
+        "form.start": "开始时间",
+        "form.end": "结束时间",
+        "form.activity": "活动",
+        "form.activityPlaceholder": "足球、公文数学、机器人",
+        "form.eventName": "事件名称",
+        "form.eventPlaceholder": "足球、生日、节日",
+        "form.icon": "图标",
+        "form.colorStyle": "颜色样式",
+        "form.childColor": "孩子的颜色",
+        "form.purple": "紫色标记",
+        "form.notes": "备注",
+        "form.notesPlaceholder": "教室、老师、用品、接送备注",
+        "form.location": "地点",
+        "form.locationPlaceholder": "学校、教室、运动场",
+        "form.responsible": "负责的成人",
+        "form.responsiblePlaceholder": "妈妈、爸爸、保姆",
+        "form.items": "携带 / 准备",
+        "form.itemsPlaceholder": "队服、水杯、作业",
+        "icons.reading": "📖 阅读 / 公文数学",
+        "icons.robotics": "🤖 机器人",
+        "icons.soccer": "⚽ 足球",
+        "icons.kungfu": "🥋 功夫",
+        "icons.math": "√x 数学",
+        "icons.coding": "</> 编程",
+        "icons.art": "🎨 美术",
+        "icons.birthday": "🎂 生日",
+        "icons.holiday": "🎉 节日",
+        "eventType.activity": "活动",
+        "eventType.birthday": "生日",
+        "eventType.holiday": "节日",
+        "repeat.none": "不重复",
+        "repeat.daily": "每天",
+        "repeat.weekly": "每周",
+        "repeat.monthly": "每月",
+        "repeat.yearly": "每年",
+        "kids.title": "管理孩子",
+        "kids.add": "＋ 添加孩子",
+        "kids.save": "保存孩子",
+        "kids.your": "你的孩子",
+        "kids.name": "孩子姓名",
+        "kids.namePlaceholder": "孩子姓名",
+        "kids.color": "颜色",
+        "kids.remove": "移除 {name}",
+        "presets.title": "预设与恢复",
+        "presets.saveTitle": "保存当前日程",
+        "presets.name": "预设名称",
+        "presets.namePlaceholder": "课后安排",
+        "presets.save": "保存预设",
+        "presets.loadTitle": "载入已保存预设",
+        "presets.saved": "已保存预设",
+        "presets.delete": "删除所选预设",
+        "presets.rewindTitle": "恢复",
+        "presets.noHistory": "还没有可恢复的日程。",
+        "presets.restore": "恢复上一个日程",
+        "presets.none": "还没有保存预设",
+        "presets.last": "上一个恢复点：{label}，保存于 {date}。",
+        "presets.savedStatus": "已保存“{name}”。",
+        "presets.loadedStatus": "已载入“{name}”，所有活动仍可编辑。",
+        "presets.deletedStatus": "已删除“{name}”。",
+        "presets.restoredStatus": "已恢复 {label}。",
+        "presets.family": "家庭日程",
+        "presets.example": "Andrew 和 Mark 日程",
+        "presets.confirmDelete": "删除预设“{name}”？",
+        "presets.confirmExample": "载入 Andrew 和 Mark 示例？这会替换当前的孩子和日程。",
+        "calendar.empty": "还没有活动。",
+        "calendar.conflict": "日程冲突",
+        "calendar.weekly": "每周活动",
+        "calendar.allDay": "全天",
+        "calendar.family": "全家",
+        "month.more": "还有 {count} 项",
+        "stack.next": "显示下一个重叠活动。当前显示 {child} 的{title}。",
+        "stack.tooltip": "显示下一个活动（{child}：{title}）",
+        "validation.endAfter": "结束时间必须晚于开始时间。",
+        "day.monday": "星期一",
+        "day.tuesday": "星期二",
+        "day.wednesday": "星期三",
+        "day.thursday": "星期四",
+        "day.friday": "星期五",
+        "day.saturday": "星期六",
+        "day.sunday": "星期日",
+        "color.blue": "蓝色",
+        "color.green": "绿色",
+        "color.coral": "珊瑚色",
+        "color.gold": "金色",
+        "activity.Kumon": "公文数学",
+        "activity.Soccer": "足球",
+        "activity.Kungfu": "功夫",
+        "activity.Robotics": "机器人",
+        "activity.Coding": "编程",
+        "activity.Art": "美术",
+        "activity.AoPS": "AoPS"
+      }
+    };
+
+    let currentLanguage = localStorage.getItem("kidssync.v2.language") === "zh" ? "zh" : "en";
+
+    function t(key, replacements = {}) {
+      const template = translations[currentLanguage][key] || translations.en[key] || key;
+      return Object.entries(replacements).reduce(
+        (result, [name, value]) => result.replaceAll(`{${name}}`, value),
+        template
+      );
+    }
+
     const days = [
-      { key: "monday", label: "Monday 周一", weather: "🌥️", theme: "blue" },
-      { key: "tuesday", label: "Tuesday 周二", weather: "☀️", theme: "green" },
-      { key: "wednesday", label: "Wednesday 周三", weather: "☁️", theme: "blue" },
-      { key: "thursday", label: "Thursday 周四", weather: "🌞", theme: "green" },
-      { key: "friday", label: "Friday 周五", weather: "", theme: "blue" }
+      { key: "monday", labelKey: "day.monday", weather: "🌥️", theme: "blue" },
+      { key: "tuesday", labelKey: "day.tuesday", weather: "☀️", theme: "green" },
+      { key: "wednesday", labelKey: "day.wednesday", weather: "☁️", theme: "blue" },
+      { key: "thursday", labelKey: "day.thursday", weather: "🌞", theme: "green" },
+      { key: "friday", labelKey: "day.friday", weather: "", theme: "blue" },
+      { key: "saturday", labelKey: "day.saturday", weather: "☀️", theme: "green" },
+      { key: "sunday", labelKey: "day.sunday", weather: "🌤️", theme: "blue" }
     ];
+    const scheduleStartMinutes = 8 * 60;
+    const scheduleEndMinutes = 20 * 60;
+    const scheduleDurationMinutes = scheduleEndMinutes - scheduleStartMinutes;
+    const FAMILY_CHILD = "__family__";
 
     const palettes = {
       blue: { label: "Blue", color: "#2f7fd3", soft: "#d9ebff", line: "#8eb9df", ink: "#142c66" },
@@ -1089,35 +1977,127 @@
       { id: "preset-a16", child: "Mark", day: "friday", start: "16:30", end: "18:15", title: "AoPS", icon: "√x", style: "child", notes: "" }
     ];
 
+    function migrateUntouchedExampleStartup() {
+      const migrationKey = "kidssync.v2.generic-startup";
+      if (localStorage.getItem(migrationKey)) return;
+
+      try {
+        const storedKids = JSON.parse(localStorage.getItem("kidssync.v2.kids"));
+        const storedActivities = JSON.parse(localStorage.getItem("kidssync.v2.activities"));
+        const exactKids = Array.isArray(storedKids)
+          && storedKids.length === andrewMarkPresetKids.length
+          && storedKids.every((kid, index) => Object.keys(andrewMarkPresetKids[index]).every(key => kid[key] === andrewMarkPresetKids[index][key]));
+        const exactActivities = Array.isArray(storedActivities)
+          && storedActivities.length === andrewMarkPresetActivities.length
+          && storedActivities.every(activity => {
+            const example = andrewMarkPresetActivities.find(item => item.id === activity.id);
+            return example && Object.keys(example).every(key => activity[key] === example[key]);
+          });
+
+        if (exactKids && exactActivities) {
+          localStorage.removeItem("kidssync.v2.kids");
+          localStorage.removeItem("kidssync.v2.activities");
+        }
+      } catch {
+      }
+
+      localStorage.setItem(migrationKey, "done");
+    }
+
+    migrateUntouchedExampleStartup();
+
     let kidProfiles = loadKids();
     let kids = buildKids(kidProfiles);
     let kidDraft = [];
+    let savedPresets = loadSavedPresets();
+    let scheduleHistory = loadScheduleHistory();
+    let selectedDate = new Date();
+    let currentWeekStart = getMonday(selectedDate);
+    let currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+    let currentView = ["today", "week", "month"].includes(localStorage.getItem("kidssync.v2.view"))
+      ? localStorage.getItem("kidssync.v2.view")
+      : "week";
 
     const state = {
       visibleKids: new Set(kidProfiles.map(kid => kid.name)),
-      activities: loadActivities()
+      activities: loadActivities(),
+      stackFront: new Map()
     };
 
     const grid = document.getElementById("scheduleGrid");
     const mobileAgenda = document.getElementById("mobileAgenda");
+    const weekSchedule = document.getElementById("weekSchedule");
+    const todayView = document.getElementById("todayView");
+    const todayHeading = document.getElementById("todayHeading");
+    const todayList = document.getElementById("todayList");
+    const monthView = document.getElementById("monthView");
+    const monthWeekdays = document.getElementById("monthWeekdays");
+    const monthGrid = document.getElementById("monthGrid");
     const kidFilters = document.getElementById("kidFilters");
     const dialog = document.getElementById("activityDialog");
     const kidsDialog = document.getElementById("kidsDialog");
+    const presetDialog = document.getElementById("presetDialog");
     const form = document.getElementById("activityForm");
     const kidsForm = document.getElementById("kidsForm");
+    const presetForm = document.getElementById("presetForm");
     const kidEditorList = document.getElementById("kidEditorList");
+    const savedPresetSelect = document.getElementById("savedPresetSelect");
+    const presetStatus = document.getElementById("presetStatus");
+    const rewindSummary = document.getElementById("rewindSummary");
     const deleteButton = document.getElementById("deleteActivity");
     const fields = {
       id: document.getElementById("activityId"),
       child: document.getElementById("child"),
-      day: document.getElementById("day"),
+      date: document.getElementById("startDate"),
+      eventType: document.getElementById("eventType"),
+      recurrence: document.getElementById("recurrence"),
+      allDay: document.getElementById("allDay"),
       start: document.getElementById("startTime"),
       end: document.getElementById("endTime"),
       title: document.getElementById("title"),
       icon: document.getElementById("icon"),
       style: document.getElementById("style"),
-      notes: document.getElementById("notes")
+      notes: document.getElementById("notes"),
+      location: document.getElementById("location"),
+      responsible: document.getElementById("responsible"),
+      items: document.getElementById("items")
     };
+
+    function applyStaticTranslations() {
+      document.documentElement.lang = currentLanguage === "zh" ? "zh-CN" : "en";
+      document.title = t("document.title");
+      document.querySelectorAll("[data-i18n]").forEach(element => {
+        element.textContent = t(element.dataset.i18n);
+      });
+      document.querySelectorAll("[data-i18n-placeholder]").forEach(element => {
+        element.placeholder = t(element.dataset.i18nPlaceholder);
+      });
+      document.querySelectorAll("[data-i18n-aria]").forEach(element => {
+        element.setAttribute("aria-label", t(element.dataset.i18nAria));
+      });
+      document.querySelectorAll("[data-language]").forEach(button => {
+        const active = button.dataset.language === currentLanguage;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", active);
+      });
+    }
+
+    function setLanguage(language) {
+      currentLanguage = language === "zh" ? "zh" : "en";
+      localStorage.setItem("kidssync.v2.language", currentLanguage);
+      applyStaticTranslations();
+      populateFormOptions();
+      renderAll();
+    }
+
+    function dayLabel(day) {
+      return t(day.labelKey);
+    }
+
+    function activityTitle(activity) {
+      const key = `activity.${activity.title}`;
+      return translations[currentLanguage][key] || activity.title;
+    }
 
     function buildKids(profiles) {
       return profiles.reduce((result, profile) => {
@@ -1154,6 +2134,195 @@
       localStorage.setItem("kidssync.v2.kids", JSON.stringify(kidProfiles));
     }
 
+    function loadSavedPresets() {
+      try {
+        const stored = JSON.parse(localStorage.getItem("kidssync.v2.presets"));
+        return Array.isArray(stored) ? stored : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveSavedPresets() {
+      localStorage.setItem("kidssync.v2.presets", JSON.stringify(savedPresets));
+    }
+
+    function loadScheduleHistory() {
+      try {
+        const stored = JSON.parse(localStorage.getItem("kidssync.v2.history"));
+        return Array.isArray(stored) ? stored : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveScheduleHistory() {
+      localStorage.setItem("kidssync.v2.history", JSON.stringify(scheduleHistory.slice(0, 20)));
+    }
+
+    function cloneSchedule() {
+      return {
+        kids: kidProfiles.map(kid => ({ ...kid })),
+        activities: state.activities.map(activity => ({ ...activity })),
+        visibleKids: [...state.visibleKids]
+      };
+    }
+
+    function applyScheduleSnapshot(snapshot) {
+      kidProfiles = (snapshot.kids || defaultKids).map(kid => ({ ...kid }));
+      kids = buildKids(kidProfiles);
+      state.activities = (snapshot.activities || []).map(activity => ({ ...activity }));
+      state.stackFront.clear();
+      const visible = Array.isArray(snapshot.visibleKids) ? snapshot.visibleKids.filter(name => kids[name]) : [];
+      state.visibleKids = new Set(visible.length ? visible : kidProfiles.map(kid => kid.name));
+      saveKids();
+      saveActivities();
+      populateFormOptions();
+      renderAll();
+    }
+
+    function rememberCurrentSchedule(label) {
+      scheduleHistory.unshift({
+        id: crypto.randomUUID(),
+        label,
+        savedAt: new Date().toISOString(),
+        snapshot: cloneSchedule()
+      });
+      scheduleHistory = scheduleHistory.slice(0, 20);
+      saveScheduleHistory();
+    }
+
+    function formatDateTime(value) {
+      return new Date(value).toLocaleString(currentLanguage === "zh" ? "zh-CN" : "en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      });
+    }
+
+    function getMonday(date) {
+      const result = new Date(date);
+      const day = result.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      result.setDate(result.getDate() + diff);
+      result.setHours(0, 0, 0, 0);
+      return result;
+    }
+
+    function addDays(date, amount) {
+      const result = new Date(date);
+      result.setDate(result.getDate() + amount);
+      return result;
+    }
+
+    function dateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function parseDateKey(value) {
+      const [year, month, day] = value.split("-").map(Number);
+      return new Date(year, month - 1, day);
+    }
+
+    function dateSerial(date) {
+      return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000;
+    }
+
+    function defaultEventDate() {
+      if (currentView === "today") return dateKey(selectedDate);
+      if (currentView === "month") {
+        const sameMonth = selectedDate.getFullYear() === currentMonthStart.getFullYear()
+          && selectedDate.getMonth() === currentMonthStart.getMonth();
+        return dateKey(sameMonth ? selectedDate : currentMonthStart);
+      }
+      const today = new Date();
+      const weekEnd = addDays(currentWeekStart, 6);
+      if (dateSerial(today) >= dateSerial(currentWeekStart) && dateSerial(today) <= dateSerial(weekEnd)) return dateKey(today);
+      return dateKey(currentWeekStart);
+    }
+
+    function activityOccursOn(activity, date) {
+      if (!activity.startDate) {
+        const day = days.find(item => item.key === activity.day);
+        return day ? days[date.getDay() === 0 ? 6 : date.getDay() - 1]?.key === day.key : false;
+      }
+
+      const anchor = parseDateKey(activity.startDate);
+      const difference = dateSerial(date) - dateSerial(anchor);
+      if (difference < 0) return false;
+
+      switch (activity.recurrence || "none") {
+        case "daily":
+          return true;
+        case "weekly":
+          return difference % 7 === 0;
+        case "monthly":
+          return date.getDate() === anchor.getDate();
+        case "yearly":
+          return date.getMonth() === anchor.getMonth() && date.getDate() === anchor.getDate();
+        default:
+          return difference === 0;
+      }
+    }
+
+    function occurrenceKey(activity) {
+      return `${activity.id}:${activity.occurrenceDate || activity.day || "event"}`;
+    }
+
+    function occurrencesOnDate(date) {
+      const day = days[(date.getDay() + 6) % 7];
+      return state.activities
+        .filter(activity => activity.child === FAMILY_CHILD || state.visibleKids.has(activity.child))
+        .filter(activity => activityOccursOn(activity, date))
+        .map(activity => ({ ...activity, day: day.key, occurrenceDate: dateKey(date) }));
+    }
+
+    function weekOccurrences() {
+      return days.flatMap((day, index) => occurrencesOnDate(addDays(currentWeekStart, index)));
+    }
+
+    function formatShortDate(date) {
+      return date.toLocaleDateString(currentLanguage === "zh" ? "zh-CN" : "en-US", { month: "short", day: "numeric" });
+    }
+
+    function formatFullDate(date) {
+      return date.toLocaleDateString(currentLanguage === "zh" ? "zh-CN" : "en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+    }
+
+    function updateWeekLabel() {
+      if (currentView === "today") {
+        document.getElementById("weekLabel").textContent = formatFullDate(selectedDate);
+        return;
+      }
+      if (currentView === "month") {
+        document.getElementById("weekLabel").textContent = currentMonthStart.toLocaleDateString(
+          currentLanguage === "zh" ? "zh-CN" : "en-US",
+          { year: "numeric", month: "long" }
+        );
+        return;
+      }
+      const sunday = addDays(currentWeekStart, 6);
+      const sameMonth = currentWeekStart.getMonth() === sunday.getMonth();
+      if (currentLanguage === "zh") {
+        document.getElementById("weekLabel").textContent = sameMonth
+          ? `${currentWeekStart.getMonth() + 1}月${currentWeekStart.getDate()}日 - ${sunday.getDate()}日`
+          : `${formatShortDate(currentWeekStart)} - ${formatShortDate(sunday)}`;
+        return;
+      }
+      document.getElementById("weekLabel").textContent = sameMonth
+        ? `${currentWeekStart.toLocaleDateString("en-US", { month: "short" })} ${currentWeekStart.getDate()} - ${sunday.getDate()}`
+        : `${formatShortDate(currentWeekStart)} - ${formatShortDate(sunday)}`;
+    }
+
     function escapeHtml(value) {
       return String(value).replace(/[&<>"']/g, character => ({
         "&": "&amp;",
@@ -1170,22 +2339,50 @@
     }
 
     function timeLabel(time) {
+      if (currentLanguage === "zh") return time;
       const [hourText, minute] = time.split(":");
       const hour = Number(hourText);
       const displayHour = hour > 12 ? hour - 12 : hour;
       return `${displayHour}:${minute}`;
     }
 
+    function formatTimeLabel(totalMinutes) {
+      const hour = Math.floor(totalMinutes / 60);
+      const minute = totalMinutes % 60;
+      if (currentLanguage === "zh") {
+        const period = hour < 12 ? "上午" : "下午";
+        return `${period} ${hour % 12 || 12}:${String(minute).padStart(2, "0")}`;
+      }
+      const displayHour = hour % 12 || 12;
+      const suffix = hour < 12 ? "AM" : "PM";
+      return `${displayHour}:${String(minute).padStart(2, "0")} ${suffix}`;
+    }
+
     function eventColors(activity) {
       if (activity.style === "purple") {
         return { soft: "var(--purple-soft)", line: "var(--purple-line)", ink: "#39205f" };
+      }
+      if (activity.child === FAMILY_CHILD) {
+        return palettes.gold;
       }
       const kid = kids[activity.child] || Object.values(kids)[0] || palettes.blue;
       return { soft: kid.soft, line: kid.line, ink: kid.ink };
     }
 
     function visibleActivities() {
-      return state.activities.filter(activity => state.visibleKids.has(activity.child));
+      return weekOccurrences();
+    }
+
+    function displayChild(activity) {
+      return activity.child === FAMILY_CHILD ? t("calendar.family") : activity.child;
+    }
+
+    function recurrenceValue(activity) {
+      return activity.recurrence || (activity.day ? "weekly" : "none");
+    }
+
+    function recurrenceLabel(activity) {
+      return t(`repeat.${recurrenceValue(activity)}`);
     }
 
     function findConflicts(activities) {
@@ -1194,27 +2391,59 @@
         for (let j = i + 1; j < activities.length; j += 1) {
           const first = activities[i];
           const second = activities[j];
+          if (first.allDay || second.allDay) continue;
           const sameDay = first.day === second.day;
           const sameChild = first.child === second.child;
           const overlaps = minutes(first.start) < minutes(second.end) && minutes(second.start) < minutes(first.end);
           if (sameDay && sameChild && overlaps) {
-            conflicts.add(first.id);
-            conflicts.add(second.id);
+            conflicts.add(occurrenceKey(first));
+            conflicts.add(occurrenceKey(second));
           }
         }
       }
       return conflicts;
     }
 
+    function activitiesOverlap(first, second) {
+      return minutes(first.start) < minutes(second.end) && minutes(second.start) < minutes(first.end);
+    }
+
+    function buildOverlapGroups(activities) {
+      const groups = [];
+      const visited = new Set();
+
+      activities.forEach(activity => {
+        if (visited.has(activity.id)) return;
+        const group = [];
+        const queue = [activity];
+        visited.add(activity.id);
+
+        while (queue.length) {
+          const current = queue.shift();
+          group.push(current);
+          activities.forEach(candidate => {
+            if (!visited.has(candidate.id) && activitiesOverlap(current, candidate)) {
+              visited.add(candidate.id);
+              queue.push(candidate);
+            }
+          });
+        }
+
+        groups.push(group.sort((first, second) => minutes(first.start) - minutes(second.start)));
+      });
+
+      return groups;
+    }
+
     function renderKidFilters() {
       kidFilters.innerHTML = "";
       const title = document.createElement("p");
       title.className = "kids-panel-title";
-      title.textContent = "Your Kids";
+      title.textContent = t("kids.your");
       const manage = document.createElement("button");
       manage.type = "button";
       manage.className = "small-btn";
-      manage.textContent = "Edit";
+      manage.textContent = t("actions.edit");
       manage.addEventListener("click", openKidsDialog);
       const header = document.createElement("div");
       header.className = "kids-header";
@@ -1253,19 +2482,45 @@
       grid.appendChild(timeHead);
 
       days.forEach(day => {
+        const date = addDays(currentWeekStart, days.findIndex(item => item.key === day.key));
         const head = document.createElement("div");
         head.className = `day-head ${day.theme}`;
-        head.innerHTML = `<span class="weather" aria-hidden="true">${day.weather}</span><span>${day.label}</span>`;
+        head.innerHTML = `<span class="weather" aria-hidden="true">${day.weather}</span><span>${dayLabel(day)}<small>${formatShortDate(date)}</small></span>`;
         grid.appendChild(head);
+      });
+
+      const allDayHead = document.createElement("div");
+      allDayHead.className = "all-day-head";
+      allDayHead.textContent = t("calendar.allDay");
+      grid.appendChild(allDayHead);
+
+      days.forEach(day => {
+        const cell = document.createElement("div");
+        cell.className = "all-day-cell";
+        activities
+          .filter(activity => activity.day === day.key && activity.allDay)
+          .forEach(activity => {
+            const colors = eventColors(activity);
+            const event = document.createElement("button");
+            event.type = "button";
+            event.className = "all-day-event";
+            event.style.setProperty("--event-bg", colors.soft);
+            event.style.setProperty("--event-line", colors.line);
+            event.style.setProperty("--event-ink", colors.ink);
+            event.innerHTML = `<span aria-hidden="true">${activity.icon}</span><span>${escapeHtml(activityTitle(activity))} · ${escapeHtml(displayChild(activity))}</span>`;
+            event.addEventListener("click", () => openDialog(activity));
+            cell.appendChild(event);
+          });
+        grid.appendChild(cell);
       });
 
       const timeColumn = document.createElement("div");
       timeColumn.className = "time-column";
-      for (let time = 13.5 * 60; time <= 19 * 60; time += 30) {
+      for (let time = scheduleStartMinutes; time <= scheduleEndMinutes; time += 30) {
         const label = document.createElement("div");
         label.className = "time-label";
-        label.style.top = `${((time - 13.5 * 60) / (5.5 * 60)) * 100}%`;
-        label.textContent = time === 13.5 * 60 ? "1:30 PM" : `${timeLabel(`${Math.floor(time / 60).toString().padStart(2, "0")}:${(time % 60).toString().padStart(2, "0")}`)} ${time < 720 ? "AM" : "PM"}`;
+        label.style.top = `${((time - scheduleStartMinutes) / scheduleDurationMinutes) * 100}%`;
+        label.textContent = formatTimeLabel(time);
         timeColumn.appendChild(label);
       }
       grid.appendChild(timeColumn);
@@ -1274,41 +2529,66 @@
         const column = document.createElement("div");
         column.className = "day-column";
         const dayActivities = activities
-          .filter(activity => activity.day === day.key)
+          .filter(activity => activity.day === day.key && !activity.allDay)
           .sort((a, b) => minutes(a.start) - minutes(b.start));
 
-        dayActivities.forEach((activity, index) => {
-          const start = minutes(activity.start);
-          const end = minutes(activity.end);
-          const overlapping = dayActivities.filter(other => minutes(other.start) < end && start < minutes(other.end));
-          const overlapIndex = overlapping.findIndex(other => other.id === activity.id);
-          const laneCount = Math.min(overlapping.length, 2);
-          const top = ((start - 13.5 * 60) / (5.5 * 60)) * 100;
-          const height = Math.max(((end - start) / (5.5 * 60)) * 100, 9);
-          const colors = eventColors(activity);
-          const event = document.createElement("button");
-          event.type = "button";
-          event.className = `event${height < 14 ? " small" : ""}${laneCount > 1 ? " narrow" : ""}${conflicts.has(activity.id) ? " conflict" : ""}`;
-          event.style.top = `${top}%`;
-          event.style.height = `${height}%`;
-          event.style.setProperty("--event-bg", colors.soft);
-          event.style.setProperty("--event-line", colors.line);
-          event.style.setProperty("--event-ink", colors.ink);
-          if (laneCount > 1) {
-            const lane = Math.max(0, overlapIndex % 2);
-            event.style.left = lane === 0 ? "8px" : "50%";
-            event.style.right = lane === 0 ? "50%" : "8px";
+        buildOverlapGroups(dayActivities).forEach(group => {
+          const stackKey = `${day.key}:${group.map(activity => activity.id).sort().join("|")}`;
+          const savedFront = state.stackFront.get(stackKey);
+          const frontActivity = group.find(activity => activity.id === savedFront) || group[group.length - 1];
+
+          group.forEach((activity, stackIndex) => {
+            const start = minutes(activity.start);
+            const end = minutes(activity.end);
+            const top = ((start - scheduleStartMinutes) / scheduleDurationMinutes) * 100;
+            const height = Math.max(((end - start) / scheduleDurationMinutes) * 100, 5.5);
+            const colors = eventColors(activity);
+            const event = document.createElement("button");
+            event.type = "button";
+            event.className = `event${end - start <= 45 ? " small" : ""}${group.length > 1 ? " overlap-offset" : ""}${frontActivity.id === activity.id && group.length > 1 ? " stack-front" : ""}${conflicts.has(occurrenceKey(activity)) ? " conflict" : ""}`;
+            event.style.top = `${top}%`;
+            event.style.height = `${height}%`;
+            event.style.setProperty("--event-bg", colors.soft);
+            event.style.setProperty("--event-line", colors.line);
+            event.style.setProperty("--event-ink", colors.ink);
+            if (group.length > 1) {
+              const offset = Math.min(stackIndex, 2) * 12;
+              const verticalOffset = Math.min(stackIndex, 2) * 22;
+              event.style.left = `${10 + offset}px`;
+              event.style.right = "10px";
+              event.style.top = `calc(${top}% + ${verticalOffset}px)`;
+              event.style.zIndex = frontActivity.id === activity.id ? "30" : `${2 + stackIndex}`;
+            }
+            event.innerHTML = `
+              <span class="event-icon" aria-hidden="true">${activity.icon}</span>
+              <span>
+                <span class="event-time">${timeLabel(activity.start)} - ${timeLabel(activity.end)}</span>
+                <span class="event-title">${escapeHtml(activityTitle(activity))}</span>
+                <span class="event-child">(${escapeHtml(displayChild(activity))})</span>
+              </span>
+            `;
+            event.addEventListener("click", () => openDialog(activity));
+            column.appendChild(event);
+          });
+
+          if (group.length > 1) {
+            const groupTop = ((Math.min(...group.map(activity => minutes(activity.start))) - scheduleStartMinutes) / scheduleDurationMinutes) * 100;
+            const switcher = document.createElement("button");
+            switcher.type = "button";
+            switcher.className = "stack-switcher";
+            switcher.style.top = groupTop > 1.5 ? `calc(${groupTop}% - 16px)` : "4px";
+            const frontTitle = activityTitle(frontActivity);
+            switcher.setAttribute("aria-label", t("stack.next", { child: frontActivity.child, title: frontTitle }));
+            switcher.title = t("stack.tooltip", { child: frontActivity.child, title: frontTitle });
+            switcher.innerHTML = `<span class="stack-switcher-icon" aria-hidden="true"></span><span class="stack-count">${group.length}</span>`;
+            switcher.addEventListener("click", () => {
+              const frontIndex = group.findIndex(activity => activity.id === frontActivity.id);
+              const nextActivity = group[(frontIndex + 1) % group.length];
+              state.stackFront.set(stackKey, nextActivity.id);
+              renderGrid();
+            });
+            column.appendChild(switcher);
           }
-          event.innerHTML = `
-            <span class="event-icon" aria-hidden="true">${activity.icon}</span>
-            <span>
-              <span class="event-time">${timeLabel(activity.start)} - ${timeLabel(activity.end)}</span>
-              <span class="event-title">${activity.title}</span>
-              <span class="event-child">(${activity.child})</span>
-            </span>
-          `;
-          event.addEventListener("click", () => openDialog(activity));
-          column.appendChild(event);
         });
 
         grid.appendChild(column);
@@ -1320,32 +2600,35 @@
       const conflicts = findConflicts(activities);
       mobileAgenda.innerHTML = "";
       days.forEach(day => {
+        const date = addDays(currentWeekStart, days.findIndex(item => item.key === day.key));
         const card = document.createElement("article");
         card.className = "day-card";
-        card.innerHTML = `<h2>${day.weather} ${day.label}</h2><div class="agenda-list"></div>`;
+        card.innerHTML = `<h2>${day.weather} ${dayLabel(day)} · ${formatShortDate(date)}</h2><div class="agenda-list"></div>`;
         const list = card.querySelector(".agenda-list");
         const items = activities
           .filter(activity => activity.day === day.key)
-          .sort((a, b) => minutes(a.start) - minutes(b.start));
+          .sort((a, b) => Number(b.allDay) - Number(a.allDay) || minutes(a.start) - minutes(b.start));
 
         if (!items.length) {
-          list.innerHTML = `<p class="agenda-meta">No activities yet.</p>`;
+          list.innerHTML = `<p class="agenda-meta">${t("calendar.empty")}</p>`;
         }
 
         items.forEach(activity => {
           const colors = eventColors(activity);
+          const logistics = eventLogistics(activity);
+          const agendaDetails = [activity.notes, logistics].filter(Boolean).join(" · ");
           const item = document.createElement("button");
           item.type = "button";
           item.className = "agenda-item";
           item.style.setProperty("--event-bg", colors.soft);
-          item.style.setProperty("--event-line", conflicts.has(activity.id) ? "#c93651" : colors.line);
+          item.style.setProperty("--event-line", conflicts.has(occurrenceKey(activity)) ? "#c93651" : colors.line);
           item.style.setProperty("--event-ink", colors.ink);
           item.innerHTML = `
             <span class="event-icon" aria-hidden="true">${activity.icon}</span>
             <span>
-              <span class="agenda-meta">${timeLabel(activity.start)} - ${timeLabel(activity.end)} · ${activity.child}</span>
-              <span class="agenda-title">${activity.title}</span>
-              <span class="agenda-meta">${activity.notes || (conflicts.has(activity.id) ? "Schedule conflict" : "Weekly activity")}</span>
+              <span class="agenda-meta">${activity.allDay ? t("calendar.allDay") : `${timeLabel(activity.start)} - ${timeLabel(activity.end)}`} · ${escapeHtml(displayChild(activity))}</span>
+              <span class="agenda-title">${escapeHtml(activityTitle(activity))}</span>
+              <span class="agenda-meta">${agendaDetails ? escapeHtml(agendaDetails) : (conflicts.has(occurrenceKey(activity)) ? t("calendar.conflict") : recurrenceLabel(activity))}</span>
             </span>
           `;
           item.addEventListener("click", () => openDialog(activity));
@@ -1355,25 +2638,189 @@
       });
     }
 
+    function eventTimeText(activity) {
+      return activity.allDay ? t("calendar.allDay") : `${timeLabel(activity.start)} - ${timeLabel(activity.end)}`;
+    }
+
+    function eventLogistics(activity) {
+      return [
+        activity.location ? `📍 ${activity.location}` : "",
+        activity.responsible ? `👤 ${activity.responsible}` : "",
+        activity.items ? `✓ ${activity.items}` : ""
+      ].filter(Boolean).join(" · ");
+    }
+
+    function renderToday() {
+      todayHeading.textContent = formatFullDate(selectedDate);
+      todayList.innerHTML = "";
+      const activities = occurrencesOnDate(selectedDate)
+        .sort((first, second) => Number(second.allDay) - Number(first.allDay) || minutes(first.start) - minutes(second.start));
+
+      if (!activities.length) {
+        const empty = document.createElement("p");
+        empty.className = "today-empty";
+        empty.textContent = t("calendar.empty");
+        todayList.appendChild(empty);
+        return;
+      }
+
+      activities.forEach(activity => {
+        const colors = eventColors(activity);
+        const event = document.createElement("button");
+        const logistics = eventLogistics(activity);
+        event.type = "button";
+        event.className = "today-event";
+        event.style.setProperty("--event-bg", colors.soft);
+        event.style.setProperty("--event-ink", colors.ink);
+        event.innerHTML = `
+          <span class="today-event-icon" aria-hidden="true">${activity.icon}</span>
+          <span>
+            <span class="today-event-title">${escapeHtml(activityTitle(activity))}</span>
+            <span class="today-event-meta">${escapeHtml(displayChild(activity))} · ${recurrenceLabel(activity)}</span>
+            ${logistics ? `<span class="today-event-details">${escapeHtml(logistics)}</span>` : ""}
+          </span>
+          <span class="today-event-time">${eventTimeText(activity)}</span>
+        `;
+        event.addEventListener("click", () => openDialog(activity));
+        todayList.appendChild(event);
+      });
+    }
+
+    function isSameDate(first, second) {
+      return first.getFullYear() === second.getFullYear()
+        && first.getMonth() === second.getMonth()
+        && first.getDate() === second.getDate();
+    }
+
+    function renderMonth() {
+      monthWeekdays.innerHTML = days
+        .map(day => `<div class="month-weekday">${dayLabel(day)}</div>`)
+        .join("");
+      monthGrid.innerHTML = "";
+
+      const firstDay = new Date(currentMonthStart.getFullYear(), currentMonthStart.getMonth(), 1);
+      const mondayOffset = (firstDay.getDay() + 6) % 7;
+      const gridStart = addDays(firstDay, -mondayOffset);
+      const today = new Date();
+
+      for (let index = 0; index < 42; index += 1) {
+        const date = addDays(gridStart, index);
+        const activities = occurrencesOnDate(date)
+          .sort((first, second) => Number(second.allDay) - Number(first.allDay) || minutes(first.start) - minutes(second.start));
+        const cell = document.createElement("div");
+        const outside = date.getMonth() !== currentMonthStart.getMonth();
+        cell.className = `month-day${outside ? " is-outside" : ""}${isSameDate(date, today) ? " is-today" : ""}`;
+
+        const dateButton = document.createElement("button");
+        dateButton.type = "button";
+        dateButton.className = "month-date";
+        dateButton.textContent = date.getDate();
+        dateButton.setAttribute("aria-label", formatFullDate(date));
+        dateButton.addEventListener("click", () => {
+          selectedDate = new Date(date);
+          activateCalendarView("today", true);
+        });
+        cell.appendChild(dateButton);
+
+        activities.slice(0, 3).forEach(activity => {
+          const colors = eventColors(activity);
+          const event = document.createElement("button");
+          event.type = "button";
+          event.className = "month-event";
+          event.style.setProperty("--event-bg", colors.soft);
+          event.style.setProperty("--event-line", colors.line);
+          event.style.setProperty("--event-ink", colors.ink);
+          event.textContent = `${activity.allDay ? "" : `${timeLabel(activity.start)} `}${activity.icon} ${activityTitle(activity)}`;
+          event.addEventListener("click", () => openDialog(activity));
+          cell.appendChild(event);
+        });
+
+        if (activities.length > 3) {
+          const more = document.createElement("p");
+          more.className = "month-more";
+          more.textContent = t("month.more", { count: activities.length - 3 });
+          cell.appendChild(more);
+        }
+
+        monthGrid.appendChild(cell);
+      }
+    }
+
+    function updateCalendarView() {
+      const showWeek = currentView === "week";
+      weekSchedule.hidden = !showWeek;
+      mobileAgenda.hidden = !showWeek;
+      todayView.hidden = currentView !== "today";
+      monthView.hidden = currentView !== "month";
+      document.querySelectorAll("[data-view]").forEach(button => {
+        const active = button.dataset.view === currentView;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-selected", active);
+      });
+    }
+
+    function activateCalendarView(view, preserveDate = false) {
+      currentView = ["today", "week", "month"].includes(view) ? view : "week";
+      if (currentView === "today" && !preserveDate) selectedDate = new Date();
+      if (currentView === "week") currentWeekStart = getMonday(selectedDate);
+      if (currentView === "month") currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      localStorage.setItem("kidssync.v2.view", currentView);
+      renderAll();
+    }
+
     function populateFormOptions() {
-      fields.child.innerHTML = Object.keys(kids).map(name => `<option value="${name}">${name}</option>`).join("");
-      fields.day.innerHTML = days.map(day => `<option value="${day.key}">${day.label}</option>`).join("");
+      fields.child.innerHTML = [
+        `<option value="${FAMILY_CHILD}">${t("calendar.family")}</option>`,
+        ...Object.keys(kids).map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
+      ].join("");
+    }
+
+    function updateAllDayFields() {
+      const allDay = fields.allDay.checked;
+      fields.start.disabled = allDay;
+      fields.end.disabled = allDay;
+      fields.start.required = !allDay;
+      fields.end.required = !allDay;
+      document.getElementById("startTimeField").classList.toggle("is-disabled", allDay);
+      document.getElementById("endTimeField").classList.toggle("is-disabled", allDay);
+    }
+
+    function applyEventTypeDefaults() {
+      if (fields.eventType.value === "birthday") {
+        fields.recurrence.value = "yearly";
+        fields.allDay.checked = true;
+        fields.icon.value = "🎂";
+      } else if (fields.eventType.value === "holiday") {
+        fields.child.value = FAMILY_CHILD;
+        fields.recurrence.value = "yearly";
+        fields.allDay.checked = true;
+        fields.icon.value = "🎉";
+      }
+      updateAllDayFields();
     }
 
     function openDialog(activity) {
       const isEdit = Boolean(activity);
       populateFormOptions();
-      document.getElementById("dialogTitle").textContent = isEdit ? "Edit Activity" : "Add Activity";
+      document.getElementById("dialogTitle").textContent = isEdit ? t("dialog.editTitle") : t("dialog.addTitle");
       deleteButton.style.visibility = isEdit ? "visible" : "hidden";
       fields.id.value = activity?.id || "";
-      fields.child.value = activity?.child || kidProfiles[0]?.name || "";
-      fields.day.value = activity?.day || "monday";
+      fields.child.value = activity?.child || kidProfiles[0]?.name || FAMILY_CHILD;
+      const legacyDayIndex = days.findIndex(day => day.key === activity?.day);
+      fields.date.value = activity?.startDate || activity?.occurrenceDate || (legacyDayIndex >= 0 ? dateKey(addDays(currentWeekStart, legacyDayIndex)) : defaultEventDate());
+      fields.eventType.value = activity?.eventType || "activity";
+      fields.recurrence.value = activity ? recurrenceValue(activity) : "none";
+      fields.allDay.checked = Boolean(activity?.allDay);
       fields.start.value = activity?.start || "15:00";
       fields.end.value = activity?.end || "15:30";
       fields.title.value = activity?.title || "";
       fields.icon.value = activity?.icon || "📖";
       fields.style.value = activity?.style || "child";
       fields.notes.value = activity?.notes || "";
+      fields.location.value = activity?.location || "";
+      fields.responsible.value = activity?.responsible || "";
+      fields.items.value = activity?.items || "";
+      updateAllDayFields();
       dialog.showModal();
     }
 
@@ -1386,16 +2833,16 @@
         row.dataset.originalName = kid.name;
         row.innerHTML = `
           <label>
-            Child name
-            <input class="kid-name-input" type="text" value="${escapeHtml(kid.name)}" required maxlength="28" placeholder="Child name">
+            ${t("kids.name")}
+            <input class="kid-name-input" type="text" value="${escapeHtml(kid.name)}" required maxlength="28" placeholder="${t("kids.namePlaceholder")}">
           </label>
           <label>
-            Color
+            ${t("kids.color")}
             <select class="kid-palette-select">
-              ${Object.entries(palettes).map(([key, palette]) => `<option value="${key}"${kid.palette === key ? " selected" : ""}>${palette.label}</option>`).join("")}
+              ${Object.entries(palettes).map(([key]) => `<option value="${key}"${kid.palette === key ? " selected" : ""}>${t(`color.${key}`)}</option>`).join("")}
             </select>
           </label>
-          <button class="remove-kid" type="button" aria-label="Remove ${escapeHtml(kid.name)}" ${kidDraft.length === 1 ? "disabled" : ""}>×</button>
+          <button class="remove-kid" type="button" aria-label="${t("kids.remove", { name: escapeHtml(kid.name) })}" ${kidDraft.length === 1 ? "disabled" : ""}>×</button>
         `;
         row.querySelector(".remove-kid").addEventListener("click", () => {
           kidDraft.splice(index, 1);
@@ -1416,16 +2863,87 @@
       renderAll();
     }
 
+    function renderPresetDialog() {
+      const defaultName = kidProfiles.some(kid => kid.name === "Andrew" || kid.name === "Mark")
+        ? t("presets.example")
+        : t("presets.family");
+      document.getElementById("presetName").value = `${defaultName} ${new Date().toLocaleDateString(currentLanguage === "zh" ? "zh-CN" : "en-US", { month: "short", day: "numeric" })}`;
+      savedPresetSelect.innerHTML = savedPresets.length
+        ? savedPresets.map(preset => `<option value="${preset.id}">${escapeHtml(preset.name)} · ${formatDateTime(preset.savedAt)}</option>`).join("")
+        : `<option value="">${t("presets.none")}</option>`;
+      document.getElementById("loadSavedPreset").disabled = savedPresets.length === 0;
+      document.getElementById("deleteSavedPreset").disabled = savedPresets.length === 0;
+      document.getElementById("rewindSchedule").disabled = scheduleHistory.length === 0;
+      rewindSummary.textContent = scheduleHistory.length
+        ? t("presets.last", { label: scheduleHistory[0].label, date: formatDateTime(scheduleHistory[0].savedAt) })
+        : t("presets.noHistory");
+      presetStatus.textContent = "";
+    }
+
+    function openPresetDialog() {
+      renderPresetDialog();
+      presetDialog.showModal();
+    }
+
+    function closePresetDialog() {
+      presetDialog.close();
+    }
+
+    function saveCurrentPreset() {
+      const input = document.getElementById("presetName");
+      const fallback = `${t("presets.family")} ${new Date().toLocaleDateString(currentLanguage === "zh" ? "zh-CN" : "en-US", { month: "short", day: "numeric" })}`;
+      const name = input.value.trim() || fallback;
+      savedPresets.unshift({
+        id: crypto.randomUUID(),
+        name,
+        savedAt: new Date().toISOString(),
+        snapshot: cloneSchedule()
+      });
+      savedPresets = savedPresets.slice(0, 30);
+      saveSavedPresets();
+      renderPresetDialog();
+      presetStatus.textContent = t("presets.savedStatus", { name });
+    }
+
+    function loadSelectedPreset() {
+      const preset = savedPresets.find(item => item.id === savedPresetSelect.value);
+      if (!preset) return;
+      rememberCurrentSchedule(`Before loading "${preset.name}"`);
+      applyScheduleSnapshot(preset.snapshot);
+      renderPresetDialog();
+      presetStatus.textContent = t("presets.loadedStatus", { name: preset.name });
+    }
+
+    function deleteSelectedPreset() {
+      const preset = savedPresets.find(item => item.id === savedPresetSelect.value);
+      if (!preset || !confirm(t("presets.confirmDelete", { name: preset.name }))) return;
+      savedPresets = savedPresets.filter(item => item.id !== preset.id);
+      saveSavedPresets();
+      renderPresetDialog();
+      presetStatus.textContent = t("presets.deletedStatus", { name: preset.name });
+    }
+
+    function rewindSchedule() {
+      const previous = scheduleHistory.shift();
+      if (!previous) return;
+      saveScheduleHistory();
+      applyScheduleSnapshot(previous.snapshot);
+      renderPresetDialog();
+      presetStatus.textContent = t("presets.restoredStatus", { label: previous.label });
+    }
+
     function loadAndrewMarkPreset() {
       const hasExistingSchedule = state.activities.length > 0 || kidProfiles.some(kid => !["Child 1", "Child 2"].includes(kid.name));
-      if (hasExistingSchedule && !confirm("Load the Andrew and Mark preset? This will replace the current kids and schedule.")) {
+      if (hasExistingSchedule && !confirm(t("presets.confirmExample"))) {
         return;
       }
 
+      rememberCurrentSchedule("Before Andrew and Mark preset");
       kidProfiles = andrewMarkPresetKids.map(kid => ({ ...kid }));
       kids = buildKids(kidProfiles);
       state.visibleKids = new Set(kidProfiles.map(kid => kid.name));
       state.activities = andrewMarkPresetActivities.map(activity => ({ ...activity }));
+      state.stackFront.clear();
       saveKids();
       saveActivities();
       populateFormOptions();
@@ -1439,16 +2957,49 @@
 
     function renderAll() {
       renderKidFilters();
+      updateWeekLabel();
       renderGrid();
       renderAgenda();
+      renderToday();
+      renderMonth();
+      updateCalendarView();
+    }
+
+    function navigateCalendar(direction) {
+      if (currentView === "today") {
+        selectedDate = addDays(selectedDate, direction);
+      } else if (currentView === "month") {
+        currentMonthStart = new Date(currentMonthStart.getFullYear(), currentMonthStart.getMonth() + direction, 1);
+        selectedDate = new Date(currentMonthStart);
+      } else {
+        currentWeekStart = addDays(currentWeekStart, direction * 7);
+        selectedDate = new Date(currentWeekStart);
+      }
+      renderAll();
     }
 
     document.getElementById("addActivity").addEventListener("click", () => openDialog());
     document.getElementById("loadPreset").addEventListener("click", loadAndrewMarkPreset);
+    document.getElementById("managePresets").addEventListener("click", openPresetDialog);
     document.getElementById("closeDialog").addEventListener("click", closeDialog);
     document.getElementById("cancelDialog").addEventListener("click", closeDialog);
     document.getElementById("closeKidsDialog").addEventListener("click", closeKidsDialog);
     document.getElementById("cancelKidsDialog").addEventListener("click", closeKidsDialog);
+    document.getElementById("closePresetDialog").addEventListener("click", closePresetDialog);
+    document.getElementById("donePresets").addEventListener("click", closePresetDialog);
+    document.getElementById("saveCurrentPreset").addEventListener("click", saveCurrentPreset);
+    document.getElementById("loadSavedPreset").addEventListener("click", loadSelectedPreset);
+    document.getElementById("deleteSavedPreset").addEventListener("click", deleteSelectedPreset);
+    document.getElementById("rewindSchedule").addEventListener("click", rewindSchedule);
+    document.querySelectorAll("[data-language]").forEach(button => {
+      button.addEventListener("click", () => setLanguage(button.dataset.language));
+    });
+    document.querySelectorAll("[data-view]").forEach(button => {
+      button.addEventListener("click", () => activateCalendarView(button.dataset.view));
+    });
+    fields.eventType.addEventListener("change", applyEventTypeDefaults);
+    fields.allDay.addEventListener("change", updateAllDayFields);
+    presetForm.addEventListener("submit", event => event.preventDefault());
     document.getElementById("addKidRow").addEventListener("click", () => {
       const nextNumber = kidDraft.length + 1;
       const paletteKeys = Object.keys(palettes);
@@ -1460,16 +3011,16 @@
       renderKidEditor();
     });
     document.getElementById("prevWeek").addEventListener("click", () => {
-      document.getElementById("weekLabel").textContent = "Jul 27 - Jul 31";
+      navigateCalendar(-1);
     });
     document.getElementById("nextWeek").addEventListener("click", () => {
-      document.getElementById("weekLabel").textContent = "Aug 10 - Aug 14";
+      navigateCalendar(1);
     });
 
     form.addEventListener("submit", event => {
       event.preventDefault();
-      if (minutes(fields.end.value) <= minutes(fields.start.value)) {
-        fields.end.setCustomValidity("End time must be after start time.");
+      if (!fields.allDay.checked && minutes(fields.end.value) <= minutes(fields.start.value)) {
+        fields.end.setCustomValidity(t("validation.endAfter"));
         fields.end.reportValidity();
         return;
       }
@@ -1477,13 +3028,19 @@
       const activity = {
         id: fields.id.value || crypto.randomUUID(),
         child: fields.child.value,
-        day: fields.day.value,
+        startDate: fields.date.value,
+        eventType: fields.eventType.value,
+        recurrence: fields.recurrence.value,
+        allDay: fields.allDay.checked,
         start: fields.start.value,
         end: fields.end.value,
         title: fields.title.value.trim(),
         icon: fields.icon.value,
         style: fields.style.value,
-        notes: fields.notes.value.trim()
+        notes: fields.notes.value.trim(),
+        location: fields.location.value.trim(),
+        responsible: fields.responsible.value.trim(),
+        items: fields.items.value.trim()
       };
 
       const existingIndex = state.activities.findIndex(item => item.id === activity.id);
@@ -1527,7 +3084,7 @@
       kids = buildKids(kidProfiles);
       state.activities = state.activities
         .map(activity => renamed.has(activity.child) ? { ...activity, child: renamed.get(activity.child) } : activity)
-        .filter(activity => kids[activity.child]);
+        .filter(activity => activity.child === FAMILY_CHILD || kids[activity.child]);
       state.visibleKids = new Set(kidProfiles.map(kid => kid.name));
       saveKids();
       saveActivities();
@@ -1543,6 +3100,7 @@
       renderAll();
     });
 
+    applyStaticTranslations();
     populateFormOptions();
     renderAll();
   </script>
