@@ -53,6 +53,209 @@
       cursor: pointer;
     }
 
+    [hidden] {
+      display: none !important;
+    }
+
+    .auth-screen {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px 16px;
+      background: #eef4f8;
+    }
+
+    .auth-shell {
+      width: min(460px, 100%);
+    }
+
+    .auth-brand {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .auth-logo {
+      color: #1d75cf;
+      font-size: 40px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .auth-logo span {
+      color: #329036;
+    }
+
+    .auth-panel {
+      padding: 28px;
+      border: 1px solid #cbd7e5;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 18px 46px rgba(31, 49, 86, 0.14);
+    }
+
+    .auth-panel h1 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 28px;
+      line-height: 1.15;
+    }
+
+    .auth-prompt {
+      margin: 8px 0 22px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      margin-bottom: 22px;
+      padding: 4px;
+      border: 1px solid #cbd8e8;
+      border-radius: 8px;
+      background: #f1f5f9;
+    }
+
+    .auth-tab {
+      min-height: 40px;
+      border-radius: 6px;
+      color: #52617e;
+      background: transparent;
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .auth-tab.is-active {
+      color: #fff;
+      background: #1976d2;
+      box-shadow: 0 2px 6px rgba(25, 118, 210, 0.24);
+    }
+
+    .auth-form {
+      display: grid;
+      gap: 16px;
+    }
+
+    .auth-form label {
+      display: grid;
+      gap: 7px;
+      color: #35445f;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .auth-form input {
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 12px;
+      border: 1px solid #bac8da;
+      border-radius: 7px;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+    }
+
+    .auth-form input:focus {
+      border-color: #2f7fd3;
+      box-shadow: 0 0 0 3px rgba(47, 127, 211, 0.15);
+    }
+
+    .auth-help {
+      margin: -7px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .auth-error {
+      min-height: 20px;
+      margin: 0;
+      color: #a61b33;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .auth-submit {
+      min-height: 46px;
+      border-radius: 7px;
+      color: #fff;
+      background: #1976d2;
+      font-weight: 850;
+    }
+
+    .auth-submit:disabled {
+      cursor: wait;
+      opacity: 0.7;
+    }
+
+    .account-bar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .save-status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 0 10px;
+      border: 1px solid #b9d7c1;
+      border-radius: 7px;
+      color: #246c35;
+      background: #eef8f0;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .save-status.is-error {
+      border-color: #e2a8b3;
+      color: #9b2138;
+      background: #fff1f3;
+    }
+
+    .account-identity {
+      min-width: 0;
+      text-align: right;
+    }
+
+    .account-family {
+      display: block;
+      color: #26344f;
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .account-email {
+      display: block;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .logout-btn {
+      min-height: 36px;
+      padding: 0 13px;
+      border: 1px solid #c3d2e3;
+      border-radius: 7px;
+      color: #33445f;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .logout-btn:hover {
+      border-color: #8da9c7;
+      background: #f4f8fc;
+    }
+
     .app {
       width: min(1380px, calc(100% - 32px));
       margin: 0 auto;
@@ -418,6 +621,7 @@
 
     .icon-btn {
       width: 42px;
+      flex: 0 0 42px;
       color: var(--blue);
       background: #e9f4ff;
       border: 1px solid #bdd7ef;
@@ -446,9 +650,11 @@
     }
 
     .week-label {
+      min-width: 0;
       font-size: 18px;
       font-weight: 850;
-      white-space: nowrap;
+      line-height: 1.15;
+      text-align: center;
     }
 
     .schedule-shell {
@@ -629,8 +835,8 @@
       --schedule-height: 1440px;
       --half-hour-row: 60px;
       display: grid;
-      grid-template-columns: 106px repeat(7, minmax(150px, 1fr));
-      min-width: 1180px;
+      grid-template-columns: 106px repeat(7, minmax(176px, 1fr));
+      min-width: 1338px;
     }
 
     .time-head,
@@ -653,9 +859,12 @@
 
     .day-head {
       gap: 10px;
+      padding: 8px 12px;
       border-left: 1px solid var(--line);
       font-size: 22px;
       color: #182755;
+      line-height: 1.05;
+      text-align: left;
     }
 
     .day-head.blue {
@@ -667,7 +876,13 @@
     }
 
     .day-head .weather {
+      flex: 0 0 auto;
       font-size: 30px;
+    }
+
+    .day-head-label {
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
 
     .day-head small {
@@ -1264,11 +1479,19 @@
       }
 
       .toolbar-leading {
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
       }
 
       .week-controls {
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr) 48px;
+        width: 100%;
+      }
+
+      .week-label {
+        align-self: center;
       }
 
       .primary-btn {
@@ -1345,19 +1568,102 @@
     }
 
     @media (max-width: 420px) {
+      .auth-panel {
+        padding: 22px 18px;
+      }
+
+      .account-bar {
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+
+      .save-status {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+      }
+
       .toolbar-leading {
         align-items: stretch;
-        flex-direction: column;
       }
 
       .language-switch {
         align-self: flex-start;
       }
+
+      .week-label {
+        font-size: 16px;
+      }
     }
   </style>
 </head>
 <body>
-  <main class="app">
+  <section class="auth-screen" id="authScreen" aria-labelledby="authHeading" hidden>
+    <div class="auth-shell">
+      <div class="auth-brand">
+        <div class="auth-logo" aria-label="KidsSync">Kids<span>Sync</span></div>
+        <div class="language-switch" role="group" aria-label="Language" data-i18n-aria="aria.language">
+          <button class="language-option" type="button" data-language="en" aria-pressed="true">EN</button>
+          <button class="language-option" type="button" data-language="zh" aria-pressed="false">中文</button>
+        </div>
+      </div>
+
+      <div class="auth-panel">
+        <h1 id="authHeading" data-i18n="auth.welcome">Welcome to KidsSync</h1>
+        <p class="auth-prompt" data-i18n="auth.prompt">Sign in to your family calendar.</p>
+
+        <div class="auth-tabs" role="tablist" aria-label="Account access" data-i18n-aria="auth.access">
+          <button class="auth-tab is-active" type="button" role="tab" data-auth-view="signin" aria-selected="true" data-i18n="auth.signIn">Sign In</button>
+          <button class="auth-tab" type="button" role="tab" data-auth-view="signup" aria-selected="false" data-i18n="auth.createAccount">Create Account</button>
+        </div>
+
+        <form class="auth-form" id="signInForm">
+          <label>
+            <span data-i18n="auth.email">Email</span>
+            <input id="signInEmail" type="email" autocomplete="email" required>
+          </label>
+          <label>
+            <span data-i18n="auth.password">Password</span>
+            <input id="signInPassword" type="password" autocomplete="current-password" required>
+          </label>
+          <p class="auth-error" id="signInError" role="alert"></p>
+          <button class="auth-submit" type="submit" data-i18n="auth.submitSignIn">Sign In</button>
+        </form>
+
+        <form class="auth-form" id="signUpForm" hidden>
+          <label>
+            <span data-i18n="auth.familyName">Family name</span>
+            <input id="signUpFamily" type="text" autocomplete="organization" maxlength="50" required>
+          </label>
+          <label>
+            <span data-i18n="auth.email">Email</span>
+            <input id="signUpEmail" type="email" autocomplete="email" required>
+          </label>
+          <label>
+            <span data-i18n="auth.password">Password</span>
+            <input id="signUpPassword" type="password" autocomplete="new-password" minlength="8" required>
+          </label>
+          <p class="auth-help" data-i18n="auth.passwordHelp">Use at least 8 characters.</p>
+          <label>
+            <span data-i18n="auth.confirmPassword">Confirm password</span>
+            <input id="signUpConfirm" type="password" autocomplete="new-password" minlength="8" required>
+          </label>
+          <p class="auth-error" id="signUpError" role="alert"></p>
+          <button class="auth-submit" type="submit" data-i18n="auth.submitCreate">Create Family Account</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <main class="app" id="appShell" hidden>
+    <div class="account-bar" aria-label="Family account" data-i18n-aria="auth.familyAccount">
+      <span class="save-status" id="saveStatus" role="status" data-i18n="save.saved">Saved on this device</span>
+      <div class="account-identity">
+        <span class="account-family" id="accountFamily"></span>
+        <span class="account-email" id="accountEmail"></span>
+      </div>
+      <button class="logout-btn" type="button" id="logoutButton" data-i18n="auth.logout">Log Out</button>
+    </div>
     <section class="topbar" aria-label="Family schedule overview" data-i18n-aria="aria.overview">
       <div class="brand">
         <div class="calendar-mark" aria-hidden="true">
@@ -1407,7 +1713,7 @@
           <button class="view-option" type="button" data-view="month" role="tab" aria-selected="false" data-i18n="view.month">Month</button>
         </div>
         <button class="ghost-btn" type="button" id="loadPreset" data-i18n="actions.loadExample">Load Example</button>
-        <button class="ghost-btn" type="button" id="managePresets" data-i18n="actions.presets">Presets & Rewind</button>
+        <button class="ghost-btn" type="button" id="managePresets" data-i18n="actions.presets">Presets &amp; Rewind</button>
         <button class="primary-btn" type="button" id="addActivity" data-i18n="actions.addActivity">＋ Add Event</button>
       </div>
     </section>
@@ -1576,7 +1882,7 @@
 
   <dialog id="presetDialog">
     <div class="modal-header">
-      <h2 data-i18n="presets.title">Presets & Rewind</h2>
+      <h2 data-i18n="presets.title">Presets &amp; Rewind</h2>
       <button class="close-btn" type="button" id="closePresetDialog" aria-label="Close" data-i18n-aria="aria.close">×</button>
     </div>
     <form id="presetForm">
@@ -1638,6 +1944,28 @@
         "aria.monthlySchedule": "Monthly schedule",
         "aria.familyGoals": "Family goals",
         "aria.close": "Close",
+        "auth.welcome": "Welcome to KidsSync",
+        "auth.prompt": "Sign in to your family calendar.",
+        "auth.access": "Account access",
+        "auth.signIn": "Sign In",
+        "auth.createAccount": "Create Account",
+        "auth.email": "Email",
+        "auth.password": "Password",
+        "auth.familyName": "Family name",
+        "auth.confirmPassword": "Confirm password",
+        "auth.passwordHelp": "Use at least 8 characters.",
+        "auth.submitSignIn": "Sign In",
+        "auth.submitCreate": "Create Family Account",
+        "auth.signingIn": "Signing in...",
+        "auth.creating": "Creating account...",
+        "auth.invalid": "The email or password is incorrect.",
+        "auth.exists": "An account already exists for this email.",
+        "auth.mismatch": "The passwords do not match.",
+        "auth.unavailable": "Secure login is unavailable in this browser.",
+        "auth.familyAccount": "Family account",
+        "auth.logout": "Log Out",
+        "save.saved": "Saved on this device",
+        "save.failed": "Could not save",
         "brand.ribbon": "Family Weekly Planner",
         "brand.subtitle": "A shared schedule for parents managing school, activities, homework, and family time.",
         "tips.title": "Tips",
@@ -1785,6 +2113,28 @@
         "aria.monthlySchedule": "每月安排",
         "aria.familyGoals": "家庭目标",
         "aria.close": "关闭",
+        "auth.welcome": "欢迎使用 KidsSync",
+        "auth.prompt": "登录以查看你的家庭日历。",
+        "auth.access": "账户访问",
+        "auth.signIn": "登录",
+        "auth.createAccount": "创建账户",
+        "auth.email": "电子邮箱",
+        "auth.password": "密码",
+        "auth.familyName": "家庭名称",
+        "auth.confirmPassword": "确认密码",
+        "auth.passwordHelp": "请使用至少 8 个字符。",
+        "auth.submitSignIn": "登录",
+        "auth.submitCreate": "创建家庭账户",
+        "auth.signingIn": "正在登录...",
+        "auth.creating": "正在创建账户...",
+        "auth.invalid": "电子邮箱或密码不正确。",
+        "auth.exists": "此电子邮箱已有账户。",
+        "auth.mismatch": "两次输入的密码不一致。",
+        "auth.unavailable": "此浏览器不支持安全登录。",
+        "auth.familyAccount": "家庭账户",
+        "auth.logout": "退出登录",
+        "save.saved": "已保存到此设备",
+        "save.failed": "无法保存",
         "brand.ribbon": "家庭每周计划",
         "brand.subtitle": "帮助家长共同管理上学、课外活动、作业和家庭时间。",
         "tips.title": "小贴士",
@@ -1917,7 +2267,62 @@
       }
     };
 
-    let currentLanguage = localStorage.getItem("kidssync.v2.language") === "zh" ? "zh" : "en";
+    const AUTH_ACCOUNTS_KEY = "kidssync.auth.accounts";
+    const AUTH_ACTIVE_KEY = "kidssync.auth.active";
+    const AUTH_LEGACY_CLAIMED_KEY = "kidssync.auth.legacy-claimed";
+    const LANGUAGE_STORAGE_KEY = "kidssync.ui.language";
+    const ACCOUNT_DATA_KEYS = ["kids", "activities", "presets", "history", "view", "generic-startup"];
+
+    function loadAccounts() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(AUTH_ACCOUNTS_KEY));
+        return Array.isArray(stored) ? stored : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function normalizeEmail(value) {
+      return value.trim().toLowerCase();
+    }
+
+    function accountDataKey(accountId, name) {
+      return `kidssync.account.${accountId}.${name}`;
+    }
+
+    function findActiveAccount() {
+      const activeId = localStorage.getItem(AUTH_ACTIVE_KEY);
+      const account = loadAccounts().find(item => item.id === activeId) || null;
+      if (!account && activeId) localStorage.removeItem(AUTH_ACTIVE_KEY);
+      return account;
+    }
+
+    function migrateLegacyDataToAccount(account) {
+      if (localStorage.getItem(AUTH_LEGACY_CLAIMED_KEY)) return;
+      ACCOUNT_DATA_KEYS.forEach(name => {
+        const legacyValue = localStorage.getItem(`kidssync.v2.${name}`);
+        const targetKey = accountDataKey(account.id, name);
+        if (legacyValue !== null && localStorage.getItem(targetKey) === null) {
+          localStorage.setItem(targetKey, legacyValue);
+        }
+      });
+      localStorage.setItem(AUTH_LEGACY_CLAIMED_KEY, account.id);
+    }
+
+    const activeAccount = findActiveAccount();
+
+    function scheduleStorageKey(name) {
+      return activeAccount
+        ? accountDataKey(activeAccount.id, name)
+        : `kidssync.guest.${name}`;
+    }
+
+    if (localStorage.getItem(LANGUAGE_STORAGE_KEY) === null) {
+      const legacyLanguage = localStorage.getItem("kidssync.v2.language");
+      if (legacyLanguage) localStorage.setItem(LANGUAGE_STORAGE_KEY, legacyLanguage);
+    }
+
+    let currentLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY) === "zh" ? "zh" : "en";
 
     function t(key, replacements = {}) {
       const template = translations[currentLanguage][key] || translations.en[key] || key;
@@ -1925,6 +2330,141 @@
         (result, [name, value]) => result.replaceAll(`{${name}}`, value),
         template
       );
+    }
+
+    function bytesToBase64(bytes) {
+      return btoa(String.fromCharCode(...bytes));
+    }
+
+    function base64ToBytes(value) {
+      return Uint8Array.from(atob(value), character => character.charCodeAt(0));
+    }
+
+    async function passwordHash(password, salt, iterations = 150000) {
+      if (!crypto.subtle) throw new Error("Web Crypto unavailable");
+      const material = await crypto.subtle.importKey(
+        "raw",
+        new TextEncoder().encode(password),
+        "PBKDF2",
+        false,
+        ["deriveBits"]
+      );
+      const bits = await crypto.subtle.deriveBits(
+        { name: "PBKDF2", salt, iterations, hash: "SHA-256" },
+        material,
+        256
+      );
+      return bytesToBase64(new Uint8Array(bits));
+    }
+
+    function setAuthView(view) {
+      const selectedView = view === "signup" ? "signup" : "signin";
+      document.querySelectorAll("[data-auth-view]").forEach(button => {
+        const active = button.dataset.authView === selectedView;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-selected", active);
+      });
+      document.getElementById("signInForm").hidden = selectedView !== "signin";
+      document.getElementById("signUpForm").hidden = selectedView !== "signup";
+      document.getElementById("signInError").textContent = "";
+      document.getElementById("signUpError").textContent = "";
+    }
+
+    function initializeAuthUI() {
+      const signedIn = Boolean(activeAccount);
+      document.getElementById("authScreen").hidden = signedIn;
+      document.getElementById("appShell").hidden = !signedIn;
+      if (activeAccount) {
+        document.getElementById("accountFamily").textContent = activeAccount.familyName;
+        document.getElementById("accountEmail").textContent = activeAccount.email;
+      }
+    }
+
+    async function handleSignIn(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const submit = form.querySelector("button[type='submit']");
+      const error = document.getElementById("signInError");
+      const email = normalizeEmail(document.getElementById("signInEmail").value);
+      const password = document.getElementById("signInPassword").value;
+      error.textContent = "";
+      submit.disabled = true;
+      submit.textContent = t("auth.signingIn");
+
+      try {
+        const account = loadAccounts().find(item => item.email === email);
+        if (!account) {
+          error.textContent = t("auth.invalid");
+          return;
+        }
+        const hash = await passwordHash(password, base64ToBytes(account.salt), account.iterations);
+        if (hash !== account.passwordHash) {
+          error.textContent = t("auth.invalid");
+          return;
+        }
+        localStorage.setItem(AUTH_ACTIVE_KEY, account.id);
+        location.reload();
+      } catch {
+        error.textContent = t("auth.unavailable");
+      } finally {
+        submit.disabled = false;
+        submit.textContent = t("auth.submitSignIn");
+      }
+    }
+
+    async function handleSignUp(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const submit = form.querySelector("button[type='submit']");
+      const error = document.getElementById("signUpError");
+      const familyName = document.getElementById("signUpFamily").value.trim();
+      const email = normalizeEmail(document.getElementById("signUpEmail").value);
+      const password = document.getElementById("signUpPassword").value;
+      const confirmation = document.getElementById("signUpConfirm").value;
+      error.textContent = "";
+
+      if (password !== confirmation) {
+        error.textContent = t("auth.mismatch");
+        return;
+      }
+
+      const accounts = loadAccounts();
+      if (accounts.some(account => account.email === email)) {
+        error.textContent = t("auth.exists");
+        return;
+      }
+
+      submit.disabled = true;
+      submit.textContent = t("auth.creating");
+      try {
+        if (!crypto.subtle) throw new Error("Web Crypto unavailable");
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const iterations = 150000;
+        const account = {
+          id: crypto.randomUUID(),
+          email,
+          familyName,
+          salt: bytesToBase64(salt),
+          iterations,
+          passwordHash: await passwordHash(password, salt, iterations),
+          createdAt: new Date().toISOString()
+        };
+        accounts.push(account);
+        localStorage.setItem(AUTH_ACCOUNTS_KEY, JSON.stringify(accounts));
+        migrateLegacyDataToAccount(account);
+        localStorage.setItem(AUTH_ACTIVE_KEY, account.id);
+        location.reload();
+      } catch {
+        error.textContent = t("auth.unavailable");
+      } finally {
+        submit.disabled = false;
+        submit.textContent = t("auth.submitCreate");
+      }
+    }
+
+    function logOut() {
+      localStorage.removeItem(AUTH_ACTIVE_KEY);
+      location.reload();
     }
 
     const days = [
@@ -1978,12 +2518,13 @@
     ];
 
     function migrateUntouchedExampleStartup() {
-      const migrationKey = "kidssync.v2.generic-startup";
+      if (!activeAccount) return;
+      const migrationKey = scheduleStorageKey("generic-startup");
       if (localStorage.getItem(migrationKey)) return;
 
       try {
-        const storedKids = JSON.parse(localStorage.getItem("kidssync.v2.kids"));
-        const storedActivities = JSON.parse(localStorage.getItem("kidssync.v2.activities"));
+        const storedKids = JSON.parse(localStorage.getItem(scheduleStorageKey("kids")));
+        const storedActivities = JSON.parse(localStorage.getItem(scheduleStorageKey("activities")));
         const exactKids = Array.isArray(storedKids)
           && storedKids.length === andrewMarkPresetKids.length
           && storedKids.every((kid, index) => Object.keys(andrewMarkPresetKids[index]).every(key => kid[key] === andrewMarkPresetKids[index][key]));
@@ -1995,8 +2536,8 @@
           });
 
         if (exactKids && exactActivities) {
-          localStorage.removeItem("kidssync.v2.kids");
-          localStorage.removeItem("kidssync.v2.activities");
+          localStorage.removeItem(scheduleStorageKey("kids"));
+          localStorage.removeItem(scheduleStorageKey("activities"));
         }
       } catch {
       }
@@ -2014,8 +2555,8 @@
     let selectedDate = new Date();
     let currentWeekStart = getMonday(selectedDate);
     let currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-    let currentView = ["today", "week", "month"].includes(localStorage.getItem("kidssync.v2.view"))
-      ? localStorage.getItem("kidssync.v2.view")
+    let currentView = ["today", "week", "month"].includes(localStorage.getItem(scheduleStorageKey("view")))
+      ? localStorage.getItem(scheduleStorageKey("view"))
       : "week";
 
     const state = {
@@ -2084,7 +2625,7 @@
 
     function setLanguage(language) {
       currentLanguage = language === "zh" ? "zh" : "en";
-      localStorage.setItem("kidssync.v2.language", currentLanguage);
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, currentLanguage);
       applyStaticTranslations();
       populateFormOptions();
       renderAll();
@@ -2106,20 +2647,40 @@
       }, {});
     }
 
+    function updateSaveStatus(saved) {
+      const status = document.getElementById("saveStatus");
+      if (!status) return;
+      status.textContent = t(saved ? "save.saved" : "save.failed");
+      status.classList.toggle("is-error", !saved);
+    }
+
+    function persistScheduleData(name, value) {
+      try {
+        const storedValue = typeof value === "string" ? value : JSON.stringify(value);
+        localStorage.setItem(scheduleStorageKey(name), storedValue);
+        updateSaveStatus(true);
+        return true;
+      } catch {
+        updateSaveStatus(false);
+        return false;
+      }
+    }
+
     function loadKids() {
       try {
-        const stored = JSON.parse(localStorage.getItem("kidssync.v2.kids"));
+        const stored = JSON.parse(localStorage.getItem(scheduleStorageKey("kids")));
         if (Array.isArray(stored) && stored.length) {
-          return stored.filter(kid => kid.name && palettes[kid.palette]);
+          const validKids = stored.filter(kid => kid.name && palettes[kid.palette]);
+          if (validKids.length) return validKids;
         }
       } catch {
       }
-      return defaultKids;
+      return defaultKids.map(kid => ({ ...kid }));
     }
 
     function loadActivities() {
       try {
-        const stored = JSON.parse(localStorage.getItem("kidssync.v2.activities"));
+        const stored = JSON.parse(localStorage.getItem(scheduleStorageKey("activities")));
         return Array.isArray(stored) ? stored : [];
       } catch {
         return [];
@@ -2127,16 +2688,16 @@
     }
 
     function saveActivities() {
-      localStorage.setItem("kidssync.v2.activities", JSON.stringify(state.activities));
+      return persistScheduleData("activities", state.activities);
     }
 
     function saveKids() {
-      localStorage.setItem("kidssync.v2.kids", JSON.stringify(kidProfiles));
+      return persistScheduleData("kids", kidProfiles);
     }
 
     function loadSavedPresets() {
       try {
-        const stored = JSON.parse(localStorage.getItem("kidssync.v2.presets"));
+        const stored = JSON.parse(localStorage.getItem(scheduleStorageKey("presets")));
         return Array.isArray(stored) ? stored : [];
       } catch {
         return [];
@@ -2144,12 +2705,12 @@
     }
 
     function saveSavedPresets() {
-      localStorage.setItem("kidssync.v2.presets", JSON.stringify(savedPresets));
+      return persistScheduleData("presets", savedPresets);
     }
 
     function loadScheduleHistory() {
       try {
-        const stored = JSON.parse(localStorage.getItem("kidssync.v2.history"));
+        const stored = JSON.parse(localStorage.getItem(scheduleStorageKey("history")));
         return Array.isArray(stored) ? stored : [];
       } catch {
         return [];
@@ -2157,7 +2718,7 @@
     }
 
     function saveScheduleHistory() {
-      localStorage.setItem("kidssync.v2.history", JSON.stringify(scheduleHistory.slice(0, 20)));
+      return persistScheduleData("history", scheduleHistory.slice(0, 20));
     }
 
     function cloneSchedule() {
@@ -2179,6 +2740,7 @@
       saveActivities();
       populateFormOptions();
       renderAll();
+      requestAnimationFrame(scrollWeekToFirstActivity);
     }
 
     function rememberCurrentSchedule(label) {
@@ -2457,7 +3019,7 @@
         button.className = `kid-toggle${state.visibleKids.has(name) ? "" : " is-off"}`;
         button.setAttribute("aria-pressed", state.visibleKids.has(name));
         button.style.setProperty("--kid-color", kid.color);
-        button.innerHTML = `<span class="kid-icon" aria-hidden="true"></span><span>${name}</span>`;
+        button.innerHTML = `<span class="kid-icon" aria-hidden="true"></span><span>${escapeHtml(name)}</span>`;
         button.addEventListener("click", () => {
           if (state.visibleKids.has(name) && state.visibleKids.size > 1) {
             state.visibleKids.delete(name);
@@ -2485,7 +3047,7 @@
         const date = addDays(currentWeekStart, days.findIndex(item => item.key === day.key));
         const head = document.createElement("div");
         head.className = `day-head ${day.theme}`;
-        head.innerHTML = `<span class="weather" aria-hidden="true">${day.weather}</span><span>${dayLabel(day)}<small>${formatShortDate(date)}</small></span>`;
+        head.innerHTML = `<span class="weather" aria-hidden="true">${day.weather}</span><span class="day-head-label">${dayLabel(day)}<small>${formatShortDate(date)}</small></span>`;
         grid.appendChild(head);
       });
 
@@ -2764,7 +3326,7 @@
       if (currentView === "today" && !preserveDate) selectedDate = new Date();
       if (currentView === "week") currentWeekStart = getMonday(selectedDate);
       if (currentView === "month") currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-      localStorage.setItem("kidssync.v2.view", currentView);
+      persistScheduleData("view", currentView);
       renderAll();
     }
 
@@ -2939,15 +3501,29 @@
       }
 
       rememberCurrentSchedule("Before Andrew and Mark preset");
+      selectedDate = new Date();
+      currentWeekStart = getMonday(selectedDate);
       kidProfiles = andrewMarkPresetKids.map(kid => ({ ...kid }));
       kids = buildKids(kidProfiles);
       state.visibleKids = new Set(kidProfiles.map(kid => kid.name));
-      state.activities = andrewMarkPresetActivities.map(activity => ({ ...activity }));
+      state.activities = andrewMarkPresetActivities.map(activity => {
+        const dayIndex = days.findIndex(day => day.key === activity.day);
+        return {
+          ...activity,
+          startDate: dateKey(addDays(currentWeekStart, Math.max(dayIndex, 0))),
+          recurrence: "weekly",
+          eventType: "activity",
+          allDay: false
+        };
+      });
       state.stackFront.clear();
+      currentView = "week";
+      persistScheduleData("view", currentView);
       saveKids();
       saveActivities();
       populateFormOptions();
       renderAll();
+      requestAnimationFrame(scrollWeekToFirstActivity);
     }
 
     function closeDialog() {
@@ -2965,6 +3541,20 @@
       updateCalendarView();
     }
 
+    function scrollWeekToFirstActivity() {
+      if (currentView !== "week" || window.matchMedia("(max-width: 740px)").matches) return;
+      const timedActivities = visibleActivities().filter(activity => !activity.allDay && activity.start);
+      if (!timedActivities.length) return;
+      const firstStart = Math.min(...timedActivities.map(activity => minutes(activity.start)));
+      const timeline = grid.querySelector(".time-column");
+      const headerHeight = (grid.querySelector(".time-head")?.offsetHeight || 70)
+        + (grid.querySelector(".all-day-head")?.offsetHeight || 52);
+      const timelineHeight = timeline?.offsetHeight || 1440;
+      const focusMinute = Math.max(firstStart - 30, scheduleStartMinutes);
+      const top = headerHeight + ((focusMinute - scheduleStartMinutes) / scheduleDurationMinutes) * timelineHeight;
+      weekSchedule.scrollTo({ top, left: weekSchedule.scrollLeft, behavior: "smooth" });
+    }
+
     function navigateCalendar(direction) {
       if (currentView === "today") {
         selectedDate = addDays(selectedDate, direction);
@@ -2978,6 +3568,12 @@
       renderAll();
     }
 
+    document.querySelectorAll("[data-auth-view]").forEach(button => {
+      button.addEventListener("click", () => setAuthView(button.dataset.authView));
+    });
+    document.getElementById("signInForm").addEventListener("submit", handleSignIn);
+    document.getElementById("signUpForm").addEventListener("submit", handleSignUp);
+    document.getElementById("logoutButton").addEventListener("click", logOut);
     document.getElementById("addActivity").addEventListener("click", () => openDialog());
     document.getElementById("loadPreset").addEventListener("click", loadAndrewMarkPreset);
     document.getElementById("managePresets").addEventListener("click", openPresetDialog);
@@ -3101,6 +3697,7 @@
     });
 
     applyStaticTranslations();
+    initializeAuthUI();
     populateFormOptions();
     renderAll();
   </script>
