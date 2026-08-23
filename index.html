@@ -171,12 +171,31 @@
       line-height: 1.4;
     }
 
+    .auth-cloud-note {
+      margin: 16px 0 0;
+      padding-top: 14px;
+      border-top: 1px solid #e1e8f0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .auth-cloud-note.is-error {
+      color: #8f2f42;
+    }
+
     .auth-error {
       min-height: 20px;
       margin: 0;
       color: #a61b33;
       font-size: 13px;
       font-weight: 750;
+    }
+
+    .auth-error.is-success {
+      color: #24713a;
     }
 
     .auth-submit {
@@ -190,6 +209,22 @@
     .auth-submit:disabled {
       cursor: wait;
       opacity: 0.7;
+    }
+
+    .auth-preview-btn {
+      width: 100%;
+      min-height: 44px;
+      margin-top: 14px;
+      border: 1px solid #bed8ef;
+      border-radius: 7px;
+      color: #1f477f;
+      background: #eef5ff;
+      font-weight: 850;
+    }
+
+    .auth-preview-btn:hover {
+      border-color: #8eb9df;
+      background: #e4f0ff;
     }
 
     .account-bar {
@@ -219,6 +254,13 @@
       background: #fff1f3;
     }
 
+    .save-status.is-syncing,
+    .save-status.is-offline {
+      border-color: #e0c474;
+      color: #6b4b08;
+      background: #fff8df;
+    }
+
     .account-identity {
       min-width: 0;
       text-align: right;
@@ -240,7 +282,9 @@
       white-space: nowrap;
     }
 
-    .logout-btn {
+    .settings-btn,
+    .logout-btn,
+    .auth-entry-btn {
       min-height: 36px;
       padding: 0 13px;
       border: 1px solid #c3d2e3;
@@ -251,9 +295,32 @@
       font-weight: 800;
     }
 
+    .settings-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .settings-btn span[aria-hidden="true"] {
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .settings-btn:hover,
     .logout-btn:hover {
       border-color: #8da9c7;
       background: #f4f8fc;
+    }
+
+    .auth-entry-btn {
+      border-color: #1976d2;
+      color: #fff;
+      background: #1976d2;
+    }
+
+    .auth-entry-btn:hover {
+      border-color: #125fa9;
+      background: #125fa9;
     }
 
     .app {
@@ -608,6 +675,131 @@
       flex-wrap: wrap;
     }
 
+    .schedule-overview {
+      display: grid;
+      grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+      align-items: center;
+      gap: 18px;
+      margin: 0 0 14px;
+      padding: 10px 0;
+      border-top: 1px solid var(--soft-line);
+      border-bottom: 1px solid var(--soft-line);
+    }
+
+    .calendar-search {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 32px minmax(0, 1fr) 32px;
+      align-items: center;
+      gap: 2px;
+      padding: 0 5px;
+      border: 1px solid #c3d2e3;
+      border-radius: 8px;
+      color: var(--muted);
+      background: #fff;
+    }
+
+    .calendar-search:focus-within {
+      border-color: #1976d2;
+      box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
+    }
+
+    .calendar-search-icon {
+      font-size: 17px;
+      text-align: center;
+    }
+
+    .calendar-search input {
+      min-width: 0;
+      height: 40px;
+      padding: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .clear-search {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      color: var(--muted);
+      background: transparent;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .clear-search:hover {
+      color: #1f477f;
+      background: #eef5ff;
+    }
+
+    .overview-stats {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: max-content max-content minmax(0, 1fr);
+      align-items: center;
+      justify-content: end;
+    }
+
+    .overview-stat,
+    .conflict-summary,
+    .overview-next {
+      min-width: 0;
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 14px;
+      border-left: 1px solid var(--soft-line);
+      color: #35445f;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: left;
+    }
+
+    .overview-stat strong,
+    .conflict-summary strong {
+      color: #182755;
+      font-size: 17px;
+    }
+
+    .conflict-summary:not(:disabled) {
+      color: #a61b33;
+      cursor: pointer;
+    }
+
+    .conflict-summary:not(:disabled) strong {
+      color: #c93651;
+    }
+
+    .conflict-summary:not(:disabled):hover {
+      background: #fff1f3;
+    }
+
+    .conflict-summary:disabled {
+      cursor: default;
+    }
+
+    .overview-next {
+      overflow: hidden;
+    }
+
+    .overview-next strong {
+      overflow: hidden;
+      color: #1f477f;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .event.conflict-focus,
+    .agenda-item.conflict-focus {
+      outline: 4px solid rgba(25, 118, 210, 0.38);
+      outline-offset: 3px;
+    }
+
     .icon-btn,
     .primary-btn,
     .ghost-btn,
@@ -673,6 +865,41 @@
       display: none !important;
     }
 
+    .calendar-empty-state {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      margin: 0 0 14px;
+      padding: 18px 20px;
+      border: 1px solid #bdd7ef;
+      border-radius: 8px;
+      background: #eef6ff;
+      box-shadow: 0 8px 22px rgba(31, 49, 86, 0.08);
+    }
+
+    .calendar-empty-state h2 {
+      margin: 0;
+      color: #182755;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+
+    .calendar-empty-state p {
+      margin: 6px 0 0;
+      color: #52617e;
+      font-size: 14px;
+      font-weight: 750;
+      line-height: 1.35;
+    }
+
+    .empty-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
     .today-view {
       border-top: 1px solid var(--line);
       border-bottom: 1px solid var(--line);
@@ -693,29 +920,47 @@
 
     .today-list {
       display: grid;
+      gap: 0;
+    }
+
+    .today-section {
+      display: grid;
+      border-bottom: 1px solid var(--soft-line);
+    }
+
+    .today-section:last-child {
+      border-bottom: 0;
+    }
+
+    .today-section-title {
+      margin: 0;
+      padding: 13px 18px 7px;
+      color: #52617e;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
     .today-event,
     .today-empty {
-      min-height: 70px;
+      min-height: 74px;
       display: grid;
       grid-template-columns: 54px minmax(0, 1fr) auto;
       align-items: center;
       gap: 12px;
-      padding: 13px 18px;
-      border-bottom: 1px solid var(--soft-line);
+      margin: 0 12px 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--event-line, var(--soft-line));
+      border-radius: 8px;
       color: var(--event-ink, var(--ink));
-      background: linear-gradient(to right, var(--event-bg, #fff) 0 7px, #fff 7px 100%);
+      background: linear-gradient(to right, var(--event-line, var(--line)) 0 6px, var(--event-bg, #fff) 6px 100%);
+      box-shadow: 0 8px 18px rgba(41, 70, 110, 0.08);
       text-align: left;
     }
 
-    .today-event:last-child {
-      border-bottom: 0;
-    }
-
-    .today-event-icon {
-      font-size: 32px;
-      text-align: center;
+    .today-event.is-next {
+      outline: 3px solid rgba(25, 118, 210, 0.16);
     }
 
     .today-event-title {
@@ -724,26 +969,42 @@
       font-weight: 900;
     }
 
+    .today-badge,
     .today-event-meta,
     .today-event-details {
       display: block;
       margin-top: 3px;
-      color: #52617e;
+      color: var(--event-ink, #52617e);
       font-size: 13px;
       font-weight: 700;
+      opacity: 0.82;
     }
 
-    .today-event-time {
-      color: #1f477f;
-      font-size: 14px;
+    .today-badge {
+      width: max-content;
+      margin: 0 0 4px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      font-size: 11px;
       font-weight: 900;
-      white-space: nowrap;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      opacity: 1;
     }
 
     .today-empty {
       grid-template-columns: 1fr;
       color: var(--muted);
       font-weight: 750;
+      background: #fff;
+    }
+
+    .today-empty-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
     }
 
     .month-view {
@@ -837,8 +1098,8 @@
       --schedule-height: 1440px;
       --half-hour-row: 60px;
       display: grid;
-      grid-template-columns: 106px repeat(7, minmax(176px, 1fr));
-      min-width: 1338px;
+      grid-template-columns: 106px repeat(7, minmax(196px, 1fr));
+      min-width: 1478px;
     }
 
     .time-head,
@@ -860,10 +1121,10 @@
     }
 
     .day-head {
-      gap: 10px;
-      padding: 8px 12px;
+      gap: 8px;
+      padding: 8px 10px;
       border-left: 1px solid var(--line);
-      font-size: 22px;
+      font-size: 18px;
       color: #182755;
       line-height: 1.05;
       text-align: left;
@@ -879,12 +1140,12 @@
 
     .day-head .weather {
       flex: 0 0 auto;
-      font-size: 30px;
+      font-size: 26px;
     }
 
     .day-head-label {
       min-width: 0;
-      overflow-wrap: anywhere;
+      white-space: nowrap;
     }
 
     .day-head small {
@@ -986,6 +1247,13 @@
       text-align: center;
     }
 
+    .event-card-copy {
+      min-width: 0;
+      display: grid;
+      gap: 3px;
+      text-align: left;
+    }
+
     .event:hover {
       outline: 3px solid rgba(25, 118, 210, 0.18);
     }
@@ -1004,23 +1272,48 @@
 
     .event-title {
       display: block;
-      margin-top: 6px;
       font-size: 18px;
       line-height: 1.08;
       font-weight: 900;
       overflow-wrap: break-word;
     }
 
-    .event-child {
+    .event-child,
+    .event-detail,
+    .event-badge {
       display: block;
-      margin-top: 3px;
       font-size: 14px;
       line-height: 1.1;
       font-weight: 800;
     }
 
-    .event.conflict {
+    .event-detail {
+      opacity: 0.78;
+    }
+
+    .event-badge {
+      width: max-content;
+      padding: 2px 6px;
+      border-radius: 999px;
+      color: #fff;
+      background: #1976d2;
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .event-badge.is-conflict {
+      background: #c93651;
+    }
+
+    .event.conflict,
+    .today-event.conflict {
       box-shadow: inset 0 0 0 3px rgba(198, 54, 81, 0.42), 0 8px 18px rgba(41, 70, 110, 0.12);
+    }
+
+    .month-event.conflict {
+      border-left-color: #c93651;
+      box-shadow: inset 0 0 0 1px rgba(198, 54, 81, 0.35);
     }
 
     .event.small {
@@ -1035,13 +1328,12 @@
     }
 
     .event.small .event-title {
-      margin-top: 1px;
       font-size: 13px;
     }
 
     .event.small .event-child,
+    .event.small .event-detail,
     .event.small .event-time {
-      margin-top: 1px;
       font-size: 12px;
       line-height: 1;
     }
@@ -1064,6 +1356,21 @@
 
     .event.narrow .event-title {
       font-size: 15px;
+    }
+
+    .event.narrow .event-detail,
+    .event.narrow .event-child {
+      display: none;
+    }
+
+    .today-event .event-icon {
+      font-size: 32px;
+      text-align: center;
+    }
+
+    .today-event .event-time {
+      color: #1f477f;
+      font-size: 14px;
     }
 
     .event.overlap-offset {
@@ -1224,10 +1531,10 @@
       background: var(--event-bg);
       color: var(--event-ink);
       padding: 10px;
+      text-align: left;
     }
 
     .agenda-title {
-      margin: 2px 0;
       font-weight: 900;
     }
 
@@ -1285,6 +1592,16 @@
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 14px;
+    }
+
+    .custom-icon-field {
+      grid-column: 1 / -1;
+    }
+
+    .field-help {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
     }
 
     label {
@@ -1385,6 +1702,354 @@
       font-weight: 750;
     }
 
+    .settings-dialog {
+      width: min(620px, calc(100% - 24px));
+    }
+
+    .settings-form {
+      gap: 0;
+      padding: 0;
+    }
+
+    .settings-group {
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .settings-group h3 {
+      margin: 14px 0 6px;
+      color: #144876;
+      font-size: 15px;
+    }
+
+    .setting-row {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--soft-line);
+      color: #26334f;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .setting-row:last-child {
+      border-bottom: 0;
+    }
+
+    .setting-row select {
+      width: min(220px, 48%);
+    }
+
+    .setting-toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex: 0 0 auto;
+      margin: 0;
+      padding: 0;
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      background: #9aa8ba;
+      cursor: pointer;
+      transition: background 160ms ease;
+    }
+
+    .setting-toggle::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(22, 34, 52, 0.25);
+      transition: transform 160ms ease;
+    }
+
+    .setting-toggle:checked {
+      background: #1976d2;
+    }
+
+    .setting-toggle:checked::after {
+      transform: translateX(20px);
+    }
+
+    .setting-toggle:focus-visible {
+      outline: 3px solid rgba(25, 118, 210, 0.3);
+      outline-offset: 2px;
+    }
+
+    .setting-toggle:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .notification-status {
+      min-height: 20px;
+      margin: 8px 0 12px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .notification-status.is-error {
+      color: #a61b33;
+    }
+
+    .cloud-sync-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 58px;
+      padding: 10px 0;
+    }
+
+    .cloud-sync-copy {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .cloud-sync-action {
+      flex: 0 0 auto;
+    }
+
+    .cloud-sync-action:disabled {
+      cursor: wait;
+      opacity: 0.65;
+    }
+
+    .settings-actions {
+      display: flex;
+      justify-content: flex-end;
+      padding: 16px 20px 20px;
+    }
+
+    html.reduce-motion *,
+    html.reduce-motion *::before,
+    html.reduce-motion *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+
+    html.dark-mode {
+      color-scheme: dark;
+      --ink: #edf3fb;
+      --muted: #aab7ca;
+      --line: #3b4a5e;
+      --soft-line: #2d3949;
+      --page: #111820;
+      --panel: #1a2430;
+      --shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
+    }
+
+    html.dark-mode body {
+      background: #111820;
+    }
+
+    html.dark-mode .auth-screen {
+      background: #111820;
+    }
+
+    html.dark-mode .auth-panel {
+      border-color: #3b4a5e;
+      background: #1a2430;
+      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.28);
+    }
+
+    html.dark-mode .auth-tabs {
+      border-color: #506079;
+      background: #202c3a;
+    }
+
+    html.dark-mode .auth-tab,
+    html.dark-mode .auth-form label {
+      color: #bac7d8;
+    }
+
+    html.dark-mode .auth-tab.is-active {
+      color: #fff;
+      background: #287fcf;
+    }
+
+    html.dark-mode .panel,
+    html.dark-mode .toolbar,
+    html.dark-mode .schedule-shell,
+    html.dark-mode .today-view,
+    html.dark-mode .month-view,
+    html.dark-mode .goal,
+    html.dark-mode .day-card,
+    html.dark-mode dialog {
+      color: var(--ink);
+      background: var(--panel);
+    }
+
+    html.dark-mode .brand-subtitle,
+    html.dark-mode .tip-panel li,
+    html.dark-mode .note-panel p,
+    html.dark-mode .goal p,
+    html.dark-mode .week-label,
+    html.dark-mode .account-family,
+    html.dark-mode label,
+    html.dark-mode .setting-row {
+      color: var(--ink);
+    }
+
+    html.dark-mode .settings-btn,
+    html.dark-mode .logout-btn,
+    html.dark-mode .auth-preview-btn,
+    html.dark-mode .close-btn,
+    html.dark-mode .small-btn,
+    html.dark-mode input,
+    html.dark-mode select,
+    html.dark-mode textarea {
+      border-color: #506079;
+      color: var(--ink);
+      background: #202c3a;
+    }
+
+    html.dark-mode .auth-entry-btn {
+      border-color: #4a9af0;
+      color: #fff;
+      background: #287fcf;
+    }
+
+    html.dark-mode .calendar-search {
+      border-color: #506079;
+      background: #202c3a;
+    }
+
+    html.dark-mode .calendar-search input {
+      color: var(--ink);
+      background: transparent;
+    }
+
+    html.dark-mode .overview-stat,
+    html.dark-mode .conflict-summary,
+    html.dark-mode .overview-next {
+      color: var(--ink);
+    }
+
+    html.dark-mode .overview-stat strong,
+    html.dark-mode .conflict-summary strong,
+    html.dark-mode .overview-next strong {
+      color: #b8dbff;
+    }
+
+    html.dark-mode .conflict-summary:not(:disabled):hover {
+      background: #3a2028;
+    }
+
+    html.dark-mode .setting-toggle {
+      border: 0;
+      background: #66758a;
+    }
+
+    html.dark-mode .setting-toggle:checked {
+      background: #4a9af0;
+    }
+
+    html.dark-mode .icon-btn,
+    html.dark-mode .ghost-btn {
+      border-color: #506079;
+      color: #b8dbff;
+      background: #223247;
+    }
+
+    html.dark-mode .danger-btn,
+    html.dark-mode .remove-kid {
+      border-color: #794958;
+      color: #ffc0ca;
+      background: #3a2028;
+    }
+
+    html.dark-mode .notification-status.is-error {
+      color: #ffc0ca;
+    }
+
+    html.dark-mode .language-switch,
+    html.dark-mode .view-switch {
+      border-color: #506079;
+      background: #202c3a;
+    }
+
+    html.dark-mode .language-option,
+    html.dark-mode .view-option {
+      color: #bac7d8;
+    }
+
+    html.dark-mode .language-option.is-active,
+    html.dark-mode .view-option.is-active {
+      color: #fff;
+    }
+
+    html.dark-mode .day-head.blue,
+    html.dark-mode .day-head.green,
+    html.dark-mode .all-day-head,
+    html.dark-mode .all-day-cell,
+    html.dark-mode .day-card h2,
+    html.dark-mode .month-weekday,
+    html.dark-mode .view-heading,
+    html.dark-mode .check-field,
+    html.dark-mode .preset-section {
+      color: var(--ink);
+      background: #202c3a;
+    }
+
+    html.dark-mode .time-column,
+    html.dark-mode .month-day {
+      color: var(--ink);
+      background: #18222e;
+    }
+
+    html.dark-mode .day-column {
+      background:
+        repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--half-hour-row) - 1px), var(--soft-line) var(--half-hour-row)),
+        #18222e;
+    }
+
+    html.dark-mode .time-label,
+    html.dark-mode .month-date,
+    html.dark-mode .settings-group h3,
+    html.dark-mode .preset-section h3 {
+      color: #dceaff;
+    }
+
+    html.dark-mode .save-status {
+      border-color: #416f50;
+      color: #aee3ba;
+      background: #1b3324;
+    }
+
+    html.dark-mode .save-status.is-error {
+      border-color: #794958;
+      color: #ffc0ca;
+      background: #3a2028;
+    }
+
+    html.dark-mode .save-status.is-syncing,
+    html.dark-mode .save-status.is-offline {
+      border-color: #756633;
+      color: #f3d986;
+      background: #342f1e;
+    }
+
+    html.dark-mode .calendar-empty-state,
+    html.dark-mode .today-empty {
+      border-color: #506079;
+      background: #202c3a;
+    }
+
     .kid-editor-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 140px 40px;
@@ -1409,6 +2074,11 @@
       gap: 10px;
     }
 
+    .left-actions {
+      display: flex;
+      gap: 10px;
+    }
+
     @media (max-width: 1100px) {
       .topbar {
         grid-template-columns: minmax(0, 1fr) 260px;
@@ -1421,6 +2091,14 @@
 
       .schedule-shell {
         overflow-x: auto;
+      }
+
+      .schedule-overview {
+        grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+      }
+
+      .overview-next {
+        display: none;
       }
 
       .goals {
@@ -1502,6 +2180,40 @@
         grid-template-columns: 1fr;
       }
 
+      .schedule-overview {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .overview-stats {
+        grid-template-columns: max-content max-content minmax(0, 1fr);
+        justify-content: stretch;
+      }
+
+      .overview-stat,
+      .conflict-summary,
+      .overview-next {
+        padding: 0 10px;
+      }
+
+      .overview-stat:first-child {
+        border-left: 0;
+      }
+
+      .overview-next {
+        display: inline-flex;
+      }
+
+      .calendar-empty-state {
+        grid-template-columns: 1fr;
+      }
+
+      .empty-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        justify-content: stretch;
+      }
+
       .view-switch {
         width: 100%;
       }
@@ -1534,10 +2246,6 @@
         grid-template-columns: 42px minmax(0, 1fr);
       }
 
-      .today-event-time {
-        grid-column: 2;
-      }
-
       .form-actions {
         flex-direction: column-reverse;
       }
@@ -1555,6 +2263,11 @@
       }
 
       .right-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .left-actions {
         display: grid;
         grid-template-columns: 1fr 1fr;
       }
@@ -1580,6 +2293,29 @@
         order: 3;
         width: 100%;
         justify-content: center;
+      }
+
+      .overview-stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .overview-stat,
+      .conflict-summary {
+        justify-content: center;
+      }
+
+      .overview-next {
+        display: none;
+      }
+
+      .settings-btn {
+        width: 36px;
+        padding: 0;
+        justify-content: center;
+      }
+
+      .settings-btn span:last-child {
+        display: none;
       }
 
       .toolbar-leading {
@@ -1650,6 +2386,9 @@
           <p class="auth-error" id="signUpError" role="alert"></p>
           <button class="auth-submit" type="submit" data-i18n="auth.submitCreate">Create Family Account</button>
         </form>
+
+        <button class="auth-preview-btn" type="button" id="continuePreview" data-i18n="auth.continuePreview">Continue without signing in</button>
+        <p class="auth-cloud-note" id="authCloudNote" role="status"></p>
       </div>
     </div>
   </section>
@@ -1661,6 +2400,11 @@
         <span class="account-family" id="accountFamily"></span>
         <span class="account-email" id="accountEmail"></span>
       </div>
+      <button class="settings-btn" type="button" id="openSettings">
+        <span aria-hidden="true">⚙</span>
+        <span data-i18n="settings.open">Settings</span>
+      </button>
+      <button class="auth-entry-btn" type="button" id="guestAuthButton" data-i18n="auth.signIn">Sign In</button>
       <button class="logout-btn" type="button" id="logoutButton" data-i18n="auth.logout">Log Out</button>
     </div>
     <section class="topbar" aria-label="Family schedule overview" data-i18n-aria="aria.overview">
@@ -1714,6 +2458,31 @@
         <button class="ghost-btn" type="button" id="loadPreset" data-i18n="actions.loadExample">Load Example</button>
         <button class="ghost-btn" type="button" id="managePresets" data-i18n="actions.presets">Presets &amp; Rewind</button>
         <button class="primary-btn" type="button" id="addActivity" data-i18n="actions.addActivity">＋ Add Event</button>
+      </div>
+    </section>
+
+    <section class="schedule-overview" aria-label="Schedule overview and search" data-i18n-aria="aria.scheduleOverview">
+      <label class="calendar-search">
+        <span class="calendar-search-icon" aria-hidden="true">⌕</span>
+        <input id="scheduleSearch" type="search" autocomplete="off" placeholder="Search events, people, or places" data-i18n-placeholder="search.placeholder" aria-label="Search schedule" data-i18n-aria="search.label">
+        <button class="clear-search" id="clearSearch" type="button" aria-label="Clear search" data-i18n-aria="search.clear" hidden>×</button>
+      </label>
+      <div class="overview-stats" aria-live="polite">
+        <span class="overview-stat" id="overviewEvents"></span>
+        <button class="conflict-summary" id="jumpConflict" type="button" disabled></button>
+        <span class="overview-next"><span data-i18n="overview.next">Next</span><strong id="overviewNextEvent"></strong></span>
+      </div>
+    </section>
+
+    <section class="calendar-empty-state" id="calendarEmptyState" hidden>
+      <div>
+        <h2 data-i18n="empty.title">Start your family calendar</h2>
+        <p data-i18n="empty.body">Add a child, add a family event, or load the example schedule.</p>
+      </div>
+      <div class="empty-actions">
+        <button class="primary-btn" type="button" id="emptyAddKid" data-i18n="empty.addKid">Add child</button>
+        <button class="ghost-btn" type="button" id="emptyAddEvent" data-i18n="empty.addEvent">Add family event</button>
+        <button class="ghost-btn" type="button" id="emptyLoadExample" data-i18n="empty.loadExample">Load example</button>
       </div>
     </section>
 
@@ -1814,16 +2583,73 @@
         <label>
           <span data-i18n="form.icon">Icon</span>
           <select id="icon" required>
-            <option value="📖" data-i18n="icons.reading">📖 Reading / Kumon</option>
-            <option value="🤖" data-i18n="icons.robotics">🤖 Robotics</option>
-            <option value="⚽" data-i18n="icons.soccer">⚽ Soccer</option>
-            <option value="🥋" data-i18n="icons.kungfu">🥋 Kungfu</option>
-            <option value="√x" data-i18n="icons.math">√x Math</option>
-            <option value="&lt;/&gt;" data-i18n="icons.coding">&lt;/&gt; Coding</option>
-            <option value="🎨" data-i18n="icons.art">🎨 Art</option>
-            <option value="🎂" data-i18n="icons.birthday">🎂 Birthday</option>
-            <option value="🎉" data-i18n="icons.holiday">🎉 Holiday</option>
+            <optgroup label="School &amp; Learning" data-i18n-label="icons.group.school">
+              <option value="📖" data-i18n="icons.reading">📖 Reading / Kumon</option>
+              <option value="✏️" data-i18n="icons.homework">✏️ Homework</option>
+              <option value="🏫" data-i18n="icons.school">🏫 School</option>
+              <option value="🧪" data-i18n="icons.science">🧪 Science</option>
+              <option value="🤖" data-i18n="icons.robotics">🤖 Robotics</option>
+              <option value="√x" data-i18n="icons.math">√x Math</option>
+              <option value="💻" data-i18n="icons.coding">💻 Coding</option>
+              <option value="🎓" data-i18n="icons.tutoring">🎓 Tutoring</option>
+            </optgroup>
+            <optgroup label="Arts &amp; Lessons" data-i18n-label="icons.group.arts">
+              <option value="🎨" data-i18n="icons.art">🎨 Art</option>
+              <option value="🎵" data-i18n="icons.music">🎵 Music</option>
+              <option value="🎹" data-i18n="icons.piano">🎹 Piano</option>
+              <option value="🎸" data-i18n="icons.guitar">🎸 Guitar</option>
+              <option value="💃" data-i18n="icons.dance">💃 Dance</option>
+              <option value="🎭" data-i18n="icons.theater">🎭 Theater</option>
+            </optgroup>
+            <optgroup label="Sports" data-i18n-label="icons.group.sports">
+              <option value="⚽" data-i18n="icons.soccer">⚽ Soccer</option>
+              <option value="🏀" data-i18n="icons.basketball">🏀 Basketball</option>
+              <option value="🏈" data-i18n="icons.football">🏈 Football</option>
+              <option value="⚾" data-i18n="icons.baseball">⚾ Baseball</option>
+              <option value="🎾" data-i18n="icons.tennis">🎾 Tennis</option>
+              <option value="🏊" data-i18n="icons.swimming">🏊 Swimming</option>
+              <option value="🥋" data-i18n="icons.kungfu">🥋 Martial Arts</option>
+              <option value="⛸️" data-i18n="icons.skating">⛸️ Skating</option>
+            </optgroup>
+            <optgroup label="Health" data-i18n-label="icons.group.health">
+              <option value="🩺" data-i18n="icons.doctor">🩺 Doctor</option>
+              <option value="🦷" data-i18n="icons.dentist">🦷 Dentist</option>
+              <option value="👓" data-i18n="icons.vision">👓 Eye Care</option>
+            </optgroup>
+            <optgroup label="Family &amp; Routines" data-i18n-label="icons.group.family">
+              <option value="🎂" data-i18n="icons.birthday">🎂 Birthday</option>
+              <option value="🎉" data-i18n="icons.holiday">🎉 Holiday / Party</option>
+              <option value="🍽️" data-i18n="icons.meal">🍽️ Family Meal</option>
+              <option value="🚗" data-i18n="icons.pickup">🚗 Pickup / Drop-off</option>
+              <option value="🚌" data-i18n="icons.bus">🚌 School Bus</option>
+              <option value="✈️" data-i18n="icons.travel">✈️ Travel</option>
+              <option value="🏠" data-i18n="icons.home">🏠 Home</option>
+              <option value="✅" data-i18n="icons.chores">✅ Chores</option>
+              <option value="🛒" data-i18n="icons.shopping">🛒 Shopping</option>
+              <option value="😴" data-i18n="icons.bedtime">😴 Bedtime</option>
+            </optgroup>
+            <optgroup label="Fun" data-i18n-label="icons.group.fun">
+              <option value="🎮" data-i18n="icons.games">🎮 Games</option>
+              <option value="🎬" data-i18n="icons.movie">🎬 Movie</option>
+              <option value="🍿" data-i18n="icons.movieNight">🍿 Movie Night</option>
+              <option value="🍦" data-i18n="icons.treat">🍦 Treat</option>
+              <option value="🛝" data-i18n="icons.playground">🛝 Playground</option>
+              <option value="🧸" data-i18n="icons.playdate">🧸 Playdate</option>
+              <option value="🎲" data-i18n="icons.boardGame">🎲 Board Game</option>
+              <option value="🎡" data-i18n="icons.funOuting">🎡 Fun Outing</option>
+              <option value="🥳" data-i18n="icons.partyFun">🥳 Party Fun</option>
+              <option value="🧺" data-i18n="icons.picnic">🧺 Picnic</option>
+            </optgroup>
+            <optgroup label="Miscellaneous" data-i18n-label="icons.group.misc">
+              <option value="✨" data-i18n="icons.misc">✨ Misc.</option>
+              <option value="__custom__" data-i18n="icons.custom">＋ Custom icon...</option>
+            </optgroup>
           </select>
+        </label>
+        <label id="customIconField" class="custom-icon-field" hidden>
+          <span data-i18n="form.customIcon">Custom icon</span>
+          <input id="customIcon" type="text" maxlength="12" inputmode="text" autocomplete="off" placeholder="Emoji or short icon" data-i18n-placeholder="form.customIconPlaceholder">
+          <small class="field-help" data-i18n="form.customIconHelp">Use an emoji or up to 4 characters.</small>
         </label>
         <label>
           <span data-i18n="form.colorStyle">Color style</span>
@@ -1852,7 +2678,10 @@
         <textarea id="notes" placeholder="Room, teacher, supplies, pickup notes" data-i18n-placeholder="form.notesPlaceholder"></textarea>
       </label>
       <div class="form-actions">
-        <button class="danger-btn" type="button" id="deleteActivity" data-i18n="actions.delete">Delete</button>
+        <div class="left-actions">
+          <button class="danger-btn" type="button" id="deleteActivity" data-i18n="actions.delete">Delete</button>
+          <button class="ghost-btn" type="button" id="duplicateActivity" data-i18n="actions.duplicate">Duplicate</button>
+        </div>
         <div class="right-actions">
           <button class="ghost-btn" type="button" id="cancelDialog" data-i18n="actions.cancel">Cancel</button>
           <button class="primary-btn" type="submit" data-i18n="actions.save">Save</button>
@@ -1924,6 +2753,78 @@
     </form>
   </dialog>
 
+  <dialog class="settings-dialog" id="settingsDialog">
+    <div class="modal-header">
+      <h2 data-i18n="settings.title">Settings</h2>
+      <button class="close-btn" type="button" id="closeSettings" aria-label="Close" data-i18n-aria="aria.close">×</button>
+    </div>
+    <form class="settings-form" id="settingsForm">
+      <section class="settings-group">
+        <h3 data-i18n="settings.accountSync">Account &amp; sync</h3>
+        <div class="cloud-sync-row">
+          <p class="cloud-sync-copy" id="cloudSyncCopy"></p>
+          <button class="small-btn cloud-sync-action" type="button" id="cloudSyncAction"></button>
+        </div>
+      </section>
+
+      <section class="settings-group">
+        <h3 data-i18n="settings.notifications">Notifications</h3>
+        <label class="setting-row">
+          <span data-i18n="settings.enableNotifications">Event notifications</span>
+          <input class="setting-toggle" id="notificationsEnabled" type="checkbox">
+        </label>
+        <label class="setting-row">
+          <span data-i18n="settings.reminderTime">Remind me before</span>
+          <select id="reminderMinutes">
+            <option value="10" data-i18n="settings.reminder10">10 minutes</option>
+            <option value="30" data-i18n="settings.reminder30">30 minutes</option>
+            <option value="60" data-i18n="settings.reminder60">1 hour</option>
+            <option value="1440" data-i18n="settings.reminderDay">1 day</option>
+          </select>
+        </label>
+        <p class="notification-status" id="notificationStatus" role="status"></p>
+      </section>
+
+      <section class="settings-group">
+        <h3 data-i18n="settings.appearance">Appearance</h3>
+        <label class="setting-row">
+          <span data-i18n="settings.darkMode">Dark mode</span>
+          <input class="setting-toggle" id="darkModeEnabled" type="checkbox">
+        </label>
+        <label class="setting-row">
+          <span data-i18n="settings.use24Hour">24-hour time</span>
+          <input class="setting-toggle" id="use24Hour" type="checkbox">
+        </label>
+        <label class="setting-row">
+          <span data-i18n="settings.reduceMotion">Reduce motion</span>
+          <input class="setting-toggle" id="reduceMotion" type="checkbox">
+        </label>
+      </section>
+
+      <section class="settings-group">
+        <h3 data-i18n="settings.calendar">Calendar</h3>
+        <label class="setting-row">
+          <span data-i18n="settings.defaultView">Default view</span>
+          <select id="defaultView">
+            <option value="today" data-i18n="view.today">Today</option>
+            <option value="week" data-i18n="view.week">Week</option>
+            <option value="month" data-i18n="view.month">Month</option>
+          </select>
+        </label>
+        <label class="setting-row">
+          <span data-i18n="settings.focusEvents">Jump to the first event</span>
+          <input class="setting-toggle" id="focusFirstEvent" type="checkbox">
+        </label>
+      </section>
+
+      <div class="settings-actions">
+        <button class="primary-btn" type="button" id="doneSettings" data-i18n="actions.done">Done</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="./supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const translations = {
       en: {
@@ -1932,6 +2833,7 @@
         "aria.language": "Language",
         "aria.childFilters": "Child filters",
         "aria.scheduleControls": "Schedule controls",
+        "aria.scheduleOverview": "Schedule overview and search",
         "aria.previousWeek": "Previous week",
         "aria.nextWeek": "Next week",
         "aria.previousPeriod": "Previous period",
@@ -1944,7 +2846,7 @@
         "aria.familyGoals": "Family goals",
         "aria.close": "Close",
         "auth.welcome": "Welcome to KidsSync",
-        "auth.prompt": "Sign in to your family calendar.",
+        "auth.prompt": "Sign in to sync your family calendar across devices.",
         "auth.access": "Account access",
         "auth.signIn": "Sign In",
         "auth.createAccount": "Create Account",
@@ -1961,9 +2863,50 @@
         "auth.exists": "An account already exists for this email.",
         "auth.mismatch": "The passwords do not match.",
         "auth.unavailable": "Secure login is unavailable in this browser.",
+        "auth.cloudSetup": "Cloud accounts are not connected yet. Guest mode will still save on this device.",
+        "auth.cloudReady": "Secure cloud accounts are ready.",
+        "auth.checkEmail": "Check your email to confirm your account, then sign in.",
+        "auth.emailNotConfirmed": "Confirm your email before signing in.",
         "auth.familyAccount": "Family account",
         "auth.logout": "Log Out",
+        "auth.continuePreview": "Continue without signing in",
+        "auth.guestFamily": "Guest preview",
+        "auth.guestDevice": "Changes stay on this device",
+        "settings.open": "Settings",
+        "settings.accountSync": "Account & sync",
+        "settings.syncGuest": "Sign in to use this schedule on your other devices.",
+        "settings.syncLocal": "This older account currently saves only on this device.",
+        "settings.syncCloud": "Your family calendar is backed up and synced across devices.",
+        "settings.syncSetup": "Connect the cloud service before accounts can sync.",
+        "settings.syncNow": "Sync now",
+        "settings.syncSignIn": "Sign in",
+        "settings.syncRetry": "Retry",
+        "settings.title": "Settings",
+        "settings.notifications": "Notifications",
+        "settings.enableNotifications": "Event notifications",
+        "settings.reminderTime": "Remind me before",
+        "settings.reminder10": "10 minutes",
+        "settings.reminder30": "30 minutes",
+        "settings.reminder60": "1 hour",
+        "settings.reminderDay": "1 day",
+        "settings.appearance": "Appearance",
+        "settings.darkMode": "Dark mode",
+        "settings.use24Hour": "24-hour time",
+        "settings.reduceMotion": "Reduce motion",
+        "settings.calendar": "Calendar",
+        "settings.defaultView": "Default view",
+        "settings.focusEvents": "Jump to the first event",
+        "settings.notificationsOn": "Notifications are on while KidsSync is open.",
+        "settings.notificationsOff": "Notifications are off.",
+        "settings.notificationsDenied": "Notifications are blocked in your browser settings.",
+        "settings.notificationsUnavailable": "Notifications are unavailable in this browser.",
+        "notifications.title": "{title} is coming up",
+        "notifications.body": "{child} · {time} · in {minutes} min",
         "save.saved": "Saved on this device",
+        "save.cloudSaved": "Saved to cloud",
+        "save.syncing": "Saving to cloud...",
+        "save.offline": "Saved here; syncs when online",
+        "save.syncFailed": "Saved here; cloud sync paused",
         "save.failed": "Could not save",
         "brand.ribbon": "Family Weekly Planner",
         "brand.subtitle": "A shared schedule for parents managing school, activities, homework, and family time.",
@@ -1977,6 +2920,7 @@
         "actions.presets": "Presets & Rewind",
         "actions.addActivity": "＋ Add Event",
         "actions.delete": "Delete",
+        "actions.duplicate": "Duplicate",
         "actions.cancel": "Cancel",
         "actions.save": "Save",
         "actions.load": "Load",
@@ -1997,6 +2941,7 @@
         "goals.gapsBody": "Find open windows before adding another commitment.",
         "dialog.addTitle": "Add Event",
         "dialog.editTitle": "Edit Event",
+        "dialog.duplicateTitle": "Duplicate Event",
         "form.child": "Child",
         "form.day": "Day",
         "form.date": "Date",
@@ -2021,15 +2966,63 @@
         "form.responsiblePlaceholder": "Mom, Dad, babysitter",
         "form.items": "Bring / prepare",
         "form.itemsPlaceholder": "Uniform, water bottle, homework",
+        "form.customIcon": "Custom icon",
+        "form.customIconPlaceholder": "Emoji or short icon",
+        "form.customIconHelp": "Use an emoji or up to 4 characters.",
+        "icons.group.school": "School & Learning",
+        "icons.group.arts": "Arts & Lessons",
+        "icons.group.sports": "Sports",
+        "icons.group.health": "Health",
+        "icons.group.family": "Family & Routines",
+        "icons.group.fun": "Fun",
+        "icons.group.misc": "Miscellaneous",
         "icons.reading": "📖 Reading / Kumon",
+        "icons.homework": "✏️ Homework",
+        "icons.school": "🏫 School",
+        "icons.science": "🧪 Science",
         "icons.robotics": "🤖 Robotics",
-        "icons.soccer": "⚽ Soccer",
-        "icons.kungfu": "🥋 Kungfu",
         "icons.math": "√x Math",
-        "icons.coding": "</> Coding",
+        "icons.coding": "💻 Coding",
+        "icons.tutoring": "🎓 Tutoring",
         "icons.art": "🎨 Art",
+        "icons.music": "🎵 Music",
+        "icons.piano": "🎹 Piano",
+        "icons.guitar": "🎸 Guitar",
+        "icons.dance": "💃 Dance",
+        "icons.theater": "🎭 Theater",
+        "icons.soccer": "⚽ Soccer",
+        "icons.basketball": "🏀 Basketball",
+        "icons.football": "🏈 Football",
+        "icons.baseball": "⚾ Baseball",
+        "icons.tennis": "🎾 Tennis",
+        "icons.swimming": "🏊 Swimming",
+        "icons.kungfu": "🥋 Martial Arts",
+        "icons.skating": "⛸️ Skating",
+        "icons.doctor": "🩺 Doctor",
+        "icons.dentist": "🦷 Dentist",
+        "icons.vision": "👓 Eye Care",
         "icons.birthday": "🎂 Birthday",
-        "icons.holiday": "🎉 Holiday",
+        "icons.holiday": "🎉 Holiday / Party",
+        "icons.meal": "🍽️ Family Meal",
+        "icons.pickup": "🚗 Pickup / Drop-off",
+        "icons.bus": "🚌 School Bus",
+        "icons.travel": "✈️ Travel",
+        "icons.home": "🏠 Home",
+        "icons.chores": "✅ Chores",
+        "icons.shopping": "🛒 Shopping",
+        "icons.bedtime": "😴 Bedtime",
+        "icons.games": "🎮 Games",
+        "icons.movie": "🎬 Movie",
+        "icons.movieNight": "🍿 Movie Night",
+        "icons.treat": "🍦 Treat",
+        "icons.playground": "🛝 Playground",
+        "icons.playdate": "🧸 Playdate",
+        "icons.boardGame": "🎲 Board Game",
+        "icons.funOuting": "🎡 Fun Outing",
+        "icons.partyFun": "🥳 Party Fun",
+        "icons.picnic": "🧺 Picnic",
+        "icons.misc": "✨ Misc.",
+        "icons.custom": "＋ Custom icon...",
         "eventType.activity": "Activity",
         "eventType.birthday": "Birthday",
         "eventType.holiday": "Holiday",
@@ -2044,6 +3037,7 @@
         "kids.your": "Your Kids",
         "kids.name": "Child name",
         "kids.namePlaceholder": "Child name",
+        "kids.defaultName": "Child {number}",
         "kids.color": "Color",
         "kids.remove": "Remove {name}",
         "presets.title": "Presets & Rewind",
@@ -2065,6 +3059,7 @@
         "presets.restoredStatus": "Restored {label}.",
         "presets.family": "Family schedule",
         "presets.example": "Andrew and Mark schedule",
+        "presets.beforeExample": "Before Andrew and Mark preset",
         "presets.confirmDelete": "Delete preset “{name}”?",
         "presets.confirmExample": "Load the Andrew and Mark preset? This will replace the current kids and schedule.",
         "calendar.empty": "No activities yet.",
@@ -2072,6 +3067,29 @@
         "calendar.weekly": "Weekly activity",
         "calendar.allDay": "All day",
         "calendar.family": "Family",
+        "empty.title": "Start your family calendar",
+        "empty.body": "Add a child, add a family event, or load the example schedule.",
+        "empty.addKid": "Add child",
+        "empty.addEvent": "Add family event",
+        "empty.loadExample": "Load example",
+        "today.nextUp": "Next up",
+        "today.allDay": "All day",
+        "today.morning": "Morning",
+        "today.afternoon": "Afternoon",
+        "today.evening": "Evening",
+        "today.addToday": "Add event today",
+        "search.label": "Search schedule",
+        "search.placeholder": "Search events, people, or places",
+        "search.clear": "Clear search",
+        "overview.events": "{count} events",
+        "overview.eventOne": "1 event",
+        "overview.eventsFiltered": "{count} of {total} events",
+        "overview.conflicts": "{count} conflicts",
+        "overview.conflictOne": "1 conflict",
+        "overview.noConflicts": "No conflicts",
+        "overview.jumpConflict": "Jump to the next conflicting event",
+        "overview.next": "Next",
+        "overview.noUpcoming": "Nothing else scheduled",
         "month.more": "+{count} more",
         "stack.next": "Show next overlapping activity. {child} {title} is in front.",
         "stack.tooltip": "Show next activity ({child}: {title})",
@@ -2101,6 +3119,7 @@
         "aria.language": "语言",
         "aria.childFilters": "孩子筛选",
         "aria.scheduleControls": "日程控制",
+        "aria.scheduleOverview": "日程概览和搜索",
         "aria.previousWeek": "上一周",
         "aria.nextWeek": "下一周",
         "aria.previousPeriod": "上一个时间段",
@@ -2113,7 +3132,7 @@
         "aria.familyGoals": "家庭目标",
         "aria.close": "关闭",
         "auth.welcome": "欢迎使用 KidsSync",
-        "auth.prompt": "登录以查看你的家庭日历。",
+        "auth.prompt": "登录后可在不同设备间同步家庭日历。",
         "auth.access": "账户访问",
         "auth.signIn": "登录",
         "auth.createAccount": "创建账户",
@@ -2130,9 +3149,50 @@
         "auth.exists": "此电子邮箱已有账户。",
         "auth.mismatch": "两次输入的密码不一致。",
         "auth.unavailable": "此浏览器不支持安全登录。",
+        "auth.cloudSetup": "云账户尚未连接。访客模式仍会将更改保存到此设备。",
+        "auth.cloudReady": "安全云账户已就绪。",
+        "auth.checkEmail": "请检查电子邮件并确认账户，然后登录。",
+        "auth.emailNotConfirmed": "请先确认电子邮件，然后再登录。",
         "auth.familyAccount": "家庭账户",
         "auth.logout": "退出登录",
+        "auth.continuePreview": "不登录，继续试用",
+        "auth.guestFamily": "访客试用",
+        "auth.guestDevice": "更改仅保存在此设备上",
+        "settings.open": "设置",
+        "settings.accountSync": "账户与同步",
+        "settings.syncGuest": "登录后可在其他设备上使用此日程。",
+        "settings.syncLocal": "此旧账户目前仅保存到此设备。",
+        "settings.syncCloud": "你的家庭日历已备份并在设备间同步。",
+        "settings.syncSetup": "需要先连接云服务，账户才能同步。",
+        "settings.syncNow": "立即同步",
+        "settings.syncSignIn": "登录",
+        "settings.syncRetry": "重试",
+        "settings.title": "设置",
+        "settings.notifications": "通知",
+        "settings.enableNotifications": "活动通知",
+        "settings.reminderTime": "提前提醒我",
+        "settings.reminder10": "10 分钟",
+        "settings.reminder30": "30 分钟",
+        "settings.reminder60": "1 小时",
+        "settings.reminderDay": "1 天",
+        "settings.appearance": "外观",
+        "settings.darkMode": "深色模式",
+        "settings.use24Hour": "24 小时制",
+        "settings.reduceMotion": "减少动态效果",
+        "settings.calendar": "日历",
+        "settings.defaultView": "默认视图",
+        "settings.focusEvents": "跳到第一个活动",
+        "settings.notificationsOn": "KidsSync 打开时会发送通知。",
+        "settings.notificationsOff": "通知已关闭。",
+        "settings.notificationsDenied": "通知已在浏览器设置中被阻止。",
+        "settings.notificationsUnavailable": "此浏览器不支持通知。",
+        "notifications.title": "{title} 即将开始",
+        "notifications.body": "{child} · {time} · {minutes} 分钟后",
         "save.saved": "已保存到此设备",
+        "save.cloudSaved": "已保存到云端",
+        "save.syncing": "正在保存到云端...",
+        "save.offline": "已保存到本机；联网后同步",
+        "save.syncFailed": "已保存到本机；云同步已暂停",
         "save.failed": "无法保存",
         "brand.ribbon": "家庭每周计划",
         "brand.subtitle": "帮助家长共同管理上学、课外活动、作业和家庭时间。",
@@ -2146,6 +3206,7 @@
         "actions.presets": "预设与恢复",
         "actions.addActivity": "＋ 添加事件",
         "actions.delete": "删除",
+        "actions.duplicate": "复制",
         "actions.cancel": "取消",
         "actions.save": "保存",
         "actions.load": "载入",
@@ -2166,6 +3227,7 @@
         "goals.gapsBody": "添加新安排前先找到合适的空档。",
         "dialog.addTitle": "添加事件",
         "dialog.editTitle": "编辑事件",
+        "dialog.duplicateTitle": "复制事件",
         "form.child": "孩子",
         "form.day": "星期",
         "form.date": "日期",
@@ -2190,15 +3252,63 @@
         "form.responsiblePlaceholder": "妈妈、爸爸、保姆",
         "form.items": "携带 / 准备",
         "form.itemsPlaceholder": "队服、水杯、作业",
+        "form.customIcon": "自定义图标",
+        "form.customIconPlaceholder": "表情或短图标",
+        "form.customIconHelp": "可用表情或最多 4 个字符。",
+        "icons.group.school": "学校与学习",
+        "icons.group.arts": "艺术与课程",
+        "icons.group.sports": "运动",
+        "icons.group.health": "健康",
+        "icons.group.family": "家庭与日常",
+        "icons.group.fun": "好玩的",
+        "icons.group.misc": "其他",
         "icons.reading": "📖 阅读 / 公文数学",
+        "icons.homework": "✏️ 作业",
+        "icons.school": "🏫 学校",
+        "icons.science": "🧪 科学",
         "icons.robotics": "🤖 机器人",
-        "icons.soccer": "⚽ 足球",
-        "icons.kungfu": "🥋 功夫",
         "icons.math": "√x 数学",
-        "icons.coding": "</> 编程",
+        "icons.coding": "💻 编程",
+        "icons.tutoring": "🎓 辅导",
         "icons.art": "🎨 美术",
+        "icons.music": "🎵 音乐",
+        "icons.piano": "🎹 钢琴",
+        "icons.guitar": "🎸 吉他",
+        "icons.dance": "💃 舞蹈",
+        "icons.theater": "🎭 戏剧",
+        "icons.soccer": "⚽ 足球",
+        "icons.basketball": "🏀 篮球",
+        "icons.football": "🏈 美式足球",
+        "icons.baseball": "⚾ 棒球",
+        "icons.tennis": "🎾 网球",
+        "icons.swimming": "🏊 游泳",
+        "icons.kungfu": "🥋 武术",
+        "icons.skating": "⛸️ 滑冰",
+        "icons.doctor": "🩺 看医生",
+        "icons.dentist": "🦷 看牙医",
+        "icons.vision": "👓 视力检查",
         "icons.birthday": "🎂 生日",
-        "icons.holiday": "🎉 节日",
+        "icons.holiday": "🎉 节日 / 聚会",
+        "icons.meal": "🍽️ 家庭用餐",
+        "icons.pickup": "🚗 接送",
+        "icons.bus": "🚌 校车",
+        "icons.travel": "✈️ 旅行",
+        "icons.home": "🏠 在家",
+        "icons.chores": "✅ 家务",
+        "icons.shopping": "🛒 购物",
+        "icons.bedtime": "😴 睡觉",
+        "icons.games": "🎮 游戏",
+        "icons.movie": "🎬 电影",
+        "icons.movieNight": "🍿 电影夜",
+        "icons.treat": "🍦 小奖励",
+        "icons.playground": "🛝 游乐场",
+        "icons.playdate": "🧸 玩伴时间",
+        "icons.boardGame": "🎲 桌游",
+        "icons.funOuting": "🎡 出去玩",
+        "icons.partyFun": "🥳 派对活动",
+        "icons.picnic": "🧺 野餐",
+        "icons.misc": "✨ 其他",
+        "icons.custom": "＋ 自定义图标...",
         "eventType.activity": "活动",
         "eventType.birthday": "生日",
         "eventType.holiday": "节日",
@@ -2213,6 +3323,7 @@
         "kids.your": "你的孩子",
         "kids.name": "孩子姓名",
         "kids.namePlaceholder": "孩子姓名",
+        "kids.defaultName": "孩子 {number}",
         "kids.color": "颜色",
         "kids.remove": "移除 {name}",
         "presets.title": "预设与恢复",
@@ -2234,6 +3345,7 @@
         "presets.restoredStatus": "已恢复 {label}。",
         "presets.family": "家庭日程",
         "presets.example": "Andrew 和 Mark 日程",
+        "presets.beforeExample": "载入 Andrew 和 Mark 示例之前",
         "presets.confirmDelete": "删除预设“{name}”？",
         "presets.confirmExample": "载入 Andrew 和 Mark 示例？这会替换当前的孩子和日程。",
         "calendar.empty": "还没有活动。",
@@ -2241,6 +3353,29 @@
         "calendar.weekly": "每周活动",
         "calendar.allDay": "全天",
         "calendar.family": "全家",
+        "empty.title": "开始你的家庭日历",
+        "empty.body": "添加孩子、添加家庭活动，或载入示例日程。",
+        "empty.addKid": "添加孩子",
+        "empty.addEvent": "添加家庭活动",
+        "empty.loadExample": "载入示例",
+        "today.nextUp": "下一项",
+        "today.allDay": "全天",
+        "today.morning": "上午",
+        "today.afternoon": "下午",
+        "today.evening": "晚上",
+        "today.addToday": "添加今天的活动",
+        "search.label": "搜索日程",
+        "search.placeholder": "搜索活动、人员或地点",
+        "search.clear": "清除搜索",
+        "overview.events": "{count} 项活动",
+        "overview.eventOne": "1 项活动",
+        "overview.eventsFiltered": "显示 {count} / {total} 项活动",
+        "overview.conflicts": "{count} 项冲突",
+        "overview.conflictOne": "1 项冲突",
+        "overview.noConflicts": "没有冲突",
+        "overview.jumpConflict": "跳到下一个冲突活动",
+        "overview.next": "下一项",
+        "overview.noUpcoming": "没有更多安排",
         "month.more": "还有 {count} 项",
         "stack.next": "显示下一个重叠活动。当前显示 {child} 的{title}。",
         "stack.tooltip": "显示下一个活动（{child}：{title}）",
@@ -2269,8 +3404,30 @@
     const AUTH_ACCOUNTS_KEY = "kidssync.auth.accounts";
     const AUTH_ACTIVE_KEY = "kidssync.auth.active";
     const AUTH_LEGACY_CLAIMED_KEY = "kidssync.auth.legacy-claimed";
+    const AUTH_GUEST_SEEN_KEY = "kidssync.auth.guest-seen";
+    const AUTH_GUEST_SESSION_KEY = "kidssync.auth.guest-session";
+    const AUTH_PENDING_GUEST_CLAIM_KEY = "kidssync.auth.pending-guest-claim";
     const LANGUAGE_STORAGE_KEY = "kidssync.ui.language";
-    const ACCOUNT_DATA_KEYS = ["kids", "activities", "presets", "history", "view", "generic-startup"];
+    const ACCOUNT_DATA_KEYS = ["kids", "activities", "presets", "history", "view", "settings", "generic-startup"];
+    const CLOUD_PENDING_KEY = "cloud-pending";
+    const CLOUD_UPDATED_KEY = "cloud-updated-at";
+    const cloudConfig = globalThis.KIDSSYNC_SUPABASE || {};
+    const cloudConfigured = Boolean(
+      cloudConfig.url
+      && cloudConfig.publishableKey
+      && globalThis.supabase?.createClient
+    );
+    const cloudClient = cloudConfigured
+      ? globalThis.supabase.createClient(cloudConfig.url, cloudConfig.publishableKey, {
+          auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+        })
+      : null;
+    let cloudSession = null;
+    let cloudSaveTimer = null;
+    let cloudSaveState = "device";
+    let cloudHydrating = false;
+    let cloudSyncBusy = false;
+    let cloudSyncRequested = false;
 
     function loadAccounts() {
       try {
@@ -2279,6 +3436,27 @@
       } catch {
         return [];
       }
+    }
+
+    function saveAccounts(accounts) {
+      localStorage.setItem(AUTH_ACCOUNTS_KEY, JSON.stringify(accounts));
+    }
+
+    function cacheCloudAccount(user, fallbackFamilyName = "") {
+      const accounts = loadAccounts();
+      const existingIndex = accounts.findIndex(account => account.id === user.id);
+      const existing = existingIndex >= 0 ? accounts[existingIndex] : null;
+      const account = {
+        id: user.id,
+        email: normalizeEmail(user.email || existing?.email || ""),
+        familyName: user.user_metadata?.family_name || fallbackFamilyName || existing?.familyName || "My Family",
+        provider: "supabase",
+        createdAt: existing?.createdAt || user.created_at || new Date().toISOString()
+      };
+      if (existingIndex >= 0) accounts[existingIndex] = account;
+      else accounts.push(account);
+      saveAccounts(accounts);
+      return account;
     }
 
     function normalizeEmail(value) {
@@ -2308,7 +3486,24 @@
       localStorage.setItem(AUTH_LEGACY_CLAIMED_KEY, account.id);
     }
 
-    const activeAccount = findActiveAccount();
+    function migrateGuestDataToAccount(account) {
+      ACCOUNT_DATA_KEYS.forEach(name => {
+        const guestKey = `kidssync.guest.${name}`;
+        const guestValue = localStorage.getItem(guestKey);
+        const targetKey = accountDataKey(account.id, name);
+        if (guestValue !== null && localStorage.getItem(targetKey) === null) {
+          localStorage.setItem(targetKey, guestValue);
+          localStorage.removeItem(guestKey);
+        }
+      });
+      const guestNotificationLog = localStorage.getItem("kidssync.guest.notification-log");
+      if (guestNotificationLog !== null) {
+        localStorage.setItem(accountDataKey(account.id, "notification-log"), guestNotificationLog);
+        localStorage.removeItem("kidssync.guest.notification-log");
+      }
+    }
+
+    let activeAccount = findActiveAccount();
 
     function scheduleStorageKey(name) {
       return activeAccount
@@ -2339,16 +3534,57 @@
       return Uint8Array.from(atob(value), character => character.charCodeAt(0));
     }
 
+    function appCrypto() {
+      return globalThis.crypto || null;
+    }
+
+    function makeId(prefix = "id") {
+      const cryptoApi = appCrypto();
+      if (cryptoApi?.randomUUID) return cryptoApi.randomUUID();
+      return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    }
+
+    function randomBytes(length) {
+      const bytes = new Uint8Array(length);
+      const cryptoApi = appCrypto();
+      if (cryptoApi?.getRandomValues) return cryptoApi.getRandomValues(bytes);
+      for (let index = 0; index < bytes.length; index += 1) {
+        bytes[index] = Math.floor(Math.random() * 256);
+      }
+      return bytes;
+    }
+
+    function fallbackPasswordHash(password, salt, iterations = 150000) {
+      const saltText = Array.from(salt).map(byte => String.fromCharCode(byte)).join("");
+      let first = 0x811c9dc5;
+      let second = 0x9e3779b9;
+      const rounds = Math.max(1, Math.ceil(iterations / 1000));
+      for (let round = 0; round < rounds; round += 1) {
+        const input = `${password}:${saltText}:${round}:${first}:${second}`;
+        for (let index = 0; index < input.length; index += 1) {
+          first ^= input.charCodeAt(index);
+          first = Math.imul(first, 0x01000193);
+          second ^= input.charCodeAt(input.length - index - 1);
+          second = Math.imul(second, 0x85ebca6b);
+        }
+      }
+      const bytes = new Uint8Array(8);
+      new DataView(bytes.buffer).setUint32(0, first >>> 0);
+      new DataView(bytes.buffer).setUint32(4, second >>> 0);
+      return bytesToBase64(bytes);
+    }
+
     async function passwordHash(password, salt, iterations = 150000) {
-      if (!crypto.subtle) throw new Error("Web Crypto unavailable");
-      const material = await crypto.subtle.importKey(
+      const cryptoApi = appCrypto();
+      if (!cryptoApi?.subtle) return fallbackPasswordHash(password, salt, iterations);
+      const material = await cryptoApi.subtle.importKey(
         "raw",
         new TextEncoder().encode(password),
         "PBKDF2",
         false,
         ["deriveBits"]
       );
-      const bits = await crypto.subtle.deriveBits(
+      const bits = await cryptoApi.subtle.deriveBits(
         { name: "PBKDF2", salt, iterations, hash: "SHA-256" },
         material,
         256
@@ -2367,15 +3603,91 @@
       document.getElementById("signUpForm").hidden = selectedView !== "signup";
       document.getElementById("signInError").textContent = "";
       document.getElementById("signUpError").textContent = "";
+      document.getElementById("signUpError").classList.remove("is-success");
+    }
+
+    function updateCloudAvailability() {
+      const note = document.getElementById("authCloudNote");
+      if (!note) return;
+      note.textContent = t(cloudConfigured ? "auth.cloudReady" : "auth.cloudSetup");
+      note.classList.toggle("is-error", !cloudConfigured);
+    }
+
+    function cloudAuthMessage(authError) {
+      const message = authError?.message || "";
+      if (/email not confirmed/i.test(message)) return t("auth.emailNotConfirmed");
+      if (/invalid login credentials/i.test(message)) return t("auth.invalid");
+      if (/already registered|already exists/i.test(message)) return t("auth.exists");
+      return message || t("auth.unavailable");
+    }
+
+    function activateCloudAccount(user, { familyName = "", claimGuest = false } = {}) {
+      const account = cacheCloudAccount(user, familyName);
+      if (claimGuest) migrateGuestDataToAccount(account);
+      migrateLegacyDataToAccount(account);
+      if (localStorage.getItem(accountDataKey(account.id, "kids")) === null) {
+        localStorage.setItem(accountDataKey(account.id, "kids"), "[]");
+      }
+      if (claimGuest) {
+        localStorage.setItem(accountDataKey(account.id, CLOUD_PENDING_KEY), new Date().toISOString());
+        localStorage.removeItem(AUTH_PENDING_GUEST_CLAIM_KEY);
+      }
+      activeAccount = account;
+      localStorage.setItem(AUTH_ACTIVE_KEY, account.id);
+      return account;
+    }
+
+    function guestSessionActive() {
+      try {
+        return sessionStorage.getItem(AUTH_GUEST_SESSION_KEY) === "true";
+      } catch {
+        return false;
+      }
+    }
+
+    function markGuestPreviewStarted() {
+      try {
+        localStorage.setItem(AUTH_GUEST_SEEN_KEY, "true");
+        sessionStorage.setItem(AUTH_GUEST_SESSION_KEY, "true");
+      } catch {
+      }
+    }
+
+    function updateAccountIdentity() {
+      document.getElementById("accountFamily").textContent = activeAccount?.familyName || t("auth.guestFamily");
+      document.getElementById("accountEmail").textContent = activeAccount?.email || t("auth.guestDevice");
+      document.getElementById("guestAuthButton").hidden = Boolean(activeAccount);
+      document.getElementById("logoutButton").hidden = !activeAccount;
+      updateCloudAvailability();
+      renderCloudSettings();
+    }
+
+    function showGuestPreview() {
+      markGuestPreviewStarted();
+      document.getElementById("authScreen").hidden = true;
+      document.getElementById("appShell").hidden = false;
+      updateAccountIdentity();
+    }
+
+    function showAuthScreen(view = "signin") {
+      document.getElementById("appShell").hidden = true;
+      document.getElementById("authScreen").hidden = false;
+      setAuthView(view);
     }
 
     function initializeAuthUI() {
-      const signedIn = Boolean(activeAccount);
-      document.getElementById("authScreen").hidden = signedIn;
-      document.getElementById("appShell").hidden = !signedIn;
       if (activeAccount) {
-        document.getElementById("accountFamily").textContent = activeAccount.familyName;
-        document.getElementById("accountEmail").textContent = activeAccount.email;
+        document.getElementById("authScreen").hidden = true;
+        document.getElementById("appShell").hidden = false;
+        updateAccountIdentity();
+        return;
+      }
+
+      const firstVisit = loadAccounts().length === 0 && localStorage.getItem(AUTH_GUEST_SEEN_KEY) === null;
+      if (firstVisit || guestSessionActive()) {
+        showGuestPreview();
+      } else {
+        showAuthScreen("signin");
       }
     }
 
@@ -2391,13 +3703,27 @@
       submit.textContent = t("auth.signingIn");
 
       try {
+        if (cloudClient) {
+          const { data, error: authError } = await cloudClient.auth.signInWithPassword({ email, password });
+          if (authError || !data.user || !data.session) {
+            error.textContent = cloudAuthMessage(authError);
+            return;
+          }
+          activateCloudAccount(data.user);
+          location.reload();
+          return;
+        }
+
         const account = loadAccounts().find(item => item.email === email);
         if (!account) {
           error.textContent = t("auth.invalid");
           return;
         }
-        const hash = await passwordHash(password, base64ToBytes(account.salt), account.iterations);
-        if (hash !== account.passwordHash) {
+        const salt = base64ToBytes(account.salt || "");
+        const iterations = account.iterations || 150000;
+        const hash = await passwordHash(password, salt, iterations);
+        const fallbackHash = fallbackPasswordHash(password, salt, iterations);
+        if (hash !== account.passwordHash && fallbackHash !== account.passwordFallbackHash) {
           error.textContent = t("auth.invalid");
           return;
         }
@@ -2421,48 +3747,61 @@
       const password = document.getElementById("signUpPassword").value;
       const confirmation = document.getElementById("signUpConfirm").value;
       error.textContent = "";
+      error.classList.remove("is-success");
 
       if (password !== confirmation) {
         error.textContent = t("auth.mismatch");
         return;
       }
 
-      const accounts = loadAccounts();
-      if (accounts.some(account => account.email === email)) {
-        error.textContent = t("auth.exists");
+      if (!cloudClient) {
+        error.textContent = t("auth.cloudSetup");
         return;
       }
 
       submit.disabled = true;
       submit.textContent = t("auth.creating");
       try {
-        if (!crypto.subtle) throw new Error("Web Crypto unavailable");
-        const salt = crypto.getRandomValues(new Uint8Array(16));
-        const iterations = 150000;
-        const account = {
-          id: crypto.randomUUID(),
+        localStorage.setItem(AUTH_PENDING_GUEST_CLAIM_KEY, email);
+        const { data, error: authError } = await cloudClient.auth.signUp({
           email,
-          familyName,
-          salt: bytesToBase64(salt),
-          iterations,
-          passwordHash: await passwordHash(password, salt, iterations),
-          createdAt: new Date().toISOString()
-        };
-        accounts.push(account);
-        localStorage.setItem(AUTH_ACCOUNTS_KEY, JSON.stringify(accounts));
-        migrateLegacyDataToAccount(account);
-        localStorage.setItem(AUTH_ACTIVE_KEY, account.id);
+          password,
+          options: { data: { family_name: familyName } }
+        });
+        if (authError || !data.user) {
+          localStorage.removeItem(AUTH_PENDING_GUEST_CLAIM_KEY);
+          error.textContent = cloudAuthMessage(authError);
+          return;
+        }
+        if (!data.session) {
+          error.textContent = t("auth.checkEmail");
+          error.classList.add("is-success");
+          return;
+        }
+        activateCloudAccount(data.user, { familyName, claimGuest: true });
         location.reload();
-      } catch {
-        error.textContent = t("auth.unavailable");
+      } catch (authError) {
+        error.textContent = cloudAuthMessage(authError);
       } finally {
         submit.disabled = false;
         submit.textContent = t("auth.submitCreate");
       }
     }
 
-    function logOut() {
+    async function logOut() {
+      if (cloudClient && activeAccount?.provider === "supabase") {
+        try {
+          if (hasPendingCloudSave() && cloudSession) await flushCloudSave();
+          await cloudClient.auth.signOut();
+        } catch {
+        }
+      }
       localStorage.removeItem(AUTH_ACTIVE_KEY);
+      try {
+        sessionStorage.removeItem(AUTH_GUEST_SESSION_KEY);
+        localStorage.setItem(AUTH_GUEST_SEEN_KEY, "true");
+      } catch {
+      }
       location.reload();
     }
 
@@ -2479,6 +3818,15 @@
     const scheduleEndMinutes = 20 * 60;
     const scheduleDurationMinutes = scheduleEndMinutes - scheduleStartMinutes;
     const FAMILY_CHILD = "__family__";
+    const DEFAULT_SETTINGS = {
+      notifications: false,
+      reminderMinutes: 30,
+      darkMode: false,
+      use24Hour: false,
+      reduceMotion: false,
+      defaultView: "week",
+      focusFirstEvent: true
+    };
 
     const palettes = {
       blue: { label: "Blue", color: "#2f7fd3", soft: "#d9ebff", line: "#8eb9df", ink: "#142c66" },
@@ -2510,8 +3858,8 @@
       { id: "preset-a10", child: "Mark", day: "wednesday", start: "17:00", end: "17:50", title: "Kungfu", icon: "🥋", style: "child", notes: "" },
       { id: "preset-a11", child: "Andrew", day: "thursday", start: "14:20", end: "16:20", title: "Robotics", icon: "🤖", style: "child", notes: "" },
       { id: "preset-a12", child: "Mark", day: "thursday", start: "15:00", end: "15:30", title: "Kungfu", icon: "🥋", style: "child", notes: "" },
-      { id: "preset-a13", child: "Andrew", day: "friday", start: "14:45", end: "15:45", title: "Coding", icon: "</>", style: "child", notes: "" },
-      { id: "preset-a14", child: "Mark", day: "friday", start: "14:45", end: "15:45", title: "Coding", icon: "</>", style: "child", notes: "" },
+      { id: "preset-a13", child: "Andrew", day: "friday", start: "14:45", end: "15:45", title: "Coding", icon: "💻", style: "child", notes: "" },
+      { id: "preset-a14", child: "Mark", day: "friday", start: "14:45", end: "15:45", title: "Coding", icon: "💻", style: "child", notes: "" },
       { id: "preset-a15", child: "Mark", day: "friday", start: "16:00", end: "18:00", title: "Art", icon: "🎨", style: "purple", notes: "" },
       { id: "preset-a16", child: "Mark", day: "friday", start: "16:30", end: "18:15", title: "AoPS", icon: "√x", style: "child", notes: "" }
     ];
@@ -2551,17 +3899,17 @@
     let kidDraft = [];
     let savedPresets = loadSavedPresets();
     let scheduleHistory = loadScheduleHistory();
+    let userSettings = loadSettings();
     let selectedDate = new Date();
     let currentWeekStart = getMonday(selectedDate);
     let currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-    let currentView = ["today", "week", "month"].includes(localStorage.getItem(scheduleStorageKey("view")))
-      ? localStorage.getItem(scheduleStorageKey("view"))
-      : "week";
+    let currentView = userSettings.defaultView;
 
     const state = {
       visibleKids: new Set(kidProfiles.map(kid => kid.name)),
       activities: loadActivities(),
-      stackFront: new Map()
+      stackFront: new Map(),
+      searchQuery: ""
     };
 
     const grid = document.getElementById("scheduleGrid");
@@ -2570,6 +3918,7 @@
     const todayView = document.getElementById("todayView");
     const todayHeading = document.getElementById("todayHeading");
     const todayList = document.getElementById("todayList");
+    const calendarEmptyState = document.getElementById("calendarEmptyState");
     const monthView = document.getElementById("monthView");
     const monthWeekdays = document.getElementById("monthWeekdays");
     const monthGrid = document.getElementById("monthGrid");
@@ -2577,14 +3926,25 @@
     const dialog = document.getElementById("activityDialog");
     const kidsDialog = document.getElementById("kidsDialog");
     const presetDialog = document.getElementById("presetDialog");
+    const settingsDialog = document.getElementById("settingsDialog");
     const form = document.getElementById("activityForm");
     const kidsForm = document.getElementById("kidsForm");
     const presetForm = document.getElementById("presetForm");
+    const settingsForm = document.getElementById("settingsForm");
     const kidEditorList = document.getElementById("kidEditorList");
     const savedPresetSelect = document.getElementById("savedPresetSelect");
     const presetStatus = document.getElementById("presetStatus");
     const rewindSummary = document.getElementById("rewindSummary");
     const deleteButton = document.getElementById("deleteActivity");
+    const duplicateButton = document.getElementById("duplicateActivity");
+    const scheduleSearch = document.getElementById("scheduleSearch");
+    const clearSearch = document.getElementById("clearSearch");
+    const jumpConflictButton = document.getElementById("jumpConflict");
+    const customIconField = document.getElementById("customIconField");
+    const CUSTOM_ICON_VALUE = "__custom__";
+    const MISC_ICON = "✨";
+    let notificationTimer = null;
+    let conflictCursor = 0;
     const fields = {
       id: document.getElementById("activityId"),
       child: document.getElementById("child"),
@@ -2596,6 +3956,7 @@
       end: document.getElementById("endTime"),
       title: document.getElementById("title"),
       icon: document.getElementById("icon"),
+      customIcon: document.getElementById("customIcon"),
       style: document.getElementById("style"),
       notes: document.getElementById("notes"),
       location: document.getElementById("location"),
@@ -2615,6 +3976,9 @@
       document.querySelectorAll("[data-i18n-aria]").forEach(element => {
         element.setAttribute("aria-label", t(element.dataset.i18nAria));
       });
+      document.querySelectorAll("[data-i18n-label]").forEach(element => {
+        element.label = t(element.dataset.i18nLabel);
+      });
       document.querySelectorAll("[data-language]").forEach(button => {
         const active = button.dataset.language === currentLanguage;
         button.classList.toggle("is-active", active);
@@ -2626,8 +3990,209 @@
       currentLanguage = language === "zh" ? "zh" : "en";
       localStorage.setItem(LANGUAGE_STORAGE_KEY, currentLanguage);
       applyStaticTranslations();
+      renderSaveStatus();
+      updateCloudAvailability();
+      renderCloudSettings();
       populateFormOptions();
       renderAll();
+      if (!document.getElementById("appShell").hidden) updateAccountIdentity();
+      if (settingsDialog.open) renderSettingsDialog();
+    }
+
+    function notificationPermission() {
+      return "Notification" in window ? window.Notification.permission : "unavailable";
+    }
+
+    function renderNotificationStatus() {
+      const status = document.getElementById("notificationStatus");
+      const permission = notificationPermission();
+      let key = "settings.notificationsOff";
+      let isError = false;
+
+      if (permission === "unavailable") {
+        key = "settings.notificationsUnavailable";
+        isError = true;
+      } else if (permission === "denied") {
+        key = "settings.notificationsDenied";
+        isError = true;
+      } else if (userSettings.notifications && permission === "granted") {
+        key = "settings.notificationsOn";
+      }
+
+      status.textContent = t(key);
+      status.classList.toggle("is-error", isError);
+    }
+
+    function renderCloudSettings() {
+      const copy = document.getElementById("cloudSyncCopy");
+      const action = document.getElementById("cloudSyncAction");
+      if (!copy || !action) return;
+
+      action.hidden = false;
+      action.disabled = cloudSyncBusy;
+      if (!activeAccount) {
+        copy.textContent = t(cloudConfigured ? "settings.syncGuest" : "settings.syncSetup");
+        action.textContent = t("settings.syncSignIn");
+        action.disabled = !cloudConfigured;
+        return;
+      }
+      if (activeAccount.provider !== "supabase") {
+        copy.textContent = t("settings.syncLocal");
+        action.hidden = true;
+        return;
+      }
+      if (!cloudClient) {
+        copy.textContent = t("settings.syncSetup");
+        action.textContent = t("settings.syncRetry");
+        action.disabled = false;
+        return;
+      }
+
+      copy.textContent = t("settings.syncCloud");
+      action.textContent = t("settings.syncNow");
+    }
+
+    async function handleCloudSyncAction() {
+      if (!activeAccount) {
+        closeSettingsDialog();
+        showAuthScreen("signin");
+        return;
+      }
+      if (!cloudClient) {
+        location.reload();
+        return;
+      }
+      if (activeAccount.provider !== "supabase") return;
+      if (hasPendingCloudSave()) await flushCloudSave();
+      else await hydrateCloudSchedule();
+      renderCloudSettings();
+    }
+
+    function renderSettingsDialog() {
+      renderCloudSettings();
+      const permission = notificationPermission();
+      const notificationsEnabled = document.getElementById("notificationsEnabled");
+      notificationsEnabled.checked = userSettings.notifications && permission !== "unavailable";
+      notificationsEnabled.disabled = permission === "unavailable" || permission === "denied";
+      document.getElementById("reminderMinutes").value = String(userSettings.reminderMinutes);
+      document.getElementById("reminderMinutes").disabled = !notificationsEnabled.checked || notificationsEnabled.disabled;
+      document.getElementById("darkModeEnabled").checked = userSettings.darkMode;
+      document.getElementById("use24Hour").checked = userSettings.use24Hour;
+      document.getElementById("reduceMotion").checked = userSettings.reduceMotion;
+      document.getElementById("defaultView").value = userSettings.defaultView;
+      document.getElementById("focusFirstEvent").checked = userSettings.focusFirstEvent;
+      renderNotificationStatus();
+    }
+
+    function applySettings() {
+      document.documentElement.classList.toggle("dark-mode", userSettings.darkMode);
+      document.documentElement.classList.toggle("reduce-motion", userSettings.reduceMotion);
+    }
+
+    function openSettingsDialog() {
+      renderSettingsDialog();
+      settingsDialog.showModal();
+    }
+
+    function closeSettingsDialog() {
+      settingsDialog.close();
+    }
+
+    function saveSetting(name, value, { rerender = false } = {}) {
+      userSettings[name] = value;
+      saveSettings();
+      applySettings();
+      if (rerender) renderAll();
+      renderSettingsDialog();
+    }
+
+    async function handleNotificationToggle(event) {
+      const toggle = event.currentTarget;
+      if (!toggle.checked) {
+        userSettings.notifications = false;
+        saveSettings();
+        startNotificationChecks();
+        renderSettingsDialog();
+        return;
+      }
+
+      if (notificationPermission() === "unavailable") {
+        userSettings.notifications = false;
+        renderSettingsDialog();
+        return;
+      }
+
+      let permission = window.Notification.permission;
+      if (permission === "default") {
+        try {
+          permission = await window.Notification.requestPermission();
+        } catch {
+          permission = "denied";
+        }
+      }
+      userSettings.notifications = permission === "granted";
+      saveSettings();
+      startNotificationChecks();
+      renderSettingsDialog();
+    }
+
+    function loadNotificationLog() {
+      try {
+        const log = JSON.parse(localStorage.getItem(scheduleStorageKey("notification-log")));
+        return log && typeof log === "object" ? log : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function checkUpcomingNotifications(now = new Date()) {
+      if (!userSettings.notifications || notificationPermission() !== "granted") return;
+      const leadMinutes = Number(userSettings.reminderMinutes);
+      const log = loadNotificationLog();
+      const staleBefore = now.getTime() - (7 * 86400000);
+      Object.entries(log).forEach(([key, timestamp]) => {
+        if (Number(timestamp) < staleBefore) delete log[key];
+      });
+
+      const finalDate = addDays(now, Math.ceil(leadMinutes / 1440));
+      for (let date = new Date(now); dateSerial(date) <= dateSerial(finalDate); date = addDays(date, 1)) {
+        state.activities
+          .filter(activity => !activity.allDay && activity.start && activityOccursOn(activity, date))
+          .forEach(activity => {
+            const eventStart = new Date(date);
+            const [hour, minute] = activity.start.split(":").map(Number);
+            eventStart.setHours(hour, minute, 0, 0);
+            const minutesUntil = (eventStart.getTime() - now.getTime()) / 60000;
+            const notificationKey = `${activity.id}:${dateKey(date)}`;
+            if (minutesUntil <= 0 || minutesUntil > leadMinutes || log[notificationKey]) return;
+
+            try {
+              new window.Notification(t("notifications.title", { title: activityTitle(activity) }), {
+                body: t("notifications.body", {
+                  child: displayChild(activity),
+                  time: formatTimeLabel(minutes(activity.start)),
+                  minutes: Math.max(1, Math.ceil(minutesUntil))
+                }),
+                tag: `kidssync-${notificationKey}`
+              });
+              log[notificationKey] = now.getTime();
+            } catch {
+            }
+          });
+      }
+
+      try {
+        localStorage.setItem(scheduleStorageKey("notification-log"), JSON.stringify(log));
+      } catch {
+      }
+    }
+
+    function startNotificationChecks() {
+      if (notificationTimer) window.clearInterval(notificationTimer);
+      notificationTimer = null;
+      if (!userSettings.notifications || notificationPermission() !== "granted") return;
+      checkUpcomingNotifications();
+      notificationTimer = window.setInterval(checkUpcomingNotifications, 60000);
     }
 
     function dayLabel(day) {
@@ -2646,11 +4211,256 @@
       }, {});
     }
 
-    function updateSaveStatus(saved) {
+    function renderSaveStatus() {
       const status = document.getElementById("saveStatus");
       if (!status) return;
-      status.textContent = t(saved ? "save.saved" : "save.failed");
-      status.classList.toggle("is-error", !saved);
+      const key = {
+        device: "save.saved",
+        cloud: "save.cloudSaved",
+        syncing: "save.syncing",
+        offline: "save.offline",
+        syncFailed: "save.syncFailed",
+        failed: "save.failed"
+      }[cloudSaveState] || "save.saved";
+      status.textContent = t(key);
+      status.classList.toggle("is-error", cloudSaveState === "failed" || cloudSaveState === "syncFailed");
+      status.classList.toggle("is-syncing", cloudSaveState === "syncing");
+      status.classList.toggle("is-offline", cloudSaveState === "offline");
+    }
+
+    function setCloudSaveState(nextState) {
+      cloudSaveState = nextState;
+      renderSaveStatus();
+      renderCloudSettings();
+    }
+
+    function updateSaveStatus(saved) {
+      if (!saved) {
+        setCloudSaveState("failed");
+        return;
+      }
+      if (activeAccount?.provider === "supabase") {
+        setCloudSaveState(cloudClient && navigator.onLine ? "syncing" : "offline");
+        return;
+      }
+      setCloudSaveState("device");
+    }
+
+    function cloudPendingKey() {
+      return activeAccount ? accountDataKey(activeAccount.id, CLOUD_PENDING_KEY) : "";
+    }
+
+    function cloudUpdatedKey() {
+      return activeAccount ? accountDataKey(activeAccount.id, CLOUD_UPDATED_KEY) : "";
+    }
+
+    function hasPendingCloudSave() {
+      const key = cloudPendingKey();
+      return Boolean(key && localStorage.getItem(key));
+    }
+
+    function markCloudSavePending() {
+      const key = cloudPendingKey();
+      if (!key) return;
+      localStorage.setItem(key, new Date().toISOString());
+    }
+
+    function buildCloudSnapshot() {
+      return {
+        version: 1,
+        kids: kidProfiles.map(kid => ({ ...kid })),
+        activities: state.activities.map(activity => ({ ...activity })),
+        presets: savedPresets.map(preset => ({ ...preset })),
+        history: scheduleHistory.slice(0, 20).map(entry => ({ ...entry })),
+        settings: { ...userSettings },
+        view: currentView
+      };
+    }
+
+    function queueCloudSave() {
+      if (cloudHydrating || activeAccount?.provider !== "supabase") return;
+      markCloudSavePending();
+      if (!cloudClient || !cloudSession || !navigator.onLine) {
+        setCloudSaveState("offline");
+        return;
+      }
+      setCloudSaveState("syncing");
+      window.clearTimeout(cloudSaveTimer);
+      cloudSaveTimer = window.setTimeout(flushCloudSave, 650);
+    }
+
+    async function flushCloudSave() {
+      if (cloudSyncBusy) {
+        cloudSyncRequested = true;
+        return false;
+      }
+      if (!cloudClient || !cloudSession || activeAccount?.provider !== "supabase") return false;
+      if (!navigator.onLine) {
+        setCloudSaveState("offline");
+        return false;
+      }
+
+      cloudSyncBusy = true;
+      cloudSyncRequested = false;
+      let syncSucceeded = false;
+      setCloudSaveState("syncing");
+      const pendingKey = cloudPendingKey();
+      const pendingVersion = localStorage.getItem(pendingKey) || new Date().toISOString();
+
+      try {
+        const { data, error } = await cloudClient
+          .from("family_schedules")
+          .upsert({
+            user_id: cloudSession.user.id,
+            schedule: buildCloudSnapshot(),
+            updated_at: new Date().toISOString()
+          }, { onConflict: "user_id" })
+          .select("updated_at")
+          .single();
+        if (error) throw error;
+
+        if (localStorage.getItem(pendingKey) === pendingVersion) {
+          localStorage.removeItem(pendingKey);
+        }
+        if (data?.updated_at) localStorage.setItem(cloudUpdatedKey(), data.updated_at);
+        syncSucceeded = true;
+        setCloudSaveState(hasPendingCloudSave() ? "syncing" : "cloud");
+        return true;
+      } catch (syncError) {
+        console.error("KidsSync cloud save failed", syncError);
+        setCloudSaveState(navigator.onLine ? "syncFailed" : "offline");
+        return false;
+      } finally {
+        cloudSyncBusy = false;
+        if (cloudSyncRequested || (syncSucceeded && hasPendingCloudSave())) {
+          window.clearTimeout(cloudSaveTimer);
+          cloudSaveTimer = window.setTimeout(flushCloudSave, 900);
+        }
+      }
+    }
+
+    function applyCloudSnapshot(snapshot) {
+      if (!snapshot || typeof snapshot !== "object") return;
+      cloudHydrating = true;
+      try {
+        if (Array.isArray(snapshot.kids)) {
+          kidProfiles = snapshot.kids
+            .filter(kid => kid && typeof kid.name === "string" && palettes[kid.palette])
+            .map(kid => ({ ...kid }));
+          localStorage.setItem(scheduleStorageKey("kids"), JSON.stringify(kidProfiles));
+        }
+        kids = buildKids(kidProfiles);
+        state.visibleKids = new Set(kidProfiles.map(kid => kid.name));
+
+        if (Array.isArray(snapshot.activities)) {
+          state.activities = snapshot.activities.map(activity => ({ ...activity }));
+          localStorage.setItem(scheduleStorageKey("activities"), JSON.stringify(state.activities));
+        }
+        if (Array.isArray(snapshot.presets)) {
+          savedPresets = snapshot.presets.map(preset => ({ ...preset }));
+          localStorage.setItem(scheduleStorageKey("presets"), JSON.stringify(savedPresets));
+        }
+        if (Array.isArray(snapshot.history)) {
+          scheduleHistory = snapshot.history.slice(0, 20).map(entry => ({ ...entry }));
+          localStorage.setItem(scheduleStorageKey("history"), JSON.stringify(scheduleHistory));
+        }
+        if (snapshot.settings && typeof snapshot.settings === "object") {
+          localStorage.setItem(scheduleStorageKey("settings"), JSON.stringify(snapshot.settings));
+          userSettings = loadSettings();
+        }
+        if (["today", "week", "month"].includes(snapshot.view)) {
+          currentView = snapshot.view;
+          localStorage.setItem(scheduleStorageKey("view"), currentView);
+        }
+
+        state.stackFront.clear();
+        applySettings();
+        populateFormOptions();
+        renderAll();
+        startNotificationChecks();
+      } finally {
+        cloudHydrating = false;
+      }
+    }
+
+    async function hydrateCloudSchedule() {
+      if (!cloudClient || !cloudSession || activeAccount?.provider !== "supabase") return false;
+      if (hasPendingCloudSave()) return flushCloudSave();
+      if (!navigator.onLine) {
+        setCloudSaveState("offline");
+        return false;
+      }
+
+      setCloudSaveState("syncing");
+      try {
+        const { data, error } = await cloudClient
+          .from("family_schedules")
+          .select("schedule, updated_at")
+          .eq("user_id", cloudSession.user.id)
+          .maybeSingle();
+        if (error) throw error;
+        if (!data) {
+          markCloudSavePending();
+          return flushCloudSave();
+        }
+
+        const localUpdatedAt = localStorage.getItem(cloudUpdatedKey());
+        if (!localUpdatedAt || localUpdatedAt !== data.updated_at) {
+          applyCloudSnapshot(data.schedule);
+          localStorage.setItem(cloudUpdatedKey(), data.updated_at);
+        }
+        setCloudSaveState("cloud");
+        return true;
+      } catch (syncError) {
+        console.error("KidsSync cloud load failed", syncError);
+        setCloudSaveState(navigator.onLine ? "syncFailed" : "offline");
+        return false;
+      }
+    }
+
+    async function initializeCloudSync() {
+      updateCloudAvailability();
+      renderCloudSettings();
+      if (!cloudClient) {
+        setCloudSaveState(activeAccount?.provider === "supabase" ? "syncFailed" : "device");
+        return;
+      }
+
+      try {
+        const { data, error } = await cloudClient.auth.getSession();
+        if (error) throw error;
+        const session = data.session;
+        if (!session) {
+          if (activeAccount?.provider === "supabase") {
+            localStorage.removeItem(AUTH_ACTIVE_KEY);
+            location.reload();
+            return;
+          }
+          setCloudSaveState("device");
+          return;
+        }
+
+        const pendingClaimEmail = normalizeEmail(localStorage.getItem(AUTH_PENDING_GUEST_CLAIM_KEY) || "");
+        const shouldClaimGuest = pendingClaimEmail && pendingClaimEmail === normalizeEmail(session.user.email || "");
+        if (!activeAccount || activeAccount.id !== session.user.id || activeAccount.provider !== "supabase") {
+          activateCloudAccount(session.user, { claimGuest: Boolean(shouldClaimGuest) });
+          location.reload();
+          return;
+        }
+
+        activeAccount = cacheCloudAccount(session.user, activeAccount.familyName);
+        if (shouldClaimGuest) {
+          migrateGuestDataToAccount(activeAccount);
+          markCloudSavePending();
+          localStorage.removeItem(AUTH_PENDING_GUEST_CLAIM_KEY);
+        }
+        cloudSession = session;
+        updateAccountIdentity();
+        await hydrateCloudSchedule();
+      } catch (syncError) {
+        console.error("KidsSync cloud initialization failed", syncError);
+        setCloudSaveState(navigator.onLine ? "syncFailed" : "offline");
+      }
     }
 
     function persistScheduleData(name, value) {
@@ -2658,6 +4468,7 @@
         const storedValue = typeof value === "string" ? value : JSON.stringify(value);
         localStorage.setItem(scheduleStorageKey(name), storedValue);
         updateSaveStatus(true);
+        queueCloudSave();
         return true;
       } catch {
         updateSaveStatus(false);
@@ -2667,14 +4478,15 @@
 
     function loadKids() {
       try {
-        const stored = JSON.parse(localStorage.getItem(scheduleStorageKey("kids")));
-        if (Array.isArray(stored) && stored.length) {
+        const storedValue = localStorage.getItem(scheduleStorageKey("kids"));
+        const stored = JSON.parse(storedValue);
+        if (Array.isArray(stored)) {
           const validKids = stored.filter(kid => kid.name && palettes[kid.palette]);
-          if (validKids.length) return validKids;
+          if (validKids.length || storedValue !== null) return validKids;
         }
       } catch {
       }
-      return defaultKids.map(kid => ({ ...kid }));
+      return defaultKids.map((kid, index) => ({ ...kid, name: defaultChildName(index + 1) }));
     }
 
     function loadActivities() {
@@ -2720,6 +4532,28 @@
       return persistScheduleData("history", scheduleHistory.slice(0, 20));
     }
 
+    function loadSettings() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(scheduleStorageKey("settings")));
+        const settings = stored && typeof stored === "object"
+          ? { ...DEFAULT_SETTINGS, ...stored }
+          : { ...DEFAULT_SETTINGS };
+        settings.reminderMinutes = [10, 30, 60, 1440].includes(Number(settings.reminderMinutes))
+          ? Number(settings.reminderMinutes)
+          : DEFAULT_SETTINGS.reminderMinutes;
+        settings.defaultView = ["today", "week", "month"].includes(settings.defaultView)
+          ? settings.defaultView
+          : DEFAULT_SETTINGS.defaultView;
+        return settings;
+      } catch {
+        return { ...DEFAULT_SETTINGS };
+      }
+    }
+
+    function saveSettings() {
+      return persistScheduleData("settings", userSettings);
+    }
+
     function cloneSchedule() {
       return {
         kids: kidProfiles.map(kid => ({ ...kid })),
@@ -2729,7 +4563,7 @@
     }
 
     function applyScheduleSnapshot(snapshot) {
-      kidProfiles = (snapshot.kids || defaultKids).map(kid => ({ ...kid }));
+      kidProfiles = (snapshot.kids || defaultKids.map((kid, index) => ({ ...kid, name: defaultChildName(index + 1) }))).map(kid => ({ ...kid }));
       kids = buildKids(kidProfiles);
       state.activities = (snapshot.activities || []).map(activity => ({ ...activity }));
       state.stackFront.clear();
@@ -2739,12 +4573,12 @@
       saveActivities();
       populateFormOptions();
       renderAll();
-      requestAnimationFrame(scrollWeekToFirstActivity);
+      if (userSettings.focusFirstEvent) requestAnimationFrame(scrollWeekToFirstActivity);
     }
 
     function rememberCurrentSchedule(label) {
       scheduleHistory.unshift({
-        id: crypto.randomUUID(),
+        id: makeId("history"),
         label,
         savedAt: new Date().toISOString(),
         snapshot: cloneSchedule()
@@ -2834,16 +4668,44 @@
       return `${activity.id}:${activity.occurrenceDate || activity.day || "event"}`;
     }
 
-    function occurrencesOnDate(date) {
+    function activityMatchesSearch(activity) {
+      const query = state.searchQuery.trim().toLocaleLowerCase(currentLanguage === "zh" ? "zh-CN" : "en-US");
+      if (!query) return true;
+      return [
+        activity.title,
+        activityTitle(activity),
+        displayChild(activity),
+        activity.location,
+        activity.responsible,
+        activity.items,
+        activity.notes
+      ].filter(Boolean).join(" ").toLocaleLowerCase(currentLanguage === "zh" ? "zh-CN" : "en-US").includes(query);
+    }
+
+    function occurrencesOnDate(date, { ignoreSearch = false } = {}) {
       const day = days[(date.getDay() + 6) % 7];
       return state.activities
         .filter(activity => activity.child === FAMILY_CHILD || state.visibleKids.has(activity.child))
+        .filter(activity => ignoreSearch || activityMatchesSearch(activity))
         .filter(activity => activityOccursOn(activity, date))
         .map(activity => ({ ...activity, day: day.key, occurrenceDate: dateKey(date) }));
     }
 
-    function weekOccurrences() {
-      return days.flatMap((day, index) => occurrencesOnDate(addDays(currentWeekStart, index)));
+    function weekOccurrences(options = {}) {
+      return days.flatMap((day, index) => occurrencesOnDate(addDays(currentWeekStart, index), options));
+    }
+
+    function monthOccurrences(options = {}) {
+      const year = currentMonthStart.getFullYear();
+      const month = currentMonthStart.getMonth();
+      const dayCount = new Date(year, month + 1, 0).getDate();
+      return Array.from({ length: dayCount }, (_, index) => occurrencesOnDate(new Date(year, month, index + 1), options)).flat();
+    }
+
+    function currentPeriodOccurrences(options = {}) {
+      if (currentView === "today") return occurrencesOnDate(selectedDate, options);
+      if (currentView === "month") return monthOccurrences(options);
+      return weekOccurrences(options);
     }
 
     function formatShortDate(date) {
@@ -2894,12 +4756,46 @@
       })[character]);
     }
 
+    function iconOptionValues() {
+      return new Set(Array.from(fields.icon.options).map(option => option.value));
+    }
+
+    function updateCustomIconField() {
+      const isCustom = fields.icon.value === CUSTOM_ICON_VALUE;
+      customIconField.hidden = !isCustom;
+      fields.customIcon.required = isCustom;
+      if (!isCustom) {
+        fields.customIcon.setCustomValidity("");
+      }
+    }
+
+    function setIconField(icon) {
+      const value = icon || "📖";
+      if (iconOptionValues().has(value)) {
+        fields.icon.value = value;
+        fields.customIcon.value = "";
+      } else {
+        fields.icon.value = CUSTOM_ICON_VALUE;
+        fields.customIcon.value = value;
+      }
+      updateCustomIconField();
+    }
+
+    function selectedEventIcon() {
+      if (fields.icon.value !== CUSTOM_ICON_VALUE) {
+        return fields.icon.value || MISC_ICON;
+      }
+      const customIcon = fields.customIcon.value.trim();
+      return customIcon || MISC_ICON;
+    }
+
     function minutes(time) {
       const [hour, minute] = time.split(":").map(Number);
       return hour * 60 + minute;
     }
 
     function timeLabel(time) {
+      if (userSettings.use24Hour) return time;
       if (currentLanguage === "zh") return time;
       const [hourText, minute] = time.split(":");
       const hour = Number(hourText);
@@ -2910,6 +4806,9 @@
     function formatTimeLabel(totalMinutes) {
       const hour = Math.floor(totalMinutes / 60);
       const minute = totalMinutes % 60;
+      if (userSettings.use24Hour) {
+        return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+      }
       if (currentLanguage === "zh") {
         const period = hour < 12 ? "上午" : "下午";
         return `${period} ${hour % 12 || 12}:${String(minute).padStart(2, "0")}`;
@@ -2938,6 +4837,10 @@
       return activity.child === FAMILY_CHILD ? t("calendar.family") : activity.child;
     }
 
+    function defaultChildName(number) {
+      return t("kids.defaultName", { number });
+    }
+
     function recurrenceValue(activity) {
       return activity.recurrence || (activity.day ? "weekly" : "none");
     }
@@ -2946,22 +4849,32 @@
       return t(`repeat.${recurrenceValue(activity)}`);
     }
 
-    function findConflicts(activities) {
-      const conflicts = new Set();
+    function findConflictPairs(activities) {
+      const pairs = [];
       for (let i = 0; i < activities.length; i += 1) {
         for (let j = i + 1; j < activities.length; j += 1) {
           const first = activities[i];
           const second = activities[j];
           if (first.allDay || second.allDay) continue;
-          const sameDay = first.day === second.day;
+          const sameDay = first.occurrenceDate && second.occurrenceDate
+            ? first.occurrenceDate === second.occurrenceDate
+            : first.day === second.day;
           const sameChild = first.child === second.child;
           const overlaps = minutes(first.start) < minutes(second.end) && minutes(second.start) < minutes(first.end);
           if (sameDay && sameChild && overlaps) {
-            conflicts.add(occurrenceKey(first));
-            conflicts.add(occurrenceKey(second));
+            pairs.push([first, second]);
           }
         }
       }
+      return pairs;
+    }
+
+    function findConflicts(activities) {
+      const conflicts = new Set();
+      findConflictPairs(activities).forEach(([first, second]) => {
+        conflicts.add(occurrenceKey(first));
+        conflicts.add(occurrenceKey(second));
+      });
       return conflicts;
     }
 
@@ -3068,7 +4981,8 @@
             event.style.setProperty("--event-bg", colors.soft);
             event.style.setProperty("--event-line", colors.line);
             event.style.setProperty("--event-ink", colors.ink);
-            event.innerHTML = `<span aria-hidden="true">${activity.icon}</span><span>${escapeHtml(activityTitle(activity))} · ${escapeHtml(displayChild(activity))}</span>`;
+            event.dataset.occurrenceKey = occurrenceKey(activity);
+            event.innerHTML = `<span aria-hidden="true">${escapeHtml(activity.icon || MISC_ICON)}</span><span>${escapeHtml(activityTitle(activity))} · ${escapeHtml(displayChild(activity))}</span>`;
             event.addEventListener("click", () => openDialog(activity));
             cell.appendChild(event);
           });
@@ -3112,6 +5026,7 @@
             event.style.setProperty("--event-bg", colors.soft);
             event.style.setProperty("--event-line", colors.line);
             event.style.setProperty("--event-ink", colors.ink);
+            event.dataset.occurrenceKey = occurrenceKey(activity);
             if (group.length > 1) {
               const offset = Math.min(stackIndex, 2) * 12;
               const verticalOffset = Math.min(stackIndex, 2) * 22;
@@ -3120,14 +5035,10 @@
               event.style.top = `calc(${top}% + ${verticalOffset}px)`;
               event.style.zIndex = frontActivity.id === activity.id ? "30" : `${2 + stackIndex}`;
             }
-            event.innerHTML = `
-              <span class="event-icon" aria-hidden="true">${activity.icon}</span>
-              <span>
-                <span class="event-time">${timeLabel(activity.start)} - ${timeLabel(activity.end)}</span>
-                <span class="event-title">${escapeHtml(activityTitle(activity))}</span>
-                <span class="event-child">(${escapeHtml(displayChild(activity))})</span>
-              </span>
-            `;
+            event.innerHTML = eventCardMarkup(activity, {
+              badge: conflicts.has(occurrenceKey(activity)) ? t("calendar.conflict") : "",
+              badgeClass: "is-conflict"
+            });
             event.addEventListener("click", () => openDialog(activity));
             column.appendChild(event);
           });
@@ -3184,14 +5095,13 @@
           item.style.setProperty("--event-bg", colors.soft);
           item.style.setProperty("--event-line", conflicts.has(occurrenceKey(activity)) ? "#c93651" : colors.line);
           item.style.setProperty("--event-ink", colors.ink);
-          item.innerHTML = `
-            <span class="event-icon" aria-hidden="true">${activity.icon}</span>
-            <span>
-              <span class="agenda-meta">${activity.allDay ? t("calendar.allDay") : `${timeLabel(activity.start)} - ${timeLabel(activity.end)}`} · ${escapeHtml(displayChild(activity))}</span>
-              <span class="agenda-title">${escapeHtml(activityTitle(activity))}</span>
-              <span class="agenda-meta">${agendaDetails ? escapeHtml(agendaDetails) : (conflicts.has(occurrenceKey(activity)) ? t("calendar.conflict") : recurrenceLabel(activity))}</span>
-            </span>
-          `;
+          item.dataset.occurrenceKey = occurrenceKey(activity);
+          item.innerHTML = eventCardMarkup(activity, {
+            badge: conflicts.has(occurrenceKey(activity)) ? t("calendar.conflict") : "",
+            badgeClass: "is-conflict",
+            detail: activity.notes || "",
+            showRecurrence: !agendaDetails
+          });
           item.addEventListener("click", () => openDialog(activity));
           list.appendChild(item);
         });
@@ -3211,40 +5121,171 @@
       ].filter(Boolean).join(" · ");
     }
 
+    function eventCardMarkup(activity, options = {}) {
+      const logistics = eventLogistics(activity);
+      const details = [options.detail || "", logistics].filter(Boolean).join(" · ");
+      const meta = [
+        escapeHtml(displayChild(activity)),
+        options.showRecurrence ? recurrenceLabel(activity) : ""
+      ].filter(Boolean).join(" · ");
+      return `
+        <span class="event-icon" aria-hidden="true">${escapeHtml(activity.icon || MISC_ICON)}</span>
+        <span class="event-card-copy">
+          ${options.badge ? `<span class="event-badge ${options.badgeClass || ""}">${escapeHtml(options.badge)}</span>` : ""}
+          <span class="event-time">${eventTimeText(activity)}</span>
+          <span class="event-title">${escapeHtml(activityTitle(activity))}</span>
+          <span class="event-child">${meta}</span>
+          ${details ? `<span class="event-detail">${escapeHtml(details)}</span>` : ""}
+        </span>
+      `;
+    }
+
+    function todaySectionKey(activity) {
+      if (activity.allDay) return "allDay";
+      const start = minutes(activity.start);
+      if (start < 12 * 60) return "morning";
+      if (start < 17 * 60) return "afternoon";
+      return "evening";
+    }
+
+    function todaySectionTitle(key) {
+      return t(`today.${key}`);
+    }
+
+    function nextUpActivity(activities) {
+      const timed = activities.filter(activity => !activity.allDay);
+      if (!timed.length) return null;
+      const now = new Date();
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+      if (isSameDate(selectedDate, now)) {
+        return timed.find(activity => minutes(activity.start) >= nowMinutes) || timed[timed.length - 1];
+      }
+      return timed[0];
+    }
+
     function renderToday() {
       todayHeading.textContent = formatFullDate(selectedDate);
       todayList.innerHTML = "";
       const activities = occurrencesOnDate(selectedDate)
         .sort((first, second) => Number(second.allDay) - Number(first.allDay) || minutes(first.start) - minutes(second.start));
+      const conflicts = findConflicts(activities);
 
       if (!activities.length) {
-        const empty = document.createElement("p");
+        const empty = document.createElement("article");
         empty.className = "today-empty";
-        empty.textContent = t("calendar.empty");
+        empty.innerHTML = `
+          <span>
+            <span class="today-event-title">${t("calendar.empty")}</span>
+            <span class="today-event-meta">${formatFullDate(selectedDate)}</span>
+            <span class="today-empty-actions">
+              <button class="ghost-btn" type="button">${t("today.addToday")}</button>
+            </span>
+          </span>
+        `;
+        empty.querySelector("button").addEventListener("click", () => openNewEventForDate(selectedDate, FAMILY_CHILD));
         todayList.appendChild(empty);
         return;
       }
 
-      activities.forEach(activity => {
-        const colors = eventColors(activity);
-        const event = document.createElement("button");
-        const logistics = eventLogistics(activity);
-        event.type = "button";
-        event.className = "today-event";
-        event.style.setProperty("--event-bg", colors.soft);
-        event.style.setProperty("--event-ink", colors.ink);
-        event.innerHTML = `
-          <span class="today-event-icon" aria-hidden="true">${activity.icon}</span>
-          <span>
-            <span class="today-event-title">${escapeHtml(activityTitle(activity))}</span>
-            <span class="today-event-meta">${escapeHtml(displayChild(activity))} · ${recurrenceLabel(activity)}</span>
-            ${logistics ? `<span class="today-event-details">${escapeHtml(logistics)}</span>` : ""}
-          </span>
-          <span class="today-event-time">${eventTimeText(activity)}</span>
-        `;
-        event.addEventListener("click", () => openDialog(activity));
-        todayList.appendChild(event);
+      const next = nextUpActivity(activities);
+      ["allDay", "morning", "afternoon", "evening"].forEach(sectionKey => {
+        const sectionItems = activities.filter(activity => todaySectionKey(activity) === sectionKey);
+        if (!sectionItems.length) return;
+
+        const section = document.createElement("section");
+        section.className = "today-section";
+        section.innerHTML = `<h3 class="today-section-title">${todaySectionTitle(sectionKey)}</h3>`;
+
+        sectionItems.forEach(activity => {
+          const colors = eventColors(activity);
+          const isNext = next?.id === activity.id;
+          const isConflict = conflicts.has(occurrenceKey(activity));
+          const event = document.createElement("button");
+          event.type = "button";
+          event.className = `today-event${isNext ? " is-next" : ""}${isConflict ? " conflict" : ""}`;
+          event.style.setProperty("--event-bg", colors.soft);
+          event.style.setProperty("--event-line", colors.line);
+          event.style.setProperty("--event-ink", colors.ink);
+          event.dataset.occurrenceKey = occurrenceKey(activity);
+          event.innerHTML = eventCardMarkup(activity, {
+            badge: isConflict ? t("calendar.conflict") : (isNext ? t("today.nextUp") : ""),
+            badgeClass: isConflict ? "is-conflict" : "",
+            showRecurrence: true
+          });
+          event.addEventListener("click", () => openDialog(activity));
+          section.appendChild(event);
+        });
+
+        todayList.appendChild(section);
       });
+    }
+
+    function renderCalendarEmptyState() {
+      calendarEmptyState.hidden = !(kidProfiles.length === 0 && state.activities.length === 0);
+    }
+
+    function occurrenceDateTime(activity) {
+      const dateValue = activity.occurrenceDate || activity.startDate;
+      if (!dateValue) return null;
+      const date = parseDateKey(dateValue);
+      if (!activity.allDay && activity.start) {
+        const [hour, minute] = activity.start.split(":").map(Number);
+        date.setHours(hour, minute, 0, 0);
+      }
+      return date;
+    }
+
+    function nextPeriodOccurrence(activities) {
+      const now = new Date();
+      return activities
+        .map(activity => ({ activity, date: occurrenceDateTime(activity) }))
+        .filter(item => item.date && item.date.getTime() >= now.getTime())
+        .sort((first, second) => first.date - second.date)[0] || null;
+    }
+
+    function nextOccurrenceLabel(item) {
+      if (!item) return t("overview.noUpcoming");
+      const activity = item.activity;
+      const date = parseDateKey(activity.occurrenceDate || activity.startDate);
+      const dateLabel = currentView === "today" ? "" : `${formatShortDate(date)} · `;
+      const time = activity.allDay ? t("calendar.allDay") : formatTimeLabel(minutes(activity.start));
+      return `${dateLabel}${time} ${activity.icon || MISC_ICON} ${activityTitle(activity)} · ${displayChild(activity)}`;
+    }
+
+    function renderScheduleOverview() {
+      const allActivities = currentPeriodOccurrences({ ignoreSearch: true });
+      const visibleActivitiesForPeriod = currentPeriodOccurrences();
+      const hasSearch = Boolean(state.searchQuery.trim());
+      document.getElementById("overviewEvents").textContent = hasSearch
+        ? t("overview.eventsFiltered", { count: visibleActivitiesForPeriod.length, total: allActivities.length })
+        : t(visibleActivitiesForPeriod.length === 1 ? "overview.eventOne" : "overview.events", { count: visibleActivitiesForPeriod.length });
+
+      const conflictCount = findConflictPairs(visibleActivitiesForPeriod).length;
+      jumpConflictButton.textContent = conflictCount
+        ? t(conflictCount === 1 ? "overview.conflictOne" : "overview.conflicts", { count: conflictCount })
+        : t("overview.noConflicts");
+      jumpConflictButton.disabled = conflictCount === 0;
+      jumpConflictButton.title = conflictCount ? t("overview.jumpConflict") : "";
+      document.getElementById("overviewNextEvent").textContent = nextOccurrenceLabel(nextPeriodOccurrence(visibleActivitiesForPeriod));
+      clearSearch.hidden = !state.searchQuery;
+    }
+
+    function jumpToNextConflict() {
+      const conflictKeys = findConflicts(currentPeriodOccurrences());
+      const candidates = [...document.querySelectorAll("[data-occurrence-key]")]
+        .filter(element => conflictKeys.has(element.dataset.occurrenceKey))
+        .filter(element => element.getClientRects().length > 0);
+      if (!candidates.length) return;
+      const target = candidates[conflictCursor % candidates.length];
+      conflictCursor = (conflictCursor + 1) % candidates.length;
+      target.classList.add("conflict-focus");
+      target.scrollIntoView({
+        behavior: userSettings.reduceMotion ? "auto" : "smooth",
+        block: "center",
+        inline: "center"
+      });
+      target.focus({ preventScroll: true });
+      window.setTimeout(() => target.classList.remove("conflict-focus"), 1600);
     }
 
     function isSameDate(first, second) {
@@ -3268,6 +5309,7 @@
         const date = addDays(gridStart, index);
         const activities = occurrencesOnDate(date)
           .sort((first, second) => Number(second.allDay) - Number(first.allDay) || minutes(first.start) - minutes(second.start));
+        const conflicts = findConflicts(activities);
         const cell = document.createElement("div");
         const outside = date.getMonth() !== currentMonthStart.getMonth();
         cell.className = `month-day${outside ? " is-outside" : ""}${isSameDate(date, today) ? " is-today" : ""}`;
@@ -3287,11 +5329,12 @@
           const colors = eventColors(activity);
           const event = document.createElement("button");
           event.type = "button";
-          event.className = "month-event";
+          event.className = `month-event${conflicts.has(occurrenceKey(activity)) ? " conflict" : ""}`;
           event.style.setProperty("--event-bg", colors.soft);
           event.style.setProperty("--event-line", colors.line);
           event.style.setProperty("--event-ink", colors.ink);
-          event.textContent = `${activity.allDay ? "" : `${timeLabel(activity.start)} `}${activity.icon} ${activityTitle(activity)}`;
+          event.dataset.occurrenceKey = occurrenceKey(activity);
+          event.textContent = `${activity.allDay ? "" : `${timeLabel(activity.start)} `}${activity.icon || MISC_ICON} ${activityTitle(activity)}`;
           event.addEventListener("click", () => openDialog(activity));
           cell.appendChild(event);
         });
@@ -3309,6 +5352,7 @@
 
     function updateCalendarView() {
       const showWeek = currentView === "week";
+      calendarEmptyState.classList.toggle("is-week", showWeek);
       weekSchedule.hidden = !showWeek;
       mobileAgenda.hidden = !showWeek;
       todayView.hidden = currentView !== "today";
@@ -3350,12 +5394,12 @@
       if (fields.eventType.value === "birthday") {
         fields.recurrence.value = "yearly";
         fields.allDay.checked = true;
-        fields.icon.value = "🎂";
+        setIconField("🎂");
       } else if (fields.eventType.value === "holiday") {
         fields.child.value = FAMILY_CHILD;
         fields.recurrence.value = "yearly";
         fields.allDay.checked = true;
-        fields.icon.value = "🎉";
+        setIconField("🎉");
       }
       updateAllDayFields();
     }
@@ -3364,7 +5408,8 @@
       const isEdit = Boolean(activity);
       populateFormOptions();
       document.getElementById("dialogTitle").textContent = isEdit ? t("dialog.editTitle") : t("dialog.addTitle");
-      deleteButton.style.visibility = isEdit ? "visible" : "hidden";
+      deleteButton.hidden = !isEdit;
+      duplicateButton.hidden = !isEdit;
       fields.id.value = activity?.id || "";
       fields.child.value = activity?.child || kidProfiles[0]?.name || FAMILY_CHILD;
       const legacyDayIndex = days.findIndex(day => day.key === activity?.day);
@@ -3375,7 +5420,7 @@
       fields.start.value = activity?.start || "15:00";
       fields.end.value = activity?.end || "15:30";
       fields.title.value = activity?.title || "";
-      fields.icon.value = activity?.icon || "📖";
+      setIconField(activity?.icon || "📖");
       fields.style.value = activity?.style || "child";
       fields.notes.value = activity?.notes || "";
       fields.location.value = activity?.location || "";
@@ -3383,6 +5428,22 @@
       fields.items.value = activity?.items || "";
       updateAllDayFields();
       dialog.showModal();
+    }
+
+    function duplicateActivityDraft() {
+      if (!fields.id.value) return;
+      fields.id.value = "";
+      document.getElementById("dialogTitle").textContent = t("dialog.duplicateTitle");
+      deleteButton.hidden = true;
+      duplicateButton.hidden = true;
+      fields.title.focus();
+      fields.title.select();
+    }
+
+    function openNewEventForDate(date, child = FAMILY_CHILD) {
+      openDialog();
+      fields.date.value = dateKey(date);
+      fields.child.value = child;
     }
 
     function renderKidEditor() {
@@ -3417,6 +5478,16 @@
       kidDraft = kidProfiles.map(kid => ({ ...kid }));
       renderKidEditor();
       kidsDialog.showModal();
+    }
+
+    function openKidsDialogWithStarter() {
+      if (!kidProfiles.length) {
+        kidDraft = [{ id: makeId("kid"), name: defaultChildName(1), palette: "blue" }];
+        renderKidEditor();
+        kidsDialog.showModal();
+        return;
+      }
+      openKidsDialog();
     }
 
     function closeKidsDialog() {
@@ -3455,7 +5526,7 @@
       const fallback = `${t("presets.family")} ${new Date().toLocaleDateString(currentLanguage === "zh" ? "zh-CN" : "en-US", { month: "short", day: "numeric" })}`;
       const name = input.value.trim() || fallback;
       savedPresets.unshift({
-        id: crypto.randomUUID(),
+        id: makeId("preset"),
         name,
         savedAt: new Date().toISOString(),
         snapshot: cloneSchedule()
@@ -3494,12 +5565,13 @@
     }
 
     function loadAndrewMarkPreset() {
-      const hasExistingSchedule = state.activities.length > 0 || kidProfiles.some(kid => !["Child 1", "Child 2"].includes(kid.name));
+      const defaultKidNames = [defaultChildName(1), defaultChildName(2), "Child 1", "Child 2"];
+      const hasExistingSchedule = state.activities.length > 0 || kidProfiles.some(kid => !defaultKidNames.includes(kid.name));
       if (hasExistingSchedule && !confirm(t("presets.confirmExample"))) {
         return;
       }
 
-      rememberCurrentSchedule("Before Andrew and Mark preset");
+      rememberCurrentSchedule(t("presets.beforeExample"));
       selectedDate = new Date();
       currentWeekStart = getMonday(selectedDate);
       kidProfiles = andrewMarkPresetKids.map(kid => ({ ...kid }));
@@ -3522,12 +5594,13 @@
       saveActivities();
       populateFormOptions();
       renderAll();
-      requestAnimationFrame(scrollWeekToFirstActivity);
+      if (userSettings.focusFirstEvent) requestAnimationFrame(scrollWeekToFirstActivity);
     }
 
     function closeDialog() {
       dialog.close();
       form.reset();
+      updateCustomIconField();
     }
 
     function renderAll() {
@@ -3537,6 +5610,8 @@
       renderAgenda();
       renderToday();
       renderMonth();
+      renderScheduleOverview();
+      renderCalendarEmptyState();
       updateCalendarView();
     }
 
@@ -3551,7 +5626,11 @@
       const timelineHeight = timeline?.offsetHeight || 1440;
       const focusMinute = Math.max(firstStart - 30, scheduleStartMinutes);
       const top = headerHeight + ((focusMinute - scheduleStartMinutes) / scheduleDurationMinutes) * timelineHeight;
-      weekSchedule.scrollTo({ top, left: weekSchedule.scrollLeft, behavior: "smooth" });
+      weekSchedule.scrollTo({
+        top,
+        left: weekSchedule.scrollLeft,
+        behavior: userSettings.reduceMotion ? "auto" : "smooth"
+      });
     }
 
     function navigateCalendar(direction) {
@@ -3572,12 +5651,42 @@
     });
     document.getElementById("signInForm").addEventListener("submit", handleSignIn);
     document.getElementById("signUpForm").addEventListener("submit", handleSignUp);
+    document.getElementById("guestAuthButton").addEventListener("click", () => showAuthScreen("signin"));
+    document.getElementById("continuePreview").addEventListener("click", showGuestPreview);
     document.getElementById("logoutButton").addEventListener("click", logOut);
+    document.getElementById("openSettings").addEventListener("click", openSettingsDialog);
+    document.getElementById("cloudSyncAction").addEventListener("click", handleCloudSyncAction);
+    document.getElementById("closeSettings").addEventListener("click", closeSettingsDialog);
+    document.getElementById("doneSettings").addEventListener("click", closeSettingsDialog);
+    document.getElementById("notificationsEnabled").addEventListener("change", handleNotificationToggle);
+    document.getElementById("reminderMinutes").addEventListener("change", event => {
+      saveSetting("reminderMinutes", Number(event.currentTarget.value));
+      startNotificationChecks();
+    });
+    document.getElementById("darkModeEnabled").addEventListener("change", event => {
+      saveSetting("darkMode", event.currentTarget.checked);
+    });
+    document.getElementById("use24Hour").addEventListener("change", event => {
+      saveSetting("use24Hour", event.currentTarget.checked, { rerender: true });
+    });
+    document.getElementById("reduceMotion").addEventListener("change", event => {
+      saveSetting("reduceMotion", event.currentTarget.checked);
+    });
+    document.getElementById("defaultView").addEventListener("change", event => {
+      saveSetting("defaultView", event.currentTarget.value);
+    });
+    document.getElementById("focusFirstEvent").addEventListener("change", event => {
+      saveSetting("focusFirstEvent", event.currentTarget.checked);
+    });
     document.getElementById("addActivity").addEventListener("click", () => openDialog());
     document.getElementById("loadPreset").addEventListener("click", loadAndrewMarkPreset);
+    document.getElementById("emptyAddKid").addEventListener("click", openKidsDialogWithStarter);
+    document.getElementById("emptyAddEvent").addEventListener("click", () => openNewEventForDate(selectedDate, FAMILY_CHILD));
+    document.getElementById("emptyLoadExample").addEventListener("click", loadAndrewMarkPreset);
     document.getElementById("managePresets").addEventListener("click", openPresetDialog);
     document.getElementById("closeDialog").addEventListener("click", closeDialog);
     document.getElementById("cancelDialog").addEventListener("click", closeDialog);
+    duplicateButton.addEventListener("click", duplicateActivityDraft);
     document.getElementById("closeKidsDialog").addEventListener("click", closeKidsDialog);
     document.getElementById("cancelKidsDialog").addEventListener("click", closeKidsDialog);
     document.getElementById("closePresetDialog").addEventListener("click", closePresetDialog);
@@ -3592,15 +5701,30 @@
     document.querySelectorAll("[data-view]").forEach(button => {
       button.addEventListener("click", () => activateCalendarView(button.dataset.view));
     });
+    scheduleSearch.addEventListener("input", event => {
+      state.searchQuery = event.currentTarget.value;
+      conflictCursor = 0;
+      renderAll();
+    });
+    clearSearch.addEventListener("click", () => {
+      state.searchQuery = "";
+      scheduleSearch.value = "";
+      conflictCursor = 0;
+      renderAll();
+      scheduleSearch.focus();
+    });
+    jumpConflictButton.addEventListener("click", jumpToNextConflict);
     fields.eventType.addEventListener("change", applyEventTypeDefaults);
+    fields.icon.addEventListener("change", updateCustomIconField);
     fields.allDay.addEventListener("change", updateAllDayFields);
     presetForm.addEventListener("submit", event => event.preventDefault());
+    settingsForm.addEventListener("submit", event => event.preventDefault());
     document.getElementById("addKidRow").addEventListener("click", () => {
       const nextNumber = kidDraft.length + 1;
       const paletteKeys = Object.keys(palettes);
       kidDraft.push({
-        id: crypto.randomUUID(),
-        name: `Child ${nextNumber}`,
+        id: makeId("kid"),
+        name: defaultChildName(nextNumber),
         palette: paletteKeys[(nextNumber - 1) % paletteKeys.length]
       });
       renderKidEditor();
@@ -3621,7 +5745,7 @@
       }
       fields.end.setCustomValidity("");
       const activity = {
-        id: fields.id.value || crypto.randomUUID(),
+        id: fields.id.value || makeId("activity"),
         child: fields.child.value,
         startDate: fields.date.value,
         eventType: fields.eventType.value,
@@ -3630,7 +5754,7 @@
         start: fields.start.value,
         end: fields.end.value,
         title: fields.title.value.trim(),
-        icon: fields.icon.value,
+        icon: selectedEventIcon(),
         style: fields.style.value,
         notes: fields.notes.value.trim(),
         location: fields.location.value.trim(),
@@ -3657,7 +5781,7 @@
       const updatedKids = rows.map((row, index) => {
         const originalName = row.dataset.originalName;
         let name = row.querySelector(".kid-name-input").value.trim();
-        if (!name) name = `Child ${index + 1}`;
+        if (!name) name = defaultChildName(index + 1);
         let uniqueName = name;
         let suffix = 2;
         while (seen.has(uniqueName.toLowerCase())) {
@@ -3669,13 +5793,13 @@
           renamed.set(originalName, uniqueName);
         }
         return {
-          id: row.dataset.id || crypto.randomUUID(),
+          id: row.dataset.id || makeId("kid"),
           name: uniqueName,
           palette: row.querySelector(".kid-palette-select").value
         };
       });
 
-      kidProfiles = updatedKids.length ? updatedKids : defaultKids;
+      kidProfiles = updatedKids;
       kids = buildKids(kidProfiles);
       state.activities = state.activities
         .map(activity => renamed.has(activity.child) ? { ...activity, child: renamed.get(activity.child) } : activity)
@@ -3695,10 +5819,27 @@
       renderAll();
     });
 
+    window.addEventListener("online", () => {
+      if (activeAccount?.provider !== "supabase" || !cloudSession) return;
+      if (hasPendingCloudSave()) flushCloudSave();
+      else hydrateCloudSchedule();
+    });
+    window.addEventListener("offline", () => {
+      if (activeAccount?.provider === "supabase") setCloudSaveState("offline");
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (activeAccount?.provider !== "supabase" || !cloudSession) return;
+      if (hasPendingCloudSave()) flushCloudSave();
+      else if (!document.hidden) hydrateCloudSchedule();
+    });
+
+    applySettings();
     applyStaticTranslations();
     initializeAuthUI();
     populateFormOptions();
     renderAll();
+    startNotificationChecks();
+    initializeCloudSync();
   </script>
 </body>
 </html>
