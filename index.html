@@ -1681,7 +1681,8 @@
       line-height: 1.35;
     }
 
-    .app.is-calendar-empty .calendar-view {
+    .app.is-calendar-empty .calendar-view,
+    .app.has-no-search-results .calendar-view {
       display: none !important;
     }
 
@@ -11925,6 +11926,7 @@
       const hasActiveSearch = Boolean(state.searchQuery.trim()) || state.eventFilter !== "all";
       const hasNoMatches = state.activities.length > 0 && hasActiveSearch && currentPeriodOccurrences().length === 0;
       searchEmptyState.hidden = !hasNoMatches;
+      document.getElementById("appShell").classList.toggle("has-no-search-results", hasNoMatches);
     }
 
     function resetScheduleFilters() {
