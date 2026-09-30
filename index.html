@@ -919,6 +919,13 @@
       position: relative;
     }
 
+    .invitation-button.has-unread {
+      border-color: var(--blue-line);
+      color: #174f83;
+      background: var(--blue-soft);
+      box-shadow: 0 0 0 3px rgba(47, 127, 211, .1);
+    }
+
     .invitation-badge {
       position: absolute;
       top: -7px;
@@ -3376,6 +3383,34 @@
       background: var(--panel);
     }
 
+    .invitation-card.is-new {
+      border-left: 4px solid var(--blue);
+      background: #f7fbff;
+    }
+
+    .mailbox-card-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .invitation-state {
+      flex: 0 0 auto;
+      padding: 3px 7px;
+      border-radius: 999px;
+      color: #486176;
+      background: #edf2f6;
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .invitation-state.is-new {
+      color: #174f83;
+      background: var(--blue-soft);
+    }
+
     .invitation-copy,
     .shared-event-copy {
       display: grid;
@@ -3413,6 +3448,15 @@
     .right-actions {
       display: flex;
       gap: 10px;
+    }
+
+    .share-summary-actions {
+      justify-content: center;
+    }
+
+    .share-summary-actions .right-actions {
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
     .left-actions {
@@ -4019,7 +4063,7 @@
     .role-pill { display: inline-flex; align-items: center; width: max-content; min-height: 25px; padding: 3px 8px; border: 1px solid var(--blue-line); border-radius: 999px; color: #174f83; background: var(--blue-soft); font-size: 11px; font-weight: 900; }
     .owner-row { background: var(--blue-soft); }
     .invite-note-callout { margin: 0 20px 14px; padding: 12px 14px; border-left: 3px solid var(--trust-success); color: #29475a; background: #f4f8f5; font-size: 13px; line-height: 1.55; }
-    .shared-calendar-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 20px 14px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .shared-calendar-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin: 0 20px 14px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
     .shared-calendar-access { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; font-weight: 800; }
     .shared-event-actions { display: flex; align-items: center; gap: 6px; }
     .shared-event-form { padding: 20px; }
@@ -4955,6 +4999,8 @@
 
     html.dark-mode .toolbar,
     html.dark-mode .account-bar { border-color: var(--line); background: rgba(24, 37, 46, 0.96); }
+    html.dark-mode .invitation-card.is-new { background: var(--blue-soft); }
+    html.dark-mode .invitation-state { color: var(--muted); background: var(--panel); }
     html.dark-mode .ribbon { color: #0e1a21; background: var(--blue); }
     html.dark-mode .primary-btn,
     html.dark-mode .auth-entry-btn,
@@ -6554,6 +6600,37 @@
     }
   </style>
   <style>
+    /* Small, consistent button feedback on hover and press. */
+    button:not(:disabled),
+    .more-actions summary {
+      transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease;
+    }
+
+    button:not(:disabled):hover,
+    .more-actions summary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(27, 53, 74, .14);
+    }
+
+    button:not(:disabled):active,
+    .more-actions summary:active {
+      transform: translateY(0) scale(.98);
+      box-shadow: 0 3px 8px rgba(27, 53, 74, .12);
+    }
+
+    html.reduce-motion button:not(:disabled),
+    html.reduce-motion .more-actions summary {
+      transition: none;
+    }
+
+    html.reduce-motion button:not(:disabled):hover,
+    html.reduce-motion button:not(:disabled):active,
+    html.reduce-motion .more-actions summary:hover,
+    html.reduce-motion .more-actions summary:active {
+      transform: none;
+    }
+  </style>
+  <style>
     /* Gentle reveal motion for the About section. */
     .welcome-about-section.motion-ready .welcome-about-copy,
     .welcome-about-section.motion-ready .welcome-about-point {
@@ -6604,10 +6681,202 @@
     .history-item-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
     .history-item-copy span, .history-item-time { color: var(--muted); font-size: 12px; line-height: 1.4; }
     .history-item-time { white-space: nowrap; text-align: right; }
+    .welcome-back-body { padding: 18px 20px 22px; }
+    .welcome-back-intro { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+    .welcome-back-list { display: grid; gap: 8px; }
+    .welcome-back-item { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 11px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); }
+    .welcome-back-item-icon { font-size: 21px; text-align: center; }
+    .welcome-back-item-copy { min-width: 0; }
+    .welcome-back-item-copy strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+    .welcome-back-item-copy span, .welcome-back-item-time { color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .welcome-back-item-time { white-space: nowrap; text-align: right; }
+    .welcome-back-empty { padding: 26px 16px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); text-align: center; }
+    .welcome-back-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+    .version-item { align-items: center; }
+    .version-item-actions { display: grid; justify-items: end; gap: 7px; }
+    .version-item-actions .small-btn { min-width: 82px; }
     @media (max-width: 560px) {
       .history-body { padding: 14px; }
       .history-item { grid-template-columns: 28px minmax(0, 1fr); }
       .history-item-time { grid-column: 2; text-align: left; }
+      .welcome-back-body { padding: 14px; }
+      .welcome-back-item { grid-template-columns: 28px minmax(0, 1fr); }
+      .welcome-back-item-time { grid-column: 2; text-align: left; }
+      .welcome-back-actions { display: grid; grid-template-columns: 1fr; }
+      .version-item-actions { grid-column: 2; width: 100%; grid-template-columns: minmax(0, 1fr) auto; align-items: center; justify-items: start; }
+      .version-item-actions .small-btn { justify-self: end; min-height: 42px; }
+    }
+  </style>
+  <style>
+    /* Fluid in-between layouts for resizable windows and split-screen use. */
+    @media (min-width: 741px) and (max-width: 900px) {
+      .app { width: calc(100% - 24px); }
+
+      .topbar {
+        grid-template-columns: minmax(0, 1fr) minmax(260px, .78fr);
+        gap: 12px;
+        align-items: center;
+      }
+
+      .brand { gap: 12px; }
+      .calendar-mark { width: 60px; height: 60px; }
+      .calendar-grid {
+        left: 10px;
+        top: 24px;
+        grid-template-columns: repeat(2, 13px);
+        grid-auto-rows: 10px;
+        gap: 5px;
+      }
+      .clock-hand { width: 32px; height: 32px; }
+      .brand h1 { font-size: 38px; }
+      .ribbon { margin-top: 6px; padding: 6px 10px; font-size: 13px; }
+      .brand-subtitle { display: none; }
+      .kids-panel { min-height: 96px; padding: 12px 14px; }
+      .kids-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+      .kid-toggle { min-height: 44px; font-size: 16px; }
+
+      .toolbar-leading {
+        grid-template-columns: minmax(230px, 1fr) minmax(220px, .82fr) auto;
+        gap: 8px;
+      }
+
+      .calendar-workspace,
+      .week-controls,
+      .language-switch {
+        width: auto;
+        height: 52px;
+      }
+
+      .calendar-workspace { grid-column: auto; }
+      .language-switch { min-width: 104px; }
+      .calendar-zoom { display: none; }
+
+      .schedule-actions {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) minmax(110px, auto) minmax(130px, auto) 96px;
+        gap: 8px;
+      }
+
+      .schedule-actions .view-switch {
+        grid-column: auto;
+        width: 100%;
+      }
+
+      .schedule-actions > .ghost-btn,
+      .schedule-actions > .primary-btn,
+      .schedule-actions > .more-actions { width: 100%; }
+      .schedule-actions > .primary-btn { white-space: nowrap; }
+    }
+
+    @media (min-width: 561px) and (max-width: 740px) {
+      .app { width: calc(100% - 20px); }
+
+      .account-bar {
+        display: grid;
+        grid-template-columns: auto 40px minmax(100px, 1fr) 44px auto;
+        gap: 8px;
+        padding: 8px 10px;
+      }
+
+      .save-status { grid-column: 1; grid-row: 1; margin: 0; }
+      .account-avatar { grid-column: 2; grid-row: 1; width: 40px; height: 40px; }
+      .account-identity { grid-column: 3; grid-row: 1; min-width: 0; }
+      .account-email { max-width: 100%; }
+      .account-bar #openSettings { grid-column: 4; grid-row: 1; }
+      .account-bar .invitation-button,
+      .account-bar .auth-entry-btn,
+      .account-bar .logout-btn {
+        grid-column: 5;
+        grid-row: 1;
+        width: auto;
+        min-width: 0;
+        padding-inline: 12px;
+      }
+
+      .topbar { gap: 10px; margin-bottom: 10px; }
+      .brand {
+        display: grid;
+        grid-template-columns: 58px minmax(0, 1fr);
+        gap: 12px;
+        padding: 6px 8px;
+      }
+      .calendar-mark { width: 58px; height: 58px; }
+      .calendar-grid {
+        left: 10px;
+        top: 23px;
+        grid-template-columns: repeat(2, 13px);
+        grid-auto-rows: 10px;
+        gap: 5px;
+      }
+      .clock-hand { width: 32px; height: 32px; }
+      .brand h1 { font-size: 38px; }
+      .ribbon { margin-top: 6px; padding: 5px 10px; font-size: 13px; }
+      .brand-subtitle { display: none; }
+      .kids-panel { min-height: 0; padding: 12px 14px; }
+      .kids-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+      .kid-toggle { min-height: 44px; font-size: 16px; }
+
+      .toolbar-leading {
+        grid-template-columns: minmax(0, 1fr) 108px;
+        gap: 8px;
+      }
+
+      .calendar-workspace {
+        grid-column: 1 / -1;
+        height: 50px;
+      }
+
+      .week-controls {
+        grid-column: 1;
+        width: 100%;
+        height: 50px;
+      }
+
+      .toolbar-leading > .language-switch {
+        grid-column: 2;
+        width: 108px;
+        height: 50px;
+      }
+
+      .schedule-actions {
+        grid-template-columns: minmax(112px, .7fr) minmax(150px, 1fr) 96px;
+        gap: 8px;
+      }
+
+      .schedule-actions .view-switch { grid-column: 1 / -1; }
+      .schedule-actions > .ghost-btn,
+      .schedule-actions > .primary-btn,
+      .schedule-actions > .more-actions { width: 100%; }
+      .schedule-actions > .primary-btn { white-space: nowrap; }
+    }
+
+    @media (max-height: 600px) and (min-width: 561px) {
+      .app { padding-top: 8px; padding-bottom: 16px; }
+      .account-bar { margin-bottom: 8px; padding-block: 6px; }
+      .topbar { margin-bottom: 8px; }
+      .brand-subtitle { display: none; }
+      .toolbar { margin-bottom: 8px; padding-block: 8px; }
+      .schedule-overview { margin-bottom: 8px; padding-block: 8px; }
+
+      dialog,
+      .settings-dialog,
+      .calendar-dialog,
+      .share-dialog,
+      .insights-dialog {
+        max-height: calc(100dvh - 12px);
+      }
+
+      .modal-header { padding: 11px 16px; }
+      dialog form { padding: 14px 16px; }
+      #activityForm .form-actions {
+        position: sticky;
+        z-index: 5;
+        bottom: -14px;
+        margin: 4px -16px -14px;
+        padding: 10px 16px 14px;
+        border-top: 1px solid var(--line);
+        background: var(--panel);
+      }
     }
   </style>
 </head>
@@ -7003,9 +7272,9 @@
         <span aria-hidden="true">⚙</span>
         <span data-i18n="settings.open">Settings</span>
       </button>
-      <button class="settings-btn invitation-button" type="button" id="openInvitations" hidden>
-        <span aria-hidden="true">👥</span>
-        <span data-i18n="invitations.open">Invites</span>
+      <button class="settings-btn invitation-button" type="button" id="openInvitations" hidden aria-label="Invitation mailbox" data-i18n-aria="invitations.mailboxAria">
+        <span aria-hidden="true">📬</span>
+        <span data-i18n="invitations.open">Mailbox</span>
         <span class="invitation-badge" id="invitationBadge" hidden>0</span>
       </button>
       <button class="auth-entry-btn" type="button" id="guestAuthButton" data-i18n="auth.signIn">Sign In</button>
@@ -7079,6 +7348,7 @@
             <button class="ghost-btn feature-btn" type="button" id="openReminders"><span class="button-icon" aria-hidden="true">🔔</span><span data-i18n="reminders.open">Reminders</span><span class="reminder-badge" id="reminderBadge" hidden>0</span></button>
             <button class="ghost-btn" type="button" id="toggleWeekends" aria-pressed="false" data-i18n="actions.hideWeekends">Hide weekends</button>
             <button class="ghost-btn feature-btn share-btn" type="button" id="shareSchedule"><span class="button-icon" aria-hidden="true">↗</span><span data-i18n="sharing.share">Share</span></button>
+            <button class="ghost-btn feature-btn" type="button" id="openVersionHistory"><span class="button-icon" aria-hidden="true">↶</span><span data-i18n="versions.open">Version history</span></button>
             <button class="ghost-btn" type="button" id="openActivityHistory" data-i18n="history.open">Activity history</button>
           </div>
         </details>
@@ -7565,8 +7835,7 @@
       </label>
       <button class="primary-btn" type="button" id="importSchedule" disabled data-i18n="transfer.import">Import events</button>
     </div>
-    <div class="form-actions">
-      <span></span>
+    <div class="form-actions share-summary-actions">
       <div class="right-actions">
         <button class="ghost-btn" type="button" id="copySchedule" data-i18n="sharing.copy">Copy text</button>
         <button class="ghost-btn" type="button" id="emailWeeklySummary" data-i18n="sharing.emailSummary">Email weekly summary</button>
@@ -7578,10 +7847,10 @@
 
   <dialog class="share-dialog" id="invitationsDialog">
     <div class="modal-header">
-      <h2 data-i18n="invitations.title">Calendar Invitations</h2>
+      <h2><span aria-hidden="true">📬</span> <span data-i18n="invitations.title">Invitation mailbox</span></h2>
       <button class="close-btn" type="button" id="closeInvitations" aria-label="Close" data-i18n-aria="aria.close">×</button>
     </div>
-    <p id="invitationDialogDescription" style="padding: 0 20px; color: var(--muted)" data-i18n="invitations.description">Accept invitations to view calendars shared with your account.</p>
+    <p id="invitationDialogDescription" style="padding: 0 20px; color: var(--muted)" data-i18n="invitations.description">Calendar invitations sent to your signed-in email appear here.</p>
     <div class="invitation-list" id="invitationList"></div>
   </dialog>
 
@@ -7594,6 +7863,7 @@
     <p class="invite-note-callout" id="sharedCalendarInviteNote" hidden></p>
     <div class="shared-calendar-toolbar">
       <span class="shared-calendar-access"><span data-i18n="sharing.permission">Permission</span><span class="role-pill" id="sharedCalendarRole"></span></span>
+      <button class="primary-btn" type="button" id="sharedCalendarSignIn" hidden data-i18n="invitations.signInForAccess">Sign in for full access</button>
       <button class="primary-btn" type="button" id="addSharedEvent" hidden data-i18n="invitations.addEvent">Add event</button>
     </div>
     <div class="shared-calendar-events" id="sharedCalendarEvents"></div>
@@ -7772,6 +8042,32 @@
     <div class="history-body">
       <p class="history-intro" data-i18n="history.intro">See who changed this family calendar and when.</p>
       <div class="history-list" id="activityHistoryList"></div>
+    </div>
+  </dialog>
+
+  <dialog class="insights-dialog" id="welcomeBackDialog">
+    <div class="modal-header">
+      <h2 data-i18n="welcomeBack.title">Welcome back</h2>
+      <button class="close-btn" type="button" id="closeWelcomeBack" aria-label="Close" data-i18n-aria="aria.close">×</button>
+    </div>
+    <div class="welcome-back-body">
+      <p class="welcome-back-intro" data-i18n="welcomeBack.intro">Here’s what changed in your family calendar while you were away.</p>
+      <div class="welcome-back-list" id="welcomeBackList"></div>
+      <div class="welcome-back-actions">
+        <button class="primary-btn" type="button" id="welcomeBackDone" data-i18n="actions.done">Done</button>
+        <button class="ghost-btn" type="button" id="welcomeBackViewHistory" data-i18n="history.open">Activity history</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="insights-dialog" id="versionHistoryDialog">
+    <div class="modal-header">
+      <h2 data-i18n="versions.title">Version history</h2>
+      <button class="close-btn" type="button" id="closeVersionHistory" aria-label="Close" data-i18n-aria="aria.close">×</button>
+    </div>
+    <div class="history-body">
+      <p class="history-intro" id="versionHistoryIntro"></p>
+      <div class="history-list" id="versionHistoryList"></div>
     </div>
   </dialog>
 
@@ -8065,16 +8361,22 @@
         "sharing.active": "Accepted",
         "sharing.declined": "Declined",
         "sharing.inviteCreated": "Sharing link created. They can open it with the invited email.",
-        "invitations.open": "Invites",
-        "invitations.title": "Calendar Invitations",
-        "invitations.description": "Accept invitations to view calendars shared with your account.",
-        "invitations.empty": "No calendar invitations yet.",
+        "invitations.open": "Mailbox",
+        "invitations.mailboxAria": "Invitation mailbox",
+        "invitations.title": "Invitation mailbox",
+        "invitations.description": "Calendar invitations sent to your signed-in email appear here.",
+        "invitations.empty": "Your invitation mailbox is empty.",
+        "invitations.new": "New",
+        "invitations.accepted": "Accepted",
         "invitations.from": "Shared by {email}",
         "invitations.accept": "Accept",
         "invitations.decline": "Decline",
         "invitations.view": "View calendar",
         "invitations.sharedTitle": "Shared Calendar",
         "invitations.readOnly": "This calendar is read-only. The owner’s updates appear here after syncing.",
+        "invitations.publicPreview": "You can view this calendar now. Sign in with the invited account to unlock its assigned access.",
+        "invitations.signInForAccess": "Sign in for full access",
+        "invitations.reviewInvite": "Review invitation",
         "invitations.commenterAccess": "You can view this calendar and add comments, but you cannot change events.",
         "invitations.editorAccess": "You can add, edit, and delete events on this shared calendar.",
         "invitations.addEvent": "Add event",
@@ -8091,6 +8393,8 @@
         "invitations.linkUnavailable": "Create the invitation online before copying its link.",
         "invitations.opened": "Choose Accept or Decline for this invitation.",
         "invitations.wrongAccount": "This link does not match the signed-in email address, or it has expired.",
+        "invitations.wrongAccountPreview": "You’re signed in as {email}. This invitation belongs to another account, but the read-only calendar is still available here.",
+        "invitations.switchAccount": "Use another account",
         "comments.title": "Calendar comments",
         "comments.ownerIntro": "Read feedback from commenters and reply here.",
         "comments.viewerIntro": "Comments from the owner and invited family members appear here.",
@@ -8212,6 +8516,26 @@
         "history.moved": "moved",
         "history.deleted": "deleted",
         "history.imported": "imported",
+        "welcomeBack.title": "Welcome back",
+        "welcomeBack.intro": "Here’s what changed in your family calendar while you were away.",
+        "welcomeBack.empty": "No new updates from other family members.",
+        "welcomeBack.actorFallback": "A family member",
+        "versions.open": "Version history",
+        "versions.title": "Version history",
+        "versions.intro": "{calendar} · latest 20 saved versions",
+        "versions.empty": "Past versions will appear after the next calendar change.",
+        "versions.restore": "Restore",
+        "versions.confirmRestore": "Restore “{label}”? Your current calendar will be saved first.",
+        "versions.restored": "Restored {label}.",
+        "versions.summary": "{events} events · {kids} kids",
+        "versions.beforeCreate": "Before adding {title}",
+        "versions.beforeEdit": "Before editing {title}",
+        "versions.beforeDelete": "Before deleting {title}",
+        "versions.beforeKids": "Before changing family members",
+        "versions.beforeRestore": "Before restoring {label}",
+        "versions.beforeUndo": "Before restoring {title}",
+        "versions.beforeImport": "Before importing {name}",
+        "versions.beforePreset": "Before loading {name}",
         "actions.duplicate": "Duplicate",
         "actions.cancel": "Cancel",
         "actions.save": "Save",
@@ -8733,16 +9057,22 @@
         "sharing.active": "已接受",
         "sharing.declined": "已拒绝",
         "sharing.inviteCreated": "共享链接已创建。对方可使用受邀邮箱打开。",
-        "invitations.open": "邀请",
-        "invitations.title": "日历邀请",
-        "invitations.description": "接受邀请后，可查看他人与你共享的日历。",
-        "invitations.empty": "目前没有日历邀请。",
+        "invitations.open": "邀请箱",
+        "invitations.mailboxAria": "邀请邮箱",
+        "invitations.title": "邀请邮箱",
+        "invitations.description": "发送到当前登录邮箱的日历邀请会显示在这里。",
+        "invitations.empty": "邀请邮箱是空的。",
+        "invitations.new": "新邀请",
+        "invitations.accepted": "已接受",
         "invitations.from": "共享者：{email}",
         "invitations.accept": "接受",
         "invitations.decline": "拒绝",
         "invitations.view": "查看日历",
         "invitations.sharedTitle": "共享日历",
         "invitations.readOnly": "此日历为只读。所有者同步后，最新内容会显示在这里。",
+        "invitations.publicPreview": "你现在可以查看此日历。请使用受邀账户登录以解锁相应权限。",
+        "invitations.signInForAccess": "登录以获得完整权限",
+        "invitations.reviewInvite": "查看邀请",
         "invitations.commenterAccess": "你可以查看此日历并发表评论，但不能更改事件。",
         "invitations.editorAccess": "你可以在此共享日历中添加、编辑和删除事件。",
         "invitations.addEvent": "添加事件",
@@ -8759,6 +9089,8 @@
         "invitations.linkUnavailable": "请先联网创建邀请，再复制链接。",
         "invitations.opened": "请选择接受或拒绝此邀请。",
         "invitations.wrongAccount": "此链接与当前登录邮箱不匹配，或链接已失效。",
+        "invitations.wrongAccountPreview": "你当前以 {email} 登录。此邀请属于另一个账户，但你仍可在这里查看只读日历。",
+        "invitations.switchAccount": "使用其他账户",
         "comments.title": "日历评论",
         "comments.ownerIntro": "查看评论者的反馈，并在这里回复。",
         "comments.viewerIntro": "所有者和受邀家庭成员的评论会显示在这里。",
@@ -8866,6 +9198,26 @@
         "history.moved": "移动了",
         "history.deleted": "删除了",
         "history.imported": "导入了",
+        "welcomeBack.title": "欢迎回来",
+        "welcomeBack.intro": "这是你离开期间家庭日历的更新。",
+        "welcomeBack.empty": "没有其他家庭成员的新更新。",
+        "welcomeBack.actorFallback": "家庭成员",
+        "versions.open": "版本历史",
+        "versions.title": "版本历史",
+        "versions.intro": "{calendar} · 最近保存的 20 个版本",
+        "versions.empty": "下次更改日历后，过去的版本会显示在这里。",
+        "versions.restore": "恢复",
+        "versions.confirmRestore": "要恢复“{label}”吗？当前日历会先保存。",
+        "versions.restored": "已恢复 {label}。",
+        "versions.summary": "{events} 个事件 · {kids} 个孩子",
+        "versions.beforeCreate": "添加 {title} 之前",
+        "versions.beforeEdit": "编辑 {title} 之前",
+        "versions.beforeDelete": "删除 {title} 之前",
+        "versions.beforeKids": "更改家庭成员之前",
+        "versions.beforeRestore": "恢复 {label} 之前",
+        "versions.beforeUndo": "恢复 {title} 之前",
+        "versions.beforeImport": "导入 {name} 之前",
+        "versions.beforePreset": "载入 {name} 之前",
         "actions.duplicate": "复制",
         "actions.cancel": "取消",
         "actions.save": "保存",
@@ -9822,17 +10174,20 @@
         return;
       }
 
+      if (pendingInviteToken) {
+        document.getElementById("welcomeScreen").hidden = true;
+        document.getElementById("authScreen").hidden = true;
+        document.getElementById("appShell").hidden = false;
+        updateAccountIdentity();
+        openLinkedCalendarPreview();
+        return;
+      }
+
       if (activeAccount) {
         document.getElementById("welcomeScreen").hidden = true;
         document.getElementById("authScreen").hidden = true;
         document.getElementById("appShell").hidden = false;
         updateAccountIdentity();
-        return;
-      }
-
-      if (pendingInviteToken) {
-        document.getElementById("inviteAuthNotice").hidden = false;
-        showAuthScreen("signin");
         return;
       }
 
@@ -10198,6 +10553,8 @@
     const dashboardDialog = document.getElementById("dashboardDialog");
     const remindersDialog = document.getElementById("remindersDialog");
     const activityHistoryDialog = document.getElementById("activityHistoryDialog");
+    const welcomeBackDialog = document.getElementById("welcomeBackDialog");
+    const versionHistoryDialog = document.getElementById("versionHistoryDialog");
     const form = document.getElementById("activityForm");
     const kidsForm = document.getElementById("kidsForm");
     const presetForm = document.getElementById("presetForm");
@@ -10617,6 +10974,48 @@
       return activeAccount ? accountDataKey(activeAccount.id, CLOUD_UPDATED_KEY) : "";
     }
 
+    function welcomeBackSeenKey() {
+      return activeAccount ? accountDataKey(activeAccount.id, `welcome-back:${currentCalendarId}`) : "";
+    }
+
+    function recentExternalAudit() {
+      const seenAt = welcomeBackSeenKey() ? localStorage.getItem(welcomeBackSeenKey()) || "" : "";
+      const currentActor = normalizeEmail(activeAccount?.email || "");
+      return activityAudit
+        .filter(entry => entry?.at && (!seenAt || entry.at > seenAt))
+        .filter(entry => normalizeEmail(entry.actor || "") !== currentActor)
+        .slice(0, 8);
+    }
+
+    function markWelcomeBackSeen() {
+      const key = welcomeBackSeenKey();
+      if (key) localStorage.setItem(key, new Date().toISOString());
+    }
+
+    function renderWelcomeBack() {
+      const list = document.getElementById("welcomeBackList");
+      if (!list) return;
+      const entries = recentExternalAudit();
+      if (!entries.length) {
+        list.innerHTML = `<p class="welcome-back-empty">${escapeHtml(t("welcomeBack.empty"))}</p>`;
+        return;
+      }
+      list.innerHTML = entries.map(entry => {
+        const actionKey = `history.${entry.action}`;
+        const action = t(actionKey) === actionKey ? entry.action : t(actionKey);
+        const count = entry.count > 1 ? ` (${entry.count})` : "";
+        const icon = entry.action === "deleted" ? "🗑️" : entry.action === "moved" ? "↔️" : entry.action === "created" ? "➕" : "✏️";
+        const actor = entry.actor || t("welcomeBack.actorFallback");
+        return `<article class="welcome-back-item"><span class="welcome-back-item-icon" aria-hidden="true">${icon}</span><span class="welcome-back-item-copy"><strong>${escapeHtml(`${action} ${entry.title || "Untitled event"}${count}`)}</strong><span>${escapeHtml(actor)}</span></span><time class="welcome-back-item-time" datetime="${escapeHtml(entry.at)}">${escapeHtml(formatDateTime(entry.at))}</time></article>`;
+      }).join("");
+    }
+
+    function openWelcomeBackIfNeeded() {
+      if (activeAccount?.provider !== "supabase" || !welcomeBackDialog || welcomeBackDialog.open || !recentExternalAudit().length) return;
+      renderWelcomeBack();
+      welcomeBackDialog.showModal();
+    }
+
     function hasPendingCloudSave() {
       const key = cloudPendingKey();
       return Boolean(key && localStorage.getItem(key));
@@ -10813,10 +11212,13 @@
         }
 
         const localUpdatedAt = localStorage.getItem(cloudUpdatedKey());
+        let receivedRemoteUpdate = false;
         if (!localUpdatedAt || localUpdatedAt !== data.updated_at) {
           applyCloudSnapshot(data.schedule);
           localStorage.setItem(cloudUpdatedKey(), data.updated_at);
+          receivedRemoteUpdate = true;
         }
+        if (receivedRemoteUpdate) window.setTimeout(openWelcomeBackIfNeeded, 300);
         setCloudSaveState("cloud");
         return true;
       } catch (syncError) {
@@ -10992,6 +11394,37 @@
         const count = entry.count > 1 ? ` (${entry.count})` : "";
         return `<article class="history-item"><span class="history-item-icon" aria-hidden="true">${entry.action === "deleted" ? "🗑️" : entry.action === "moved" ? "↔️" : entry.action === "created" ? "➕" : "✏️"}</span><span class="history-item-copy"><strong>${escapeHtml(`${action} ${entry.title}${count}`)}</strong><span>${escapeHtml(entry.actor || "This device")}</span></span><time class="history-item-time" datetime="${escapeHtml(entry.at)}">${escapeHtml(formatDateTime(entry.at))}</time></article>`;
       }).join("");
+    }
+
+    function renderVersionHistory() {
+      const list = document.getElementById("versionHistoryList");
+      const calendarName = calendars.find(calendar => calendar.id === currentCalendarId)?.name || t("calendars.default");
+      document.getElementById("versionHistoryIntro").textContent = t("versions.intro", { calendar: calendarName });
+      if (!scheduleHistory.length) {
+        list.innerHTML = `<p class="history-empty">${escapeHtml(t("versions.empty"))}</p>`;
+        return;
+      }
+      list.innerHTML = scheduleHistory.map(version => {
+        const eventCount = Array.isArray(version.snapshot?.activities) ? version.snapshot.activities.length : 0;
+        const kidCount = Array.isArray(version.snapshot?.kids) ? version.snapshot.kids.length : 0;
+        return `<article class="history-item version-item"><span class="history-item-icon" aria-hidden="true">↶</span><span class="history-item-copy"><strong>${escapeHtml(version.label)}</strong><span>${escapeHtml(t("versions.summary", { events: eventCount, kids: kidCount }))}</span></span><span class="version-item-actions"><time class="history-item-time" datetime="${escapeHtml(version.savedAt)}">${escapeHtml(formatDateTime(version.savedAt))}</time><button class="small-btn" type="button" data-restore-version="${escapeHtml(version.id)}">${escapeHtml(t("versions.restore"))}</button></span></article>`;
+      }).join("");
+    }
+
+    function restoreScheduleVersion(versionId) {
+      const version = scheduleHistory.find(entry => entry.id === versionId);
+      if (!version || !version.snapshot || !confirm(t("versions.confirmRestore", { label: version.label }))) return;
+      const currentVersion = {
+        id: makeId("history"),
+        label: t("versions.beforeRestore", { label: version.label }),
+        savedAt: new Date().toISOString(),
+        snapshot: cloneSchedule()
+      };
+      scheduleHistory = [currentVersion, ...scheduleHistory.filter(entry => entry.id !== version.id)].slice(0, 20);
+      saveScheduleHistory();
+      applyScheduleSnapshot(version.snapshot);
+      versionHistoryDialog.close();
+      showFeedbackToast(t("versions.restored", { label: version.label }));
     }
 
     function loadSettings() {
@@ -12326,7 +12759,7 @@
       document.getElementById("eventStepNext").hidden = eventFormStep === EVENT_FORM_STEPS.length;
       document.getElementById("saveActivity").hidden = eventFormStep !== EVENT_FORM_STEPS.length;
       const editActions = deleteButton.closest(".left-actions");
-      editActions.hidden = eventFormStep !== EVENT_FORM_STEPS.length || (deleteButton.hidden && duplicateButton.hidden);
+      editActions.hidden = deleteButton.hidden && duplicateButton.hidden;
 
       updateRecurrenceFields();
       updateConflictSuggestions();
@@ -12565,6 +12998,7 @@
       document.getElementById("dialogTitle").textContent = t("dialog.duplicateTitle");
       deleteButton.hidden = true;
       duplicateButton.hidden = true;
+      deleteButton.closest(".left-actions").hidden = true;
       fields.title.focus();
       fields.title.select();
     }
@@ -12687,7 +13121,7 @@
     function loadSelectedPreset() {
       const preset = savedPresets.find(item => item.id === savedPresetSelect.value);
       if (!preset) return;
-      rememberCurrentSchedule(`Before loading "${preset.name}"`);
+      rememberCurrentSchedule(t("versions.beforePreset", { name: preset.name }));
       applyScheduleSnapshot(preset.snapshot);
       renderPresetDialog();
       presetStatus.textContent = t("presets.loadedStatus", { name: preset.name });
@@ -12784,6 +13218,7 @@
       if (!deletedActivityForUndo) return;
       const restored = { ...deletedActivityForUndo };
       if (!state.activities.some(activity => activity.id === restored.id)) {
+        rememberCurrentSchedule(t("versions.beforeUndo", { title: activityTitle(restored) }));
         state.activities.push(restored);
         saveActivities();
         renderAll();
@@ -13498,9 +13933,14 @@
     function renderInvitations() {
       const list = document.getElementById("invitationList");
       const badge = document.getElementById("invitationBadge");
+      const mailboxButton = document.getElementById("openInvitations");
       const pendingCount = calendarInvitations.filter(invitation => invitation.status === "pending").length;
       badge.textContent = String(pendingCount);
       badge.hidden = pendingCount === 0;
+      mailboxButton.classList.toggle("has-unread", pendingCount > 0);
+      mailboxButton.setAttribute("aria-label", pendingCount > 0
+        ? `${t("invitations.mailboxAria")}: ${pendingCount} ${t("invitations.new")}`
+        : t("invitations.mailboxAria"));
       if (!calendarInvitations.length) {
         list.innerHTML = `<p class="invitation-empty">${escapeHtml(t("invitations.empty"))}</p>`;
         return;
@@ -13509,7 +13949,8 @@
         const pending = invitation.status === "pending";
         const active = invitation.status === "active";
         const note = String(invitation.invitation_note || "").trim();
-        return `<article class="invitation-card"><span class="invitation-copy"><strong>${escapeHtml(invitation.calendar_name || t("calendars.default"))}</strong><span>${escapeHtml(t("invitations.from", { email: invitationOwnerLabel(invitation) }))}</span>${note ? `<span>“${escapeHtml(note)}”</span>` : ""}<span class="role-pill">${escapeHtml(memberRoleLabel(invitation.role))}</span></span><span class="invitation-actions">${pending ? `<button class="primary-btn invite-answer" type="button" data-id="${escapeHtml(invitation.id)}" data-status="active">${escapeHtml(t("invitations.accept"))}</button><button class="ghost-btn invite-answer" type="button" data-id="${escapeHtml(invitation.id)}" data-status="declined">${escapeHtml(t("invitations.decline"))}</button>` : ""}${active ? `<button class="primary-btn invite-view" type="button" data-id="${escapeHtml(invitation.id)}">${escapeHtml(t("invitations.view"))}</button>` : ""}</span></article>`;
+        const stateLabel = t(pending ? "invitations.new" : "invitations.accepted");
+        return `<article class="invitation-card${pending ? " is-new" : ""}"><span class="invitation-copy"><span class="mailbox-card-heading"><strong>${escapeHtml(invitation.calendar_name || t("calendars.default"))}</strong><span class="invitation-state${pending ? " is-new" : ""}">${escapeHtml(stateLabel)}</span></span><span>${escapeHtml(t("invitations.from", { email: invitationOwnerLabel(invitation) }))}</span>${note ? `<span>“${escapeHtml(note)}”</span>` : ""}<span class="role-pill">${escapeHtml(memberRoleLabel(invitation.role))}</span></span><span class="invitation-actions">${pending ? `<button class="primary-btn invite-answer" type="button" data-id="${escapeHtml(invitation.id)}" data-status="active">${escapeHtml(t("invitations.accept"))}</button><button class="ghost-btn invite-answer" type="button" data-id="${escapeHtml(invitation.id)}" data-status="declined">${escapeHtml(t("invitations.decline"))}</button>` : ""}${active ? `<button class="primary-btn invite-view" type="button" data-id="${escapeHtml(invitation.id)}">${escapeHtml(t("invitations.view"))}</button>` : ""}</span></article>`;
       }).join("");
       list.querySelectorAll(".invite-answer").forEach(button => button.addEventListener("click", () => answerInvitation(button.dataset.id, button.dataset.status)));
       list.querySelectorAll(".invite-view").forEach(button => button.addEventListener("click", () => viewSharedCalendar(button.dataset.id)));
@@ -13538,30 +13979,58 @@
       const description = document.getElementById("invitationDialogDescription");
       const invitation = calendarInvitations.find(item => item.invite_token === pendingInviteToken);
       description.textContent = t(invitation ? "invitations.opened" : "invitations.wrongAccount");
-      const dialog = document.getElementById("invitationsDialog");
-      if (!dialog.open) dialog.showModal();
+      if (invitation?.status === "active") {
+        const dialog = document.getElementById("invitationsDialog");
+        if (dialog.open) dialog.close();
+        viewSharedCalendar(invitation.id);
+        return;
+      }
+      if (sharedCalendarState?.publicPreview) {
+        sharedCalendarState.emailMismatch = Boolean(cloudSession?.user?.id && !invitation);
+        sharedCalendarState.accessMessage = sharedCalendarState.emailMismatch
+          ? t("invitations.wrongAccountPreview", { email: normalizeEmail(cloudSession.user.email || "") })
+          : "";
+        configureSharedCalendarAccess();
+      }
     }
 
     async function answerInvitation(invitationId, status) {
       if (!cloudClient || !["active", "declined"].includes(status)) return;
+      const linkedInvitation = calendarInvitations.find(item => item.id === invitationId && item.invite_token === pendingInviteToken);
       const { error } = await cloudClient.rpc("respond_calendar_invitation", { invitation_id: invitationId, next_status: status });
       if (!error) {
-        if (calendarInvitations.some(item => item.id === invitationId && item.invite_token === pendingInviteToken)) {
+        if (linkedInvitation) {
           history.replaceState(null, "", `${location.pathname}${location.hash}`);
           pendingInviteToken = "";
         }
         await refreshInvitations();
+        if (linkedInvitation && status === "active") {
+          const invitation = calendarInvitations.find(item => item.id === invitationId && item.status === "active");
+          const dialog = document.getElementById("invitationsDialog");
+          if (dialog.open) dialog.close();
+          if (invitation) await viewSharedCalendar(invitation.id);
+        }
         trackProductEvent(status === "active" ? "Invitation Accepted" : "Invitation Declined");
       }
     }
 
     function canEditSharedCalendar() {
-      return Boolean(sharedCalendarState?.invitation?.status === "active" && normalizeMemberRole(sharedCalendarState.invitation.role) === "editor");
+      return Boolean(
+        cloudSession?.user?.id
+        && !sharedCalendarState?.publicPreview
+        && sharedCalendarState?.invitation?.status === "active"
+        && normalizeMemberRole(sharedCalendarState.invitation.role) === "editor"
+      );
     }
 
     function canCommentSharedCalendar() {
       const role = normalizeMemberRole(sharedCalendarState?.invitation?.role);
-      return Boolean(sharedCalendarState?.invitation?.status === "active" && ["commenter", "editor"].includes(role));
+      return Boolean(
+        cloudSession?.user?.id
+        && !sharedCalendarState?.publicPreview
+        && sharedCalendarState?.invitation?.status === "active"
+        && ["commenter", "editor"].includes(role)
+      );
     }
 
     function commentDateLabel(value) {
@@ -13688,17 +14157,111 @@
 
     function configureSharedCalendarAccess() {
       const role = normalizeMemberRole(sharedCalendarState?.invitation?.role);
-      const editable = role === "editor";
-      const commentable = ["commenter", "editor"].includes(role);
+      const publicPreview = Boolean(sharedCalendarState?.publicPreview);
+      const editable = canEditSharedCalendar();
+      const commentable = canCommentSharedCalendar();
       const note = String(sharedCalendarState?.invitation?.invitation_note || "").trim();
       document.getElementById("sharedCalendarRole").textContent = memberRoleLabel(role);
-      document.getElementById("sharedCalendarDescription").textContent = t(editable ? "invitations.editorAccess" : commentable ? "invitations.commenterAccess" : "invitations.readOnly");
+      document.getElementById("sharedCalendarDescription").textContent = sharedCalendarState?.accessMessage
+        || t(publicPreview ? "invitations.publicPreview" : editable ? "invitations.editorAccess" : commentable ? "invitations.commenterAccess" : "invitations.readOnly");
       document.getElementById("addSharedEvent").hidden = !editable;
+      const signInButton = document.getElementById("sharedCalendarSignIn");
+      signInButton.hidden = !publicPreview;
+      signInButton.textContent = t(sharedCalendarState?.emailMismatch
+        ? "invitations.switchAccount"
+        : cloudSession?.user?.id ? "invitations.reviewInvite" : "invitations.signInForAccess");
+      document.getElementById("sharedCommentsPanel").hidden = publicPreview;
       document.getElementById("sharedCommentForm").hidden = !commentable;
       document.getElementById("sharedCommentsIntro").textContent = t(commentable ? "comments.commenterIntro" : "comments.viewerIntro");
       const noteElement = document.getElementById("sharedCalendarInviteNote");
       noteElement.textContent = note;
-      noteElement.hidden = !note;
+      noteElement.hidden = publicPreview || !note;
+    }
+
+    async function openLinkedCalendarPreview() {
+      if (!pendingInviteToken) return;
+      const title = document.getElementById("sharedCalendarTitle");
+      const list = document.getElementById("sharedCalendarEvents");
+      const dialog = document.getElementById("sharedCalendarDialog");
+      sharedCalendarState = {
+        publicPreview: true,
+        invitation: { role: "viewer", status: "preview", invitation_note: "" },
+        schedule: {},
+        shared: { kids: [], activities: [] }
+      };
+      title.textContent = t("invitations.sharedTitle");
+      configureSharedCalendarAccess();
+      list.innerHTML = `<p class="invitation-empty">${escapeHtml(t("save.syncing"))}</p>`;
+      if (!dialog.open) dialog.showModal();
+
+      if (!cloudClient) {
+        list.innerHTML = `<p class="invitation-empty">${escapeHtml(t("invitations.unavailable"))}</p>`;
+        return;
+      }
+
+      try {
+        const { data, error } = await cloudClient.rpc("get_shared_calendar_preview", { shared_invite_token: pendingInviteToken });
+        if (error || !data?.shared) throw error || new Error("Shared calendar not found");
+        const invitation = {
+          role: normalizeMemberRole(data.role),
+          status: "preview",
+          calendar_name: data.calendar_name || t("invitations.sharedTitle"),
+          invitation_note: ""
+        };
+        const linkedInvitation = calendarInvitations.find(item => item.invite_token === pendingInviteToken);
+        const emailMismatch = Boolean(cloudSession?.user?.id && !linkedInvitation);
+        sharedCalendarState = {
+          publicPreview: true,
+          emailMismatch,
+          accessMessage: emailMismatch
+            ? t("invitations.wrongAccountPreview", { email: normalizeEmail(cloudSession.user.email || "") })
+            : "",
+          invitation,
+          schedule: {},
+          shared: data.shared
+        };
+        title.textContent = invitation.calendar_name;
+        configureSharedCalendarAccess();
+        renderSharedCalendarEvents();
+      } catch (error) {
+        reportClientError(error, "shared-calendar-preview");
+        list.innerHTML = `<p class="invitation-empty">${escapeHtml(t("invitations.unavailable"))}</p>`;
+      }
+    }
+
+    async function unlockLinkedCalendar() {
+      if (!pendingInviteToken) return;
+      const sharedDialog = document.getElementById("sharedCalendarDialog");
+      if (sharedCalendarState?.emailMismatch) {
+        await logOut();
+        return;
+      }
+      if (!cloudSession?.user?.id) {
+        if (sharedDialog.open) sharedDialog.close();
+        document.getElementById("inviteAuthNotice").hidden = false;
+        showAuthScreen("signin");
+        return;
+      }
+
+      await refreshInvitations();
+      const invitation = calendarInvitations.find(item => item.invite_token === pendingInviteToken);
+      if (invitation?.status === "active") {
+        await viewSharedCalendar(invitation.id);
+        return;
+      }
+
+      if (!invitation) {
+        sharedCalendarState.emailMismatch = true;
+        sharedCalendarState.accessMessage = t("invitations.wrongAccountPreview", { email: normalizeEmail(cloudSession.user.email || "") });
+        configureSharedCalendarAccess();
+        return;
+      }
+
+      const description = document.getElementById("invitationDialogDescription");
+      description.textContent = t("invitations.opened");
+      if (sharedDialog.open) sharedDialog.close();
+      const invitationsDialog = document.getElementById("invitationsDialog");
+      if (!invitationsDialog.open) invitationsDialog.showModal();
     }
 
     async function viewSharedCalendar(invitationId) {
@@ -13713,7 +14276,8 @@
       renderCalendarComments("sharedCommentList", sharedCalendarComments);
       document.getElementById("sharedCommentStatus").textContent = "";
       list.innerHTML = `<p class="invitation-empty">${escapeHtml(t("save.syncing"))}</p>`;
-      document.getElementById("sharedCalendarDialog").showModal();
+      const dialog = document.getElementById("sharedCalendarDialog");
+      if (!dialog.open) dialog.showModal();
       try {
         const [{ data, error }] = await Promise.all([
           cloudClient.from("family_schedules").select("schedule").eq("user_id", invitation.owner_id).maybeSingle(),
@@ -14024,6 +14588,7 @@
       document.getElementById("sharedCalendarDialog").close();
       sharedCalendarState = null;
     });
+    document.getElementById("sharedCalendarSignIn").addEventListener("click", unlockLinkedCalendar);
     document.getElementById("addSharedEvent").addEventListener("click", () => openSharedEventDialog());
     document.getElementById("closeSharedEvent").addEventListener("click", () => document.getElementById("sharedEventDialog").close());
     document.getElementById("sharedEventForm").addEventListener("submit", saveSharedEvent);
@@ -14064,7 +14629,7 @@
           ? importBackupEvents(content)
           : importIcsEvents(content);
         if (!imported.length) throw new Error("No importable events");
-        rememberCurrentSchedule(`Before importing ${file.name}`);
+        rememberCurrentSchedule(t("versions.beforeImport", { name: file.name }));
         state.activities.push(...imported);
         state.visibleKids = new Set(kidProfiles.map(kid => kid.name));
         saveKids();
@@ -14124,6 +14689,29 @@
       activityHistoryDialog.showModal();
     });
     document.getElementById("closeActivityHistory").addEventListener("click", () => activityHistoryDialog.close());
+    const closeWelcomeBack = () => {
+      markWelcomeBackSeen();
+      welcomeBackDialog.close();
+    };
+    document.getElementById("closeWelcomeBack").addEventListener("click", closeWelcomeBack);
+    document.getElementById("welcomeBackDone").addEventListener("click", closeWelcomeBack);
+    welcomeBackDialog.addEventListener("close", markWelcomeBackSeen);
+    document.getElementById("welcomeBackViewHistory").addEventListener("click", () => {
+      markWelcomeBackSeen();
+      welcomeBackDialog.close();
+      renderActivityHistory();
+      activityHistoryDialog.showModal();
+    });
+    document.getElementById("openVersionHistory").addEventListener("click", () => {
+      document.getElementById("moreActions").open = false;
+      renderVersionHistory();
+      versionHistoryDialog.showModal();
+    });
+    document.getElementById("closeVersionHistory").addEventListener("click", () => versionHistoryDialog.close());
+    document.getElementById("versionHistoryList").addEventListener("click", event => {
+      const button = event.target.closest("[data-restore-version]");
+      if (button) restoreScheduleVersion(button.dataset.restoreVersion);
+    });
     document.getElementById("reminderSettings").addEventListener("click", () => {
       remindersDialog.close();
       openSettingsDialog();
@@ -14318,6 +14906,9 @@
 
       const existingIndex = state.activities.findIndex(item => item.id === activity.id);
       const previousActivity = existingIndex >= 0 ? { ...state.activities[existingIndex] } : null;
+      if (!previousActivity || JSON.stringify(previousActivity) !== JSON.stringify(activity)) {
+        rememberCurrentSchedule(t(previousActivity ? "versions.beforeEdit" : "versions.beforeCreate", { title: activityTitle(activity) }));
+      }
       if (existingIndex >= 0) {
         state.activities[existingIndex] = activity;
       } else {
@@ -14366,6 +14957,9 @@
         };
       });
 
+      if (JSON.stringify(kidProfiles) !== JSON.stringify(updatedKids)) {
+        rememberCurrentSchedule(t("versions.beforeKids"));
+      }
       kidProfiles = updatedKids;
       kids = buildKids(kidProfiles);
       state.activities = state.activities
@@ -14383,6 +14977,7 @@
       if (!fields.id.value) return;
       const deletedActivity = state.activities.find(activity => activity.id === fields.id.value);
       if (!deletedActivity) return;
+      rememberCurrentSchedule(t("versions.beforeDelete", { title: activityTitle(deletedActivity) }));
       state.activities = state.activities.filter(activity => activity.id !== fields.id.value);
       saveActivities();
       auditActivity("deleted", deletedActivity, null);
@@ -14395,6 +14990,7 @@
       if (activeAccount?.provider !== "supabase" || !cloudSession) return;
       if (hasPendingCloudSave()) flushCloudSave();
       else hydrateCloudSchedule();
+      refreshInvitations();
     });
     window.addEventListener("offline", () => {
       if (activeAccount?.provider === "supabase") setCloudSaveState("offline");
@@ -14404,6 +15000,7 @@
       if (activeAccount?.provider !== "supabase" || !cloudSession) return;
       if (hasPendingCloudSave()) flushCloudSave();
       else if (!document.hidden) hydrateCloudSchedule();
+      if (!document.hidden) refreshInvitations();
     });
 
     if (cloudClient) {

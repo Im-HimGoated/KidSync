@@ -8,6 +8,7 @@ alter table public.family_schedules enable row level security;
 
 revoke all on table public.family_schedules from anon;
 grant select, insert, update on table public.family_schedules to authenticated;
+grant select (user_id, schedule) on table public.family_schedules to anon;
 
 create table if not exists public.calendar_members (
   id uuid primary key default gen_random_uuid(),
@@ -44,9 +45,10 @@ alter table public.calendar_members add constraint calendar_members_status_check
 
 alter table public.calendar_members enable row level security;
 revoke all on table public.calendar_members from anon;
+grant select (owner_id, calendar_id, calendar_name, invite_token, role, status) on table public.calendar_members to anon;
 revoke update on table public.calendar_members from authenticated;
 grant select, insert, delete on table public.calendar_members to authenticated;
-grant update (status) on table public.calendar_members to authenticated;
+grant update (status, role, invitation_note) on table public.calendar_members to authenticated;
 
 drop policy if exists "Owners can view calendar members" on public.calendar_members;
 create policy "Owners can view calendar members"
@@ -64,10 +66,8 @@ on public.calendar_members for insert to authenticated
 with check ((select auth.uid()) = owner_id);
 
 drop policy if exists "Invitees can answer their invitations" on public.calendar_members;
-create policy "Invitees can answer their invitations"
-on public.calendar_members for update to authenticated
-using (lower(member_email) = lower(coalesce((select auth.jwt() ->> 'email'), '')))
-with check (lower(member_email) = lower(coalesce((select auth.jwt() ->> 'email'), '')));
+-- Invitation responses use respond_calendar_invitation(), which validates the
+-- recipient and can bind member_user_id without exposing that column for updates.
 
 drop policy if exists "Owners can update calendar members" on public.calendar_members;
 create policy "Owners can update calendar members"
@@ -79,6 +79,14 @@ drop policy if exists "Owners can remove calendar members" on public.calendar_me
 create policy "Owners can remove calendar members"
 on public.calendar_members for delete to authenticated
 using ((select auth.uid()) = owner_id);
+
+drop policy if exists "Invite tokens can preview calendar members" on public.calendar_members;
+create policy "Invite tokens can preview calendar members"
+on public.calendar_members for select to anon, authenticated
+using (
+  status in ('pending', 'active')
+  and invite_token::text = coalesce(current_setting('kidssync.shared_invite_token', true), '')
+);
 
 create or replace function public.respond_calendar_invitation(invitation_id uuid, next_status text)
 returns void
@@ -111,7 +119,7 @@ $$;
 create or replace function public.update_calendar_member_access(member_id uuid, next_status text, next_role text)
 returns void
 language plpgsql
-security definer
+security invoker
 set search_path = ''
 as $$
 begin
@@ -141,7 +149,7 @@ $$;
 create or replace function public.update_calendar_member_share(member_id uuid, next_status text, next_role text, next_note text)
 returns void
 language plpgsql
-security definer
+security invoker
 set search_path = ''
 as $$
 begin
@@ -172,9 +180,9 @@ begin
 end;
 $$;
 
-revoke all on function public.respond_calendar_invitation(uuid, text) from public, anon, authenticated;
-revoke all on function public.update_calendar_member_access(uuid, text, text) from public, anon, authenticated;
-revoke all on function public.update_calendar_member_share(uuid, text, text, text) from public, anon, authenticated;
+revoke all on function public.respond_calendar_invitation(uuid, text) from public, anon, authenticated, service_role;
+revoke all on function public.update_calendar_member_access(uuid, text, text) from public, anon, authenticated, service_role;
+revoke all on function public.update_calendar_member_share(uuid, text, text, text) from public, anon, authenticated, service_role;
 grant execute on function public.respond_calendar_invitation(uuid, text) to authenticated;
 grant execute on function public.update_calendar_member_access(uuid, text, text) to authenticated;
 grant execute on function public.update_calendar_member_share(uuid, text, text, text) to authenticated;
@@ -182,9 +190,92 @@ grant execute on function public.update_calendar_member_share(uuid, text, text, 
 comment on function public.respond_calendar_invitation(uuid, text) is
   'SECURITY DEFINER is required to bind an invitation to its authenticated recipient. The function validates auth.uid(), JWT email, status, and invitation ownership.';
 comment on function public.update_calendar_member_access(uuid, text, text) is
-  'SECURITY DEFINER is required for owner-managed role updates. The function only updates rows owned by auth.uid() and validates all enum inputs.';
+  'SECURITY INVOKER owner-managed access update. Authorization is enforced by the calendar_members owner RLS policy and restricted column grants.';
 comment on function public.update_calendar_member_share(uuid, text, text, text) is
-  'SECURITY DEFINER is required for owner-managed invitation updates. The function only updates rows owned by auth.uid() and validates role, status, and note length.';
+  'SECURITY INVOKER owner-managed invitation update. Authorization is enforced by the calendar_members owner RLS policy and restricted column grants.';
+
+create or replace function public.get_shared_calendar_preview(shared_invite_token uuid)
+returns jsonb
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  invitation_record record;
+  shared_data jsonb;
+  safe_kids jsonb;
+  safe_activities jsonb;
+begin
+  perform pg_catalog.set_config('kidssync.shared_invite_token', shared_invite_token::text, true);
+
+  select
+    member.calendar_id,
+    member.calendar_name,
+    member.role,
+    schedule.schedule
+  into invitation_record
+  from public.calendar_members member
+  join public.family_schedules schedule on schedule.user_id = member.owner_id
+  where member.invite_token = shared_invite_token
+    and member.status in ('pending', 'active')
+  limit 1;
+
+  if not found then
+    return null;
+  end if;
+
+  shared_data := case
+    when invitation_record.schedule ? 'calendarData'
+      then coalesce(invitation_record.schedule #> array['calendarData', invitation_record.calendar_id], '{}'::jsonb)
+    else invitation_record.schedule
+  end;
+
+  select coalesce(jsonb_agg(jsonb_strip_nulls(jsonb_build_object(
+    'id', kid -> 'id',
+    'name', kid -> 'name',
+    'avatar', kid -> 'avatar',
+    'palette', kid -> 'palette'
+  ))), '[]'::jsonb)
+  into safe_kids
+  from jsonb_array_elements(case
+    when jsonb_typeof(shared_data -> 'kids') = 'array' then shared_data -> 'kids'
+    else '[]'::jsonb
+  end) kid;
+
+  select coalesce(jsonb_agg(jsonb_strip_nulls(jsonb_build_object(
+    'id', activity -> 'id',
+    'title', activity -> 'title',
+    'icon', activity -> 'icon',
+    'child', activity -> 'child',
+    'startDate', activity -> 'startDate',
+    'allDay', activity -> 'allDay',
+    'start', activity -> 'start',
+    'end', activity -> 'end',
+    'eventType', activity -> 'eventType',
+    'status', activity -> 'status'
+  ))), '[]'::jsonb)
+  into safe_activities
+  from jsonb_array_elements(case
+    when jsonb_typeof(shared_data -> 'activities') = 'array' then shared_data -> 'activities'
+    else '[]'::jsonb
+  end) activity;
+
+  return jsonb_build_object(
+    'calendar_name', invitation_record.calendar_name,
+    'role', invitation_record.role,
+    'shared', jsonb_build_object(
+      'kids', safe_kids,
+      'activities', safe_activities
+    )
+  );
+end;
+$$;
+
+revoke all on function public.get_shared_calendar_preview(uuid) from public, anon, authenticated, service_role;
+grant execute on function public.get_shared_calendar_preview(uuid) to anon, authenticated;
+
+comment on function public.get_shared_calendar_preview(uuid) is
+  'SECURITY INVOKER preview for bearer invite links. A transaction-local token activates narrowly scoped RLS policies, and the result excludes account identifiers, emails, comments, notes, settings, and unshared calendars.';
 
 create table if not exists public.calendar_comments (
   id uuid primary key default gen_random_uuid(),
@@ -261,6 +352,19 @@ using (
   )
 );
 
+drop policy if exists "Invite tokens can preview family schedules" on public.family_schedules;
+create policy "Invite tokens can preview family schedules"
+on public.family_schedules for select to anon, authenticated
+using (
+  exists (
+    select 1
+    from public.calendar_members member
+    where member.owner_id = family_schedules.user_id
+      and member.status in ('pending', 'active')
+      and member.invite_token::text = coalesce(current_setting('kidssync.shared_invite_token', true), '')
+  )
+);
+
 drop policy if exists "Families can create their own schedule" on public.family_schedules;
 create policy "Families can create their own schedule"
 on public.family_schedules
@@ -322,7 +426,7 @@ begin
 end;
 $$;
 
-revoke all on function public.update_shared_calendar_activities(uuid, text, jsonb) from public, anon, authenticated;
+revoke all on function public.update_shared_calendar_activities(uuid, text, jsonb) from public, anon, authenticated, service_role;
 grant execute on function public.update_shared_calendar_activities(uuid, text, jsonb) to authenticated;
 
 comment on function public.update_shared_calendar_activities(uuid, text, jsonb) is
