@@ -4,3 +4,9 @@ window.KIDSSYNC_SUPABASE = {
   url: "https://zddlukukrjdeoeofocud.supabase.co",
   publishableKey: "sb_publishable_22Z9BZSp10yJKSEEtrXJkw_RcWdVySZ"
 };
+
+// Optional: paste the Loader Script URL from Sentry's JavaScript project
+// settings. Leave blank to retain only scrubbed session diagnostics.
+window.KIDSSYNC_MONITORING = {
+  sentryLoaderUrl: ""
+};

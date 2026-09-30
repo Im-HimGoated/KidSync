@@ -4,6 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>KidsSync Weekly Schedule</title>
+  <meta name="theme-color" content="#1f6898">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./assets/kidssync-family-table-v2.png">
   <!-- Hero photo by Mikhail Nilov via Pexels, photo 8121121. -->
   <link rel="preload" as="image" href="./assets/kidssync-family-hero.jpg">
   <style>
@@ -200,8 +206,8 @@
       min-height: calc(100svh - 118px);
       border-bottom: 1px solid #dce4ec;
       background-color: #f5f4f0;
-      background-image: url("./assets/kidssync-family-table-v2.png");
-      background-position: center center;
+      background-image: url("./assets/kidssync-family-hero.jpg");
+      background-position: center 42%;
       background-size: cover;
     }
 
@@ -886,6 +892,21 @@
       background: #e4f0ff;
     }
 
+    .auth-link-btn {
+      justify-self: start;
+      min-height: 44px;
+      padding: 6px 0;
+      border: 0;
+      color: #1f6898;
+      background: transparent;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .auth-link-btn:hover { text-decoration: underline; }
+
     .account-bar {
       display: flex;
       align-items: center;
@@ -1098,6 +1119,48 @@
       color: #fff;
       background: #1976d2;
       box-shadow: 0 2px 6px rgba(25, 118, 210, 0.24);
+    }
+
+    .calendar-zoom {
+      display: inline-grid;
+      grid-template-columns: 38px 54px 38px;
+      align-items: center;
+      min-height: 42px;
+      padding: 3px;
+      border: 1px solid #bed8ef;
+      border-radius: 8px;
+      background: #eef5ff;
+    }
+
+    .calendar-zoom-button {
+      width: 36px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      color: #31506d;
+      background: transparent;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .calendar-zoom-button:hover:not(:disabled) {
+      color: #fff;
+      background: var(--blue);
+    }
+
+    .calendar-zoom-button:disabled {
+      cursor: default;
+      opacity: 0.35;
+    }
+
+    .calendar-zoom-level {
+      color: #40516a;
+      font-size: 12px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
     }
 
     .calendar-mark {
@@ -1617,6 +1680,42 @@
       font-weight: 750;
       line-height: 1.35;
     }
+
+    .app.is-calendar-empty .calendar-view {
+      display: none !important;
+    }
+
+    .app.is-calendar-empty .schedule-overview {
+      display: none;
+    }
+
+    .search-empty-state {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      margin: 0 0 14px;
+      padding: 18px 20px;
+      border: 1px dashed #aebfcb;
+      border-radius: 8px;
+      background: #f7fafc;
+    }
+
+    .search-empty-state h2 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .search-empty-state p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .search-empty-state .ghost-btn { white-space: nowrap; }
 
     .empty-actions {
       display: flex;
@@ -2763,8 +2862,8 @@
 
     .weekday-options {
       display: grid;
-      grid-template-columns: repeat(7, minmax(36px, 1fr));
-      gap: 6px;
+      grid-template-columns: repeat(7, minmax(48px, 1fr));
+      gap: 8px;
     }
 
     .weekday-option input {
@@ -2774,27 +2873,40 @@
     }
 
     .weekday-option span {
-      min-height: 36px;
+      min-height: 42px;
       display: grid;
       place-items: center;
       border: 1px solid #bed0e3;
       border-radius: 7px;
       color: #40516a;
       background: #fff;
-      font-size: 12px;
-      font-weight: 900;
+      font-size: 13px;
+      font-weight: 800;
       cursor: pointer;
+      transition: border-color 150ms ease, background 150ms ease, color 150ms ease, box-shadow 150ms ease;
+    }
+
+    .weekday-option span:hover {
+      border-color: #7fa9cf;
+      background: #f4f8fc;
     }
 
     .weekday-option input:checked + span {
       border-color: var(--blue);
       color: #fff;
       background: var(--blue);
+      box-shadow: 0 2px 7px rgba(25, 118, 210, 0.18);
     }
 
     .weekday-option input:focus-visible + span {
       outline: 3px solid rgba(25, 118, 210, 0.25);
       outline-offset: 2px;
+    }
+
+    @media (max-width: 560px) {
+      .weekday-options {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
     }
 
     .transfer-tools {
@@ -3119,13 +3231,16 @@
     }
 
     html.dark-mode .language-switch,
-    html.dark-mode .view-switch {
+    html.dark-mode .view-switch,
+    html.dark-mode .calendar-zoom {
       border-color: #506079;
       background: #202c3a;
     }
 
     html.dark-mode .language-option,
-    html.dark-mode .view-option {
+    html.dark-mode .view-option,
+    html.dark-mode .calendar-zoom-button,
+    html.dark-mode .calendar-zoom-level {
       color: #bac7d8;
     }
 
@@ -3632,6 +3747,12 @@
         grid-template-columns: 1fr;
       }
 
+      .search-empty-state {
+        grid-template-columns: 1fr;
+      }
+
+      .search-empty-state .ghost-btn { width: 100%; }
+
       .empty-actions {
         display: grid;
         grid-template-columns: 1fr;
@@ -3876,14 +3997,27 @@
     .transfer-tools, .import-panel, .share-access-panel { margin: 14px 20px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: #f8fbff; }
     .transfer-tools { display: flex; flex-wrap: wrap; gap: 8px; }
     .share-access-panel h3 { margin: 0 0 12px; color: #144876; font-size: 15px; }
+    #shareDialog { width: min(760px, calc(100% - 24px)); }
+    #sharedCalendarDialog { width: min(720px, calc(100% - 24px)); }
+    .share-access-intro { margin: -4px 0 14px; color: var(--muted); font-size: 13px; line-height: 1.55; }
     .share-access-panel .calendar-list { margin: 12px 0 0; }
     .share-access-panel .preset-row { padding: 0; }
-    .member-invite-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(150px, .42fr) auto; gap: 10px; align-items: end; }
+    .member-invite-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(150px, .42fr); gap: 10px; align-items: end; }
     .member-invite-grid label { min-width: 0; display: grid; gap: 6px; color: #35445f; font-size: 13px; font-weight: 800; }
-    .member-invite-grid input, .member-invite-grid select, .member-role-select { width: 100%; min-height: 42px; padding: 8px 10px; border: 1px solid #bac8da; border-radius: 7px; color: var(--ink); background: var(--panel); }
+    .member-invite-grid input, .member-invite-grid select, .member-invite-grid textarea, .member-role-select { width: 100%; min-height: 42px; padding: 8px 10px; border: 1px solid #bac8da; border-radius: 7px; color: var(--ink); background: var(--panel); }
+    .member-invite-grid textarea { resize: vertical; }
+    .member-invite-note { grid-column: 1 / -1; }
+    .member-invite-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; }
+    .generated-share-link { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .generated-share-link input { min-width: 0; min-height: 42px; padding: 8px 10px; border: 1px solid #bac8da; border-radius: 7px; color: #29475a; background: #ffffff; font-size: 13px; }
+    .member-access-row { align-items: start; flex-wrap: wrap; }
+    .member-access-identity { display: grid; flex: 1 1 180px; gap: 2px; min-width: 0; }
+    .member-access-identity strong { overflow: hidden; text-overflow: ellipsis; }
+    .member-access-identity small { color: var(--muted); font-size: 12px; line-height: 1.45; }
     .member-role-select { width: auto; min-width: 118px; min-height: 36px; font-size: 12px; font-weight: 800; }
     .role-pill { display: inline-flex; align-items: center; width: max-content; min-height: 25px; padding: 3px 8px; border: 1px solid var(--blue-line); border-radius: 999px; color: #174f83; background: var(--blue-soft); font-size: 11px; font-weight: 900; }
     .owner-row { background: var(--blue-soft); }
+    .invite-note-callout { margin: 0 20px 14px; padding: 12px 14px; border-left: 3px solid var(--trust-success); color: #29475a; background: #f4f8f5; font-size: 13px; line-height: 1.55; }
     .shared-calendar-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 20px 14px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
     .shared-calendar-access { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; font-weight: 800; }
     .shared-event-actions { display: flex; align-items: center; gap: 6px; }
@@ -3893,6 +4027,20 @@
     .shared-event-form > label textarea { width: 100%; padding: 10px; border: 1px solid #bac8da; border-radius: 7px; color: var(--ink); background: var(--panel); resize: vertical; }
     .shared-event-form .form-actions { padding: 16px 0 0; }
     .shared-event-status { min-height: 18px; margin: 0; color: var(--muted); font-size: 12px; font-weight: 800; }
+    .calendar-comments-panel { margin: 4px 20px 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+    .calendar-comments-panel h3, .calendar-comments-panel h4 { margin: 0; color: #244d68; font-size: 15px; }
+    .calendar-comments-intro { margin: 4px 0 12px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .calendar-comment-list { display: grid; gap: 8px; margin-bottom: 10px; }
+    .calendar-comment { display: grid; gap: 4px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: #ffffff; }
+    .calendar-comment-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+    .calendar-comment-head strong { overflow: hidden; color: #29475a; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+    .calendar-comment-head time { flex: 0 0 auto; color: var(--muted); font-size: 11px; }
+    .calendar-comment p { margin: 0; color: var(--ink); font-size: 13px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .calendar-comment-empty { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+    .calendar-comment-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
+    .calendar-comment-form label { display: grid; gap: 5px; color: #35445f; font-size: 12px; font-weight: 800; }
+    .calendar-comment-form textarea { width: 100%; min-height: 68px; padding: 9px 10px; border: 1px solid #bac8da; border-radius: 7px; color: var(--ink); background: var(--panel); resize: vertical; }
+    .calendar-comment-status { min-height: 18px; margin: 8px 0 0; color: var(--muted); font-size: 12px; font-weight: 750; }
 
     /* Typography system */
     html {
@@ -4334,9 +4482,15 @@
       .calendar-list-row strong { min-width: 100%; }
       .member-invite-grid { grid-template-columns: 1fr; }
       .member-invite-grid .ghost-btn { width: 100%; }
+      .member-invite-note, .member-invite-actions { grid-column: auto; }
+      .member-invite-actions .primary-btn { width: 100%; }
+      .generated-share-link { grid-template-columns: 1fr 1fr; }
+      .generated-share-link input { grid-column: 1 / -1; }
       .member-role-select { flex: 1 1 140px; }
       .shared-calendar-toolbar { align-items: stretch; flex-direction: column; }
       .shared-calendar-toolbar .primary-btn { width: 100%; }
+      .calendar-comment-form { grid-template-columns: 1fr; }
+      .calendar-comment-form .primary-btn { width: 100%; }
       .welcome-hero h1 { font-size: 50px; }
       .welcome-hero h2 { font-size: 30px; line-height: 1.18; }
       .welcome-hero-description { font-size: 16px; line-height: 1.55; }
@@ -4828,6 +4982,7 @@
     .primary-btn, .ghost-btn, .danger-btn, .small-btn, .settings-btn, .logout-btn,
     .auth-entry-btn, .auth-submit, .welcome-primary-btn, .welcome-secondary-btn,
     .welcome-signin-btn { min-height: 40px; border-radius: var(--radius-control); font-weight: 800; }
+    .auth-submit, .auth-link-btn { min-height: 44px; }
     .panel, .goal { border: var(--border-standard); box-shadow: var(--shadow-card); }
     .topbar > .panel, .schedule-shell { box-shadow: var(--shadow-card); }
     .modal-header, .settings-group, .preset-section { border-color: var(--line); }
@@ -4901,42 +5056,187 @@
     .welcome-hero-copy {
       position: relative;
       z-index: 2;
-      padding: 28px 30px 26px;
-      border: 1px solid rgba(255,255,255,.72);
-      border-radius: 18px;
-      background: rgba(255,255,255,.82);
-      box-shadow: 0 18px 42px rgba(26,49,87,.14);
-      backdrop-filter: blur(8px);
+      width: min(680px, 58%);
     }
 
-    .welcome-image-picker {
+    .welcome-hero::before {
+      background: rgba(247, 249, 249, .72);
+    }
+
+    .welcome-hero-description {
+      max-width: 61ch;
+    }
+
+    .welcome-trial-note {
       display: flex;
-      gap: 10px;
-      margin-top: 22px;
+      align-items: flex-start;
+      gap: 8px;
+      max-width: 58ch;
+      margin: 14px 0 0;
+      color: #405466;
+      font-size: 13px;
+      font-weight: 650;
+      line-height: 1.5;
     }
 
-    .welcome-image-option {
-      width: 62px;
-      height: 46px;
+    .welcome-trial-note::before {
+      content: "\2713";
+      flex: 0 0 auto;
+      color: var(--trust-success);
+      font-weight: 900;
+    }
+
+    .welcome-capabilities {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0;
+      max-width: 680px;
+      margin: 26px 0 0;
       padding: 0;
-      overflow: hidden;
-      border: 2px solid rgba(255,255,255,.9);
-      border-radius: 9px;
-      background: #fff;
-      box-shadow: 0 3px 10px rgba(26,49,87,.14);
-      opacity: .68;
+      border-top: 1px solid rgba(41, 75, 94, .28);
+      border-bottom: 1px solid rgba(41, 75, 94, .28);
+      list-style: none;
     }
 
-    .welcome-image-option:hover,
-    .welcome-image-option.is-active { opacity: 1; transform: translateY(-2px); }
-    .welcome-image-option.is-active { border-color: #176fc1; box-shadow: 0 0 0 3px rgba(23,111,193,.2); }
-    .welcome-image-option img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .welcome-capability {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr);
+      gap: 9px;
+      min-width: 0;
+      padding: 16px 14px 16px 0;
+    }
+
+    .welcome-capability + .welcome-capability {
+      padding-left: 14px;
+      border-left: 1px solid rgba(41, 75, 94, .22);
+    }
+
+    .welcome-capability-number {
+      color: #9a514f;
+      font-size: 11px;
+      font-weight: 850;
+      line-height: 1.5;
+    }
+
+    .welcome-capability-copy strong,
+    .welcome-capability-copy small {
+      display: block;
+    }
+
+    .welcome-capability-copy strong {
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .welcome-capability-copy small {
+      margin-top: 3px;
+      color: #526778;
+      font-size: 12px;
+      font-weight: 550;
+      line-height: 1.45;
+    }
 
     .welcome-preview-section { position: relative; z-index: 3; margin-top: -58px; border-top: 0; border-radius: 24px 24px 0 0; }
 
     @media (max-width: 740px) {
-      .welcome-hero-copy { padding: 22px 20px; background: rgba(255,255,255,.88); }
+      .welcome-hero {
+        background-position: 58% center;
+      }
+
+      .welcome-hero::before {
+        background: rgba(247, 249, 249, .86);
+      }
+
+      .welcome-hero-copy {
+        width: 100%;
+      }
+
+      .welcome-capabilities {
+        grid-template-columns: 1fr;
+        margin-top: 20px;
+      }
+
+      .welcome-capability {
+        grid-template-columns: 24px minmax(0, 1fr);
+        padding: 10px 0;
+      }
+
+      .welcome-capability + .welcome-capability {
+        padding-left: 0;
+        border-top: 1px solid rgba(41, 75, 94, .2);
+        border-left: 0;
+      }
+
       .welcome-preview-section { margin-top: -32px; border-radius: 18px 18px 0 0; }
+    }
+
+    @media (max-width: 560px) {
+      .welcome-nav .welcome-signin-btn {
+        display: none;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .welcome-hero-inner {
+        padding: 32px 0 66px;
+      }
+
+      .welcome-eyebrow {
+        margin-bottom: 10px;
+      }
+
+      .welcome-hero h1 {
+        font-size: 44px;
+      }
+
+      .welcome-hero h2 {
+        margin: 12px 0 8px;
+        font-size: 27px;
+      }
+
+      .welcome-hero-description {
+        margin-top: 8px;
+        line-height: 1.48;
+      }
+
+      .welcome-hero-actions {
+        margin-top: 16px;
+      }
+
+      .welcome-trial-note {
+        margin-top: 10px;
+      }
+
+      .welcome-capabilities {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: 14px;
+      }
+
+      .welcome-capability {
+        display: block;
+        padding: 10px 8px;
+      }
+
+      .welcome-capability + .welcome-capability {
+        padding-left: 8px;
+        border-top: 0;
+        border-left: 1px solid rgba(41, 75, 94, .2);
+      }
+
+      .welcome-capability-number {
+        display: block;
+        margin-bottom: 3px;
+      }
+
+      .welcome-capability-copy strong {
+        font-size: 12px;
+      }
+
+      .welcome-capability-copy small {
+        display: none;
+      }
     }
 
     #activityForm {
@@ -5393,39 +5693,8 @@
     }
   </style>
   <style>
-    .welcome-edge-card {
-      position: absolute;
-      z-index: 1;
-      display: grid;
-      gap: 11px;
-      width: 208px;
-      padding: 20px 19px 18px;
-      border: 1px solid rgba(255,255,255,.9);
-      border-radius: 16px;
-      background: rgba(255,255,255,.9);
-      box-shadow: 0 18px 40px rgba(26,49,87,.18);
-      backdrop-filter: blur(7px);
-    }
-
-    .welcome-edge-card-left { left: max(22px, calc((100vw - 1510px) / 2)); top: 25%; }
-    .welcome-edge-card-right { right: max(22px, calc((100vw - 1510px) / 2)); bottom: 17%; }
-    .welcome-edge-card-label { color: #cf4858; font-size: 10px; font-weight: 900; letter-spacing: .1em; }
-    .welcome-edge-card strong { color: #17223b; font-size: 19px; line-height: 1.2; }
-    .welcome-edge-card-line { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
-    .welcome-edge-card-line i { height: 5px; border-radius: 99px; background: #2f7fd3; }
-    .welcome-edge-card-line i:nth-child(2) { background: #3f9444; }
-    .welcome-edge-card-line i:nth-child(3) { background: #e0aa48; }
-    .welcome-edge-card-line i:nth-child(4) { background: #d95f50; }
-    .welcome-edge-card-avatars { display: flex; align-items: center; }
-    .welcome-edge-card-avatars i,
-    .welcome-edge-card-avatars b { display: grid; width: 25px; height: 25px; place-items: center; margin-right: -5px; border: 2px solid #fff; border-radius: 50%; color: #fff; background: #2f7fd3; font-size: 10px; font-style: normal; }
-    .welcome-edge-card-avatars i:nth-child(2) { background: #3f9444; }
-    .welcome-edge-card-avatars i:nth-child(3) { background: #d95f50; }
-    .welcome-edge-card-avatars b { color: #30506b; background: #e9eff4; }
-
-    @media (max-width: 1080px) {
-      .welcome-edge-card { display: none; }
-    }
+    /* The welcome hero stays intentionally unframed so the product message and
+       real family photo feel like one clear introduction. */
   </style>
   <style>
     /* Final phone ergonomics: stable type, reachable controls, and contained scrolling. */
@@ -5460,6 +5729,10 @@
     }
 
     @media (max-width: 740px) {
+      .calendar-zoom {
+        display: none;
+      }
+
       .settings-btn,
       .manage-calendars-btn,
       .close-btn {
@@ -5548,6 +5821,66 @@
       .brand h1 { font-size: 30px; white-space: nowrap; }
       .ribbon { padding: 6px 8px; font-size: 12px; }
       .week-label { font-size: 16px; }
+    }
+  </style>
+  <style>
+    /* High-contrast About section: its light background needs dark text. */
+    .welcome-about-section {
+      padding-inline: max(28px, 5vw);
+      color: var(--ink);
+      background: #f7f8f6;
+    }
+
+    .welcome-about-inner {
+      width: min(1180px, 100%);
+    }
+
+    .welcome-about-copy h2 {
+      color: #172a3a !important;
+    }
+
+    .welcome-about-copy > p:last-of-type {
+      color: #466075 !important;
+    }
+
+    .welcome-about-points {
+      border-color: #b9c9d3;
+    }
+
+    .welcome-about-point {
+      border-bottom-color: #b9c9d3;
+      background: #ffffff;
+      padding-inline: 20px;
+    }
+
+    .welcome-about-point span {
+      color: #2f7654;
+      font-variant-numeric: normal;
+    }
+
+    .welcome-about-point h3 {
+      color: #172a3a !important;
+    }
+
+    .welcome-about-point p {
+      color: #566b7b !important;
+    }
+
+    @media (max-width: 560px) {
+      .welcome-about-section {
+        padding-inline: 22px;
+      }
+
+      .welcome-about-inner {
+        gap: 28px;
+      }
+
+      .welcome-about-point {
+        grid-template-columns: 30px minmax(0, 1fr);
+        gap: 12px;
+        padding: 18px 4px;
+        padding-inline: 14px;
+      }
     }
   </style>
   <style>
@@ -5858,6 +6191,422 @@
       .right-actions > * {
         min-height: 44px;
       }
+
+      /* Keep the planner controls visible without making families scroll past
+         a full screen of chrome before reaching their schedule. */
+      .account-bar {
+        display: grid;
+        grid-template-columns: 40px minmax(0, 1fr) 44px auto;
+        gap: 8px;
+        padding: 8px 10px;
+      }
+
+      .account-avatar {
+        grid-column: 1;
+        grid-row: 1;
+        width: 40px;
+        height: 40px;
+      }
+
+      .account-identity {
+        grid-column: 2;
+        grid-row: 1;
+        min-width: 0;
+      }
+
+      .account-email { max-width: 100%; }
+      .account-bar #openSettings {
+        grid-column: 3;
+        grid-row: 1;
+      }
+
+      .account-bar .invitation-button,
+      .account-bar .auth-entry-btn,
+      .account-bar .logout-btn {
+        grid-column: 4;
+        grid-row: 1;
+        width: auto;
+        min-width: 0;
+        padding-inline: 12px;
+      }
+
+      .save-status {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        width: 100%;
+        min-height: 28px;
+        margin: 0;
+        padding: 5px 10px;
+      }
+
+      .topbar { margin-bottom: 10px; }
+      .brand {
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 10px;
+        padding: 6px 8px;
+      }
+
+      .calendar-mark {
+        width: 48px;
+        height: 48px;
+        border-width: 2px;
+      }
+
+      .calendar-grid {
+        left: 8px;
+        top: 20px;
+        grid-template-columns: repeat(2, 11px);
+        grid-auto-rows: 8px;
+        gap: 4px;
+      }
+
+      .clock-hand {
+        right: -8px;
+        bottom: -6px;
+        width: 28px;
+        height: 28px;
+        border-width: 3px;
+      }
+
+      .clock-hand::before,
+      .clock-hand::after {
+        left: 11px;
+        width: 3px;
+      }
+
+      .clock-hand::before { top: 5px; height: 9px; }
+      .clock-hand::after { top: 12px; height: 8px; }
+      .brand h1 { font-size: 31px; }
+      .ribbon {
+        margin-top: 4px;
+        padding: 4px 8px;
+        font-size: 11px;
+      }
+
+      .kids-panel {
+        min-height: 0;
+        gap: 6px;
+        padding: 10px;
+      }
+
+      .kids-list {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        scrollbar-width: thin;
+        scroll-snap-type: x proximity;
+      }
+
+      .kid-toggle {
+        flex: 0 0 auto;
+        min-height: 44px;
+        padding: 6px 10px;
+        font-size: 15px;
+        scroll-snap-align: start;
+      }
+
+      .kid-toggle span:last-child {
+        max-width: 120px;
+      }
+
+      .toolbar { padding: 8px; }
+      .toolbar-leading {
+        grid-template-columns: minmax(0, 1fr) 92px;
+        gap: 8px;
+      }
+
+      .calendar-workspace {
+        grid-column: 1 / -1;
+        height: 50px;
+      }
+
+      .week-controls {
+        grid-column: 1;
+        height: 50px;
+        grid-template-columns: 40px minmax(0, 1fr) 40px;
+        gap: 4px;
+      }
+
+      .week-controls .icon-btn {
+        width: 40px;
+        min-width: 40px;
+        height: 44px;
+        min-height: 44px;
+      }
+      .week-label { font-size: 15px; }
+
+      .toolbar-leading > .language-switch {
+        grid-column: 2;
+        width: 92px;
+        height: 50px;
+      }
+
+      .schedule-actions {
+        grid-template-columns: 44px minmax(0, 1fr) 96px;
+        gap: 8px;
+      }
+
+      .schedule-actions .view-switch { grid-column: 1 / -1; }
+      .schedule-actions > .ghost-btn,
+      .schedule-actions > .primary-btn,
+      .schedule-actions > .more-actions { width: 100%; }
+      .schedule-actions > .ghost-btn { padding: 0; }
+      .schedule-actions > .primary-btn { white-space: nowrap; }
+      .more-actions-menu { width: min(310px, calc(100vw - 36px)); }
+
+      .schedule-overview { margin-bottom: 10px; }
+      .calendar-search input { font-size: 16px; }
+      .overview-stat,
+      .conflict-summary,
+      .travel-summary { min-height: 44px; }
+
+      .day-card h2 {
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+      }
+
+      .agenda-item {
+        min-height: 64px;
+        grid-template-columns: 42px minmax(0, 1fr);
+      }
+
+      .agenda-title,
+      .agenda-meta {
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+      }
+
+      .preview-limit-dialog {
+        width: calc(100% - 12px);
+        max-height: calc(100dvh - 12px);
+      }
+
+      .preview-limit-review,
+      .preview-profile-form { padding: 18px 16px; }
+      .preview-limit-review h2 { font-size: 22px; line-height: 1.2; }
+      .preview-profile-heading h3 { font-size: 22px; }
+      .preview-profile-form input,
+      .preview-profile-form textarea { font-size: 16px; }
+      .preview-profile-actions {
+        position: sticky;
+        z-index: 5;
+        bottom: 0;
+        margin: 10px -16px -18px;
+        padding: 12px 16px max(12px, env(safe-area-inset-bottom));
+        border-top: 1px solid var(--line);
+        background: var(--panel);
+        box-shadow: 0 -8px 20px rgba(26, 49, 87, .08);
+      }
+    }
+
+    @media (max-width: 360px) {
+      .app { width: calc(100% - 12px); }
+      .account-bar {
+        grid-template-columns: 38px minmax(0, 1fr) 44px;
+      }
+      .account-bar .invitation-button,
+      .account-bar .auth-entry-btn,
+      .account-bar .logout-btn {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        width: 100%;
+      }
+      .save-status { grid-row: 3; }
+      .toolbar-leading {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .week-controls,
+      .toolbar-leading > .language-switch {
+        grid-column: 1;
+        width: 100%;
+      }
+      .week-controls { grid-template-columns: 44px minmax(0, 1fr) 44px; }
+      .week-controls .icon-btn { width: 44px; min-width: 44px; }
+      .toolbar-leading > .language-switch { height: 46px; }
+      .week-label { font-size: 14px; }
+      .language-option { min-width: 42px; padding-inline: 5px; }
+      .event-filter-option { padding-inline: 4px; font-size: 12px; }
+    }
+  </style>
+  <script>
+    if (!['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)) {
+      window.va = window.va || function () {
+        (window.vaq = window.vaq || []).push(arguments);
+      };
+      const analyticsScript = document.createElement('script');
+      analyticsScript.defer = true;
+      analyticsScript.src = '/_vercel/insights/script.js';
+      document.head.appendChild(analyticsScript);
+
+      const speedInsightsScript = document.createElement('script');
+      speedInsightsScript.defer = true;
+      speedInsightsScript.src = '/_vercel/speed-insights/script.js';
+      document.head.appendChild(speedInsightsScript);
+    }
+  </script>
+  <style>
+    /* Final inset for the About cards. Keep the number away from the rounded edge. */
+    .welcome-about-point {
+      padding-left: 36px !important;
+      padding-right: 36px !important;
+    }
+
+    @media (max-width: 560px) {
+      .welcome-about-point {
+        padding-left: 24px !important;
+        padding-right: 24px !important;
+      }
+    }
+  </style>
+  <style>
+    /* Five small visual details for the welcome/About experience. */
+    .welcome-about-section {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 88% 18%, rgba(119, 208, 130, .16), transparent 18rem),
+        radial-gradient(circle at 6% 88%, rgba(31, 104, 152, .08), transparent 20rem),
+        #f7f8f6;
+    }
+
+    .welcome-about-section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: max(28px, 5vw);
+      right: max(28px, 5vw);
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #2f7654, #77d082, #1f6898);
+      opacity: .9;
+    }
+
+    .welcome-about-copy,
+    .welcome-about-points {
+      position: relative;
+      z-index: 1;
+    }
+
+    .welcome-about-copy h2 {
+      max-width: 620px;
+      text-wrap: balance;
+    }
+
+    .welcome-about-copy h2::after {
+      content: "";
+      display: block;
+      width: 64px;
+      height: 4px;
+      margin-top: 18px;
+      border-radius: 999px;
+      background: #77d082;
+    }
+
+    .welcome-about-copy .welcome-section-kicker {
+      width: fit-content;
+      padding: 6px 10px;
+      border: 1px solid rgba(47, 118, 84, .24);
+      border-radius: 999px;
+      color: #2f7654;
+      background: rgba(255, 255, 255, .72);
+    }
+
+    .welcome-about-point {
+      position: relative;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .welcome-about-point:hover,
+    .welcome-about-point:focus-within {
+      z-index: 2;
+      border-color: #8fbfa1;
+      box-shadow: 0 14px 30px rgba(27, 53, 74, .10);
+      transform: translateX(4px);
+    }
+
+    .welcome-about-point > span {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border: 2px solid #9fc2ad;
+      border-radius: 50%;
+      color: #2f7654;
+      background: #e9f3ed;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    @media (max-width: 560px) {
+      .welcome-about-section::before {
+        left: 22px;
+        right: 22px;
+      }
+
+      .welcome-about-point:hover,
+      .welcome-about-point:focus-within {
+        transform: none;
+      }
+    }
+  </style>
+  <style>
+    /* Gentle reveal motion for the About section. */
+    .welcome-about-section.motion-ready .welcome-about-copy,
+    .welcome-about-section.motion-ready .welcome-about-point {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    .welcome-about-section.motion-ready.is-visible .welcome-about-copy,
+    .welcome-about-section.motion-ready.is-visible .welcome-about-point {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity .55s ease, transform .55s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .welcome-about-section.motion-ready.is-visible .welcome-about-point:nth-child(2) { transition-delay: .08s; }
+    .welcome-about-section.motion-ready.is-visible .welcome-about-point:nth-child(3) { transition-delay: .16s; }
+    .welcome-about-section.motion-ready.is-visible .welcome-about-point > span {
+      animation: about-badge-settle .55s cubic-bezier(.22, 1, .36, 1) both;
+      animation-delay: .12s;
+    }
+
+    @keyframes about-badge-settle {
+      0% { opacity: 0; transform: scale(.72) rotate(-8deg); }
+      70% { opacity: 1; transform: scale(1.08) rotate(2deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0); }
+    }
+
+    html.reduce-motion .welcome-about-section.motion-ready .welcome-about-copy,
+    html.reduce-motion .welcome-about-section.motion-ready .welcome-about-point {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+
+    html.reduce-motion .welcome-about-section.motion-ready .welcome-about-point > span {
+      animation: none;
+    }
+  </style>
+  <style>
+    .history-body { padding: 18px 20px 22px; }
+    .history-intro { margin: 0 0 14px; color: var(--muted); font-size: 13px; }
+    .history-list { display: grid; gap: 8px; }
+    .history-empty { padding: 26px 16px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); text-align: center; }
+    .history-item { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 11px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); }
+    .history-item-icon { font-size: 21px; text-align: center; }
+    .history-item-copy { min-width: 0; }
+    .history-item-copy strong, .history-item-copy span { display: block; }
+    .history-item-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+    .history-item-copy span, .history-item-time { color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .history-item-time { white-space: nowrap; text-align: right; }
+    @media (max-width: 560px) {
+      .history-body { padding: 14px; }
+      .history-item { grid-template-columns: 28px minmax(0, 1fr); }
+      .history-item-time { grid-column: 2; text-align: left; }
     }
   </style>
 </head>
@@ -5879,42 +6628,37 @@
           <button class="language-option" type="button" data-language="zh" aria-pressed="false">中文</button>
         </div>
         <button class="welcome-signin-btn" type="button" id="welcomeSignIn" data-i18n="auth.signIn">Sign In</button>
-        <button class="welcome-primary-btn" type="button" id="welcomeTryNav" data-i18n="welcome.tryPlanner">Try the planner</button>
+        <button class="welcome-primary-btn" type="button" id="welcomeTryNav" data-i18n="welcome.tryPlanner">Try KidsSync free</button>
       </div>
     </header>
 
     <section class="welcome-hero">
       <div class="welcome-hero-inner">
         <div class="welcome-hero-copy">
-          <p class="welcome-eyebrow" data-i18n="welcome.eyebrow">Built for the person holding the week together</p>
+          <p class="welcome-eyebrow" data-i18n="welcome.eyebrow">Family scheduling for busy parents</p>
           <h1 id="welcomeBrand">Kids<span>Sync</span></h1>
-          <h2 data-i18n="welcome.headline">One clear place for the whole family’s week.</h2>
-          <p class="welcome-hero-description" data-i18n="welcome.description">Plan school, activities, pickups, homework, holidays, and family time without piecing everything together from texts and paper calendars.</p>
+          <h2 data-i18n="welcome.headline">The family calendar built for real life.</h2>
+          <p class="welcome-hero-description" data-i18n="welcome.description">Give every child a clear, color-coded schedule. KidsSync keeps activities, pickups, birthdays, deadlines, and family plans together, and flags conflicts before they become problems.</p>
           <div class="welcome-hero-actions">
-            <button class="welcome-primary-btn" type="button" id="welcomeTryHero" data-i18n="welcome.tryPlanner">Try the planner</button>
+            <button class="welcome-primary-btn" type="button" id="welcomeTryHero" data-i18n="welcome.tryPlanner">Try KidsSync free</button>
             <button class="welcome-secondary-btn" type="button" id="welcomeSignInHero" data-i18n="welcome.signInAccount">Sign in to your account</button>
           </div>
-          <div class="welcome-image-picker" aria-label="Choose a family image">
-            <button class="welcome-image-option is-active" type="button" data-hero-image="./assets/kidssync-family-table-v2.png" aria-label="Family planning at a table"><img src="./assets/kidssync-family-table-v2.png" alt=""></button>
-            <button class="welcome-image-option" type="button" data-hero-image="./assets/kidssync-family-entryway-v2.png" aria-label="Family getting ready"><img src="./assets/kidssync-family-entryway-v2.png" alt=""></button>
-            <button class="welcome-image-option" type="button" data-hero-image="./assets/kidssync-family-park-v2.png" aria-label="Family planning outdoors"><img src="./assets/kidssync-family-park-v2.png" alt=""></button>
-          </div>
-          <ul class="welcome-proof" aria-label="KidsSync highlights" data-i18n-aria="welcome.highlights">
-            <li data-i18n="welcome.proofPreview">Preview without an account</li>
-            <li data-i18n="welcome.proofDevices">Made for phones and computers</li>
-            <li data-i18n="welcome.proofLanguages">English and Chinese</li>
+          <p class="welcome-trial-note" data-i18n="welcome.trialNote">Explore for 10 minutes without an account. Sign in to keep and sync your calendar.</p>
+          <ul class="welcome-capabilities" aria-label="What KidsSync helps families do" data-i18n-aria="welcome.highlights">
+            <li class="welcome-capability">
+              <span class="welcome-capability-number" aria-hidden="true">01</span>
+              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityPlan">Plan the week</strong><small data-i18n="welcome.capabilityPlanDetail">Color-coded schedules for every child</small></span>
+            </li>
+            <li class="welcome-capability">
+              <span class="welcome-capability-number" aria-hidden="true">02</span>
+              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityConflicts">Catch conflicts</strong><small data-i18n="welcome.capabilityConflictsDetail">See overlaps before plans collide</small></span>
+            </li>
+            <li class="welcome-capability">
+              <span class="welcome-capability-number" aria-hidden="true">03</span>
+              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityShare">Share the plan</strong><small data-i18n="welcome.capabilityShareDetail">Sync, print, or export for caregivers</small></span>
+            </li>
           </ul>
         </div>
-      </div>
-      <div class="welcome-edge-card welcome-edge-card-left" aria-hidden="true">
-        <span class="welcome-edge-card-label">FAMILY VIEW</span>
-        <strong>Everyone’s week,<br>at a glance.</strong>
-        <span class="welcome-edge-card-line"><i></i><i></i><i></i><i></i></span>
-      </div>
-      <div class="welcome-edge-card welcome-edge-card-right" aria-hidden="true">
-        <span class="welcome-edge-card-label">SHARED PLANS</span>
-        <strong>One place<br>to stay in sync.</strong>
-        <span class="welcome-edge-card-avatars"><i>J</i><i>M</i><i>T</i><b>+</b></span>
       </div>
       <a class="welcome-scroll-link" href="#welcomePreview" data-i18n="welcome.seeWeek">See a sample family week ↓</a>
     </section>
@@ -6069,15 +6813,15 @@
         </div>
         <div class="welcome-about-points">
           <div class="welcome-about-point">
-            <span>01</span>
+            <span>1</span>
             <div><h3 data-i18n="welcome.aboutOneTitle">Built around families</h3><p data-i18n="welcome.aboutOneBody">Different kids, different colors, one dependable plan.</p></div>
           </div>
           <div class="welcome-about-point">
-            <span>02</span>
+            <span>2</span>
             <div><h3 data-i18n="welcome.aboutTwoTitle">Useful from day one</h3><p data-i18n="welcome.aboutTwoBody">No complicated setup before you can see whether it works for you.</p></div>
           </div>
           <div class="welcome-about-point">
-            <span>03</span>
+            <span>3</span>
             <div><h3 data-i18n="welcome.aboutThreeTitle">Ready to grow smarter</h3><p data-i18n="welcome.aboutThreeBody">A strong scheduling foundation for conflict help and family planning suggestions.</p></div>
           </div>
         </div>
@@ -6119,8 +6863,34 @@
             <span data-i18n="auth.password">Password</span>
             <input id="signInPassword" type="password" autocomplete="current-password" required>
           </label>
+          <button class="auth-link-btn" type="button" id="forgotPassword" data-i18n="auth.forgotPassword">Forgot password?</button>
           <p class="auth-error" id="signInError" role="alert"></p>
           <button class="auth-submit" type="submit" data-i18n="auth.submitSignIn">Sign In</button>
+        </form>
+
+        <form class="auth-form" id="passwordResetRequestForm" hidden>
+          <label>
+            <span data-i18n="auth.email">Email</span>
+            <input id="passwordResetEmail" type="email" autocomplete="email" required>
+          </label>
+          <p class="auth-help" data-i18n="auth.resetHelp">We will email you a secure password-reset link.</p>
+          <p class="auth-error" id="passwordResetRequestStatus" role="status"></p>
+          <button class="auth-submit" type="submit" data-i18n="auth.sendReset">Send Reset Link</button>
+          <button class="auth-link-btn" type="button" id="backToSignIn" data-i18n="auth.backToSignIn">Back to sign in</button>
+        </form>
+
+        <form class="auth-form" id="passwordUpdateForm" hidden>
+          <label>
+            <span data-i18n="auth.newPassword">New password</span>
+            <input id="passwordUpdateValue" type="password" autocomplete="new-password" minlength="8" required>
+          </label>
+          <label>
+            <span data-i18n="auth.confirmPassword">Confirm password</span>
+            <input id="passwordUpdateConfirm" type="password" autocomplete="new-password" minlength="8" required>
+          </label>
+          <p class="auth-help" data-i18n="auth.passwordHelp">Use at least 8 characters.</p>
+          <p class="auth-error" id="passwordUpdateStatus" role="alert"></p>
+          <button class="auth-submit" type="submit" data-i18n="auth.updatePassword">Update Password</button>
         </form>
 
         <form class="auth-form" id="signUpForm" hidden>
@@ -6293,6 +7063,11 @@
           <button class="view-option is-active" type="button" data-view="week" role="tab" aria-selected="true" data-i18n="view.week">Week</button>
           <button class="view-option" type="button" data-view="month" role="tab" aria-selected="false" data-i18n="view.month">Month</button>
         </div>
+        <div class="calendar-zoom" id="calendarZoom" role="group" aria-label="Calendar zoom" data-i18n-aria="aria.calendarZoom">
+          <button class="calendar-zoom-button" type="button" id="zoomOut" aria-label="Zoom out calendar" title="Zoom out calendar" data-i18n-aria="aria.zoomOut" data-i18n-title="aria.zoomOut"><span aria-hidden="true">−</span></button>
+          <span class="calendar-zoom-level" id="zoomLevel" aria-live="polite">100%</span>
+          <button class="calendar-zoom-button" type="button" id="zoomIn" aria-label="Zoom in calendar" title="Zoom in calendar" data-i18n-aria="aria.zoomIn" data-i18n-title="aria.zoomIn"><span aria-hidden="true">+</span></button>
+        </div>
         <button class="ghost-btn feature-btn" type="button" id="openDashboard" aria-label="Dashboard" data-i18n-aria="dashboard.open"><span class="button-icon" aria-hidden="true">▦</span><span data-i18n="dashboard.open">Dashboard</span></button>
         <button class="primary-btn" type="button" id="addActivity" data-i18n="actions.addActivity">＋ Add Event</button>
         <details class="more-actions" id="moreActions">
@@ -6303,6 +7078,7 @@
             <button class="ghost-btn feature-btn" type="button" id="openReminders"><span class="button-icon" aria-hidden="true">🔔</span><span data-i18n="reminders.open">Reminders</span><span class="reminder-badge" id="reminderBadge" hidden>0</span></button>
             <button class="ghost-btn" type="button" id="toggleWeekends" aria-pressed="false" data-i18n="actions.hideWeekends">Hide weekends</button>
             <button class="ghost-btn feature-btn share-btn" type="button" id="shareSchedule"><span class="button-icon" aria-hidden="true">↗</span><span data-i18n="sharing.share">Share</span></button>
+            <button class="ghost-btn" type="button" id="openActivityHistory" data-i18n="history.open">Activity history</button>
           </div>
         </details>
       </div>
@@ -6337,6 +7113,14 @@
         <button class="ghost-btn" type="button" id="emptyAddEvent" data-i18n="empty.addEvent">Add family event</button>
         <button class="ghost-btn" type="button" id="emptyLoadExample" data-i18n="empty.loadExample">Load example</button>
       </div>
+    </section>
+
+    <section class="search-empty-state" id="searchEmptyState" aria-live="polite" hidden>
+      <div>
+        <h2 data-i18n="search.noResultsTitle">No matching events</h2>
+        <p data-i18n="search.noResultsBody">Try another search or clear the active filters.</p>
+      </div>
+      <button class="ghost-btn" type="button" id="resetScheduleFilters" data-i18n="search.reset">Clear search and filters</button>
     </section>
 
     <section class="schedule-shell calendar-view" id="weekSchedule" aria-label="Weekly schedule" data-i18n-aria="aria.weeklySchedule">
@@ -6459,13 +7243,13 @@
         <fieldset class="weekday-fieldset" id="repeatWeekdays">
           <legend data-i18n="repeat.onDays">Repeat on</legend>
           <div class="weekday-options">
-            <label class="weekday-option"><input type="checkbox" value="1"><span data-i18n="day.shortMon">M</span></label>
-            <label class="weekday-option"><input type="checkbox" value="2"><span data-i18n="day.shortTue">T</span></label>
-            <label class="weekday-option"><input type="checkbox" value="3"><span data-i18n="day.shortWed">W</span></label>
-            <label class="weekday-option"><input type="checkbox" value="4"><span data-i18n="day.shortThu">T</span></label>
-            <label class="weekday-option"><input type="checkbox" value="5"><span data-i18n="day.shortFri">F</span></label>
-            <label class="weekday-option"><input type="checkbox" value="6"><span data-i18n="day.shortSat">S</span></label>
-            <label class="weekday-option"><input type="checkbox" value="0"><span data-i18n="day.shortSun">S</span></label>
+            <label class="weekday-option"><input type="checkbox" value="1"><span data-i18n="day.shortMon">Mon</span></label>
+            <label class="weekday-option"><input type="checkbox" value="2"><span data-i18n="day.shortTue">Tue</span></label>
+            <label class="weekday-option"><input type="checkbox" value="3"><span data-i18n="day.shortWed">Wed</span></label>
+            <label class="weekday-option"><input type="checkbox" value="4"><span data-i18n="day.shortThu">Thu</span></label>
+            <label class="weekday-option"><input type="checkbox" value="5"><span data-i18n="day.shortFri">Fri</span></label>
+            <label class="weekday-option"><input type="checkbox" value="6"><span data-i18n="day.shortSat">Sat</span></label>
+            <label class="weekday-option"><input type="checkbox" value="0"><span data-i18n="day.shortSun">Sun</span></label>
           </div>
         </fieldset>
       </section>
@@ -6723,7 +7507,48 @@
       <h2 data-i18n="sharing.title">Share Schedule</h2>
       <button class="close-btn" type="button" id="closeShareDialog" aria-label="Close" data-i18n-aria="aria.close">×</button>
     </div>
-    <p style="padding: 0 20px; color: var(--muted)" data-i18n="sharing.description">Share a read-only view, export to another calendar, or import events from a file.</p>
+    <p style="padding: 0 20px; color: var(--muted)" data-i18n="sharing.description">Create a secure link for one person, choose what they can do, and include a note.</p>
+    <section class="share-access-panel" id="shareAccessPanel" hidden>
+      <h3 data-i18n="sharing.accessTitle">Share this calendar</h3>
+      <p class="share-access-intro" data-i18n="sharing.accessIntro">The link only works for the email you invite. They can sign in or create an account after opening it.</p>
+      <div class="member-invite-grid">
+        <label>
+          <span data-i18n="sharing.memberEmail">Person’s email</span>
+          <input id="memberEmail" type="email" placeholder="name@example.com" data-i18n-placeholder="sharing.memberPlaceholder" required>
+        </label>
+        <label>
+          <span data-i18n="sharing.permission">Permission</span>
+          <select id="memberRole">
+            <option value="viewer" data-i18n="sharing.viewer">Viewer</option>
+            <option value="commenter" data-i18n="sharing.commenter">Commenter</option>
+            <option value="editor" data-i18n="sharing.editor">Editor</option>
+          </select>
+        </label>
+        <label class="member-invite-note">
+          <span data-i18n="sharing.note">Note (optional)</span>
+          <textarea id="memberNote" rows="2" maxlength="500" placeholder="Add a message about this calendar" data-i18n-placeholder="sharing.notePlaceholder"></textarea>
+        </label>
+        <div class="member-invite-actions">
+          <button class="primary-btn" type="button" id="addMember" data-i18n="sharing.createLink">Create sharing link</button>
+        </div>
+      </div>
+      <div class="generated-share-link" id="generatedShareLinkRow" hidden>
+        <input id="generatedShareLink" type="url" readonly aria-label="Generated sharing link" data-i18n-aria="sharing.generatedLink">
+        <button class="ghost-btn" type="button" id="copyGeneratedShareLink" data-i18n="sharing.copyLink">Copy link</button>
+        <button class="ghost-btn" type="button" id="emailGeneratedShareLink" data-i18n="sharing.emailLink">Email link</button>
+      </div>
+      <div class="calendar-list" id="memberList"></div>
+      <section class="calendar-comments-panel" id="ownerCommentsPanel">
+        <h4 data-i18n="comments.title">Calendar comments</h4>
+        <p class="calendar-comments-intro" data-i18n="comments.ownerIntro">Read feedback from commenters and reply here.</p>
+        <div class="calendar-comment-list" id="ownerCommentList"></div>
+        <form class="calendar-comment-form" id="ownerCommentForm">
+          <label><span data-i18n="comments.reply">Reply</span><textarea id="ownerCommentBody" maxlength="1000" required></textarea></label>
+          <button class="primary-btn" type="submit" data-i18n="comments.post">Post comment</button>
+        </form>
+        <p class="calendar-comment-status" id="ownerCommentStatus" role="status"></p>
+      </section>
+    </section>
     <textarea class="share-copy" id="shareText" readonly aria-label="Shareable schedule text"></textarea>
     <div class="transfer-tools">
       <button class="ghost-btn" type="button" id="printSchedule" data-i18n="sharing.print">Print schedule</button>
@@ -6739,24 +7564,6 @@
       </label>
       <button class="primary-btn" type="button" id="importSchedule" disabled data-i18n="transfer.import">Import events</button>
     </div>
-    <section class="share-access-panel" id="shareAccessPanel" hidden>
-      <h3 data-i18n="sharing.accessTitle">People with access</h3>
-      <div class="member-invite-grid">
-        <label>
-          <span data-i18n="sharing.memberEmail">Person’s email</span>
-          <input id="memberEmail" type="email" placeholder="name@example.com" data-i18n-placeholder="sharing.memberPlaceholder">
-        </label>
-        <label>
-          <span data-i18n="sharing.permission">Permission</span>
-          <select id="memberRole">
-            <option value="viewer" data-i18n="sharing.viewer">Read-only viewer</option>
-            <option value="editor" data-i18n="sharing.editor">Editor</option>
-          </select>
-        </label>
-        <button class="ghost-btn" type="button" id="addMember" data-i18n="sharing.addMember">Add person</button>
-      </div>
-      <div class="calendar-list" id="memberList"></div>
-    </section>
     <div class="form-actions">
       <span></span>
       <div class="right-actions">
@@ -6783,11 +7590,22 @@
       <button class="close-btn" type="button" id="closeSharedCalendar" aria-label="Close" data-i18n-aria="aria.close">×</button>
     </div>
     <p id="sharedCalendarDescription" style="padding: 0 20px; color: var(--muted)" data-i18n="invitations.readOnly">This calendar is read-only. The owner’s updates appear here after syncing.</p>
+    <p class="invite-note-callout" id="sharedCalendarInviteNote" hidden></p>
     <div class="shared-calendar-toolbar">
       <span class="shared-calendar-access"><span data-i18n="sharing.permission">Permission</span><span class="role-pill" id="sharedCalendarRole"></span></span>
       <button class="primary-btn" type="button" id="addSharedEvent" hidden data-i18n="invitations.addEvent">Add event</button>
     </div>
     <div class="shared-calendar-events" id="sharedCalendarEvents"></div>
+    <section class="calendar-comments-panel" id="sharedCommentsPanel">
+      <h3 data-i18n="comments.title">Calendar comments</h3>
+      <p class="calendar-comments-intro" id="sharedCommentsIntro" data-i18n="comments.viewerIntro">Comments from the owner and invited family members appear here.</p>
+      <div class="calendar-comment-list" id="sharedCommentList"></div>
+      <form class="calendar-comment-form" id="sharedCommentForm" hidden>
+        <label><span data-i18n="comments.add">Add a comment</span><textarea id="sharedCommentBody" maxlength="1000" required></textarea></label>
+        <button class="primary-btn" type="submit" data-i18n="comments.post">Post comment</button>
+      </form>
+      <p class="calendar-comment-status" id="sharedCommentStatus" role="status"></p>
+    </section>
   </dialog>
 
   <dialog class="share-dialog" id="sharedEventDialog">
@@ -6881,7 +7699,7 @@
       </section>
 
       <section class="settings-group">
-        <h3 data-i18n="settings.calendar">Calendar</h3>
+        <h3 data-i18n="settings.preferences">Your preferences</h3>
         <label class="setting-row">
           <span data-i18n="settings.defaultView">Default view</span>
           <select id="defaultView">
@@ -6889,6 +7707,20 @@
             <option value="week" data-i18n="view.week">Week</option>
             <option value="month" data-i18n="view.month">Month</option>
           </select>
+        </label>
+        <label class="setting-row">
+          <span data-i18n="settings.defaultEventDuration">New event length</span>
+          <select id="defaultEventDuration">
+            <option value="30" data-i18n="settings.duration30">30 minutes</option>
+            <option value="45" data-i18n="settings.duration45">45 minutes</option>
+            <option value="60" data-i18n="settings.duration60">1 hour</option>
+            <option value="90" data-i18n="settings.duration90">1 hour 30 minutes</option>
+            <option value="120" data-i18n="settings.duration120">2 hours</option>
+          </select>
+        </label>
+        <label class="setting-row">
+          <span data-i18n="settings.showWeekends">Show weekends</span>
+          <input class="setting-toggle" id="showWeekendsDefault" type="checkbox">
         </label>
         <label class="setting-row">
           <span data-i18n="settings.focusEvents">Jump to the first event</span>
@@ -6931,6 +7763,17 @@
     </div>
   </dialog>
 
+  <dialog class="insights-dialog" id="activityHistoryDialog">
+    <div class="modal-header">
+      <h2 data-i18n="history.title">Activity history</h2>
+      <button class="close-btn" type="button" id="closeActivityHistory" aria-label="Close" data-i18n-aria="aria.close">×</button>
+    </div>
+    <div class="history-body">
+      <p class="history-intro" data-i18n="history.intro">See who changed this family calendar and when.</p>
+      <div class="history-list" id="activityHistoryList"></div>
+    </div>
+  </dialog>
+
   <script src="./supabase-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./assets/jspdf.umd.min.js"></script>
@@ -6943,12 +7786,19 @@
         "welcome.navPreview": "Product",
         "welcome.navHow": "How it works",
         "welcome.navAbout": "About us",
-        "welcome.tryPlanner": "Try the planner",
-        "welcome.eyebrow": "Built for the person holding the week together",
-        "welcome.headline": "One clear place for the whole family’s week.",
-        "welcome.description": "Plan school, activities, pickups, homework, holidays, and family time without piecing everything together from texts and paper calendars.",
+        "welcome.tryPlanner": "Try KidsSync free",
+        "welcome.eyebrow": "Family scheduling for busy parents",
+        "welcome.headline": "The family calendar built for real life.",
+        "welcome.description": "Give every child a clear, color-coded schedule. KidsSync keeps activities, pickups, birthdays, deadlines, and family plans together, and flags conflicts before they become problems.",
         "welcome.signInAccount": "Sign in to your account",
-        "welcome.highlights": "KidsSync highlights",
+        "welcome.highlights": "What KidsSync helps families do",
+        "welcome.trialNote": "Explore for 10 minutes without an account. Sign in to keep and sync your calendar.",
+        "welcome.capabilityPlan": "Plan the week",
+        "welcome.capabilityPlanDetail": "Color-coded schedules for every child",
+        "welcome.capabilityConflicts": "Catch conflicts",
+        "welcome.capabilityConflictsDetail": "See overlaps before plans collide",
+        "welcome.capabilityShare": "Share the plan",
+        "welcome.capabilityShareDetail": "Sync, print, or export for caregivers",
         "welcome.proofPreview": "Preview without an account",
         "welcome.proofDevices": "Made for phones and computers",
         "welcome.proofLanguages": "English and Chinese",
@@ -7024,6 +7874,9 @@
         "aria.previousPeriod": "Previous period",
         "aria.nextPeriod": "Next period",
         "aria.calendarView": "Calendar view",
+        "aria.calendarZoom": "Calendar zoom",
+        "aria.zoomOut": "Zoom out calendar",
+        "aria.zoomIn": "Zoom in calendar",
         "aria.weeklySchedule": "Weekly schedule",
         "aria.mobileAgenda": "Mobile weekly agenda",
         "aria.dailySchedule": "Daily schedule",
@@ -7052,6 +7905,21 @@
         "auth.cloudReady": "Secure cloud accounts are ready.",
         "auth.checkEmail": "Check your email to confirm your account, then sign in.",
         "auth.emailNotConfirmed": "Confirm your email before signing in.",
+        "auth.forgotPassword": "Forgot password?",
+        "auth.resetTitle": "Reset your password",
+        "auth.resetPrompt": "Enter your account email and we will send a secure reset link.",
+        "auth.resetHelp": "We will email you a secure password-reset link.",
+        "auth.sendReset": "Send Reset Link",
+        "auth.sendingReset": "Sending reset link...",
+        "auth.resetSent": "If an account exists for this email, a reset link is on its way.",
+        "auth.backToSignIn": "Back to sign in",
+        "auth.updateTitle": "Choose a new password",
+        "auth.updatePrompt": "Enter a new password for your KidsSync account.",
+        "auth.newPassword": "New password",
+        "auth.updatePassword": "Update Password",
+        "auth.updatingPassword": "Updating password...",
+        "auth.passwordUpdated": "Password updated. Opening your calendar...",
+        "auth.recoveryExpired": "This reset link is invalid or has expired. Request a new one.",
         "auth.familyAccount": "Family account",
         "auth.logout": "Log Out",
         "auth.continuePreview": "Continue without signing in",
@@ -7118,7 +7986,15 @@
         "settings.use24Hour": "24-hour time",
         "settings.reduceMotion": "Reduce motion",
         "settings.calendar": "Calendar",
+        "settings.preferences": "Your preferences",
         "settings.defaultView": "Default view",
+        "settings.defaultEventDuration": "New event length",
+        "settings.duration30": "30 minutes",
+        "settings.duration45": "45 minutes",
+        "settings.duration60": "1 hour",
+        "settings.duration90": "1 hour 30 minutes",
+        "settings.duration120": "2 hours",
+        "settings.showWeekends": "Show weekends",
         "settings.focusEvents": "Jump to the first event",
         "settings.notificationsOn": "Notifications are on while KidsSync is open.",
         "settings.notificationsOff": "Notifications are off.",
@@ -7138,8 +8014,8 @@
         "calendars.minimum": "Keep at least one calendar.",
         "calendars.confirmDelete": "Delete calendar “{name}” and its schedule?",
         "sharing.share": "Share",
-        "sharing.title": "Share & Import",
-        "sharing.description": "Share a read-only view, export to another calendar, or import events from a file.",
+        "sharing.title": "Share calendar",
+        "sharing.description": "Create a secure link for one person, choose what they can do, and include a note.",
         "sharing.copy": "Copy text",
         "sharing.download": "Read-only view (.html)",
         "sharing.print": "Print schedule",
@@ -7154,14 +8030,28 @@
         "sharing.copied": "Schedule copied to the clipboard.",
         "sharing.downloaded": "Schedule file downloaded.",
         "sharing.unavailable": "Use the read-only download to share this calendar.",
-        "sharing.accessTitle": "People with access",
+        "sharing.accessTitle": "Share this calendar",
+        "sharing.accessIntro": "The link only works for the email you invite. They can sign in or create an account after opening it.",
         "sharing.memberEmail": "Person’s email",
         "sharing.memberPlaceholder": "name@example.com",
         "sharing.addMember": "Add person",
+        "sharing.note": "Note (optional)",
+        "sharing.notePlaceholder": "Add a message about this calendar",
+        "sharing.createLink": "Create sharing link",
+        "sharing.generatedLink": "Generated sharing link",
+        "sharing.copyLink": "Copy link",
+        "sharing.emailLink": "Email link",
+        "sharing.linkReady": "Sharing link created and copied. Send it only to {email}.",
+        "sharing.linkCopied": "Sharing link copied.",
+        "sharing.emailInviteSubject": "{calendar} was shared with you on KidsSync",
+        "sharing.emailInviteBody": "You were invited as {role}.\n\n{note}\n\nOpen the calendar: {link}",
+        "sharing.invalidEmail": "Enter a valid email address.",
+        "sharing.cannotInviteSelf": "Use another email address; you already own this calendar.",
         "sharing.owner": "Owner",
         "sharing.permission": "Permission",
         "sharing.editor": "Editor",
-        "sharing.viewer": "Read-only viewer",
+        "sharing.commenter": "Commenter",
+        "sharing.viewer": "Viewer",
         "sharing.roleUpdated": "Permission updated.",
         "sharing.ban": "Ban",
         "sharing.unban": "Restore access",
@@ -7173,7 +8063,7 @@
         "sharing.pending": "Pending",
         "sharing.active": "Accepted",
         "sharing.declined": "Declined",
-        "sharing.inviteCreated": "Invite created. They’ll see it when they sign in with this email.",
+        "sharing.inviteCreated": "Sharing link created. They can open it with the invited email.",
         "invitations.open": "Invites",
         "invitations.title": "Calendar Invitations",
         "invitations.description": "Accept invitations to view calendars shared with your account.",
@@ -7184,6 +8074,7 @@
         "invitations.view": "View calendar",
         "invitations.sharedTitle": "Shared Calendar",
         "invitations.readOnly": "This calendar is read-only. The owner’s updates appear here after syncing.",
+        "invitations.commenterAccess": "You can view this calendar and add comments, but you cannot change events.",
         "invitations.editorAccess": "You can add, edit, and delete events on this shared calendar.",
         "invitations.addEvent": "Add event",
         "invitations.editEvent": "Edit event",
@@ -7199,6 +8090,16 @@
         "invitations.linkUnavailable": "Create the invitation online before copying its link.",
         "invitations.opened": "Choose Accept or Decline for this invitation.",
         "invitations.wrongAccount": "This link does not match the signed-in email address, or it has expired.",
+        "comments.title": "Calendar comments",
+        "comments.ownerIntro": "Read feedback from commenters and reply here.",
+        "comments.viewerIntro": "Comments from the owner and invited family members appear here.",
+        "comments.commenterIntro": "Add a comment without changing the calendar.",
+        "comments.reply": "Reply",
+        "comments.add": "Add a comment",
+        "comments.post": "Post comment",
+        "comments.empty": "No comments yet.",
+        "comments.posted": "Comment posted.",
+        "comments.failed": "The comment could not be saved.",
         "templates.title": "Event shortcuts",
         "templates.school": "School",
         "templates.sports": "Sports",
@@ -7241,13 +8142,13 @@
         "repeat.unit.weekly": "week(s)",
         "repeat.unit.monthly": "month(s)",
         "repeat.unit.yearly": "year(s)",
-        "day.shortMon": "M",
-        "day.shortTue": "T",
-        "day.shortWed": "W",
-        "day.shortThu": "T",
-        "day.shortFri": "F",
-        "day.shortSat": "S",
-        "day.shortSun": "S",
+        "day.shortMon": "Mon",
+        "day.shortTue": "Tue",
+        "day.shortWed": "Wed",
+        "day.shortThu": "Thu",
+        "day.shortFri": "Fri",
+        "day.shortSat": "Sat",
+        "day.shortSun": "Sun",
         "notifications.title": "{title} is coming up",
         "notifications.body": "{child} · {time} · in {minutes} min",
         "dashboard.open": "Dashboard",
@@ -7301,6 +8202,15 @@
         "actions.presets": "Presets & Rewind",
         "actions.addActivity": "＋ Add Event",
         "actions.delete": "Delete",
+        "history.open": "Activity history",
+        "history.title": "Activity history",
+        "history.intro": "See who changed this family calendar and when.",
+        "history.empty": "No activity changes recorded yet.",
+        "history.created": "added",
+        "history.updated": "edited",
+        "history.moved": "moved",
+        "history.deleted": "deleted",
+        "history.imported": "imported",
         "actions.duplicate": "Duplicate",
         "actions.cancel": "Cancel",
         "actions.save": "Save",
@@ -7489,6 +8399,13 @@
         "search.label": "Search schedule",
         "search.placeholder": "Search events, people, or places",
         "search.clear": "Clear search",
+        "search.noResultsTitle": "No matching events",
+        "search.noResultsBody": "Try another search or clear the active filters.",
+        "search.reset": "Clear search and filters",
+        "feedback.eventCreated": "{title} was added.",
+        "feedback.eventUpdated": "{title} was updated.",
+        "feedback.kidsSaved": "Family profiles saved.",
+        "feedback.exampleLoaded": "Example schedule loaded.",
         "overview.events": "{count} events",
         "overview.eventOne": "1 event",
         "overview.eventsFiltered": "{count} of {total} events",
@@ -7537,12 +8454,19 @@
         "welcome.navPreview": "产品",
         "welcome.navHow": "使用方法",
         "welcome.navAbout": "关于我们",
-        "welcome.tryPlanner": "试用日程表",
-        "welcome.eyebrow": "为统筹全家一周的人而设计",
-        "welcome.headline": "全家一周安排，一个清晰入口。",
-        "welcome.description": "把上学、活动、接送、作业、节日和家庭时间放在一起，不必再从聊天记录和纸质日历中拼凑安排。",
+        "welcome.tryPlanner": "免费试用 KidsSync",
+        "welcome.eyebrow": "为忙碌家长设计的家庭日程",
+        "welcome.headline": "真正适合家庭生活的共享日历。",
+        "welcome.description": "为每个孩子建立清晰的彩色日程。KidsSync 把活动、接送、生日、截止日期和家庭计划放在一起，并提前提醒时间冲突。",
         "welcome.signInAccount": "登录你的账户",
-        "welcome.highlights": "KidsSync 亮点",
+        "welcome.highlights": "KidsSync 能帮助家庭完成什么",
+        "welcome.trialNote": "无需账户即可体验 10 分钟。登录后即可保存并在不同设备上同步日历。",
+        "welcome.capabilityPlan": "安排整周",
+        "welcome.capabilityPlanDetail": "每个孩子都有专属颜色日程",
+        "welcome.capabilityConflicts": "发现冲突",
+        "welcome.capabilityConflictsDetail": "在安排撞车之前看到重叠时间",
+        "welcome.capabilityShare": "共享计划",
+        "welcome.capabilityShareDetail": "为照护者同步、打印或导出日程",
         "welcome.proofPreview": "无需账户即可试用",
         "welcome.proofDevices": "适用于手机和电脑",
         "welcome.proofLanguages": "支持英文和中文",
@@ -7618,6 +8542,9 @@
         "aria.previousPeriod": "上一个时间段",
         "aria.nextPeriod": "下一个时间段",
         "aria.calendarView": "日历视图",
+        "aria.calendarZoom": "日历缩放",
+        "aria.zoomOut": "缩小日历",
+        "aria.zoomIn": "放大日历",
         "aria.weeklySchedule": "每周日程",
         "aria.mobileAgenda": "手机版每周日程",
         "aria.dailySchedule": "每日安排",
@@ -7646,6 +8573,21 @@
         "auth.cloudReady": "安全云账户已就绪。",
         "auth.checkEmail": "请检查电子邮件并确认账户，然后登录。",
         "auth.emailNotConfirmed": "请先确认电子邮件，然后再登录。",
+        "auth.forgotPassword": "忘记密码？",
+        "auth.resetTitle": "重置密码",
+        "auth.resetPrompt": "输入账户电子邮箱，我们会发送安全的重置链接。",
+        "auth.resetHelp": "我们会通过电子邮件发送安全的密码重置链接。",
+        "auth.sendReset": "发送重置链接",
+        "auth.sendingReset": "正在发送重置链接...",
+        "auth.resetSent": "如果此电子邮箱对应一个账户，重置链接将很快发送。",
+        "auth.backToSignIn": "返回登录",
+        "auth.updateTitle": "设置新密码",
+        "auth.updatePrompt": "为你的 KidsSync 账户输入新密码。",
+        "auth.newPassword": "新密码",
+        "auth.updatePassword": "更新密码",
+        "auth.updatingPassword": "正在更新密码...",
+        "auth.passwordUpdated": "密码已更新，正在打开你的日历...",
+        "auth.recoveryExpired": "此重置链接无效或已过期。请重新申请。",
         "auth.familyAccount": "家庭账户",
         "auth.logout": "退出登录",
         "auth.continuePreview": "不登录，继续试用",
@@ -7712,7 +8654,15 @@
         "settings.use24Hour": "24 小时制",
         "settings.reduceMotion": "减少动态效果",
         "settings.calendar": "日历",
+        "settings.preferences": "你的偏好",
         "settings.defaultView": "默认视图",
+        "settings.defaultEventDuration": "新活动时长",
+        "settings.duration30": "30 分钟",
+        "settings.duration45": "45 分钟",
+        "settings.duration60": "1 小时",
+        "settings.duration90": "1 小时 30 分钟",
+        "settings.duration120": "2 小时",
+        "settings.showWeekends": "显示周末",
         "settings.focusEvents": "跳到第一个活动",
         "settings.notificationsOn": "KidsSync 打开时会发送通知。",
         "settings.notificationsOff": "通知已关闭。",
@@ -7732,8 +8682,8 @@
         "calendars.minimum": "至少保留一个日历。",
         "calendars.confirmDelete": "删除日历“{name}”及其中的日程吗？",
         "sharing.share": "分享",
-        "sharing.title": "分享与导入",
-        "sharing.description": "分享只读视图、导出到其他日历，或从文件导入事件。",
+        "sharing.title": "共享日历",
+        "sharing.description": "为一位成员创建安全链接，选择对方权限，并可附上一段说明。",
         "sharing.copy": "复制文字",
         "sharing.download": "只读视图 (.html)",
         "sharing.print": "打印日程",
@@ -7748,14 +8698,28 @@
         "sharing.copied": "日程已复制到剪贴板。",
         "sharing.downloaded": "日程文件已下载。",
         "sharing.unavailable": "请下载只读视图来分享此日历。",
-        "sharing.accessTitle": "有访问权限的人",
+        "sharing.accessTitle": "共享此日历",
+        "sharing.accessIntro": "链接仅对受邀邮箱有效。对方打开链接后可以登录或创建账户。",
         "sharing.memberEmail": "对方的电子邮箱",
         "sharing.memberPlaceholder": "name@example.com",
         "sharing.addMember": "添加成员",
+        "sharing.note": "附言（可选）",
+        "sharing.notePlaceholder": "添加关于此日历的说明",
+        "sharing.createLink": "创建共享链接",
+        "sharing.generatedLink": "生成的共享链接",
+        "sharing.copyLink": "复制链接",
+        "sharing.emailLink": "邮件发送链接",
+        "sharing.linkReady": "共享链接已创建并复制。请仅发送给 {email}。",
+        "sharing.linkCopied": "共享链接已复制。",
+        "sharing.emailInviteSubject": "有人通过 KidsSync 与你共享了“{calendar}”",
+        "sharing.emailInviteBody": "你受邀以“{role}”身份访问。\n\n{note}\n\n打开日历：{link}",
+        "sharing.invalidEmail": "请输入有效的电子邮箱。",
+        "sharing.cannotInviteSelf": "请使用其他邮箱；你已经是此日历的所有者。",
         "sharing.owner": "所有者",
         "sharing.permission": "权限",
         "sharing.editor": "编辑者",
-        "sharing.viewer": "只读查看者",
+        "sharing.commenter": "评论者",
+        "sharing.viewer": "查看者",
         "sharing.roleUpdated": "权限已更新。",
         "sharing.ban": "暂停访问",
         "sharing.unban": "恢复访问",
@@ -7767,7 +8731,7 @@
         "sharing.pending": "待处理",
         "sharing.active": "已接受",
         "sharing.declined": "已拒绝",
-        "sharing.inviteCreated": "邀请已创建。对方使用此邮箱登录后即可看到。",
+        "sharing.inviteCreated": "共享链接已创建。对方可使用受邀邮箱打开。",
         "invitations.open": "邀请",
         "invitations.title": "日历邀请",
         "invitations.description": "接受邀请后，可查看他人与你共享的日历。",
@@ -7778,6 +8742,7 @@
         "invitations.view": "查看日历",
         "invitations.sharedTitle": "共享日历",
         "invitations.readOnly": "此日历为只读。所有者同步后，最新内容会显示在这里。",
+        "invitations.commenterAccess": "你可以查看此日历并发表评论，但不能更改事件。",
         "invitations.editorAccess": "你可以在此共享日历中添加、编辑和删除事件。",
         "invitations.addEvent": "添加事件",
         "invitations.editEvent": "编辑事件",
@@ -7793,6 +8758,16 @@
         "invitations.linkUnavailable": "请先联网创建邀请，再复制链接。",
         "invitations.opened": "请选择接受或拒绝此邀请。",
         "invitations.wrongAccount": "此链接与当前登录邮箱不匹配，或链接已失效。",
+        "comments.title": "日历评论",
+        "comments.ownerIntro": "查看评论者的反馈，并在这里回复。",
+        "comments.viewerIntro": "所有者和受邀家庭成员的评论会显示在这里。",
+        "comments.commenterIntro": "无需更改日历即可发表评论。",
+        "comments.reply": "回复",
+        "comments.add": "添加评论",
+        "comments.post": "发表评论",
+        "comments.empty": "暂无评论。",
+        "comments.posted": "评论已发布。",
+        "comments.failed": "无法保存评论。",
         "templates.title": "活动快捷模板",
         "templates.school": "上学",
         "templates.sports": "运动",
@@ -7881,6 +8856,15 @@
         "actions.presets": "预设与恢复",
         "actions.addActivity": "＋ 添加事件",
         "actions.delete": "删除",
+        "history.open": "活动历史",
+        "history.title": "活动历史",
+        "history.intro": "查看谁在何时更改了家庭日历。",
+        "history.empty": "还没有记录活动更改。",
+        "history.created": "添加了",
+        "history.updated": "编辑了",
+        "history.moved": "移动了",
+        "history.deleted": "删除了",
+        "history.imported": "导入了",
         "actions.duplicate": "复制",
         "actions.cancel": "取消",
         "actions.save": "保存",
@@ -8021,13 +9005,13 @@
         "repeat.unit.weekly": "周",
         "repeat.unit.monthly": "月",
         "repeat.unit.yearly": "年",
-        "day.shortMon": "一",
-        "day.shortTue": "二",
-        "day.shortWed": "三",
-        "day.shortThu": "四",
-        "day.shortFri": "五",
-        "day.shortSat": "六",
-        "day.shortSun": "日",
+        "day.shortMon": "周一",
+        "day.shortTue": "周二",
+        "day.shortWed": "周三",
+        "day.shortThu": "周四",
+        "day.shortFri": "周五",
+        "day.shortSat": "周六",
+        "day.shortSun": "周日",
         "kids.title": "管理孩子",
         "kids.add": "＋ 添加孩子",
         "kids.save": "保存孩子",
@@ -8083,6 +9067,13 @@
         "search.label": "搜索日程",
         "search.placeholder": "搜索活动、人员或地点",
         "search.clear": "清除搜索",
+        "search.noResultsTitle": "没有匹配的活动",
+        "search.noResultsBody": "请尝试其他关键词，或清除当前筛选条件。",
+        "search.reset": "清除搜索和筛选",
+        "feedback.eventCreated": "已添加“{title}”。",
+        "feedback.eventUpdated": "已更新“{title}”。",
+        "feedback.kidsSaved": "家庭成员资料已保存。",
+        "feedback.exampleLoaded": "示例日程已载入。",
         "overview.events": "{count} 项活动",
         "overview.eventOne": "1 项活动",
         "overview.eventsFiltered": "显示 {count} / {total} 项活动",
@@ -8143,8 +9134,10 @@
     const CLOUD_PENDING_KEY = "cloud-pending";
     const CLOUD_UPDATED_KEY = "cloud-updated-at";
     const inviteTokenParam = new URLSearchParams(location.search).get("invite") || "";
+    let passwordRecoveryMode = new URLSearchParams(location.search).get("recovery") === "1";
     let pendingInviteToken = /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(inviteTokenParam) ? inviteTokenParam : "";
     const cloudConfig = globalThis.KIDSSYNC_SUPABASE || {};
+    const monitoringConfig = globalThis.KIDSSYNC_MONITORING || {};
     const cloudConfigured = Boolean(
       cloudConfig.url
       && cloudConfig.publishableKey
@@ -8340,6 +9333,7 @@
       userSettings = loadSettings();
       state.activities = loadActivities();
       state.visibleKids = new Set(kidProfiles.map(kid => kid.name));
+      state.showWeekends = userSettings.showWeekends;
       currentView = userSettings.defaultView;
       applySettings();
       populateFormOptions();
@@ -8360,6 +9354,70 @@
         template
       );
     }
+
+    function trackProductEvent(name, data = {}) {
+      if (['localhost', '127.0.0.1', '::1'].includes(location.hostname) || typeof window.va !== "function") return;
+      const safeData = Object.fromEntries(Object.entries(data)
+        .filter(([, value]) => ["string", "number", "boolean"].includes(typeof value))
+        .map(([key, value]) => [String(key).slice(0, 80), typeof value === "string" ? value.slice(0, 120) : value]));
+      window.va("event", { name: String(name).slice(0, 120), data: safeData });
+    }
+
+    function scrubDiagnostic(value) {
+      return String(value || "Unknown error")
+        .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[email]")
+        .replace(/([?&#](?:token|code|access_token|refresh_token)=)[^&#\s]+/gi, "$1[redacted]")
+        .slice(0, 500);
+    }
+
+    function recentDiagnostics() {
+      try {
+        const stored = JSON.parse(sessionStorage.getItem("kidssync.diagnostics") || "[]");
+        return Array.isArray(stored) ? stored : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function reportClientError(error, context = "app") {
+      const normalized = error instanceof Error ? error : new Error(String(error || "Unknown error"));
+      const entry = {
+        time: new Date().toISOString(),
+        context: String(context).slice(0, 80),
+        name: scrubDiagnostic(normalized.name),
+        message: scrubDiagnostic(normalized.message),
+        path: location.pathname
+      };
+      try {
+        sessionStorage.setItem("kidssync.diagnostics", JSON.stringify([...recentDiagnostics(), entry].slice(-20)));
+      } catch {
+      }
+      if (globalThis.Sentry?.captureException) {
+        globalThis.Sentry.captureException(normalized, { tags: { kidssync_context: entry.context } });
+      }
+      console.error(`[KidsSync:${entry.context}]`, normalized);
+    }
+
+    function initializeErrorMonitoring() {
+      const loaderUrl = String(monitoringConfig.sentryLoaderUrl || "").trim();
+      if (!loaderUrl || !loaderUrl.startsWith("https://") || ['localhost', '127.0.0.1', '::1'].includes(location.hostname)) return;
+      const script = document.createElement("script");
+      script.src = loaderUrl;
+      script.crossOrigin = "anonymous";
+      script.onload = () => {
+        if (!globalThis.Sentry?.captureMessage) return;
+        recentDiagnostics().forEach(entry => globalThis.Sentry.captureMessage(entry.message, {
+          level: "error",
+          tags: { kidssync_context: entry.context, buffered: "true" }
+        }));
+      };
+      script.onerror = () => console.warn("KidsSync remote error monitoring could not load.");
+      document.head.appendChild(script);
+    }
+
+    window.addEventListener("error", event => reportClientError(event.error || event.message, "window"));
+    window.addEventListener("unhandledrejection", event => reportClientError(event.reason, "promise"));
+    initializeErrorMonitoring();
 
     function bytesToBase64(bytes) {
       return btoa(String.fromCharCode(...bytes));
@@ -8428,17 +9486,28 @@
     }
 
     function setAuthView(view) {
-      const selectedView = view === "signup" ? "signup" : "signin";
+      const selectedView = ["signup", "forgot", "update"].includes(view) ? view : "signin";
       document.querySelectorAll("[data-auth-view]").forEach(button => {
         const active = button.dataset.authView === selectedView;
         button.classList.toggle("is-active", active);
         button.setAttribute("aria-selected", active);
       });
+      document.querySelector(".auth-tabs").hidden = selectedView === "forgot" || selectedView === "update";
       document.getElementById("signInForm").hidden = selectedView !== "signin";
       document.getElementById("signUpForm").hidden = selectedView !== "signup";
+      document.getElementById("passwordResetRequestForm").hidden = selectedView !== "forgot";
+      document.getElementById("passwordUpdateForm").hidden = selectedView !== "update";
       document.getElementById("signInError").textContent = "";
       document.getElementById("signUpError").textContent = "";
       document.getElementById("signUpError").classList.remove("is-success");
+      const headingKey = selectedView === "forgot" ? "auth.resetTitle" : selectedView === "update" ? "auth.updateTitle" : "auth.welcome";
+      const promptKey = selectedView === "forgot" ? "auth.resetPrompt" : selectedView === "update" ? "auth.updatePrompt" : (previewRequiresSignup ? "auth.previewCompletePrompt" : "auth.prompt");
+      const heading = document.getElementById("authHeading");
+      const prompt = document.getElementById("authPrompt");
+      heading.dataset.i18n = headingKey;
+      heading.textContent = t(headingKey);
+      prompt.dataset.i18n = promptKey;
+      prompt.textContent = t(promptKey);
     }
 
     function updateCloudAvailability() {
@@ -8703,6 +9772,7 @@
       document.getElementById("appShell").hidden = false;
       updateAccountIdentity();
       startGuestPreviewTimer();
+      trackProductEvent("Planner Preview Started");
       window.scrollTo({ top: 0, behavior: "auto" });
     }
 
@@ -8711,11 +9781,7 @@
       document.getElementById("welcomeScreen").hidden = true;
       document.getElementById("appShell").hidden = true;
       document.getElementById("authScreen").hidden = false;
-      const promptKey = previewRequiresSignup ? "auth.previewCompletePrompt" : "auth.prompt";
-      const authPrompt = document.getElementById("authPrompt");
-      authPrompt.dataset.i18n = promptKey;
-      authPrompt.textContent = t(promptKey);
-      document.getElementById("continuePreview").hidden = previewRequiresSignup;
+      document.getElementById("continuePreview").hidden = previewRequiresSignup || view === "update";
       setAuthView(view);
       window.scrollTo({ top: 0, behavior: "auto" });
     }
@@ -8725,11 +9791,36 @@
       document.getElementById("authScreen").hidden = true;
       document.getElementById("appShell").hidden = true;
       document.getElementById("welcomeScreen").hidden = false;
+      initializeWelcomeMotion();
       updateCloudAvailability();
       window.scrollTo({ top: 0, behavior: "auto" });
     }
 
+    function initializeWelcomeMotion() {
+      const section = document.getElementById("welcomeAbout");
+      if (!section || section.dataset.motionReady === "true") return;
+      section.dataset.motionReady = "true";
+      section.classList.add("motion-ready");
+      const reveal = () => section.classList.add("is-visible");
+      const reduced = userSettings.reduceMotion || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      if (reduced || !("IntersectionObserver" in window)) {
+        reveal();
+        return;
+      }
+      const observer = new IntersectionObserver(entries => {
+        if (!entries.some(entry => entry.isIntersecting)) return;
+        reveal();
+        observer.disconnect();
+      }, { threshold: 0.2 });
+      observer.observe(section);
+    }
+
     function initializeAuthUI() {
+      if (passwordRecoveryMode) {
+        showAuthScreen("update");
+        return;
+      }
+
       if (activeAccount) {
         document.getElementById("welcomeScreen").hidden = true;
         document.getElementById("authScreen").hidden = true;
@@ -8770,6 +9861,7 @@
             return;
           }
           activateCloudAccount(data.user);
+          trackProductEvent("Signed In", { provider: "supabase" });
           location.reload();
           return;
         }
@@ -8788,8 +9880,10 @@
           return;
         }
         localStorage.setItem(AUTH_ACTIVE_KEY, account.id);
+        trackProductEvent("Signed In", { provider: "device" });
         location.reload();
-      } catch {
+      } catch (authError) {
+        reportClientError(authError, "sign-in");
         error.textContent = t("auth.unavailable");
       } finally {
         submit.disabled = false;
@@ -8847,12 +9941,87 @@
           return;
         }
         activateCloudAccount(data.user, { familyName, claimGuest: true });
+        trackProductEvent("Account Created", { provider: "supabase" });
         location.reload();
       } catch (authError) {
+        reportClientError(authError, "sign-up");
         error.textContent = cloudAuthMessage(authError);
       } finally {
         submit.disabled = false;
         submit.textContent = t("auth.submitCreate");
+      }
+    }
+
+    async function handlePasswordResetRequest(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const submit = form.querySelector("button[type='submit']");
+      const status = document.getElementById("passwordResetRequestStatus");
+      const email = normalizeEmail(document.getElementById("passwordResetEmail").value);
+      status.textContent = "";
+      status.classList.remove("is-success");
+      if (!cloudClient) {
+        status.textContent = t("auth.cloudSetup");
+        return;
+      }
+      submit.disabled = true;
+      submit.textContent = t("auth.sendingReset");
+      try {
+        const redirectUrl = new URL(location.href);
+        redirectUrl.search = "";
+        redirectUrl.hash = "";
+        redirectUrl.searchParams.set("recovery", "1");
+        const { error } = await cloudClient.auth.resetPasswordForEmail(email, { redirectTo: redirectUrl.toString() });
+        if (error) throw error;
+        status.textContent = t("auth.resetSent");
+        status.classList.add("is-success");
+        trackProductEvent("Password Reset Requested");
+      } catch (resetError) {
+        reportClientError(resetError, "password-reset-request");
+        status.textContent = cloudAuthMessage(resetError);
+      } finally {
+        submit.disabled = false;
+        submit.textContent = t("auth.sendReset");
+      }
+    }
+
+    async function handlePasswordUpdate(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const submit = form.querySelector("button[type='submit']");
+      const status = document.getElementById("passwordUpdateStatus");
+      const password = document.getElementById("passwordUpdateValue").value;
+      const confirmation = document.getElementById("passwordUpdateConfirm").value;
+      status.textContent = "";
+      status.classList.remove("is-success");
+      if (password !== confirmation) {
+        status.textContent = t("auth.mismatch");
+        return;
+      }
+      if (!cloudClient) {
+        status.textContent = t("auth.cloudSetup");
+        return;
+      }
+      submit.disabled = true;
+      submit.textContent = t("auth.updatingPassword");
+      try {
+        const { data, error } = await cloudClient.auth.updateUser({ password });
+        if (error || !data.user) throw error || new Error(t("auth.recoveryExpired"));
+        activateCloudAccount(data.user);
+        passwordRecoveryMode = false;
+        history.replaceState(null, "", location.pathname);
+        status.textContent = t("auth.passwordUpdated");
+        status.classList.add("is-success");
+        trackProductEvent("Password Updated");
+        window.setTimeout(() => location.reload(), 700);
+      } catch (updateError) {
+        reportClientError(updateError, "password-update");
+        status.textContent = /session|token|expired/i.test(updateError?.message || "")
+          ? t("auth.recoveryExpired")
+          : cloudAuthMessage(updateError);
+      } finally {
+        submit.disabled = false;
+        submit.textContent = t("auth.updatePassword");
       }
     }
 
@@ -8887,6 +10056,7 @@
     // Keep the evening visible for after-school activities and family plans.
     const scheduleEndMinutes = 23 * 60;
     const scheduleDurationMinutes = scheduleEndMinutes - scheduleStartMinutes;
+    const CALENDAR_ZOOM_LEVELS = [0.75, 1, 1.25, 1.5];
     const FAMILY_CHILD = "__family__";
     const DEFAULT_SETTINGS = {
       notifications: false,
@@ -8897,7 +10067,10 @@
       use24Hour: false,
       reduceMotion: false,
       defaultView: "week",
-      focusFirstEvent: true
+      defaultEventDuration: 30,
+      showWeekends: true,
+      focusFirstEvent: true,
+      calendarZoom: 1
     };
 
     const palettes = {
@@ -8983,6 +10156,7 @@
     let kidDraft = [];
     let savedPresets = loadSavedPresets();
     let scheduleHistory = loadScheduleHistory();
+    let activityAudit = loadActivityAudit();
     let userSettings = loadSettings();
     let selectedDate = new Date();
     let currentWeekStart = getMonday(selectedDate);
@@ -8995,11 +10169,14 @@
       stackFront: new Map(),
       searchQuery: "",
       eventFilter: "all",
-      showWeekends: true
+      showWeekends: userSettings.showWeekends
     };
     let calendarMembers = [];
     let calendarInvitations = [];
     let sharedCalendarState = null;
+    let generatedShareDetails = null;
+    let ownerCalendarComments = [];
+    let sharedCalendarComments = [];
 
     const grid = document.getElementById("scheduleGrid");
     const mobileAgenda = document.getElementById("mobileAgenda");
@@ -9008,6 +10185,7 @@
     const todayHeading = document.getElementById("todayHeading");
     const todayList = document.getElementById("todayList");
     const calendarEmptyState = document.getElementById("calendarEmptyState");
+    const searchEmptyState = document.getElementById("searchEmptyState");
     const monthView = document.getElementById("monthView");
     const monthWeekdays = document.getElementById("monthWeekdays");
     const monthGrid = document.getElementById("monthGrid");
@@ -9018,6 +10196,7 @@
     const settingsDialog = document.getElementById("settingsDialog");
     const dashboardDialog = document.getElementById("dashboardDialog");
     const remindersDialog = document.getElementById("remindersDialog");
+    const activityHistoryDialog = document.getElementById("activityHistoryDialog");
     const form = document.getElementById("activityForm");
     const kidsForm = document.getElementById("kidsForm");
     const presetForm = document.getElementById("presetForm");
@@ -9034,6 +10213,10 @@
     const jumpTravelButton = document.getElementById("jumpTravel");
     const jumpNextEventButton = document.getElementById("jumpNextEvent");
     const toggleWeekendsButton = document.getElementById("toggleWeekends");
+    const calendarZoom = document.getElementById("calendarZoom");
+    const zoomOutButton = document.getElementById("zoomOut");
+    const zoomInButton = document.getElementById("zoomIn");
+    const zoomLevel = document.getElementById("zoomLevel");
     const customIconField = document.getElementById("customIconField");
     const CUSTOM_ICON_VALUE = "__custom__";
     const MISC_ICON = "✨";
@@ -9111,6 +10294,7 @@
     function setLanguage(language) {
       currentLanguage = language === "zh" ? "zh" : "en";
       localStorage.setItem(LANGUAGE_STORAGE_KEY, currentLanguage);
+      trackProductEvent("Language Changed", { language: currentLanguage });
       applyStaticTranslations();
       renderSaveStatus();
       updateCloudAvailability();
@@ -9216,6 +10400,8 @@
       document.getElementById("use24Hour").checked = userSettings.use24Hour;
       document.getElementById("reduceMotion").checked = userSettings.reduceMotion;
       document.getElementById("defaultView").value = userSettings.defaultView;
+      document.getElementById("defaultEventDuration").value = String(userSettings.defaultEventDuration);
+      document.getElementById("showWeekendsDefault").checked = userSettings.showWeekends;
       document.getElementById("focusFirstEvent").checked = userSettings.focusFirstEvent;
       renderNotificationStatus();
     }
@@ -9452,6 +10638,7 @@
           activities: calendar.id === currentCalendarId ? state.activities.map(activity => ({ ...activity })) : (read("activities") || []),
           presets: calendar.id === currentCalendarId ? savedPresets.map(preset => ({ ...preset })) : (read("presets") || []),
           history: calendar.id === currentCalendarId ? scheduleHistory.slice(0, 20).map(entry => ({ ...entry })) : (read("history") || []),
+          audit: calendar.id === currentCalendarId ? activityAudit.slice(0, 100).map(entry => ({ ...entry })) : (read("audit") || []),
           settings: calendar.id === currentCalendarId ? { ...userSettings } : (read("settings") || {}),
           view: calendar.id === currentCalendarId ? currentView : (read("view") || "week")
         };
@@ -9466,6 +10653,7 @@
         activities: state.activities.map(activity => ({ ...activity })),
         presets: savedPresets.map(preset => ({ ...preset })),
         history: scheduleHistory.slice(0, 20).map(entry => ({ ...entry })),
+        audit: activityAudit.slice(0, 100).map(entry => ({ ...entry })),
         settings: { ...userSettings },
         view: currentView
       };
@@ -9521,7 +10709,7 @@
         setCloudSaveState(hasPendingCloudSave() ? "syncing" : "cloud");
         return true;
       } catch (syncError) {
-        console.error("KidsSync cloud save failed", syncError);
+        reportClientError(syncError, "cloud-save");
         setCloudSaveState(navigator.onLine ? "syncFailed" : "offline");
         return false;
       } finally {
@@ -9577,9 +10765,14 @@
           scheduleHistory = snapshot.history.slice(0, 20).map(entry => ({ ...entry }));
           localStorage.setItem(scheduleStorageKey("history"), JSON.stringify(scheduleHistory));
         }
+        if (Array.isArray(snapshot.audit)) {
+          activityAudit = snapshot.audit.slice(0, 100).map(entry => ({ ...entry }));
+          localStorage.setItem(scheduleStorageKey("audit"), JSON.stringify(activityAudit));
+        }
         if (snapshot.settings && typeof snapshot.settings === "object") {
           localStorage.setItem(scheduleStorageKey("settings"), JSON.stringify(snapshot.settings));
           userSettings = loadSettings();
+          state.showWeekends = userSettings.showWeekends;
         }
         if (["today", "week", "month"].includes(snapshot.view)) {
           currentView = snapshot.view;
@@ -9626,7 +10819,7 @@
         setCloudSaveState("cloud");
         return true;
       } catch (syncError) {
-        console.error("KidsSync cloud load failed", syncError);
+        reportClientError(syncError, "cloud-load");
         setCloudSaveState(navigator.onLine ? "syncFailed" : "offline");
         return false;
       }
@@ -9654,6 +10847,12 @@
           return;
         }
 
+        if (passwordRecoveryMode) {
+          cloudSession = session;
+          showAuthScreen("update");
+          return;
+        }
+
         const pendingClaimEmail = normalizeEmail(localStorage.getItem(AUTH_PENDING_GUEST_CLAIM_KEY) || "");
         const shouldClaimGuest = pendingClaimEmail && pendingClaimEmail === normalizeEmail(session.user.email || "");
         if (!activeAccount || activeAccount.id !== session.user.id || activeAccount.provider !== "supabase") {
@@ -9673,7 +10872,7 @@
         await hydrateCloudSchedule();
         await refreshInvitations();
       } catch (syncError) {
-        console.error("KidsSync cloud initialization failed", syncError);
+        reportClientError(syncError, "cloud-initialization");
         setCloudSaveState(navigator.onLine ? "syncFailed" : "offline");
       }
     }
@@ -9747,6 +10946,53 @@
       return persistScheduleData("history", scheduleHistory.slice(0, 20));
     }
 
+    function loadActivityAudit() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(scheduleStorageKey("audit")));
+        return Array.isArray(stored) ? stored.slice(0, 100) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveActivityAudit() {
+      return persistScheduleData("audit", activityAudit.slice(0, 100));
+    }
+
+    function auditActor() {
+      return activeAccount?.email || activeAccount?.familyName || "This device";
+    }
+
+    function auditActivity(action, before, after, count = 1) {
+      const event = after || before || {};
+      activityAudit.unshift({
+        id: makeId("audit"),
+        action,
+        actor: auditActor(),
+        at: new Date().toISOString(),
+        eventId: event.id || "",
+        title: event.title || "Untitled event",
+        count
+      });
+      activityAudit = activityAudit.slice(0, 100);
+      saveActivityAudit();
+    }
+
+    function renderActivityHistory() {
+      const list = document.getElementById("activityHistoryList");
+      if (!list) return;
+      if (!activityAudit.length) {
+        list.innerHTML = `<p class="history-empty">${escapeHtml(t("history.empty"))}</p>`;
+        return;
+      }
+      list.innerHTML = activityAudit.map(entry => {
+        const actionKey = `history.${entry.action}`;
+        const action = t(actionKey) === actionKey ? entry.action : t(actionKey);
+        const count = entry.count > 1 ? ` (${entry.count})` : "";
+        return `<article class="history-item"><span class="history-item-icon" aria-hidden="true">${entry.action === "deleted" ? "🗑️" : entry.action === "moved" ? "↔️" : entry.action === "created" ? "➕" : "✏️"}</span><span class="history-item-copy"><strong>${escapeHtml(`${action} ${entry.title}${count}`)}</strong><span>${escapeHtml(entry.actor || "This device")}</span></span><time class="history-item-time" datetime="${escapeHtml(entry.at)}">${escapeHtml(formatDateTime(entry.at))}</time></article>`;
+      }).join("");
+    }
+
     function loadSettings() {
       try {
         const stored = JSON.parse(localStorage.getItem(scheduleStorageKey("settings")));
@@ -9759,8 +11005,15 @@
         settings.defaultView = ["today", "week", "month"].includes(settings.defaultView)
           ? settings.defaultView
           : DEFAULT_SETTINGS.defaultView;
+        settings.defaultEventDuration = [30, 45, 60, 90, 120].includes(Number(settings.defaultEventDuration))
+          ? Number(settings.defaultEventDuration)
+          : DEFAULT_SETTINGS.defaultEventDuration;
+        settings.showWeekends = settings.showWeekends !== false;
         settings.colorTheme = ["classic", "garden", "sunrise", "bold"].includes(settings.colorTheme) ? settings.colorTheme : "classic";
         settings.iconPack = ["classic", "playful", "simple"].includes(settings.iconPack) ? settings.iconPack : "classic";
+        settings.calendarZoom = CALENDAR_ZOOM_LEVELS.includes(Number(settings.calendarZoom))
+          ? Number(settings.calendarZoom)
+          : DEFAULT_SETTINGS.calendarZoom;
         return settings;
       } catch {
         return { ...DEFAULT_SETTINGS };
@@ -10265,6 +11518,7 @@
       if (!draggedOccurrence) return;
       const activity = state.activities.find(item => item.id === draggedOccurrence.id);
       if (!activity) return;
+      const beforeMove = { ...activity };
       rememberCurrentSchedule(t("drag.rewindLabel"));
       const sourceDate = parseDateKey(draggedOccurrence.occurrenceDate || activity.startDate);
       const targetKey = dateKey(targetDate);
@@ -10294,6 +11548,7 @@
         activity.end = `${String(Math.floor(endMinute / 60)).padStart(2, "0")}:${String(endMinute % 60).padStart(2, "0")}`;
       }
       saveActivities();
+      auditActivity("moved", beforeMove, activity);
       suppressEventClickUntil = Date.now() + 250;
       draggedOccurrence = null;
       renderAll();
@@ -10367,9 +11622,9 @@
       const activities = visibleActivities();
       const conflicts = findConflicts(activities);
       const displayDays = visibleWeekDays();
-      // The grid uses two pixels per minute; keep its height proportional to
-      // the displayed time range as the schedule extends into the evening.
-      grid.style.setProperty("--schedule-height", `${scheduleDurationMinutes * 2}px`);
+      const pixelsPerMinute = 2 * userSettings.calendarZoom;
+      grid.style.setProperty("--schedule-height", `${scheduleDurationMinutes * pixelsPerMinute}px`);
+      grid.style.setProperty("--half-hour-row", `${30 * pixelsPerMinute}px`);
       grid.classList.toggle("weekdays-only", !state.showWeekends);
       grid.innerHTML = "";
 
@@ -10657,7 +11912,29 @@
     }
 
     function renderCalendarEmptyState() {
-      calendarEmptyState.hidden = !(kidProfiles.length === 0 && state.activities.length === 0);
+      const isEmpty = state.activities.length === 0;
+      calendarEmptyState.hidden = !isEmpty;
+      document.getElementById("appShell").classList.toggle("is-calendar-empty", isEmpty);
+      document.getElementById("emptyAddKid").hidden = kidProfiles.length > 0;
+      const addEventButton = document.getElementById("emptyAddEvent");
+      addEventButton.classList.toggle("primary-btn", kidProfiles.length > 0);
+      addEventButton.classList.toggle("ghost-btn", kidProfiles.length === 0);
+    }
+
+    function renderSearchEmptyState() {
+      const hasActiveSearch = Boolean(state.searchQuery.trim()) || state.eventFilter !== "all";
+      const hasNoMatches = state.activities.length > 0 && hasActiveSearch && currentPeriodOccurrences().length === 0;
+      searchEmptyState.hidden = !hasNoMatches;
+    }
+
+    function resetScheduleFilters() {
+      state.searchQuery = "";
+      state.eventFilter = "all";
+      scheduleSearch.value = "";
+      conflictCursor = 0;
+      travelCursor = 0;
+      renderAll();
+      scheduleSearch.focus();
     }
 
     function occurrenceDateTime(activity) {
@@ -10724,6 +12001,26 @@
       });
       toggleWeekendsButton.textContent = t(state.showWeekends ? "actions.hideWeekends" : "actions.showWeekends");
       toggleWeekendsButton.setAttribute("aria-pressed", String(!state.showWeekends));
+      const zoomIndex = CALENDAR_ZOOM_LEVELS.indexOf(userSettings.calendarZoom);
+      calendarZoom.hidden = currentView !== "week";
+      zoomLevel.textContent = `${Math.round(userSettings.calendarZoom * 100)}%`;
+      zoomOutButton.disabled = zoomIndex <= 0;
+      zoomInButton.disabled = zoomIndex >= CALENDAR_ZOOM_LEVELS.length - 1;
+    }
+
+    function changeCalendarZoom(direction) {
+      const currentIndex = CALENDAR_ZOOM_LEVELS.indexOf(userSettings.calendarZoom);
+      const nextIndex = Math.min(CALENDAR_ZOOM_LEVELS.length - 1, Math.max(0, currentIndex + direction));
+      if (nextIndex === currentIndex) return;
+      const scrollRange = Math.max(1, weekSchedule.scrollHeight - weekSchedule.clientHeight);
+      const scrollRatio = weekSchedule.scrollTop / scrollRange;
+      userSettings.calendarZoom = CALENDAR_ZOOM_LEVELS[nextIndex];
+      saveSettings();
+      renderAll();
+      requestAnimationFrame(() => {
+        const nextScrollRange = Math.max(0, weekSchedule.scrollHeight - weekSchedule.clientHeight);
+        weekSchedule.scrollTop = scrollRatio * nextScrollRange;
+      });
     }
 
     function jumpToNextEvent() {
@@ -11214,6 +12511,8 @@
 
     function openDialog(activity) {
       const isEdit = Boolean(activity);
+      const defaultStart = 15 * 60;
+      const defaultEnd = Math.min(scheduleEndMinutes, defaultStart + userSettings.defaultEventDuration);
       populateFormOptions();
       renderEventTitleSuggestions();
       smartDefaultsAppliedTitle = "";
@@ -11229,8 +12528,8 @@
       fields.repeatInterval.value = String(activity?.repeatInterval || 1);
       fields.repeatUntil.value = activity?.repeatUntil || "";
       fields.allDay.checked = Boolean(activity?.allDay);
-      fields.start.value = activity?.start || "15:00";
-      fields.end.value = activity?.end || "15:30";
+      fields.start.value = activity?.start || timeInputValue(defaultStart);
+      fields.end.value = activity?.end || timeInputValue(defaultEnd);
       fields.title.value = activity?.title || "";
       setIconField(activity?.icon || "📖");
       fields.style.value = activity?.style || "child";
@@ -11441,6 +12740,7 @@
       populateFormOptions();
       renderAll();
       if (userSettings.focusFirstEvent) requestAnimationFrame(scrollWeekToFirstActivity);
+      showFeedbackToast(t("feedback.exampleLoaded"));
     }
 
     function closeDialog() {
@@ -11457,6 +12757,16 @@
       undoDeleteTimer = null;
       deletedActivityForUndo = null;
       document.getElementById("undoToast").hidden = true;
+    }
+
+    function showFeedbackToast(message, duration = 3200) {
+      window.clearTimeout(undoDeleteTimer);
+      undoDeleteTimer = null;
+      deletedActivityForUndo = null;
+      document.getElementById("undoToastMessage").textContent = message;
+      document.getElementById("undoDelete").hidden = true;
+      document.getElementById("undoToast").hidden = false;
+      undoDeleteTimer = window.setTimeout(dismissUndoToast, duration);
     }
 
     function showDeleteUndo(activity) {
@@ -11852,7 +13162,7 @@
         doc.save(safeCalendarFilename("pdf"));
         document.getElementById("shareStatus").textContent = t("sharing.pdfDownloaded");
       } catch (error) {
-        console.error("KidsSync PDF export failed", error);
+        reportClientError(error, "pdf-export");
         openPrintableSchedule();
         document.getElementById("shareStatus").textContent = t("sharing.pdfFallback");
       }
@@ -11989,7 +13299,7 @@
     }
 
     function normalizeMemberRole(role) {
-      return role === "editor" ? "editor" : "viewer";
+      return ["editor", "commenter", "viewer"].includes(role) ? role : "viewer";
     }
 
     function memberRoleLabel(role) {
@@ -12000,7 +13310,7 @@
       if (!isCalendarOwner()) return;
       try {
         const { data, error } = await cloudClient.from("calendar_members")
-          .select("id,member_email,status,role,calendar_name,invite_token,created_at")
+          .select("id,member_email,status,role,calendar_name,invite_token,invitation_note,created_at")
           .eq("owner_id", cloudSession.user.id)
           .eq("calendar_id", currentCalendarId)
           .order("created_at", { ascending: true });
@@ -12015,11 +13325,19 @@
       const owner = activeAccount?.email || "You";
       const statusLabel = status => t(`sharing.${status === "banned" ? "banned" : status}`);
       list.innerHTML = `<div class="calendar-list-row owner-row"><strong>${escapeHtml(owner)}</strong><span class="role-pill">${escapeHtml(t("sharing.owner"))}</span></div>`
-        + calendarMembers.map(member => `<div class="calendar-list-row"><strong>${escapeHtml(member.member_email)}</strong><span>${escapeHtml(statusLabel(member.status))}</span><select class="member-role-select" data-member-id="${escapeHtml(member.id || member.member_email)}" aria-label="${escapeHtml(t("sharing.permission"))}"><option value="editor"${normalizeMemberRole(member.role) === "editor" ? " selected" : ""}>${escapeHtml(t("sharing.editor"))}</option><option value="viewer"${normalizeMemberRole(member.role) === "viewer" ? " selected" : ""}>${escapeHtml(t("sharing.viewer"))}</option></select>${member.invite_token && member.status === "pending" ? `<button class="small-btn invite-link" type="button" data-invite-token="${escapeHtml(member.invite_token)}">🔗 ${escapeHtml(t("invitations.copyLink"))}</button>` : ""}<button class="small-btn member-status" type="button" data-member-id="${escapeHtml(member.id || member.member_email)}">${escapeHtml(member.status === "banned" ? t("sharing.unban") : t("sharing.ban"))}</button><button class="danger-btn member-remove" type="button" data-member-id="${escapeHtml(member.id || member.member_email)}">${escapeHtml(t("sharing.remove"))}</button></div>`).join("");
+        + calendarMembers.map(member => {
+          const memberId = escapeHtml(member.id || member.member_email);
+          const role = normalizeMemberRole(member.role);
+          const note = String(member.invitation_note || "").trim();
+          return `<div class="calendar-list-row member-access-row"><span class="member-access-identity"><strong>${escapeHtml(member.member_email)}</strong><small>${escapeHtml(statusLabel(member.status))}${note ? ` · ${escapeHtml(note)}` : ""}</small></span><select class="member-role-select" data-member-id="${memberId}" aria-label="${escapeHtml(t("sharing.permission"))}"><option value="viewer"${role === "viewer" ? " selected" : ""}>${escapeHtml(t("sharing.viewer"))}</option><option value="commenter"${role === "commenter" ? " selected" : ""}>${escapeHtml(t("sharing.commenter"))}</option><option value="editor"${role === "editor" ? " selected" : ""}>${escapeHtml(t("sharing.editor"))}</option></select>${member.invite_token && member.status !== "banned" ? `<button class="small-btn invite-link" type="button" data-member-id="${memberId}">${escapeHtml(t("sharing.copyLink"))}</button>` : ""}<button class="small-btn member-status" type="button" data-member-id="${memberId}">${escapeHtml(member.status === "banned" ? t("sharing.unban") : t("sharing.ban"))}</button><button class="danger-btn member-remove" type="button" data-member-id="${memberId}">${escapeHtml(t("sharing.remove"))}</button></div>`;
+        }).join("");
       list.querySelectorAll(".member-role-select").forEach(select => select.addEventListener("change", () => updateMemberRole(select.dataset.memberId, select.value)));
       list.querySelectorAll(".member-status").forEach(button => button.addEventListener("click", () => updateMember(button.dataset.memberId)));
       list.querySelectorAll(".member-remove").forEach(button => button.addEventListener("click", () => removeMember(button.dataset.memberId)));
-      list.querySelectorAll(".invite-link").forEach(button => button.addEventListener("click", () => copyInvitationLink(button.dataset.inviteToken)));
+      list.querySelectorAll(".invite-link").forEach(button => button.addEventListener("click", () => {
+        const member = calendarMembers.find(item => (item.id || item.member_email) === button.dataset.memberId);
+        if (member) showGeneratedShareLink(member, { copy: true });
+      }));
     }
 
     function invitationUrl(token) {
@@ -12030,33 +13348,74 @@
       return url.href;
     }
 
-    async function copyInvitationLink(token) {
-      const status = document.getElementById("shareStatus");
-      if (!token) {
-        status.textContent = t("invitations.linkUnavailable");
-        return;
-      }
-      const link = invitationUrl(token);
+    async function copyTextToClipboard(text) {
       try {
-        await navigator.clipboard.writeText(link);
+        await navigator.clipboard.writeText(text);
       } catch {
         const input = document.createElement("textarea");
-        input.value = link;
+        input.value = text;
         document.body.appendChild(input);
         input.select();
         document.execCommand("copy");
         input.remove();
       }
-      status.textContent = t("invitations.linkCopied");
+    }
+
+    async function showGeneratedShareLink(member, { copy = false } = {}) {
+      const status = document.getElementById("shareStatus");
+      if (!member?.invite_token) {
+        status.textContent = t("invitations.linkUnavailable");
+        return;
+      }
+      generatedShareDetails = {
+        email: member.member_email,
+        role: normalizeMemberRole(member.role),
+        note: String(member.invitation_note || "").trim(),
+        calendarName: member.calendar_name || calendars.find(calendar => calendar.id === currentCalendarId)?.name || t("calendars.default"),
+        link: invitationUrl(member.invite_token)
+      };
+      document.getElementById("generatedShareLink").value = generatedShareDetails.link;
+      document.getElementById("generatedShareLinkRow").hidden = false;
+      if (copy) {
+        await copyTextToClipboard(generatedShareDetails.link);
+        status.textContent = t("sharing.linkCopied");
+      }
+    }
+
+    async function copyGeneratedShareLink() {
+      if (!generatedShareDetails?.link) return;
+      await copyTextToClipboard(generatedShareDetails.link);
+      document.getElementById("shareStatus").textContent = t("sharing.linkCopied");
+    }
+
+    function emailGeneratedShareLink() {
+      if (!generatedShareDetails?.link) return;
+      const subject = t("sharing.emailInviteSubject", { calendar: generatedShareDetails.calendarName });
+      const body = t("sharing.emailInviteBody", {
+        role: memberRoleLabel(generatedShareDetails.role),
+        note: generatedShareDetails.note || "",
+        link: generatedShareDetails.link
+      });
+      location.href = `mailto:${encodeURIComponent(generatedShareDetails.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     }
 
     async function addMember() {
       const input = document.getElementById("memberEmail");
       const email = normalizeEmail(input.value);
-      if (!email || email === normalizeEmail(activeAccount?.email || "")) return;
+      const status = document.getElementById("shareStatus");
+      if (!email || !input.checkValidity()) {
+        status.textContent = t("sharing.invalidEmail");
+        input.reportValidity();
+        return;
+      }
+      if (email === normalizeEmail(activeAccount?.email || "")) {
+        status.textContent = t("sharing.cannotInviteSelf");
+        return;
+      }
       const role = normalizeMemberRole(document.getElementById("memberRole").value);
+      const note = document.getElementById("memberNote").value.trim().slice(0, 500);
       const calendarName = calendars.find(calendar => calendar.id === currentCalendarId)?.name || t("calendars.default");
-      const member = { id: makeId("local-member"), member_email: email, calendar_name: calendarName, status: "pending", role };
+      const member = { id: makeId("local-member"), member_email: email, calendar_name: calendarName, status: "pending", role, invitation_note: note };
       let inviteCreated = true;
       calendarMembers = calendarMembers.filter(item => item.member_email !== email);
       calendarMembers.push(member);
@@ -12068,17 +13427,27 @@
           .eq("member_email", email)
           .maybeSingle();
         const request = existing?.id
-          ? cloudClient.rpc("update_calendar_member_access", { member_id: existing.id, next_status: "pending", next_role: role })
-          : cloudClient.from("calendar_members").insert({ owner_id: cloudSession.user.id, owner_email: activeAccount.email, calendar_id: currentCalendarId, calendar_name: calendarName, member_email: email, status: "pending", role });
+          ? cloudClient.rpc("update_calendar_member_share", { member_id: existing.id, next_status: "pending", next_role: role, next_note: note })
+          : cloudClient.from("calendar_members").insert({ owner_id: cloudSession.user.id, owner_email: activeAccount.email, calendar_id: currentCalendarId, calendar_name: calendarName, member_email: email, status: "pending", role, invitation_note: note });
         const { error } = await request;
         inviteCreated = !error;
         if (inviteCreated) await refreshCloudCalendarMembers();
         else calendarMembers = calendarMembers.filter(item => item !== member);
       }
       saveCalendarMembers();
-      input.value = "";
       renderMemberList();
-      document.getElementById("shareStatus").textContent = t(inviteCreated ? "sharing.inviteCreated" : "sharing.unavailable");
+      if (inviteCreated) {
+        const savedMember = calendarMembers.find(item => normalizeEmail(item.member_email) === email);
+        await showGeneratedShareLink(savedMember, { copy: true });
+        status.textContent = savedMember?.invite_token
+          ? t("sharing.linkReady", { email })
+          : t("invitations.linkUnavailable");
+        input.value = "";
+        document.getElementById("memberNote").value = "";
+        trackProductEvent("Member Invited", { role });
+      } else {
+        status.textContent = t("sharing.unavailable");
+      }
     }
 
     async function updateMember(memberId) {
@@ -12137,7 +13506,8 @@
       list.innerHTML = calendarInvitations.map(invitation => {
         const pending = invitation.status === "pending";
         const active = invitation.status === "active";
-        return `<article class="invitation-card"><span class="invitation-copy"><strong>${escapeHtml(invitation.calendar_name || t("calendars.default"))}</strong><span>${escapeHtml(t("invitations.from", { email: invitationOwnerLabel(invitation) }))}</span><span class="role-pill">${escapeHtml(memberRoleLabel(invitation.role))}</span></span><span class="invitation-actions">${pending ? `<button class="primary-btn invite-answer" type="button" data-id="${escapeHtml(invitation.id)}" data-status="active">${escapeHtml(t("invitations.accept"))}</button><button class="ghost-btn invite-answer" type="button" data-id="${escapeHtml(invitation.id)}" data-status="declined">${escapeHtml(t("invitations.decline"))}</button>` : ""}${active ? `<button class="primary-btn invite-view" type="button" data-id="${escapeHtml(invitation.id)}">${escapeHtml(t("invitations.view"))}</button>` : ""}</span></article>`;
+        const note = String(invitation.invitation_note || "").trim();
+        return `<article class="invitation-card"><span class="invitation-copy"><strong>${escapeHtml(invitation.calendar_name || t("calendars.default"))}</strong><span>${escapeHtml(t("invitations.from", { email: invitationOwnerLabel(invitation) }))}</span>${note ? `<span>“${escapeHtml(note)}”</span>` : ""}<span class="role-pill">${escapeHtml(memberRoleLabel(invitation.role))}</span></span><span class="invitation-actions">${pending ? `<button class="primary-btn invite-answer" type="button" data-id="${escapeHtml(invitation.id)}" data-status="active">${escapeHtml(t("invitations.accept"))}</button><button class="ghost-btn invite-answer" type="button" data-id="${escapeHtml(invitation.id)}" data-status="declined">${escapeHtml(t("invitations.decline"))}</button>` : ""}${active ? `<button class="primary-btn invite-view" type="button" data-id="${escapeHtml(invitation.id)}">${escapeHtml(t("invitations.view"))}</button>` : ""}</span></article>`;
       }).join("");
       list.querySelectorAll(".invite-answer").forEach(button => button.addEventListener("click", () => answerInvitation(button.dataset.id, button.dataset.status)));
       list.querySelectorAll(".invite-view").forEach(button => button.addEventListener("click", () => viewSharedCalendar(button.dataset.id)));
@@ -12147,14 +13517,14 @@
       if (!cloudClient || !cloudSession?.user?.email) return;
       try {
         const { data, error } = await cloudClient.from("calendar_members")
-          .select("id,owner_id,owner_email,calendar_id,calendar_name,invite_token,status,role,created_at")
+          .select("id,owner_id,owner_email,calendar_id,calendar_name,invite_token,invitation_note,status,role,created_at")
           .eq("member_email", normalizeEmail(cloudSession.user.email))
           .in("status", ["pending", "active"])
           .order("created_at", { ascending: false });
         if (error) throw error;
         calendarInvitations = Array.isArray(data) ? data : [];
       } catch (error) {
-        console.error("KidsSync invitation load failed", error);
+        reportClientError(error, "invitation-load");
         calendarInvitations = [];
       }
       renderInvitations();
@@ -12179,11 +13549,120 @@
           pendingInviteToken = "";
         }
         await refreshInvitations();
+        trackProductEvent(status === "active" ? "Invitation Accepted" : "Invitation Declined");
       }
     }
 
     function canEditSharedCalendar() {
       return Boolean(sharedCalendarState?.invitation?.status === "active" && normalizeMemberRole(sharedCalendarState.invitation.role) === "editor");
+    }
+
+    function canCommentSharedCalendar() {
+      const role = normalizeMemberRole(sharedCalendarState?.invitation?.role);
+      return Boolean(sharedCalendarState?.invitation?.status === "active" && ["commenter", "editor"].includes(role));
+    }
+
+    function commentDateLabel(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      return new Intl.DateTimeFormat(currentLanguage === "zh" ? "zh-CN" : "en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      }).format(date);
+    }
+
+    function renderCalendarComments(targetId, comments) {
+      const list = document.getElementById(targetId);
+      if (!list) return;
+      list.innerHTML = comments.length
+        ? comments.map(comment => `<article class="calendar-comment"><span class="calendar-comment-head"><strong>${escapeHtml(comment.author_email || "")}</strong><time datetime="${escapeHtml(comment.created_at || "")}">${escapeHtml(commentDateLabel(comment.created_at))}</time></span><p>${escapeHtml(comment.body || "")}</p></article>`).join("")
+        : `<p class="calendar-comment-empty">${escapeHtml(t("comments.empty"))}</p>`;
+    }
+
+    async function fetchCalendarComments(ownerId, calendarId) {
+      if (!cloudClient || !ownerId || !calendarId) return [];
+      const { data, error } = await cloudClient.from("calendar_comments")
+        .select("id,owner_id,calendar_id,author_user_id,author_email,body,created_at")
+        .eq("owner_id", ownerId)
+        .eq("calendar_id", calendarId)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return Array.isArray(data) ? data : [];
+    }
+
+    async function refreshOwnerCalendarComments() {
+      if (!isCalendarOwner()) return;
+      try {
+        ownerCalendarComments = await fetchCalendarComments(cloudSession.user.id, currentCalendarId);
+        renderCalendarComments("ownerCommentList", ownerCalendarComments);
+      } catch (error) {
+        reportClientError(error, "owner-comments-load");
+        ownerCalendarComments = [];
+        renderCalendarComments("ownerCommentList", ownerCalendarComments);
+      }
+    }
+
+    async function refreshSharedCalendarComments() {
+      if (!sharedCalendarState?.invitation) return;
+      try {
+        const invitation = sharedCalendarState.invitation;
+        sharedCalendarComments = await fetchCalendarComments(invitation.owner_id, invitation.calendar_id);
+        renderCalendarComments("sharedCommentList", sharedCalendarComments);
+      } catch (error) {
+        reportClientError(error, "shared-comments-load");
+        sharedCalendarComments = [];
+        renderCalendarComments("sharedCommentList", sharedCalendarComments);
+      }
+    }
+
+    async function insertCalendarComment(ownerId, calendarId, body) {
+      const authorEmail = normalizeEmail(cloudSession?.user?.email || activeAccount?.email || "");
+      if (!cloudClient || !cloudSession?.user?.id || !authorEmail) throw new Error("Authentication required");
+      const { error } = await cloudClient.from("calendar_comments").insert({
+        owner_id: ownerId,
+        calendar_id: calendarId,
+        author_user_id: cloudSession.user.id,
+        author_email: authorEmail,
+        body: body.trim().slice(0, 1000)
+      });
+      if (error) throw error;
+    }
+
+    async function submitOwnerComment(event) {
+      event.preventDefault();
+      const input = document.getElementById("ownerCommentBody");
+      const status = document.getElementById("ownerCommentStatus");
+      const body = input.value.trim();
+      if (!body || !isCalendarOwner()) return;
+      try {
+        await insertCalendarComment(cloudSession.user.id, currentCalendarId, body);
+        input.value = "";
+        status.textContent = t("comments.posted");
+        await refreshOwnerCalendarComments();
+      } catch (error) {
+        reportClientError(error, "owner-comment-save");
+        status.textContent = t("comments.failed");
+      }
+    }
+
+    async function submitSharedComment(event) {
+      event.preventDefault();
+      const input = document.getElementById("sharedCommentBody");
+      const status = document.getElementById("sharedCommentStatus");
+      const body = input.value.trim();
+      if (!body || !canCommentSharedCalendar()) return;
+      const invitation = sharedCalendarState.invitation;
+      try {
+        await insertCalendarComment(invitation.owner_id, invitation.calendar_id, body);
+        input.value = "";
+        status.textContent = t("comments.posted");
+        await refreshSharedCalendarComments();
+      } catch (error) {
+        reportClientError(error, "shared-comment-save");
+        status.textContent = t("comments.failed");
+      }
     }
 
     function renderSharedCalendarEvents() {
@@ -12208,9 +13687,16 @@
     function configureSharedCalendarAccess() {
       const role = normalizeMemberRole(sharedCalendarState?.invitation?.role);
       const editable = role === "editor";
+      const commentable = ["commenter", "editor"].includes(role);
+      const note = String(sharedCalendarState?.invitation?.invitation_note || "").trim();
       document.getElementById("sharedCalendarRole").textContent = memberRoleLabel(role);
-      document.getElementById("sharedCalendarDescription").textContent = t(editable ? "invitations.editorAccess" : "invitations.readOnly");
+      document.getElementById("sharedCalendarDescription").textContent = t(editable ? "invitations.editorAccess" : commentable ? "invitations.commenterAccess" : "invitations.readOnly");
       document.getElementById("addSharedEvent").hidden = !editable;
+      document.getElementById("sharedCommentForm").hidden = !commentable;
+      document.getElementById("sharedCommentsIntro").textContent = t(commentable ? "comments.commenterIntro" : "comments.viewerIntro");
+      const noteElement = document.getElementById("sharedCalendarInviteNote");
+      noteElement.textContent = note;
+      noteElement.hidden = !note;
     }
 
     async function viewSharedCalendar(invitationId) {
@@ -12220,11 +13706,17 @@
       const list = document.getElementById("sharedCalendarEvents");
       title.textContent = invitation.calendar_name || t("invitations.sharedTitle");
       sharedCalendarState = { invitation, schedule: {}, shared: { kids: [], activities: [] } };
+      sharedCalendarComments = [];
       configureSharedCalendarAccess();
+      renderCalendarComments("sharedCommentList", sharedCalendarComments);
+      document.getElementById("sharedCommentStatus").textContent = "";
       list.innerHTML = `<p class="invitation-empty">${escapeHtml(t("save.syncing"))}</p>`;
       document.getElementById("sharedCalendarDialog").showModal();
       try {
-        const { data, error } = await cloudClient.from("family_schedules").select("schedule").eq("user_id", invitation.owner_id).maybeSingle();
+        const [{ data, error }] = await Promise.all([
+          cloudClient.from("family_schedules").select("schedule").eq("user_id", invitation.owner_id).maybeSingle(),
+          refreshSharedCalendarComments()
+        ]);
         if (error) throw error;
         const schedule = data?.schedule || {};
         const shared = schedule.calendarData?.[invitation.calendar_id] || schedule;
@@ -12232,7 +13724,7 @@
         configureSharedCalendarAccess();
         renderSharedCalendarEvents();
       } catch (error) {
-        console.error("KidsSync shared calendar load failed", error);
+        reportClientError(error, "shared-calendar-load");
         list.innerHTML = `<p class="invitation-empty">${escapeHtml(t("invitations.unavailable"))}</p>`;
       }
     }
@@ -12347,7 +13839,7 @@
         await persistSharedCalendarActivities(activities);
         document.getElementById("sharedEventDialog").close();
       } catch (error) {
-        console.error("KidsSync shared event save failed", error);
+        reportClientError(error, "shared-event-save");
         status.textContent = t("invitations.saveFailed");
       }
     }
@@ -12361,7 +13853,7 @@
         await persistSharedCalendarActivities(activities);
         document.getElementById("sharedEventDialog").close();
       } catch (error) {
-        console.error("KidsSync shared event delete failed", error);
+        reportClientError(error, "shared-event-delete");
         document.getElementById("sharedEventStatus").textContent = t("invitations.saveFailed");
       }
     }
@@ -12369,13 +13861,19 @@
     function openShareDialog() {
       document.getElementById("shareText").value = buildShareText();
       document.getElementById("shareStatus").textContent = "";
+      document.getElementById("ownerCommentStatus").textContent = "";
       document.getElementById("importFile").value = "";
       document.getElementById("importSchedule").disabled = true;
+      document.getElementById("generatedShareLinkRow").hidden = true;
+      generatedShareDetails = null;
       calendarMembers = loadCalendarMembers();
       const accessPanel = document.getElementById("shareAccessPanel");
       accessPanel.hidden = !isCalendarOwner();
-      if (isCalendarOwner()) refreshCloudCalendarMembers().finally(renderMemberList);
-      else renderMemberList();
+      if (isCalendarOwner()) {
+        Promise.all([refreshCloudCalendarMembers(), refreshOwnerCalendarComments()]).finally(renderMemberList);
+      } else {
+        renderMemberList();
+      }
       document.getElementById("shareDialog").showModal();
     }
 
@@ -12402,6 +13900,7 @@
       renderMonth();
       renderScheduleOverview();
       renderCalendarEmptyState();
+      renderSearchEmptyState();
       renderReminders();
       updateCalendarView();
     }
@@ -12443,22 +13942,22 @@
     ["welcomeTryNav", "welcomeTryHero", "welcomeTryPreview", "welcomeTryHow"].forEach(id => {
       document.getElementById(id).addEventListener("click", showGuestPreview);
     });
-    document.querySelectorAll("[data-hero-image]").forEach(button => {
-      button.addEventListener("click", () => {
-        const image = button.dataset.heroImage;
-        document.querySelector(".welcome-hero").style.backgroundImage = `url("${image}")`;
-        document.querySelectorAll("[data-hero-image]").forEach(option => option.classList.toggle("is-active", option === button));
-        localStorage.setItem("kidssync.welcome.hero-image", image);
-      });
-    });
-    const savedHeroImage = localStorage.getItem("kidssync.welcome.hero-image");
-    const savedHeroButton = savedHeroImage && document.querySelector(`[data-hero-image="${CSS.escape(savedHeroImage)}"]`);
-    if (savedHeroButton) savedHeroButton.click();
     ["welcomeSignIn", "welcomeSignInHero"].forEach(id => {
       document.getElementById(id).addEventListener("click", () => showAuthScreen("signin"));
     });
     document.getElementById("signInForm").addEventListener("submit", handleSignIn);
     document.getElementById("signUpForm").addEventListener("submit", handleSignUp);
+    document.getElementById("passwordResetRequestForm").addEventListener("submit", handlePasswordResetRequest);
+    document.getElementById("passwordUpdateForm").addEventListener("submit", handlePasswordUpdate);
+    document.getElementById("forgotPassword").addEventListener("click", () => {
+      document.getElementById("passwordResetEmail").value = document.getElementById("signInEmail").value;
+      setAuthView("forgot");
+      document.getElementById("passwordResetEmail").focus();
+    });
+    document.getElementById("backToSignIn").addEventListener("click", () => {
+      setAuthView("signin");
+      document.getElementById("signInEmail").focus();
+    });
     document.getElementById("previewProfileForm").addEventListener("submit", event => {
       event.preventDefault();
       openAuthFromPreview("signup");
@@ -12510,6 +14009,9 @@
     });
     document.getElementById("shareSchedule").addEventListener("click", openShareDialog);
     document.getElementById("addMember").addEventListener("click", addMember);
+    document.getElementById("copyGeneratedShareLink").addEventListener("click", copyGeneratedShareLink);
+    document.getElementById("emailGeneratedShareLink").addEventListener("click", emailGeneratedShareLink);
+    document.getElementById("ownerCommentForm").addEventListener("submit", submitOwnerComment);
     document.getElementById("closeShareDialog").addEventListener("click", () => document.getElementById("shareDialog").close());
     document.getElementById("openInvitations").addEventListener("click", async () => {
       document.getElementById("invitationsDialog").showModal();
@@ -12523,6 +14025,7 @@
     document.getElementById("addSharedEvent").addEventListener("click", () => openSharedEventDialog());
     document.getElementById("closeSharedEvent").addEventListener("click", () => document.getElementById("sharedEventDialog").close());
     document.getElementById("sharedEventForm").addEventListener("submit", saveSharedEvent);
+    document.getElementById("sharedCommentForm").addEventListener("submit", submitSharedComment);
     document.getElementById("sharedEventAllDay").addEventListener("change", updateSharedEventTimeFields);
     document.getElementById("sharedEventType").addEventListener("change", applySharedEventTypeDefaults);
     document.getElementById("deleteSharedEvent").addEventListener("click", deleteSharedEvent);
@@ -12564,6 +14067,7 @@
         state.visibleKids = new Set(kidProfiles.map(kid => kid.name));
         saveKids();
         saveActivities();
+        auditActivity("imported", imported[0], imported[0], imported.length);
         populateFormOptions();
         renderAll();
         document.getElementById("shareText").value = buildShareText();
@@ -12612,6 +14116,12 @@
     document.getElementById("closeDashboard").addEventListener("click", () => dashboardDialog.close());
     document.getElementById("openReminders").addEventListener("click", openRemindersDialog);
     document.getElementById("closeReminders").addEventListener("click", () => remindersDialog.close());
+    document.getElementById("openActivityHistory").addEventListener("click", () => {
+      document.getElementById("moreActions").open = false;
+      renderActivityHistory();
+      activityHistoryDialog.showModal();
+    });
+    document.getElementById("closeActivityHistory").addEventListener("click", () => activityHistoryDialog.close());
     document.getElementById("reminderSettings").addEventListener("click", () => {
       remindersDialog.close();
       openSettingsDialog();
@@ -12641,6 +14151,13 @@
     });
     document.getElementById("defaultView").addEventListener("change", event => {
       saveSetting("defaultView", event.currentTarget.value);
+    });
+    document.getElementById("defaultEventDuration").addEventListener("change", event => {
+      saveSetting("defaultEventDuration", Number(event.currentTarget.value));
+    });
+    document.getElementById("showWeekendsDefault").addEventListener("change", event => {
+      state.showWeekends = event.currentTarget.checked;
+      saveSetting("showWeekends", state.showWeekends, { rerender: true });
     });
     document.getElementById("focusFirstEvent").addEventListener("change", event => {
       saveSetting("focusFirstEvent", event.currentTarget.checked);
@@ -12684,6 +14201,7 @@
       renderAll();
       scheduleSearch.focus();
     });
+    document.getElementById("resetScheduleFilters").addEventListener("click", resetScheduleFilters);
     jumpConflictButton.addEventListener("click", jumpToNextConflict);
     jumpTravelButton.addEventListener("click", jumpToNextTravelWarning);
     jumpNextEventButton.addEventListener("click", jumpToNextEvent);
@@ -12697,8 +14215,12 @@
     });
     toggleWeekendsButton.addEventListener("click", () => {
       state.showWeekends = !state.showWeekends;
+      userSettings.showWeekends = state.showWeekends;
+      saveSettings();
       renderAll();
     });
+    zoomOutButton.addEventListener("click", () => changeCalendarZoom(-1));
+    zoomInButton.addEventListener("click", () => changeCalendarZoom(1));
     fields.title.addEventListener("change", applySmartEventDefaults);
     fields.eventType.addEventListener("change", applyEventTypeDefaults);
     fields.recurrence.addEventListener("change", () => updateRecurrenceFields({ resetDays: true }));
@@ -12728,6 +14250,10 @@
     document.querySelectorAll("#moreActions button").forEach(button => button.addEventListener("click", () => {
       document.getElementById("moreActions").open = false;
     }));
+    document.addEventListener("click", event => {
+      const menu = document.getElementById("moreActions");
+      if (menu.open && !menu.contains(event.target)) menu.open = false;
+    });
     presetForm.addEventListener("submit", event => event.preventDefault());
     settingsForm.addEventListener("submit", event => event.preventDefault());
     document.getElementById("addKidRow").addEventListener("click", () => {
@@ -12789,14 +14315,24 @@
       };
 
       const existingIndex = state.activities.findIndex(item => item.id === activity.id);
+      const previousActivity = existingIndex >= 0 ? { ...state.activities[existingIndex] } : null;
       if (existingIndex >= 0) {
         state.activities[existingIndex] = activity;
       } else {
         state.activities.push(activity);
       }
       saveActivities();
+      auditActivity(previousActivity ? "updated" : "created", previousActivity, activity);
+      trackProductEvent(existingIndex >= 0 ? "Event Updated" : "Event Created", {
+        type: activity.eventType,
+        recurring: activity.recurrence !== "none",
+        allDay: activity.allDay
+      });
       closeDialog();
       renderAll();
+      showFeedbackToast(t(existingIndex >= 0 ? "feedback.eventUpdated" : "feedback.eventCreated", {
+        title: activityTitle(activity)
+      }));
     });
 
     kidsForm.addEventListener("submit", event => {
@@ -12838,6 +14374,7 @@
       saveActivities();
       populateFormOptions();
       closeKidsDialog();
+      showFeedbackToast(t("feedback.kidsSaved"));
     });
 
     deleteButton.addEventListener("click", () => {
@@ -12846,6 +14383,7 @@
       if (!deletedActivity) return;
       state.activities = state.activities.filter(activity => activity.id !== fields.id.value);
       saveActivities();
+      auditActivity("deleted", deletedActivity, null);
       closeDialog();
       renderAll();
       showDeleteUndo(deletedActivity);
@@ -12866,6 +14404,15 @@
       else if (!document.hidden) hydrateCloudSchedule();
     });
 
+    if (cloudClient) {
+      cloudClient.auth.onAuthStateChange((event, session) => {
+        if (event !== "PASSWORD_RECOVERY") return;
+        passwordRecoveryMode = true;
+        cloudSession = session;
+        showAuthScreen("update");
+      });
+    }
+
     applySettings();
     applyStaticTranslations();
     initializeAuthUI();
@@ -12873,6 +14420,12 @@
     renderAll();
     startNotificationChecks();
     initializeCloudSync();
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js").catch(error => {
+        console.warn("KidsSync offline support unavailable", error);
+      });
+    }
   </script>
 </body>
 </html>

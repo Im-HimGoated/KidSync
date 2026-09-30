@@ -18,7 +18,8 @@ create table if not exists public.calendar_members (
   member_user_id uuid references auth.users(id) on delete cascade,
   calendar_name text not null default 'Family',
   invite_token uuid not null default gen_random_uuid(),
-  role text not null default 'viewer' check (role in ('editor', 'viewer')),
+  role text not null default 'viewer' check (role in ('editor', 'commenter', 'viewer')),
+  invitation_note text not null default '',
   status text not null default 'pending' check (status in ('pending', 'active', 'declined', 'banned')),
   created_at timestamptz not null default now(),
   unique (owner_id, calendar_id, member_email)
@@ -28,10 +29,14 @@ alter table public.calendar_members add column if not exists calendar_name text 
 alter table public.calendar_members add column if not exists owner_email text not null default '';
 alter table public.calendar_members add column if not exists invite_token uuid not null default gen_random_uuid();
 alter table public.calendar_members add column if not exists role text not null default 'viewer';
+alter table public.calendar_members add column if not exists invitation_note text not null default '';
 create unique index if not exists calendar_members_invite_token_idx on public.calendar_members (invite_token);
 alter table public.calendar_members drop constraint if exists calendar_members_role_check;
 alter table public.calendar_members add constraint calendar_members_role_check
-  check (role in ('editor', 'viewer'));
+  check (role in ('editor', 'commenter', 'viewer'));
+alter table public.calendar_members drop constraint if exists calendar_members_invitation_note_length;
+alter table public.calendar_members add constraint calendar_members_invitation_note_length
+  check (char_length(invitation_note) <= 500);
 alter table public.calendar_members alter column status set default 'pending';
 alter table public.calendar_members drop constraint if exists calendar_members_status_check;
 alter table public.calendar_members add constraint calendar_members_status_check
@@ -79,9 +84,13 @@ create or replace function public.respond_calendar_invitation(invitation_id uuid
 returns void
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = ''
 as $$
 begin
+  if (select auth.uid()) is null then
+    raise exception 'Authentication required';
+  end if;
+
   if next_status not in ('active', 'declined') then
     raise exception 'Invalid invitation response';
   end if;
@@ -103,13 +112,17 @@ create or replace function public.update_calendar_member_access(member_id uuid, 
 returns void
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = ''
 as $$
 begin
+  if (select auth.uid()) is null then
+    raise exception 'Authentication required';
+  end if;
+
   if next_status not in ('pending', 'active', 'declined', 'banned') then
     raise exception 'Invalid member status';
   end if;
-  if next_role not in ('editor', 'viewer') then
+  if next_role not in ('editor', 'commenter', 'viewer') then
     raise exception 'Invalid calendar role';
   end if;
 
@@ -125,10 +138,113 @@ begin
 end;
 $$;
 
-revoke all on function public.respond_calendar_invitation(uuid, text) from public;
-revoke all on function public.update_calendar_member_access(uuid, text, text) from public;
+create or replace function public.update_calendar_member_share(member_id uuid, next_status text, next_role text, next_note text)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if (select auth.uid()) is null then
+    raise exception 'Authentication required';
+  end if;
+
+  if next_status not in ('pending', 'active', 'declined', 'banned') then
+    raise exception 'Invalid member status';
+  end if;
+  if next_role not in ('editor', 'commenter', 'viewer') then
+    raise exception 'Invalid calendar role';
+  end if;
+  if char_length(coalesce(next_note, '')) > 500 then
+    raise exception 'Invitation note is too long';
+  end if;
+
+  update public.calendar_members
+  set status = next_status,
+      role = next_role,
+      invitation_note = coalesce(next_note, '')
+  where id = member_id
+    and owner_id = (select auth.uid());
+
+  if not found then
+    raise exception 'Calendar member not found';
+  end if;
+end;
+$$;
+
+revoke all on function public.respond_calendar_invitation(uuid, text) from public, anon, authenticated;
+revoke all on function public.update_calendar_member_access(uuid, text, text) from public, anon, authenticated;
+revoke all on function public.update_calendar_member_share(uuid, text, text, text) from public, anon, authenticated;
 grant execute on function public.respond_calendar_invitation(uuid, text) to authenticated;
 grant execute on function public.update_calendar_member_access(uuid, text, text) to authenticated;
+grant execute on function public.update_calendar_member_share(uuid, text, text, text) to authenticated;
+
+comment on function public.respond_calendar_invitation(uuid, text) is
+  'SECURITY DEFINER is required to bind an invitation to its authenticated recipient. The function validates auth.uid(), JWT email, status, and invitation ownership.';
+comment on function public.update_calendar_member_access(uuid, text, text) is
+  'SECURITY DEFINER is required for owner-managed role updates. The function only updates rows owned by auth.uid() and validates all enum inputs.';
+comment on function public.update_calendar_member_share(uuid, text, text, text) is
+  'SECURITY DEFINER is required for owner-managed invitation updates. The function only updates rows owned by auth.uid() and validates role, status, and note length.';
+
+create table if not exists public.calendar_comments (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null references auth.users(id) on delete cascade,
+  calendar_id text not null,
+  author_user_id uuid not null references auth.users(id) on delete cascade,
+  author_email text not null,
+  body text not null check (char_length(body) between 1 and 1000),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists calendar_comments_calendar_idx
+  on public.calendar_comments (owner_id, calendar_id, created_at);
+
+alter table public.calendar_comments enable row level security;
+revoke all on table public.calendar_comments from anon;
+grant select, insert, delete on table public.calendar_comments to authenticated;
+
+drop policy if exists "Calendar participants can read comments" on public.calendar_comments;
+create policy "Calendar participants can read comments"
+on public.calendar_comments for select to authenticated
+using (
+  (select auth.uid()) = owner_id
+  or exists (
+    select 1 from public.calendar_members member
+    where member.owner_id = calendar_comments.owner_id
+      and member.calendar_id = calendar_comments.calendar_id
+      and member.member_user_id = (select auth.uid())
+      and lower(member.member_email) = lower(coalesce((select auth.jwt() ->> 'email'), ''))
+      and member.status = 'active'
+  )
+);
+
+drop policy if exists "Commenters can add calendar comments" on public.calendar_comments;
+create policy "Commenters can add calendar comments"
+on public.calendar_comments for insert to authenticated
+with check (
+  author_user_id = (select auth.uid())
+  and lower(author_email) = lower(coalesce((select auth.jwt() ->> 'email'), ''))
+  and (
+    owner_id = (select auth.uid())
+    or exists (
+      select 1 from public.calendar_members member
+      where member.owner_id = calendar_comments.owner_id
+        and member.calendar_id = calendar_comments.calendar_id
+        and member.member_user_id = (select auth.uid())
+        and lower(member.member_email) = lower(coalesce((select auth.jwt() ->> 'email'), ''))
+        and member.status = 'active'
+        and member.role in ('commenter', 'editor')
+    )
+  )
+);
+
+drop policy if exists "Comment authors and owners can delete comments" on public.calendar_comments;
+create policy "Comment authors and owners can delete comments"
+on public.calendar_comments for delete to authenticated
+using (
+  author_user_id = (select auth.uid())
+  or owner_id = (select auth.uid())
+);
 
 drop policy if exists "Families can read their own schedule" on public.family_schedules;
 create policy "Families can read their own schedule"
@@ -164,11 +280,15 @@ create or replace function public.update_shared_calendar_activities(calendar_own
 returns timestamptz
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = ''
 as $$
 declare
   saved_at timestamptz;
 begin
+  if (select auth.uid()) is null then
+    raise exception 'Authentication required';
+  end if;
+
   if jsonb_typeof(next_activities) <> 'array' then
     raise exception 'Activities must be a JSON array';
   end if;
@@ -177,6 +297,7 @@ begin
     from public.calendar_members member
     where member.owner_id = calendar_owner_id
       and member.calendar_id = shared_calendar_id
+      and member.member_user_id = (select auth.uid())
       and lower(member.member_email) = lower(coalesce((select auth.jwt() ->> 'email'), ''))
       and member.status = 'active'
       and member.role = 'editor'
@@ -201,5 +322,22 @@ begin
 end;
 $$;
 
-revoke all on function public.update_shared_calendar_activities(uuid, text, jsonb) from public;
+revoke all on function public.update_shared_calendar_activities(uuid, text, jsonb) from public, anon, authenticated;
 grant execute on function public.update_shared_calendar_activities(uuid, text, jsonb) to authenticated;
+
+comment on function public.update_shared_calendar_activities(uuid, text, jsonb) is
+  'SECURITY DEFINER is required for editor writes to an owner schedule. Access requires an active editor row bound to both auth.uid() and the JWT email.';
+
+-- New functions should not become callable through the Data API by default.
+alter default privileges for role postgres in schema public
+  revoke execute on functions from public, anon, authenticated, service_role;
+
+-- Keep this database-maintenance helper out of PostgREST. It may exist in
+-- deployed projects even though KidsSync does not create or call it.
+do $$
+begin
+  if to_regprocedure('public.rls_auto_enable()') is not null then
+    execute 'revoke all privileges on function public.rls_auto_enable() from public, anon, authenticated, service_role';
+  end if;
+end;
+$$;
