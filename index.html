@@ -6670,6 +6670,132 @@
     }
   </style>
   <style>
+    .calendar-workspace {
+      position: relative;
+      padding-left: 12px;
+      overflow: hidden;
+    }
+
+    .calendar-workspace::before {
+      content: "";
+      position: absolute;
+      inset: 8px auto 8px 0;
+      width: 4px;
+      border-radius: 0 4px 4px 0;
+      background: var(--calendar-accent, var(--blue));
+    }
+
+    .week-controls.has-today-shortcut {
+      grid-template-columns: 42px minmax(0, 1fr) auto 42px;
+    }
+
+    .period-today {
+      min-height: 40px;
+      padding: 0 11px;
+      border: 1px solid var(--blue-line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--blue);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .period-today:hover,
+    .period-today:focus-visible,
+    .period-today.is-current {
+      background: var(--blue-soft);
+      border-color: var(--blue);
+    }
+
+    .day-head.is-today {
+      box-shadow: inset 0 -4px 0 var(--calendar-accent, var(--blue));
+    }
+
+    .day-head-label-row,
+    .agenda-day-heading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .day-today-badge,
+    .day-event-count {
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+      min-height: 20px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .day-today-badge {
+      background: var(--calendar-accent, var(--blue));
+      color: #fff;
+    }
+
+    .day-event-count {
+      min-width: 20px;
+      background: rgba(255, 255, 255, .78);
+      color: currentColor;
+      border: 1px solid rgba(28, 53, 72, .18);
+    }
+
+    .current-time-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      z-index: 45;
+      height: 2px;
+      background: #d64255;
+      pointer-events: none;
+    }
+
+    .current-time-line::before {
+      content: "";
+      position: absolute;
+      left: -5px;
+      top: -4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #d64255;
+    }
+
+    .current-time-line span {
+      position: absolute;
+      right: 4px;
+      top: -11px;
+      padding: 2px 5px;
+      border-radius: 5px;
+      background: #d64255;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .day-card.is-today > h2 {
+      border-left: 4px solid var(--calendar-accent, var(--blue));
+    }
+
+    .agenda-day-heading {
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    html.dark-mode .period-today { background: #172637; }
+    html.dark-mode .day-event-count {
+      background: rgba(10, 24, 36, .58);
+      border-color: rgba(255, 255, 255, .2);
+    }
+
     .history-body { padding: 18px 20px 22px; }
     .history-intro { margin: 0 0 14px; color: var(--muted); font-size: 13px; }
     .history-list { display: grid; gap: 8px; }
@@ -6696,6 +6822,10 @@
     .version-item-actions { display: grid; justify-items: end; gap: 7px; }
     .version-item-actions .small-btn { min-width: 82px; }
     @media (max-width: 560px) {
+      .week-controls.has-today-shortcut {
+        grid-template-columns: 40px minmax(0, 1fr) auto 40px;
+      }
+      .period-today { min-height: 40px; padding-inline: 8px; }
       .history-body { padding: 14px; }
       .history-item { grid-template-columns: 28px minmax(0, 1fr); }
       .history-item-time { grid-column: 2; text-align: left; }
@@ -7317,9 +7447,10 @@
           <select id="calendarSelect" aria-label="Current calendar"></select>
           <button class="icon-btn manage-calendars-btn" type="button" id="manageCalendars" aria-label="Manage calendars" data-i18n-aria="calendars.manage" data-i18n-title="calendars.manage" title="Manage calendars"><span aria-hidden="true">⚙</span></button>
         </div>
-        <div class="week-controls">
+        <div class="week-controls has-today-shortcut">
           <button class="icon-btn" type="button" id="prevWeek" aria-label="Previous period" data-i18n-aria="aria.previousPeriod">‹</button>
           <div class="week-label" id="weekLabel">Aug 3 - Aug 7</div>
+          <button class="period-today" type="button" id="jumpToday" data-i18n="actions.today">Today</button>
           <button class="icon-btn" type="button" id="nextWeek" aria-label="Next period" data-i18n-aria="aria.nextPeriod">›</button>
         </div>
         <div class="language-switch" role="group" aria-label="Language" data-i18n-aria="aria.language">
@@ -8222,6 +8353,7 @@
         "auth.continuePreview": "Continue without signing in",
         "auth.guestFamily": "Guest preview",
         "auth.guestDevice": "Changes stay on this device",
+        "auth.signInToShare": "Sign in to share your family calendar",
         "auth.previewCompletePrompt": "Your preview is complete. Sign in or create an account now, or you will lose access to this calendar.",
         "previewGate.kicker": "10-minute preview complete",
         "previewGate.title": "Keep the calendar you just made.",
@@ -8542,6 +8674,7 @@
         "actions.load": "Load",
         "actions.done": "Done",
         "actions.more": "More",
+        "actions.today": "Today",
         "actions.hideWeekends": "Hide weekends",
         "actions.showWeekends": "Show weekends",
         "actions.edit": "Edit",
@@ -8706,6 +8839,7 @@
         "presets.confirmDelete": "Delete preset “{name}”?",
         "presets.confirmExample": "Load the Andrew and Mark preset? This will replace the current kids and schedule.",
         "calendar.empty": "No activities yet.",
+        "calendar.today": "Today",
         "calendar.conflict": "Schedule conflict",
         "calendar.weekly": "Weekly activity",
         "calendar.allDay": "All day",
@@ -8918,6 +9052,7 @@
         "auth.continuePreview": "不登录，继续试用",
         "auth.guestFamily": "访客试用",
         "auth.guestDevice": "更改仅保存在此设备上",
+        "auth.signInToShare": "登录后才能分享家庭日历",
         "auth.previewCompletePrompt": "试用已结束。请立即登录或创建账户，否则你将无法继续访问此日历。",
         "previewGate.kicker": "10 分钟试用已完成",
         "previewGate.title": "保留你刚刚创建的日历。",
@@ -9224,6 +9359,7 @@
         "actions.load": "载入",
         "actions.done": "完成",
         "actions.more": "更多",
+        "actions.today": "今天",
         "actions.hideWeekends": "隐藏周末",
         "actions.showWeekends": "显示周末",
         "actions.edit": "编辑",
@@ -9402,6 +9538,7 @@
         "presets.confirmDelete": "删除预设“{name}”？",
         "presets.confirmExample": "载入 Andrew 和 Mark 示例？这会替换当前的孩子和日程。",
         "calendar.empty": "还没有活动。",
+        "calendar.today": "今天",
         "calendar.conflict": "日程冲突",
         "calendar.weekly": "每周活动",
         "calendar.allDay": "全天",
@@ -10114,6 +10251,10 @@
       document.getElementById("guestAuthButton").hidden = Boolean(activeAccount);
       document.getElementById("logoutButton").hidden = !activeAccount;
       document.getElementById("openInvitations").hidden = activeAccount?.provider !== "supabase";
+      const shareButton = document.getElementById("shareSchedule");
+      shareButton.disabled = !activeAccount;
+      shareButton.title = activeAccount ? "" : t("auth.signInToShare");
+      shareButton.setAttribute("aria-disabled", String(!activeAccount));
       updateCloudAvailability();
       renderCloudSettings();
     }
@@ -12069,9 +12210,12 @@
 
       displayDays.forEach(day => {
         const date = addDays(currentWeekStart, days.findIndex(item => item.key === day.key));
+        const dayActivities = activities.filter(activity => activity.day === day.key);
+        const isToday = isSameDate(date, new Date());
+        const countLabel = t(dayActivities.length === 1 ? "overview.eventOne" : "overview.events", { count: dayActivities.length });
         const head = document.createElement("div");
-        head.className = `day-head ${day.theme}`;
-        head.innerHTML = `<span class="weather" aria-hidden="true">${day.weather}</span><span class="day-head-label">${dayLabel(day)}<small>${formatShortDate(date)}</small></span>`;
+        head.className = `day-head ${day.theme}${isToday ? " is-today" : ""}`;
+        head.innerHTML = `<span class="weather" aria-hidden="true">${day.weather}</span><span class="day-head-label"><span class="day-head-label-row"><span>${dayLabel(day)}</span>${isToday ? `<span class="day-today-badge">${escapeHtml(t("calendar.today"))}</span>` : ""}${dayActivities.length ? `<span class="day-event-count" aria-label="${escapeHtml(countLabel)}">${dayActivities.length}</span>` : ""}</span><small>${formatShortDate(date)}</small></span>`;
         grid.appendChild(head);
       });
 
@@ -12185,7 +12329,30 @@
           }
         });
 
+        if (isSameDate(targetDate, new Date())) {
+          const marker = document.createElement("div");
+          marker.className = "current-time-line";
+          marker.dataset.currentTimeMarker = "";
+          marker.setAttribute("aria-hidden", "true");
+          marker.innerHTML = "<span></span>";
+          column.appendChild(marker);
+        }
+
         grid.appendChild(column);
+      });
+      updateCurrentTimeMarkers();
+    }
+
+    function updateCurrentTimeMarkers() {
+      const now = new Date();
+      const currentMinute = now.getHours() * 60 + now.getMinutes();
+      const isVisible = currentMinute >= scheduleStartMinutes && currentMinute <= scheduleEndMinutes;
+      document.querySelectorAll("[data-current-time-marker]").forEach(marker => {
+        marker.hidden = !isVisible;
+        if (!isVisible) return;
+        marker.style.top = `${((currentMinute - scheduleStartMinutes) / scheduleDurationMinutes) * 100}%`;
+        const label = marker.querySelector("span");
+        if (label) label.textContent = formatTimeLabel(currentMinute);
       });
     }
 
@@ -12195,13 +12362,15 @@
       mobileAgenda.innerHTML = "";
       visibleWeekDays().forEach(day => {
         const date = addDays(currentWeekStart, days.findIndex(item => item.key === day.key));
-        const card = document.createElement("article");
-        card.className = "day-card";
-        card.innerHTML = `<h2>${day.weather} ${dayLabel(day)} · ${formatShortDate(date)}</h2><div class="agenda-list"></div>`;
-        const list = card.querySelector(".agenda-list");
         const items = activities
           .filter(activity => activity.day === day.key)
           .sort((a, b) => Number(b.allDay) - Number(a.allDay) || minutes(a.start) - minutes(b.start));
+        const isToday = isSameDate(date, new Date());
+        const countLabel = t(items.length === 1 ? "overview.eventOne" : "overview.events", { count: items.length });
+        const card = document.createElement("article");
+        card.className = `day-card${isToday ? " is-today" : ""}`;
+        card.innerHTML = `<h2 class="agenda-day-heading"><span>${day.weather} ${dayLabel(day)} · ${formatShortDate(date)}</span>${isToday ? `<span class="day-today-badge">${escapeHtml(t("calendar.today"))}</span>` : ""}${items.length ? `<span class="day-event-count" aria-label="${escapeHtml(countLabel)}">${items.length}</span>` : ""}</h2><div class="agenda-list"></div>`;
+        const list = card.querySelector(".agenda-list");
 
         if (!items.length) {
           list.innerHTML = `<p class="agenda-meta">${t("calendar.empty")}</p>`;
@@ -12441,6 +12610,16 @@
       zoomLevel.textContent = `${Math.round(userSettings.calendarZoom * 100)}%`;
       zoomOutButton.disabled = zoomIndex <= 0;
       zoomInButton.disabled = zoomIndex >= CALENDAR_ZOOM_LEVELS.length - 1;
+      const now = new Date();
+      const isCurrentPeriod = currentView === "today"
+        ? isSameDate(selectedDate, now)
+        : currentView === "month"
+          ? currentMonthStart.getFullYear() === now.getFullYear() && currentMonthStart.getMonth() === now.getMonth()
+          : dateSerial(now) >= dateSerial(currentWeekStart) && dateSerial(now) <= dateSerial(addDays(currentWeekStart, 6));
+      const todayButton = document.getElementById("jumpToday");
+      todayButton.classList.toggle("is-current", isCurrentPeriod);
+      if (isCurrentPeriod) todayButton.setAttribute("aria-current", "date");
+      else todayButton.removeAttribute("aria-current");
     }
 
     function changeCalendarZoom(direction) {
@@ -13404,6 +13583,8 @@
       const select = document.getElementById("calendarSelect");
       if (!select) return;
       select.innerHTML = calendars.map(calendar => `<option value="${escapeHtml(calendar.id)}"${calendar.id === currentCalendarId ? " selected" : ""}>${escapeHtml(calendar.icon || "📅")} ${escapeHtml(calendar.name)}</option>`).join("");
+      const activeCalendar = calendars.find(calendar => calendar.id === currentCalendarId);
+      document.querySelector(".calendar-workspace")?.style.setProperty("--calendar-accent", activeCalendar?.color || "#2f7fd3");
     }
 
     function renderCalendarList() {
@@ -13837,6 +14018,7 @@
     }
 
     async function addMember() {
+      if (!isCalendarOwner()) return;
       const input = document.getElementById("memberEmail");
       const email = normalizeEmail(input.value);
       const status = document.getElementById("shareStatus");
@@ -14425,6 +14607,10 @@
     }
 
     function openShareDialog() {
+      if (!activeAccount) {
+        showAuthScreen("signin");
+        return;
+      }
       document.getElementById("shareText").value = buildShareText();
       document.getElementById("shareStatus").textContent = "";
       document.getElementById("ownerCommentStatus").textContent = "";
@@ -14500,6 +14686,16 @@
         selectedDate = new Date(currentWeekStart);
       }
       renderAll();
+    }
+
+    function jumpToToday() {
+      selectedDate = new Date();
+      currentWeekStart = getMonday(selectedDate);
+      currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      renderAll();
+      if (currentView === "week" && userSettings.focusFirstEvent) {
+        requestAnimationFrame(scrollWeekToFirstActivity);
+      }
     }
 
     document.querySelectorAll("[data-auth-view]").forEach(button => {
@@ -14865,6 +15061,8 @@
     document.getElementById("nextWeek").addEventListener("click", () => {
       navigateCalendar(1);
     });
+    document.getElementById("jumpToday").addEventListener("click", jumpToToday);
+    window.setInterval(updateCurrentTimeMarkers, 60000);
 
     form.addEventListener("submit", event => {
       event.preventDefault();
