@@ -1465,7 +1465,7 @@
     .calendar-search {
       min-width: 0;
       display: grid;
-      grid-template-columns: 32px minmax(0, 1fr) 32px;
+      grid-template-columns: auto minmax(0, 1fr) 32px;
       align-items: center;
       gap: 2px;
       padding: 0 5px;
@@ -1483,6 +1483,17 @@
     .calendar-search-icon {
       font-size: 17px;
       text-align: center;
+    }
+
+    .calendar-search-label {
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:0 7px;
+      color:#315a76;
+      font-size:12px;
+      font-weight:900;
+      white-space:nowrap;
     }
 
     .calendar-search input {
@@ -1509,6 +1520,11 @@
     .clear-search:hover {
       color: #1f477f;
       background: #eef5ff;
+    }
+
+    @media (max-width: 560px) {
+      .calendar-search-label > span:last-child { display:none; }
+      .calendar-search-label { padding-inline:6px; }
     }
 
     .overview-stats {
@@ -2960,6 +2976,24 @@
     .reminder-badge { min-width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px; border-radius: 999px; color: #fff; background: #cf3f56; font-size: 11px; font-weight: 900; }
     .insights-dialog { width: min(920px, calc(100% - 24px)); }
     .dashboard-body, .reminders-body { padding: 20px; }
+    .dashboard-greeting { margin: 0 0 16px; color: var(--ink); font-size: 22px; font-weight: 900; letter-spacing: -.02em; }
+    .dashboard-overview-grid { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr); gap:16px; margin-bottom:20px; }
+    .dashboard-overview-grid .dashboard-section { padding:16px; border:1px solid var(--line); border-radius:12px; background:var(--panel); }
+    .dashboard-section-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+    .dashboard-section-heading .dashboard-section-note { margin-bottom:0; }
+    .map-dialog { width:min(680px,calc(100% - 24px)); }
+    .map-body { padding:20px; }
+    .map-search-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; margin-top:16px; }
+    .map-search-row input { min-width:0; min-height:42px; padding:0 12px; border:1px solid var(--line); border-radius:9px; color:var(--ink); background:var(--panel); font:inherit; }
+    .map-category-row { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0; }
+    .map-category { min-height:36px; padding:0 12px; border:1px solid var(--line); border-radius:999px; color:var(--ink); background:var(--panel); font-size:13px; font-weight:800; }
+    .map-category:hover, .map-category.is-selected { border-color:var(--blue-line); color:#174f73; background:var(--blue-soft); }
+    .map-result-card { display:grid; grid-template-columns:42px minmax(0,1fr) auto; align-items:center; gap:12px; padding:16px; border:1px solid var(--line); border-radius:12px; background:var(--panel); }
+    .map-result-icon { display:grid; width:38px; height:38px; place-items:center; border-radius:12px; color:#fff; background:var(--blue); font-size:22px; }
+    .map-result-card strong { display:block; color:var(--ink); font-size:15px; }
+    .map-result-card p { margin:4px 0 0; color:var(--muted); font-size:12px; line-height:1.4; }
+    html.dark-mode .map-category:hover, html.dark-mode .map-category.is-selected { color:#b8dbff; background:#213541; }
+    @media (max-width:700px) { .dashboard-overview-grid { grid-template-columns:1fr; } .dashboard-section-heading { flex-direction:column; } .map-result-card { grid-template-columns:36px minmax(0,1fr); } .map-result-card .small-btn { grid-column:2; justify-self:start; } }
     .dashboard-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
     .dashboard-stat { min-width: 0; padding: 18px; border-right: 1px solid var(--line); background: var(--panel); }
     .dashboard-stat:last-child { border-right: 0; }
@@ -6636,13 +6670,14 @@
     .welcome-about-section.motion-ready .welcome-about-point {
       opacity: 0;
       transform: translateY(14px);
+      transition: opacity .55s ease, transform .55s ease, box-shadow .2s ease, border-color .2s ease;
+      will-change: opacity, transform;
     }
 
     .welcome-about-section.motion-ready.is-visible .welcome-about-copy,
     .welcome-about-section.motion-ready.is-visible .welcome-about-point {
       opacity: 1;
       transform: translateY(0);
-      transition: opacity .55s ease, transform .55s ease, box-shadow .2s ease, border-color .2s ease;
     }
 
     .welcome-about-section.motion-ready.is-visible .welcome-about-point:nth-child(2) { transition-delay: .08s; }
@@ -7295,6 +7330,1509 @@
       .agenda-day-heading .day-event-count { grid-column: 2; }
     }
   </style>
+  <style>
+    /* Final visual polish: clearer hierarchy, softer surfaces, and consistent interaction feedback. */
+    :root {
+      --shadow-card: 0 12px 30px rgba(31, 49, 86, .08);
+      --shadow-hover: 0 18px 38px rgba(31, 49, 86, .14);
+      --radius-card: 16px;
+      --radius-control: 11px;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 8% 0%, rgba(255, 224, 133, .24), transparent 24rem),
+        radial-gradient(circle at 96% 8%, rgba(105, 177, 230, .18), transparent 22rem),
+        linear-gradient(180deg, #f8fbfd 0%, #f2f6fa 100%);
+    }
+
+    .app {
+      width: min(1440px, calc(100% - 48px));
+      padding-top: 28px;
+      padding-bottom: 54px;
+    }
+
+    .account-bar {
+      min-height: 58px;
+      padding: 8px 12px 8px 16px;
+      border: 1px solid rgba(183, 202, 220, .75);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, .78);
+      box-shadow: 0 8px 22px rgba(31, 49, 86, .06);
+      backdrop-filter: blur(14px);
+    }
+
+    .topbar > .panel,
+    .panel,
+    .goal,
+    .schedule-shell,
+    .month-view,
+    .calendar-empty-state,
+    .search-empty-state {
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+    }
+
+    .topbar > .panel {
+      border-color: rgba(183, 202, 220, .82);
+      background: rgba(255, 255, 255, .9);
+    }
+
+    .toolbar {
+      padding: 13px;
+      border-radius: var(--radius-card);
+      border-color: rgba(183, 202, 220, .86);
+      background: rgba(255, 255, 255, .88);
+      box-shadow: 0 12px 28px rgba(31, 49, 86, .08);
+      backdrop-filter: blur(12px);
+    }
+
+    .calendar-search,
+    .calendar-workspace select,
+    .week-controls button,
+    .schedule-actions > button,
+    .schedule-actions > details,
+    .view-switch,
+    .event-filter,
+    .calendar-zoom {
+      border-radius: var(--radius-control);
+    }
+
+    .schedule-overview {
+      padding: 12px 0;
+    }
+
+    .schedule-shell,
+    .month-view {
+      overflow: auto;
+      border-color: rgba(183, 202, 220, .9);
+      box-shadow: 0 18px 42px rgba(31, 49, 86, .1);
+    }
+
+    .time-head,
+    .day-head {
+      min-height: 78px;
+      background: linear-gradient(180deg, #fafdff 0%, #eef6fc 100%);
+    }
+
+    .day-head.blue { background: linear-gradient(180deg, #e8f3ff 0%, #dcecff 100%); }
+    .day-head.green { background: linear-gradient(180deg, #f1f9e8 0%, #e8f3dd 100%); }
+    .day-head { cursor: pointer; transition: filter .18s ease, box-shadow .18s ease; }
+    .day-head:hover { filter: brightness(.98); box-shadow: inset 0 -3px 0 rgba(47,127,211,.34); }
+    .day-head:focus-visible { outline: 3px solid rgba(47,127,211,.42); outline-offset: -3px; }
+    .event-visual-options { margin:0 0 16px; padding:14px; border:1px solid var(--line); border-radius:14px; background:color-mix(in srgb, var(--panel) 88%, var(--blue-soft)); }
+    .event-visual-options legend { padding:0 5px; color:var(--ink); font-size:12px; font-weight:900; }
+    .event-color-options { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+    .event-color-swatch { width:28px; height:28px; padding:0; border:4px solid transparent; border-radius:50%; background:var(--swatch); box-shadow:0 0 0 1px rgba(27,49,70,.16); cursor:pointer; transition:transform .16s ease, box-shadow .16s ease; }
+    .event-color-swatch:hover { transform:scale(1.1); }
+    .event-color-swatch.is-selected { box-shadow:0 0 0 3px var(--panel), 0 0 0 5px var(--swatch); transform:scale(1.06); }
+    .event-attendee-options { display:flex; flex-wrap:wrap; gap:8px; }
+    .event-attendee-option { display:inline-flex; align-items:center; gap:7px; min-height:38px; padding:5px 10px 5px 7px; border:1px solid var(--line); border-radius:999px; color:var(--muted); background:var(--panel); font-size:12px; font-weight:800; cursor:pointer; transition:border-color .16s ease, background .16s ease, color .16s ease; }
+    .event-attendee-option input { position:absolute; opacity:0; pointer-events:none; }
+    .event-attendee-option.is-selected { border-color:var(--blue-line); color:var(--ink); background:var(--blue-soft); }
+    .event-attendee-avatar { display:grid; place-items:center; width:27px; height:27px; border-radius:50%; background:#f6a33b; font-size:16px; }
+    html.dark-mode .event-visual-options { background:#1c303d; }
+    html.dark-mode .event-attendee-option { background:#172630; }
+
+    .event {
+      border-radius: 13px;
+      box-shadow: 0 10px 22px rgba(41, 70, 110, .14);
+      transition: transform .18s ease, box-shadow .18s ease, outline-color .18s ease;
+    }
+
+    .event:hover {
+      transform: translateY(-2px) scale(1.008);
+      box-shadow: 0 16px 30px rgba(41, 70, 110, .2);
+    }
+
+    .event.overlap-offset {
+      grid-template-columns: 1fr;
+      align-content: start;
+      gap: 5px;
+      padding: 9px 10px;
+    }
+
+    .event.overlap-offset .event-icon {
+      display: none;
+    }
+
+    .event.overlap-offset .event-time {
+      width: max-content;
+      max-width: 100%;
+      padding: 3px 7px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .58);
+      border-radius: 999px;
+      color: inherit;
+      background: rgba(255, 255, 255, .62);
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.2;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .event.overlap-offset .event-title {
+      font-size: clamp(12px, 1.15vw, 16px);
+      line-height: 1.15;
+    }
+
+    .event.overlap-offset .event-child,
+    .event.overlap-offset .event-detail {
+      font-size: 11px;
+      line-height: 1.2;
+    }
+
+    .month-event,
+    .all-day-event,
+    .today-event,
+    .agenda-item,
+    .goal,
+    .panel {
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .month-event:hover,
+    .all-day-event:hover,
+    .today-event:hover,
+    .agenda-item:hover,
+    .goal:hover,
+    .panel:hover {
+      border-color: #a8c7e2;
+      box-shadow: var(--shadow-hover);
+    }
+
+    .goal:hover,
+    .panel:hover {
+      transform: translateY(-2px);
+    }
+
+    .primary-btn,
+    .ghost-btn,
+    .danger-btn,
+    .small-btn,
+    .settings-btn,
+    .logout-btn,
+    .auth-entry-btn,
+    .icon-btn,
+    .view-option,
+    .language-option,
+    .event-filter-option {
+      transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease, border-color .16s ease;
+    }
+
+    .primary-btn:hover:not(:disabled),
+    .ghost-btn:hover:not(:disabled),
+    .danger-btn:hover:not(:disabled),
+    .small-btn:hover:not(:disabled),
+    .settings-btn:hover:not(:disabled),
+    .logout-btn:hover:not(:disabled),
+    .auth-entry-btn:hover:not(:disabled),
+    .icon-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(31, 71, 127, .14);
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    summary:focus-visible {
+      outline: 3px solid rgba(47, 127, 211, .34);
+      outline-offset: 2px;
+    }
+
+    dialog {
+      border: 1px solid rgba(183, 202, 220, .95);
+      border-radius: 20px;
+      box-shadow: 0 28px 80px rgba(16, 39, 67, .24);
+    }
+
+    dialog::backdrop {
+      background: rgba(15, 35, 53, .48);
+      backdrop-filter: blur(5px);
+    }
+
+    .appearance-dialog {
+      width: min(980px, calc(100% - 28px));
+      padding: 0;
+      overflow: hidden;
+      background: #edf3fc;
+    }
+
+    .appearance-dialog-body {
+      padding: 54px 48px 34px;
+      text-align: center;
+    }
+
+    .appearance-dialog-heading h2 {
+      max-width: 760px;
+      margin: 0 auto;
+      color: #3f444b;
+      font-size: clamp(30px, 4vw, 44px);
+      font-weight: 500;
+      letter-spacing: -.03em;
+      line-height: 1.12;
+    }
+
+    .appearance-dialog-heading p:last-child {
+      margin: 22px 0 0;
+      color: #4d5158;
+      font-size: clamp(18px, 2.2vw, 27px);
+      line-height: 1.35;
+    }
+
+    .appearance-dialog-kicker {
+      margin: 0 0 14px;
+      color: #176fc1;
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .appearance-choice-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 28px;
+      margin: 48px auto 34px;
+      max-width: 860px;
+    }
+
+    .appearance-choice {
+      display: grid;
+      gap: 14px;
+      justify-items: center;
+      padding: 14px;
+      border: 2px solid transparent;
+      border-radius: 24px;
+      color: #272b31;
+      background: transparent;
+      text-align: center;
+      transition: transform .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .appearance-choice:hover {
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, .5);
+    }
+
+    .appearance-choice.is-selected {
+      border-color: #1474c8;
+      background: rgba(213, 229, 255, .76);
+      box-shadow: 0 10px 26px rgba(37, 101, 175, .12);
+    }
+
+    .appearance-preview-card {
+      position: relative;
+      display: grid;
+      align-content: start;
+      gap: 14px;
+      width: min(100%, 250px);
+      min-height: 178px;
+      padding: 25px 25px 20px;
+      border-radius: 28px;
+      box-shadow: 0 6px 14px rgba(31, 49, 86, .12);
+      text-align: left;
+    }
+
+    .appearance-preview-light,
+    .appearance-preview-device {
+      color: #24282d;
+      background: #f7f9fc;
+    }
+
+    .appearance-preview-dark {
+      color: #f3f6fb;
+      background: #28292b;
+    }
+
+    .appearance-preview-device {
+      background: linear-gradient(90deg, #f7f9fc 0 50%, #28292b 50% 100%);
+    }
+
+    .appearance-preview-date {
+      display: grid;
+      place-items: center;
+      width: 33px;
+      height: 33px;
+      border-radius: 6px;
+      color: #fff;
+      background: #3988ed;
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .appearance-preview-control {
+      display: block;
+      padding: 13px 14px;
+      border-radius: 18px;
+      color: currentColor;
+      background: rgba(255,255,255,.82);
+      box-shadow: 0 3px 8px rgba(0,0,0,.14);
+      font-size: 21px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .appearance-preview-dark .appearance-preview-control {
+      background: rgba(0,0,0,.2);
+    }
+
+    .appearance-preview-device .appearance-preview-control {
+      background: linear-gradient(90deg, rgba(255,255,255,.9) 0 50%, rgba(0,0,0,.18) 50% 100%);
+    }
+
+    .appearance-preview-lines {
+      display: grid;
+      gap: 9px;
+      padding: 0 2px;
+    }
+
+    .appearance-preview-lines i {
+      display: block;
+      height: 3px;
+      border-radius: 999px;
+      background: currentColor;
+      opacity: .9;
+    }
+
+    .appearance-choice-label {
+      position: relative;
+      padding-left: 32px;
+      font-size: 22px;
+      font-weight: 500;
+    }
+
+    .appearance-choice-label::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 22px;
+      height: 22px;
+      border: 3px solid #51575c;
+      border-radius: 50%;
+      transform: translateY(-50%);
+    }
+
+    .appearance-choice.is-selected .appearance-choice-label::before {
+      border-color: #0d6fb9;
+      box-shadow: inset 0 0 0 5px #edf3fc, inset 0 0 0 10px #0d6fb9;
+    }
+
+    .appearance-dialog-done {
+      min-width: 138px;
+      min-height: 58px;
+      padding: 0 25px;
+      border-radius: 999px;
+      color: #fff;
+      background: #1262d4;
+      font-size: 18px;
+      font-weight: 750;
+      box-shadow: 0 8px 18px rgba(18, 98, 212, .22);
+    }
+
+    .appearance-dialog-done:hover {
+      background: #0b51b7;
+      transform: translateY(-1px);
+    }
+
+    /* Keep child filters useful without letting them compete with the calendar. */
+    #kidFilters {
+      min-height: 92px;
+      padding: 10px 14px;
+      gap: 7px;
+    }
+
+    #kidFilters .kids-panel-title {
+      font-size: 11px;
+      letter-spacing: .1em;
+    }
+
+    #kidFilters .kids-header {
+      min-height: 24px;
+    }
+
+    #kidFilters .kids-header .small-btn {
+      min-height: 28px;
+      padding: 0 9px;
+      font-size: 12px;
+    }
+
+    #kidFilters .kids-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px 8px;
+    }
+
+    #kidFilters .kid-toggle {
+      flex: 1 1 120px;
+      min-width: 0;
+      min-height: 34px;
+      gap: 7px;
+      padding: 3px 5px;
+      border-radius: 9px;
+      font-size: 15px;
+    }
+
+    #kidFilters .kid-avatar {
+      width: 29px;
+      height: 29px;
+      font-size: 17px;
+    }
+
+    #kidFilters .kid-toggle-copy small {
+      font-size: 10px;
+    }
+
+    .time-zone-label {
+      color: #4b5968;
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: .02em;
+    }
+
+    .all-day-event.is-built-in-holiday,
+    .month-event.is-built-in-holiday {
+      --event-bg: #d9f3e2;
+      --event-line: #138548;
+      --event-ink: #0b6335;
+      border-color: var(--event-line);
+      background: var(--event-bg);
+      color: var(--event-ink);
+    }
+
+    .all-day-event.is-built-in-holiday {
+      box-shadow: 0 3px 8px rgba(19, 133, 72, .16);
+    }
+
+    .day-column {
+      cursor: crosshair;
+    }
+
+    .day-column .event,
+    .day-column .stack-switcher {
+      cursor: pointer;
+    }
+
+    .modal-header {
+      border-bottom-color: rgba(183, 202, 220, .75);
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,251,253,.96));
+    }
+
+    .welcome-hero,
+    .welcome-preview-section,
+    .welcome-benefits,
+    .welcome-how-grid,
+    .welcome-about-section {
+      border-color: #cbd9e4;
+    }
+
+    @media (max-width: 740px) {
+      .app { width: calc(100% - 24px); padding-top: 14px; }
+      .account-bar { border-radius: 14px; padding: 8px 10px; }
+      .toolbar { padding: 10px; border-radius: 14px; }
+      .topbar > .panel { border-radius: 14px; }
+      .schedule-shell, .month-view { border-radius: 14px; }
+      dialog { border-radius: 16px; }
+      #kidFilters { min-height: 78px; padding: 8px 11px; }
+      #kidFilters .kids-list { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; }
+      #kidFilters .kid-toggle { flex: 0 0 auto; min-height: 32px; }
+      .appearance-dialog-body { padding: 34px 18px 24px; }
+      .appearance-dialog-heading h2 { font-size: 30px; }
+      .appearance-dialog-heading p:last-child { margin-top: 14px; font-size: 18px; }
+      .appearance-choice-grid { gap: 8px; margin: 30px auto 26px; }
+      .appearance-choice { padding: 6px; border-radius: 16px; }
+      .appearance-preview-card { min-height: 120px; padding: 14px; border-radius: 18px; gap: 8px; }
+      .appearance-preview-date { width: 25px; height: 25px; font-size: 13px; }
+      .appearance-preview-control { padding: 9px 8px; border-radius: 12px; font-size: 13px; }
+      .appearance-preview-lines { gap: 6px; }
+      .appearance-preview-lines i { height: 2px; }
+      .appearance-choice-label { padding-left: 22px; font-size: 15px; }
+      .appearance-choice-label::before { width: 15px; height: 15px; border-width: 2px; }
+      .appearance-choice.is-selected .appearance-choice-label::before { box-shadow: inset 0 0 0 3px #edf3fc, inset 0 0 0 7px #0d6fb9; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .event,
+      .month-event,
+      .all-day-event,
+      .today-event,
+      .agenda-item,
+      .goal,
+      .panel,
+      .primary-btn,
+      .ghost-btn,
+      .danger-btn,
+      .small-btn,
+      .settings-btn,
+      .logout-btn,
+      .auth-entry-btn,
+      .icon-btn { transition: none; }
+      .event:hover, .goal:hover, .panel:hover { transform: none; }
+    }
+  </style>
+  <style>
+    .calendar-stage { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 14px; align-items: start; min-width: 0; }
+    .calendar-stage-main { grid-column: 1; grid-row: 1; min-width: 0; }
+    .mini-calendar { grid-column: 2; grid-row: 1; position: sticky; top: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); box-shadow: 0 8px 22px rgba(27, 53, 74, .07); }
+    .calendar-sidebar-heading { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; color: var(--ink); font-size: 21px; font-weight: 950; }
+    .calendar-sidebar-heading span { color: var(--blue); font-size: 22px; }
+    .mini-calendar-header { display: grid; grid-template-columns: minmax(0, 1fr) 40px 40px; gap: 4px; align-items: center; margin-bottom: 10px; }
+    .mini-calendar-title { min-width: 0; margin: 0; color: var(--ink); font-size: 17px; font-weight: 900; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mini-calendar-nav { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 1px solid transparent; border-radius: 50%; color: var(--ink); background: transparent; font: inherit; font-size: 26px; line-height: 1; cursor: pointer; }
+    .mini-calendar-nav:hover, .mini-calendar-nav:focus-visible { border-color: var(--blue-line); background: var(--blue-soft); }
+    .mini-calendar-weekdays, .mini-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+    .mini-calendar-weekdays { margin-bottom: 4px; color: var(--muted); font-size: 11px; font-weight: 900; text-align: center; }
+    .mini-calendar-weekdays span { display: grid; place-items: center; min-height: 28px; }
+    .mini-calendar-day { display: grid; place-items: center; justify-self: center; width: 100%; max-width: 34px; aspect-ratio: 1; padding: 0; border: 2px solid transparent; border-radius: 50%; color: var(--ink); background: transparent; font: inherit; font-size: 13px; font-weight: 750; cursor: pointer; }
+    .mini-calendar-day:hover, .mini-calendar-day:focus-visible { background: var(--blue-soft); }
+    .mini-calendar-day.is-outside { color: var(--muted); }
+    .mini-calendar-day.is-selected { border-color: #4d8fe4; color: #174f91; background: #e9f2ff; }
+    .mini-calendar-day.is-today { border-color: #123f7a; color: #fff; background: #123f7a; }
+    .mini-calendar-day.is-today.is-selected { box-shadow: 0 0 0 3px var(--panel), 0 0 0 5px #4d8fe4; }
+    .mini-calendar-tools { display: grid; gap: 7px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .mini-calendar-tools h3 { margin: 0 0 3px; color: var(--ink); font-size: 14px; font-weight: 900; }
+    .mini-calendar-tool { display: grid; grid-template-columns: 32px minmax(0, 1fr) 16px; gap: 8px; align-items: center; width: 100%; min-height: 44px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: var(--panel); font: inherit; font-size: 13px; font-weight: 850; text-align: left; cursor: pointer; }
+    .mini-calendar-tool:hover, .mini-calendar-tool:focus-visible { border-color: var(--blue-line); background: var(--blue-soft); }
+    .mini-calendar-tool-icon { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 7px; color: #fff; background: var(--blue); font-size: 16px; }
+    .mini-calendar-tool-chevron { color: var(--muted); font-size: 20px; }
+    .mini-calendar-tool.is-primary { border-color: var(--blue); color: #fff; background: var(--blue); }
+    .mini-calendar-tool.is-primary .mini-calendar-tool-icon { background: rgba(255, 255, 255, .18); }
+    .mini-calendar-tool.is-primary .mini-calendar-tool-chevron { color: #fff; }
+    .mini-calendar-tool.is-primary:hover, .mini-calendar-tool.is-primary:focus-visible { background: #1f6898; }
+    html.dark-mode .mini-calendar-day.is-selected { color: #dbeaff; background: #183754; }
+    html.dark-mode .mini-calendar-day.is-today { color: #fff; background: #2f73c8; border-color: #2f73c8; }
+
+    @media (max-width: 900px) {
+      .calendar-stage { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+      .calendar-stage-main { grid-column: 1; grid-row: 2; }
+      .mini-calendar { grid-column: 1; grid-row: 1; position: static; width: 100%; box-sizing: border-box; }
+      .mini-calendar-day { max-width: 40px; }
+      .mini-calendar-tools { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .mini-calendar-tools h3 { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 560px) {
+      .mini-calendar { padding: 10px; }
+      .mini-calendar-header { margin-bottom: 6px; }
+      .mini-calendar-title { font-size: 16px; }
+      .mini-calendar-weekdays span { min-height: 24px; }
+      .mini-calendar-day { max-width: 38px; font-size: 12px; }
+      .calendar-sidebar-heading { font-size: 18px; }
+      .mini-calendar-tools { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
+      .mini-calendar-tools h3 { display: none; }
+      .mini-calendar-tool { display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; min-height: 46px; padding: 3px; }
+      .mini-calendar-tool > span:nth-child(2), .mini-calendar-tool-chevron { display: none; }
+      .mini-calendar-tool-icon { width: 36px; height: 36px; }
+    }
+
+    @media (max-width: 390px) {
+      .mini-calendar-tools { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    }
+  </style>
+    <style>
+      /* Branded calendar bar. The original navigation actions live in its menu. */
+      #appShell { display:block; }
+      #appShell > .app-sidebar,
+      #appShell > :not(.app-sidebar) { grid-column:auto; grid-row:auto; }
+      .app-sidebar { position:relative; z-index:45; display:flex; align-items:center; gap:7px; min-height:68px; margin-bottom:12px; padding:9px 12px; border:1px solid rgba(183,202,220,.9); border-radius:14px; color:#172a3a; background:rgba(255,255,255,.96); box-shadow:0 10px 28px rgba(27,53,74,.08); }
+      .sidebar-menu { position:relative; flex:0 0 auto; }
+      .sidebar-menu > summary { list-style:none; }
+      .sidebar-menu > summary::-webkit-details-marker { display:none; }
+      .sidebar-icon-button { position:relative; display:inline-grid; flex:0 0 44px; width:44px; height:44px; min-width:44px; min-height:44px; padding:0; place-items:center; border:1px solid transparent; border-radius:50%; color:#405463; background:transparent; font-size:23px; font-weight:850; line-height:1; cursor:pointer; }
+      .sidebar-icon-button:hover,
+      .sidebar-icon-button:focus-visible,
+      .sidebar-menu[open] > summary { border-color:#c6d9e5; color:#174f73; background:#eef5f8; box-shadow:none; transform:none; }
+      .sidebar-menu-glyph { display:grid; gap:4px; width:20px; }
+      .sidebar-menu-glyph i { display:block; width:20px; height:2px; border-radius:999px; background:currentColor; }
+      .sidebar-brand { display:flex; flex:0 0 auto; align-items:center; gap:10px; min-width:174px; margin-right:10px; padding:0; border:0; }
+      .sidebar-brand-mark { position:relative; display:grid; grid-template-columns:repeat(2,7px); grid-auto-rows:7px; gap:4px; width:40px; height:40px; padding:14px 9px 7px; place-items:stretch; border-radius:9px; color:#fff; background:#1f6898; box-shadow:0 5px 12px rgba(31,104,152,.24); font-size:0; }
+      .sidebar-brand-mark::before { content:""; position:absolute; top:8px; left:8px; right:8px; height:2px; border-radius:999px; background:rgba(255,255,255,.9); }
+      .sidebar-brand-mark i { display:block; border-radius:2px; background:currentColor; opacity:.95; }
+      .sidebar-brand-mark i:nth-child(2) { color:#ffcf69; }
+      .sidebar-brand-mark i:nth-child(3) { color:#82d091; }
+      .sidebar-brand-mark i:nth-child(4) { color:#f27e87; }
+      .sidebar-brand-copy { display:grid; min-width:0; }
+      .sidebar-brand-copy strong { color:#172a3a; font-size:24px; line-height:1; letter-spacing:0; white-space:nowrap; }
+      .sidebar-brand-copy strong span { color:#2f7654; }
+      .sidebar-brand-copy small { margin-top:4px; color:#6d7e8b; font-size:9px; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
+      .sidebar-date-controls { display:flex; align-items:center; gap:4px; min-width:0; }
+      .sidebar-today { min-height:44px; padding:0 19px; border:1px solid #b7c8d4; border-radius:9px; color:#263b4c; background:#fff; font-size:14px; font-weight:800; }
+      .sidebar-today:hover,
+      .sidebar-today:focus-visible { border-color:#7f9fb3; background:#f6f9fa; }
+      .sidebar-period-button { position:relative; display:inline-flex; align-items:center; gap:8px; min-width:190px; min-height:44px; margin-left:3px; padding:0 12px; border:1px solid transparent; border-radius:8px; color:#172a3a; background:transparent; font-size:20px; font-weight:700; text-align:left; }
+      .sidebar-period-button:hover,
+      .sidebar-period-button:focus-visible { border-color:#c6d9e5; background:#f2f7f9; }
+      .sidebar-period-button .week-label { flex:1 1 auto; min-width:0; overflow:hidden; font:inherit; text-overflow:ellipsis; white-space:nowrap; }
+      .sidebar-period-chevron { color:#667887; font-size:12px; }
+      .sidebar-date-picker { position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
+      .sidebar-spacer { flex:1 1 auto; min-width:8px; }
+      .sidebar-tools { display:flex; align-items:center; gap:2px; }
+      .sidebar-search-glyph { position:relative; width:18px; height:18px; border:3px solid currentColor; border-radius:50%; }
+      .sidebar-search-glyph::after { content:""; position:absolute; right:-7px; bottom:-4px; width:8px; height:3px; border-radius:999px; background:currentColor; transform:rotate(45deg); transform-origin:left center; }
+      .sidebar-nav { position:absolute; top:calc(100% + 8px); left:0; z-index:80; display:grid; gap:4px; width:232px; margin:0; padding:8px; border:1px solid var(--line); border-radius:10px; background:var(--panel); box-shadow:0 20px 46px rgba(19,47,67,.2); }
+      .sidebar-nav-item { display:grid; grid-template-columns:30px minmax(0,1fr); align-items:center; gap:10px; min-height:44px; padding:0 12px; border:0; border-radius:7px; color:var(--ink); background:transparent; font-size:14px; font-weight:800; text-align:left; }
+      .sidebar-nav-item:hover,
+      .sidebar-nav-item:focus-visible { color:var(--ink); background:#edf4f7; transform:none; }
+      .sidebar-nav-item.is-active { color:#174f73; background:#e6f1f5; box-shadow:inset 3px 0 0 #1f6898; }
+      .sidebar-nav-icon { display:grid; place-items:center; width:28px; height:28px; border:0; border-radius:7px; color:#2b6e90; background:#edf4f7; font-size:16px; font-weight:900; }
+      .sidebar-nav-item.is-active .sidebar-nav-icon { color:#fff; background:#1f6898; }
+      .sidebar-calendar-switcher { margin:8px 0 2px; padding-top:8px; border-top:1px solid var(--line); }
+      .sidebar-calendar-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:3px 8px 6px; color:var(--muted); font-size:11px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; }
+      .sidebar-calendar-heading button { width:24px; min-height:24px; padding:0; border:0; border-radius:6px; color:var(--blue); background:transparent; font-size:20px; line-height:1; }
+      .sidebar-calendar-heading button:hover { background:var(--blue-soft); transform:none; box-shadow:none; }
+      .sidebar-calendar-group { display:grid; gap:2px; }
+      .sidebar-calendar-row { display:grid; grid-template-columns:25px minmax(0,1fr) 20px; align-items:center; gap:8px; width:100%; min-height:36px; padding:0 7px; border:0; border-radius:8px; color:var(--ink); background:transparent; text-align:left; }
+      .sidebar-calendar-row:hover, .sidebar-calendar-row.is-selected { background:#eaf2f8; transform:none; box-shadow:none; }
+      .sidebar-calendar-check { display:grid; width:22px; height:22px; place-items:center; border-radius:4px; color:#fff; font-size:15px; font-weight:950; }
+      .sidebar-calendar-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; font-weight:750; }
+      .sidebar-calendar-more { color:var(--muted); font-size:18px; font-weight:900; opacity:0; }
+      .sidebar-calendar-row:hover .sidebar-calendar-more, .sidebar-calendar-row.is-selected .sidebar-calendar-more { opacity:1; }
+      html.dark-mode .sidebar-calendar-row:hover, html.dark-mode .sidebar-calendar-row.is-selected { background:#213541; }
+      .sidebar-tooltip::after { content:attr(data-tooltip); position:absolute; top:calc(100% + 9px); left:50%; z-index:120; max-width:220px; padding:7px 9px; border-radius:6px; color:#fff; background:#20333f; box-shadow:0 8px 18px rgba(16,37,49,.18); font-size:12px; font-weight:700; line-height:1.2; opacity:0; pointer-events:none; transform:translate(-50%,-3px); transition:opacity .14s ease,transform .14s ease; white-space:nowrap; }
+      .sidebar-tooltip:hover::after,
+      .sidebar-tooltip:focus-visible::after { opacity:1; transform:translate(-50%,0); }
+      .sidebar-menu[open] > summary::after { display:none; }
+      .sidebar-tooltip-left::after { left:0; transform:translate(0,-3px); }
+      .sidebar-tooltip-left:hover::after,
+      .sidebar-tooltip-left:focus-visible::after { transform:translate(0,0); }
+      .sidebar-tooltip-right::after { right:0; left:auto; transform:translate(0,-3px); }
+      .sidebar-tooltip-right:hover::after,
+      .sidebar-tooltip-right:focus-visible::after { transform:translate(0,0); }
+      .sidebar-footer { display:none; }
+      .topbar { display:block; }
+      .topbar > .brand { display:none; }
+      .topbar > .kids-panel { width:100%; }
+      .toolbar-leading { grid-template-columns:minmax(0,1fr) auto; }
+      .app.is-calendar-empty .schedule-overview { display:grid; grid-template-columns:minmax(260px,360px); }
+      .app.is-calendar-empty .schedule-overview .overview-stats,
+      .app.is-calendar-empty .schedule-overview .event-filter { display:none; }
+      .sidebar-help-dialog { width:min(720px,calc(100% - 24px)); max-height:min(760px,calc(100% - 24px)); padding:0; }
+      .sidebar-help-body { padding:20px; }
+      .sidebar-help-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:16px; }
+      .sidebar-help-grid article { padding:14px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
+      .sidebar-help-grid strong { display:block; color:var(--ink); font-size:13px; }
+      .sidebar-help-grid p { margin:6px 0 0; color:var(--muted); font-size:12px; line-height:1.45; }
+      .email-notification-note { display:grid; gap:5px; margin-top:12px; padding:11px 12px; border:1px solid var(--line); border-radius:12px; color:var(--ink); background:var(--panel); font-size:12px; font-weight:850; }
+      .email-notification-note p { margin:0; color:var(--muted); font-size:11px; font-weight:650; line-height:1.45; }
+      .email-notification-note .small-btn { justify-self:start; }
+      html.dark-mode .app-sidebar,
+      html.dark-mode .sidebar-nav { border-color:var(--line); background:#172630; }
+      html.dark-mode .sidebar-brand-copy strong,
+      html.dark-mode .sidebar-icon-button,
+      html.dark-mode .sidebar-period-button { color:var(--ink); }
+      html.dark-mode .sidebar-today { border-color:var(--line); color:var(--ink); background:#1d2b35; }
+      html.dark-mode .sidebar-icon-button:hover,
+      html.dark-mode .sidebar-icon-button:focus-visible,
+      html.dark-mode .sidebar-period-button:hover,
+      html.dark-mode .sidebar-period-button:focus-visible,
+      html.dark-mode .sidebar-nav-item:hover { border-color:var(--line); background:#213541; }
+      @media (max-width:900px) {
+        .app-sidebar { display:grid; grid-template-columns:44px minmax(0,1fr) auto; gap:6px; padding:8px; }
+        .sidebar-menu { grid-column:1; grid-row:1; }
+        .sidebar-brand { grid-column:2; grid-row:1; min-width:0; margin:0; }
+        .sidebar-brand-copy strong { font-size:21px; }
+        .sidebar-brand-copy small { display:none; }
+        .sidebar-tools { grid-column:3; grid-row:1; }
+        .sidebar-spacer { display:none; }
+        .sidebar-date-controls { grid-column:1 / -1; grid-row:2; display:grid; grid-template-columns:auto 44px 44px minmax(0,1fr); gap:5px; width:100%; padding-top:7px; border-top:1px solid var(--soft-line); }
+        .sidebar-period-button { width:100%; min-width:0; margin:0; font-size:16px; }
+        .sidebar-tooltip::after { display:none; }
+        .sidebar-help-grid { grid-template-columns:1fr; }
+        .toolbar-leading { grid-template-columns:minmax(0,1fr) auto; }
+        .calendar-workspace { grid-column:1; width:auto; height:50px; }
+        .toolbar-leading > .language-switch { grid-column:2; width:auto; height:50px; }
+      }
+      @media (max-width:460px) {
+        .sidebar-brand-mark { width:36px; height:36px; padding:13px 8px 6px; }
+        .sidebar-brand-copy strong { font-size:19px; }
+        .sidebar-tools { gap:0; }
+        .sidebar-tools .sidebar-icon-button { width:36px; min-width:36px; height:36px; min-height:36px; }
+        .sidebar-date-controls { grid-template-columns:auto 42px 42px minmax(0,1fr); }
+        .sidebar-today { padding-inline:12px; }
+        .sidebar-period-button { padding-inline:8px; font-size:14px; }
+        .sidebar-nav { position:fixed; top:68px; left:8px; right:8px; width:auto; }
+      }
+      @media (prefers-reduced-motion:reduce) { .sidebar-tooltip::after { transition:none; } }
+    </style>
+    <style>
+      /* Final dark-theme pass. Keep modern calendar surfaces legible when later
+         component styles introduce light backgrounds. */
+      html.dark-mode { color-scheme:dark; }
+      html.dark-mode body,
+      html.dark-mode .app,
+      html.dark-mode .app-sidebar,
+      html.dark-mode .account-bar,
+      html.dark-mode .topbar,
+      html.dark-mode .toolbar,
+      html.dark-mode .calendar-stage,
+      html.dark-mode .calendar-stage-main,
+      html.dark-mode .schedule-overview,
+      html.dark-mode .schedule-shell,
+      html.dark-mode .today-view,
+      html.dark-mode .month-view,
+      html.dark-mode .mini-calendar,
+      html.dark-mode .panel,
+      html.dark-mode dialog {
+        color:var(--ink);
+      }
+
+      html.dark-mode .app-sidebar,
+      html.dark-mode .account-bar,
+      html.dark-mode .toolbar,
+      html.dark-mode .mini-calendar,
+      html.dark-mode .panel,
+      html.dark-mode dialog,
+      html.dark-mode .sidebar-nav,
+      html.dark-mode .more-menu,
+      html.dark-mode .feedback-toast {
+        border-color:var(--line);
+        background:#172630;
+      }
+
+      html.dark-mode .calendar-workspace,
+      html.dark-mode .week-controls,
+      html.dark-mode .calendar-search,
+      html.dark-mode .overview-stat,
+      html.dark-mode .overview-next,
+      html.dark-mode .event-filter,
+      html.dark-mode .view-switch,
+      html.dark-mode .language-switch,
+      html.dark-mode .calendar-zoom,
+      html.dark-mode .more-actions > summary,
+      html.dark-mode .sidebar-today,
+      html.dark-mode .sidebar-period-button,
+      html.dark-mode .mini-calendar-tool,
+      html.dark-mode .settings-group,
+      html.dark-mode .preset-section,
+      html.dark-mode .dashboard-section,
+      html.dark-mode .reminder-item,
+      html.dark-mode .dashboard-event,
+      html.dark-mode .kid-load-item,
+      html.dark-mode .deadline-event,
+      html.dark-mode .busy-day,
+      html.dark-mode .kid-editor-row,
+      html.dark-mode .preset-row,
+      html.dark-mode .calendar-list-row,
+      html.dark-mode .history-item,
+      html.dark-mode .welcome-back-item,
+      html.dark-mode .invitation-card,
+      html.dark-mode .shared-event,
+      html.dark-mode .sidebar-help-grid article,
+      html.dark-mode .calendar-empty-state {
+        border-color:var(--line);
+        color:var(--ink);
+        background:#1d2b35;
+      }
+
+      html.dark-mode .schedule-overview {
+        border-color:var(--line);
+        background:transparent;
+      }
+
+      html.dark-mode .overview-stats,
+      html.dark-mode .event-filters {
+        color:var(--ink);
+      }
+
+      html.dark-mode .conflict-summary {
+        border-color:#754654;
+        color:#ffd5dc;
+        background:#3a2028;
+      }
+
+      html.dark-mode .travel-summary {
+        border-color:#765f35;
+        color:#ffe3aa;
+        background:#362d1e;
+      }
+
+      html.dark-mode .sidebar-brand-copy strong,
+      html.dark-mode .sidebar-period-button,
+      html.dark-mode .sidebar-today,
+      html.dark-mode .sidebar-icon-button,
+      html.dark-mode .sidebar-nav-item,
+      html.dark-mode .calendar-workspace,
+      html.dark-mode .calendar-workspace label,
+      html.dark-mode .week-label,
+      html.dark-mode .calendar-sidebar-heading,
+      html.dark-mode .mini-calendar-title,
+      html.dark-mode .mini-calendar-tools h3,
+      html.dark-mode .mini-calendar-tool,
+      html.dark-mode .panel-title,
+      html.dark-mode .kids-label,
+      html.dark-mode .kid-toggle,
+      html.dark-mode .account-name,
+      html.dark-mode .overview-stat,
+      html.dark-mode .overview-next,
+      html.dark-mode .event-filter,
+      html.dark-mode .more-actions > summary,
+      html.dark-mode .empty-state-title,
+      html.dark-mode .modal-header h2,
+      html.dark-mode .modal-header h3,
+      html.dark-mode legend,
+      html.dark-mode label {
+        color:var(--ink);
+      }
+
+      html.dark-mode .sidebar-brand-copy strong span { color:#82cda2; }
+      html.dark-mode .sidebar-brand-copy small,
+      html.dark-mode .account-family,
+      html.dark-mode .overview-stat span,
+      html.dark-mode .overview-next span,
+      html.dark-mode .mini-calendar-weekdays,
+      html.dark-mode .mini-calendar-day.is-outside,
+      html.dark-mode .mini-calendar-tool-chevron,
+      html.dark-mode .empty-state-copy,
+      html.dark-mode .helper-text,
+      html.dark-mode .field-hint,
+      html.dark-mode .cloud-sync-copy {
+        color:var(--muted);
+      }
+
+      html.dark-mode .calendar-search-label { color:#b9ddf0; }
+
+      html.dark-mode input,
+      html.dark-mode select,
+      html.dark-mode textarea,
+      html.dark-mode .calendar-workspace select {
+        border-color:#496071;
+        color:var(--ink);
+        background:#14212a;
+      }
+
+      html.dark-mode input::placeholder,
+      html.dark-mode textarea::placeholder { color:#91a3af; opacity:1; }
+      html.dark-mode select option { color:var(--ink); background:#18252e; }
+
+      html.dark-mode .settings-btn,
+      html.dark-mode .logout-btn,
+      html.dark-mode .auth-preview-btn,
+      html.dark-mode .close-btn,
+      html.dark-mode .small-btn,
+      html.dark-mode .ghost-btn,
+      html.dark-mode .icon-btn,
+      html.dark-mode .calendar-nav-btn,
+      html.dark-mode .mini-calendar-nav,
+      html.dark-mode .sidebar-today {
+        border-color:#496071;
+        color:var(--ink);
+        background:#20303b;
+      }
+
+      html.dark-mode .settings-btn:hover,
+      html.dark-mode .logout-btn:hover,
+      html.dark-mode .auth-preview-btn:hover,
+      html.dark-mode .close-btn:hover,
+      html.dark-mode .small-btn:hover,
+      html.dark-mode .ghost-btn:hover,
+      html.dark-mode .icon-btn:hover,
+      html.dark-mode .calendar-nav-btn:hover,
+      html.dark-mode .mini-calendar-nav:hover,
+      html.dark-mode .sidebar-today:hover,
+      html.dark-mode .sidebar-icon-button:hover,
+      html.dark-mode .sidebar-period-button:hover,
+      html.dark-mode .sidebar-nav-item:hover,
+      html.dark-mode .mini-calendar-tool:hover {
+        border-color:#658397;
+        color:#fff;
+        background:#294252;
+      }
+
+      html.dark-mode .primary-btn,
+      html.dark-mode .auth-entry-btn,
+      html.dark-mode .auth-submit,
+      html.dark-mode .language-option.is-active,
+      html.dark-mode .view-option.is-active,
+      html.dark-mode .event-filter.is-active,
+      html.dark-mode .mini-calendar-tool.is-primary,
+      html.dark-mode .sidebar-nav-item.is-active {
+        border-color:#3488c5;
+        color:#fff;
+        background:#287fcf;
+      }
+
+      html.dark-mode .mini-calendar-tool.is-primary .mini-calendar-tool-icon,
+      html.dark-mode .sidebar-nav-item.is-active .sidebar-nav-icon { color:#fff; }
+
+      html.dark-mode .sidebar-nav-icon,
+      html.dark-mode .mini-calendar-tool-icon {
+        color:#dff3ff;
+        background:#275b78;
+      }
+
+      html.dark-mode .mini-calendar-day { color:#e9f0f5; }
+      html.dark-mode .mini-calendar-day:hover { color:#fff; background:#294252; }
+      html.dark-mode .mini-calendar-day.is-selected { color:#fff; background:#244866; border-color:#69a8d1; }
+      html.dark-mode .mini-calendar-day.is-today { color:#fff; background:#287fcf; border-color:#70b9ed; }
+
+      html.dark-mode .schedule-shell,
+      html.dark-mode .today-view,
+      html.dark-mode .month-view,
+      html.dark-mode .day-card,
+      html.dark-mode .day-column,
+      html.dark-mode .all-day-cell {
+        border-color:var(--line);
+        background:#15212a;
+      }
+
+      html.dark-mode .day-header,
+      html.dark-mode .time-label,
+      html.dark-mode .all-day-label,
+      html.dark-mode .month-day-number,
+      html.dark-mode .today-heading { color:var(--ink); }
+      html.dark-mode .hour-row,
+      html.dark-mode .day-column,
+      html.dark-mode .day-header,
+      html.dark-mode .all-day-row { border-color:var(--soft-line); }
+
+      /* Event colors are deliberately light so category colors and dark text stay clear. */
+      html.dark-mode .activity-card,
+      html.dark-mode .month-activity,
+      html.dark-mode .today-activity { color:#132332; }
+      html.dark-mode .activity-card *,
+      html.dark-mode .month-activity *,
+      html.dark-mode .today-activity * { color:inherit; }
+
+      html.dark-mode .danger-btn,
+      html.dark-mode .remove-kid {
+        border-color:#8d5360;
+        color:#ffc8d0;
+        background:#3b2229;
+      }
+
+      html.dark-mode .danger-btn:hover,
+      html.dark-mode .remove-kid:hover { border-color:#b86a79; background:#4a2932; }
+
+      html.dark-mode .modal-header,
+      html.dark-mode .modal-footer,
+      html.dark-mode .settings-actions { border-color:var(--line); background:#172630; }
+      html.dark-mode hr { border-color:var(--line); }
+
+      html.dark-mode .appearance-dialog { border-color:#4a6070; background:#172630; }
+      html.dark-mode .appearance-dialog-heading h2 { color:#f3f7fa; letter-spacing:0; }
+      html.dark-mode .appearance-dialog-heading p:last-child { color:#c0cdd5; }
+      html.dark-mode .appearance-dialog-kicker { color:#72bdf0; }
+      html.dark-mode .appearance-choice { color:#e7eef3; }
+      html.dark-mode .appearance-choice:hover { background:#20333f; }
+      html.dark-mode .appearance-choice.is-selected { border-color:#62a9d2; background:#244052; }
+      html.dark-mode .appearance-choice-label::before { border-color:#a9bbc6; }
+      html.dark-mode .appearance-choice.is-selected .appearance-choice-label::before {
+        border-color:#72bdf0;
+        box-shadow:inset 0 0 0 5px #172630,inset 0 0 0 10px #72bdf0;
+      }
+      html.dark-mode .calendar-empty-state h2 { color:#f3f7fa; }
+      html.dark-mode .calendar-empty-state p { color:#b8c6cf; }
+    </style>
+    <style>
+      /* Keep child filters compact so the calendar remains the main workspace. */
+      #kidFilters {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 8px 10px;
+        height: 46px !important;
+        min-height: 46px !important;
+        max-height: 46px !important;
+        padding: 4px 8px;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      #kidFilters .kids-header {
+        display: contents;
+      }
+
+      #kidFilters .kids-panel-title {
+        grid-column: 1;
+        grid-row: 1;
+        margin: 0;
+        font-size: 10px;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      #kidFilters .kids-header .small-btn {
+        grid-column: 3;
+        grid-row: 1;
+        min-height: 30px;
+        padding: 0 10px;
+      }
+
+      #kidFilters .kids-list {
+        grid-column: 2;
+        grid-row: 1;
+        display: flex;
+        min-width: 0;
+        gap: 6px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 0;
+        scrollbar-width: thin;
+      }
+
+      #kidFilters .kid-toggle {
+        flex: 0 0 auto;
+        min-width: 0;
+        min-height: 30px !important;
+        height: 30px;
+        padding: 1px 6px 1px 3px;
+        gap: 5px;
+        border-radius: 8px;
+        font-size: 14px;
+        line-height: 1;
+      }
+
+      #kidFilters .kid-avatar {
+        width: 24px;
+        height: 24px;
+        font-size: 13px;
+      }
+
+      #kidFilters .kids-list { align-items: center; }
+
+      #kidFilters .kid-toggle-copy small {
+        display: none;
+      }
+
+      /* Let the full timeline participate in page scrolling instead of trapping it
+         inside a viewport-sized calendar panel. */
+      .schedule-shell {
+        height: clamp(430px, calc(100vh - 300px), 720px);
+        min-height: 430px;
+        max-height: 720px;
+        overflow: auto;
+        overscroll-behavior: contain;
+      }
+
+      .schedule-grid { grid-template-columns: 106px repeat(7, minmax(220px, 1fr)); }
+      .event { left: 12px; right: 12px; padding: 8px 10px; grid-template-columns: 36px minmax(0, 1fr); gap: 7px; }
+      .event-card-copy { min-width: 0; }
+      .event-time, .event-title, .event-child, .event-detail { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+      .month-view {
+        height: auto;
+        max-height: none;
+      }
+
+      @media (max-width: 560px) {
+        #kidFilters {
+          grid-template-columns: minmax(0, 1fr) auto;
+          padding: 5px 7px;
+        }
+
+        #kidFilters .kids-panel-title {
+          display: none;
+        }
+
+        #kidFilters .kids-list {
+          grid-column: 1;
+        }
+
+        #kidFilters .kids-header .small-btn {
+          grid-column: 2;
+        }
+      }
+    </style>
+    <style>
+      /* Authentication is a focused product moment: calm form, useful context. */
+      .auth-screen {
+        min-height:100dvh;
+        padding:clamp(16px,3vw,42px);
+        color:#f4f8fb;
+        background:#101b27;
+      }
+
+      .auth-shell {
+        display:grid;
+        grid-template-columns:minmax(390px, .82fr) minmax(520px, 1.55fr);
+        width:min(1420px,100%);
+        min-height:min(860px,calc(100dvh - clamp(32px,6vw,84px)));
+        overflow:hidden;
+        border:1px solid #314454;
+        border-radius:20px;
+        background:#142331;
+        box-shadow:0 28px 70px rgba(0,0,0,.3);
+      }
+
+      .auth-form-side {
+        display:flex;
+        flex-direction:column;
+        min-width:0;
+        padding:clamp(28px,4vw,58px);
+      }
+
+      .auth-brand {
+        margin:0 0 clamp(42px,7vh,82px);
+      }
+
+      .auth-logo {
+        display:flex;
+        align-items:center;
+        gap:12px;
+        color:#f4f8fb;
+        font-size:30px;
+      }
+
+      .auth-logo .auth-logo-word { color:#f4f8fb; }
+      .auth-logo .auth-logo-word > span { color:#80d29e; }
+
+      .auth-logo-mark {
+        position:relative;
+        display:grid;
+        grid-template-columns:repeat(2,7px);
+        grid-auto-rows:7px;
+        gap:4px;
+        width:42px;
+        height:42px;
+        padding:15px 10px 7px;
+        border-radius:9px;
+        color:#fff;
+        background:#287fcf;
+        box-shadow:0 8px 18px rgba(40,127,207,.28);
+      }
+
+      .auth-logo-mark::before {
+        content:"";
+        position:absolute;
+        top:9px;
+        left:9px;
+        right:9px;
+        height:2px;
+        border-radius:999px;
+        background:rgba(255,255,255,.9);
+      }
+
+      .auth-logo-mark i { border-radius:2px; background:currentColor; }
+      .auth-logo-mark i:nth-child(2) { color:#ffd064; }
+      .auth-logo-mark i:nth-child(3) { color:#83d39f; }
+      .auth-logo-mark i:nth-child(4) { color:#f58991; }
+
+      .auth-brand .language-switch {
+        width:auto;
+        min-width:104px;
+        align-self:center;
+        border-color:#425769;
+        background:#1b2d3b;
+      }
+
+      .auth-brand .language-option { color:#bac8d2; }
+      .auth-brand .language-option.is-active {
+        border-color:#3488c5;
+        color:#fff;
+        background:#287fcf;
+      }
+
+      .auth-panel {
+        width:min(100%,500px);
+        margin:auto 0;
+        padding:0;
+        border:0;
+        border-radius:0;
+        color:#f4f8fb;
+        background:transparent;
+        box-shadow:none;
+      }
+
+      .auth-eyebrow {
+        margin:0 0 11px;
+        color:#80d29e;
+        font-size:12px;
+        font-weight:900;
+        letter-spacing:.08em;
+        text-transform:uppercase;
+      }
+
+      .auth-screen .auth-panel h1 {
+        color:#f7fafc;
+        font-size:clamp(30px,3vw,43px);
+        letter-spacing:0;
+      }
+
+      .auth-prompt {
+        max-width:440px;
+        margin:12px 0 26px;
+        color:#b9c7d1;
+        font-size:16px;
+      }
+
+      .auth-tabs {
+        margin-bottom:24px;
+        border-color:#3b5061;
+        background:#1b2d3b;
+      }
+
+      .auth-tab { color:#bdc9d2; }
+      .auth-tab.is-active { color:#fff; background:#287fcf; }
+
+      .auth-form { gap:17px; }
+      .auth-form label { color:#eaf0f4; }
+      .auth-form input {
+        min-height:50px;
+        border-color:#465d70;
+        color:#f7fafc;
+        background:#203448;
+      }
+
+      .auth-form input:hover { border-color:#617b8e; }
+      .auth-form input:focus {
+        border-color:#62a9d2;
+        box-shadow:0 0 0 3px rgba(98,169,210,.24);
+      }
+
+      .auth-help,
+      .auth-cloud-note { color:#aebdc8; }
+      .auth-cloud-note { border-color:#354a5a; }
+      .auth-error { color:#ffabb7; }
+      .auth-error.is-success { color:#91d6a8; }
+      .auth-link-btn { color:#86c9ef; }
+      .auth-link-btn:hover { color:#b6e2fa; }
+      .auth-submit {
+        min-height:50px;
+        color:#fff;
+        background:#287fcf;
+        box-shadow:0 10px 22px rgba(31,104,152,.26);
+      }
+      .auth-submit:hover { background:#216eaa; }
+
+      .auth-preview-btn {
+        border-color:#526a7c;
+        color:#eaf3f8;
+        background:#1d3040;
+      }
+      .auth-preview-btn:hover { border-color:#70a0bd; color:#fff; background:#264154; }
+      .auth-back-btn { color:#aabac6; }
+      .auth-back-btn:hover { color:#e3f2fa; }
+
+      .auth-visual {
+        position:relative;
+        min-width:0;
+        min-height:100%;
+        margin:18px 18px 18px 0;
+        overflow:hidden;
+        border-radius:16px;
+        background:#dbe6e7;
+      }
+
+      .auth-visual > img {
+        position:absolute;
+        inset:0;
+        width:100%;
+        height:100%;
+        object-fit:cover;
+        object-position:center;
+      }
+
+      .auth-visual-shade {
+        position:absolute;
+        inset:0;
+        background:linear-gradient(180deg,rgba(10,28,39,.05) 42%,rgba(9,25,36,.84) 100%);
+      }
+
+      .auth-visual-copy {
+        position:absolute;
+        left:clamp(24px,4vw,58px);
+        bottom:clamp(26px,5vw,62px);
+        z-index:2;
+        width:min(480px,calc(100% - 48px));
+        color:#fff;
+        text-shadow:0 2px 14px rgba(0,0,0,.35);
+      }
+
+      .auth-visual-kicker {
+        display:block;
+        margin-bottom:9px;
+        color:#c8f1d6;
+        font-size:12px;
+        font-weight:900;
+        letter-spacing:.08em;
+        text-transform:uppercase;
+      }
+
+      .auth-visual-copy strong {
+        display:block;
+        max-width:430px;
+        font-size:clamp(29px,3.4vw,50px);
+        line-height:1.05;
+      }
+
+      .auth-visual-copy p {
+        max-width:450px;
+        margin:12px 0 0;
+        color:#edf5f8;
+        font-size:clamp(14px,1.25vw,18px);
+        line-height:1.5;
+      }
+
+      .auth-schedule-card {
+        position:absolute;
+        top:clamp(24px,5vw,64px);
+        right:clamp(22px,4vw,54px);
+        z-index:2;
+        width:min(270px,40%);
+        padding:16px;
+        border:1px solid rgba(255,255,255,.72);
+        border-radius:12px;
+        color:#1b3040;
+        background:rgba(255,255,255,.93);
+        box-shadow:0 20px 44px rgba(18,42,56,.24);
+        backdrop-filter:blur(10px);
+      }
+
+      .auth-schedule-heading {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        margin-bottom:11px;
+        font-size:14px;
+        font-weight:900;
+      }
+
+      .auth-schedule-heading b {
+        display:grid;
+        place-items:center;
+        width:25px;
+        height:25px;
+        border-radius:50%;
+        color:#fff;
+        background:#287fcf;
+        font-size:12px;
+      }
+
+      .auth-schedule-item {
+        display:grid;
+        grid-template-columns:48px minmax(0,1fr);
+        gap:9px;
+        align-items:center;
+        min-height:37px;
+        border-top:1px solid #d8e2e8;
+        font-size:12px;
+        font-weight:800;
+      }
+
+      .auth-schedule-item i { font-style:normal; font-size:11px; font-weight:900; }
+      .auth-schedule-item i.blue { color:#236f9e; }
+      .auth-schedule-item i.green { color:#34774d; }
+      .auth-schedule-item i.coral { color:#a64d56; }
+
+      html.dark-mode .auth-screen { background:#0d161e; }
+      html.dark-mode .auth-shell { border-color:#314454; background:#142331; }
+      html.dark-mode .auth-panel { background:transparent; }
+
+      @media (max-width:980px) {
+        .auth-shell { grid-template-columns:minmax(350px,.9fr) minmax(420px,1.1fr); }
+        .auth-form-side { padding:32px; }
+        .auth-brand { margin-bottom:40px; }
+        .auth-schedule-card { width:min(245px,52%); }
+      }
+
+      @media (max-width:760px) {
+        .auth-screen { align-items:start; padding:12px; }
+        .auth-shell { grid-template-columns:minmax(0,1fr); min-height:0; overflow:visible; }
+        .auth-visual {
+          grid-row:1;
+          min-height:260px;
+          margin:12px 12px 0;
+        }
+        .auth-form-side { grid-row:2; padding:28px; }
+        .auth-brand { margin-bottom:34px; }
+        .auth-visual-copy { left:22px; bottom:22px; width:calc(100% - 44px); }
+        .auth-visual-copy strong { font-size:30px; }
+        .auth-visual-copy p { display:none; }
+        .auth-schedule-card { top:18px; right:18px; width:210px; padding:12px; }
+        .auth-schedule-item { min-height:32px; }
+      }
+
+      @media (max-width:480px) {
+        .auth-screen { padding:0; }
+        .auth-shell { border:0; border-radius:0; box-shadow:none; }
+        .auth-visual { min-height:210px; margin:10px 10px 0; border-radius:12px; }
+        .auth-form-side { padding:24px 18px 30px; }
+        .auth-brand { margin-bottom:28px; }
+        .auth-brand .language-switch { width:auto; min-width:104px; }
+        .auth-logo { font-size:25px; }
+        .auth-logo-mark { width:38px; height:38px; padding:13px 8px 7px; }
+        .auth-screen .auth-panel h1 { font-size:30px; }
+        .auth-prompt { margin-bottom:20px; font-size:14px; }
+        .auth-schedule-card { top:12px; right:12px; width:176px; padding:10px; }
+        .auth-schedule-item { grid-template-columns:42px minmax(0,1fr); gap:5px; font-size:10px; }
+        .auth-visual-copy { left:16px; bottom:15px; width:calc(100% - 32px); }
+        .auth-visual-kicker { margin-bottom:5px; font-size:10px; }
+        .auth-visual-copy strong { max-width:160px; font-size:22px; line-height:1.05; }
+      }
+    </style>
+    <style>
+      .calendar-view-menu { position:relative; z-index:30; }
+      .calendar-view-menu > summary { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:42px; padding:0 14px; border:1px solid var(--line); border-radius:999px; color:var(--ink); background:var(--panel); font-size:13px; font-weight:850; cursor:pointer; list-style:none; }
+      .calendar-view-menu > summary::-webkit-details-marker { display:none; }
+      .calendar-view-menu[open] > summary { border-color:var(--blue-line); background:var(--blue-soft); }
+      .calendar-view-menu-panel { position:absolute; top:calc(100% + 8px); right:0; display:grid; min-width:190px; padding:7px; border:1px solid var(--line); border-radius:14px; background:var(--panel); box-shadow:0 18px 36px rgba(21,45,73,.2); }
+      .calendar-view-menu-panel button { display:flex; align-items:center; justify-content:space-between; gap:22px; min-height:38px; padding:0 10px; border:0; border-radius:9px; color:var(--ink); background:transparent; font-size:13px; font-weight:750; text-align:left; cursor:pointer; }
+      .calendar-view-menu-panel button:hover, .calendar-view-menu-panel button:focus-visible { background:var(--blue-soft); outline:none; }
+      .calendar-view-menu-panel kbd { min-width:18px; color:var(--muted); font:inherit; text-align:center; }
+      .calendar-view-menu-divider { height:1px; margin:6px 2px; background:var(--line); }
+      .schedule-shell::-webkit-scrollbar { width:12px; height:12px; }
+      .schedule-shell::-webkit-scrollbar-track { border-radius:999px; background:rgba(214,226,236,.48); }
+      .schedule-shell::-webkit-scrollbar-thumb { border:3px solid transparent; border-radius:999px; background-clip:padding-box; background-color:#8ca6b8; }
+      .schedule-shell { scrollbar-color:#8ca6b8 rgba(214,226,236,.48); scrollbar-width:auto; }
+      @media (max-width:740px) { .calendar-view-menu-panel { right:auto; left:0; } }
+      html.dark-mode .calendar-view-menu-panel { box-shadow:0 18px 36px rgba(0,0,0,.38); }
+    </style>
+    <style>
+      .lists-dialog { width:min(1040px,calc(100% - 24px)); }
+      .lists-body { padding:20px; }
+      .lists-intro { max-width:700px; margin:0 0 18px; color:var(--muted); font-size:14px; line-height:1.55; }
+      .lists-summary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); margin-bottom:22px; border-block:1px solid var(--line); }
+      .lists-summary-item { width:100%; display:grid; grid-template-columns:36px minmax(0,1fr) auto; align-items:center; gap:12px; min-height:72px; padding:12px 16px; border:0; color:var(--ink); background:transparent; text-align:left; }
+      .lists-summary-item + .lists-summary-item { border-left:1px solid var(--line); }
+      .lists-summary-item:hover, .lists-summary-item:focus-visible { background:var(--blue-soft); outline:none; transform:none; }
+      .lists-summary-icon { display:grid; place-items:center; width:36px; height:36px; border-radius:8px; color:#fff; background:#2f7654; font-size:17px; font-weight:900; }
+      .lists-summary-item.is-past .lists-summary-icon { background:#617384; }
+      .lists-summary-copy { min-width:0; }
+      .lists-summary-copy strong { display:block; color:var(--ink); font-size:22px; line-height:1; }
+      .lists-summary-copy span { display:block; margin-top:5px; color:var(--muted); font-size:12px; font-weight:750; }
+      .lists-summary-jump { color:var(--muted); font-size:20px; font-weight:900; }
+      .lists-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; }
+      .activity-list-section { min-width:0; }
+      .activity-list-past { padding-left:22px; border-left:1px solid var(--line); }
+      .activity-list-heading { display:flex; align-items:end; justify-content:space-between; gap:12px; margin-bottom:12px; }
+      .activity-list-heading h3 { margin:2px 0 0; color:var(--ink); font-size:18px; }
+      .activity-list-kicker { margin:0; color:var(--muted); font-size:10px; font-weight:900; text-transform:uppercase; }
+      .activity-list-count { flex:0 0 auto; padding:5px 8px; border-radius:6px; color:#24516e; background:var(--blue-soft); font-size:11px; font-weight:900; }
+      .activity-list { display:grid; gap:8px; max-height:min(58vh,620px); overflow:auto; padding-right:4px; scrollbar-width:thin; }
+      .activity-list-item { --list-accent:#2f7fd3; width:100%; display:grid; grid-template-columns:64px 36px minmax(0,1fr) auto; align-items:center; gap:10px; min-height:72px; padding:10px 12px; border:1px solid var(--line); border-left:4px solid var(--list-accent); border-radius:8px; color:var(--ink); background:var(--panel); text-align:left; }
+      .activity-list-item:hover, .activity-list-item:focus-visible { border-color:var(--list-accent); background:var(--blue-soft); outline:none; transform:none; }
+      .activity-list-date { color:var(--muted); font-size:10px; font-weight:850; line-height:1.2; text-align:center; text-transform:uppercase; }
+      .activity-list-date strong { display:block; margin-top:3px; color:var(--ink); font-size:20px; line-height:1; }
+      .activity-list-icon { font-size:22px; text-align:center; }
+      .activity-list-copy { min-width:0; }
+      .activity-list-copy strong, .activity-list-copy span { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .activity-list-copy strong { color:var(--ink); font-size:13px; }
+      .activity-list-copy span { margin-top:4px; color:var(--muted); font-size:11px; font-weight:700; }
+      .activity-list-time { color:#24516e; font-size:11px; font-weight:900; white-space:nowrap; }
+      .activity-list-past .activity-list-item { opacity:.82; }
+      .activity-list-empty { display:grid; min-height:180px; place-items:center; padding:24px; border:1px dashed var(--line); border-radius:8px; color:var(--muted); font-size:13px; font-weight:750; text-align:center; }
+      html.dark-mode .lists-summary, html.dark-mode .activity-list-past { border-color:var(--line); }
+      html.dark-mode .lists-summary-item:hover, html.dark-mode .lists-summary-item:focus-visible { background:#244052; }
+      html.dark-mode .activity-list-count { color:#cceaff; background:#244052; }
+      html.dark-mode .activity-list-item { border-color:var(--line); color:var(--ink); background:#1d2b35; }
+      html.dark-mode .activity-list-item:hover, html.dark-mode .activity-list-item:focus-visible { border-color:var(--list-accent); background:#244052; }
+      html.dark-mode .activity-list-time { color:#b8dbff; }
+      @media (max-width:760px) {
+        .lists-body { padding:16px; }
+        .lists-grid { grid-template-columns:minmax(0,1fr); gap:24px; }
+        .activity-list-past { padding:22px 0 0; border-top:1px solid var(--line); border-left:0; }
+        .activity-list { max-height:min(52vh,520px); }
+      }
+      @media (max-width:440px) {
+        .lists-summary { grid-template-columns:minmax(0,1fr); }
+        .lists-summary-item + .lists-summary-item { border-top:1px solid var(--line); border-left:0; }
+        .activity-list-item { grid-template-columns:52px 30px minmax(0,1fr); gap:8px; padding:9px 8px; }
+        .activity-list-time { grid-column:3; justify-self:start; }
+      }
+    </style>
 </head>
 <body>
   <section class="welcome-screen" id="welcomeScreen" aria-labelledby="welcomeBrand" hidden>
@@ -7500,15 +9038,15 @@
         <div class="welcome-about-points">
           <div class="welcome-about-point">
             <span>1</span>
-            <div><h3 data-i18n="welcome.aboutOneTitle">Built around families</h3><p data-i18n="welcome.aboutOneBody">Different kids, different colors, one dependable plan.</p></div>
+            <div><h3 data-i18n="welcome.aboutOneTitle">See the week at a glance</h3><p data-i18n="welcome.aboutOneBody">The Dashboard brings upcoming events, holidays, and family updates into one calm view.</p></div>
           </div>
           <div class="welcome-about-point">
             <span>2</span>
-            <div><h3 data-i18n="welcome.aboutTwoTitle">Useful from day one</h3><p data-i18n="welcome.aboutTwoBody">No complicated setup before you can see whether it works for you.</p></div>
+            <div><h3 data-i18n="welcome.aboutTwoTitle">Stay in sync</h3><p data-i18n="welcome.aboutTwoBody">Shared calendars show what changed, who changed it, and what your family needs to know next.</p></div>
           </div>
           <div class="welcome-about-point">
             <span>3</span>
-            <div><h3 data-i18n="welcome.aboutThreeTitle">Ready to grow smarter</h3><p data-i18n="welcome.aboutThreeBody">A strong scheduling foundation for conflict help and family planning suggestions.</p></div>
+            <div><h3 data-i18n="welcome.aboutThreeTitle">Find what’s nearby</h3><p data-i18n="welcome.aboutThreeBody">Use Map to discover restaurants, parks, activities, and other useful places close to your family.</p></div>
           </div>
         </div>
       </div>
@@ -7522,89 +9060,108 @@
 
   <section class="auth-screen" id="authScreen" aria-labelledby="authHeading" hidden>
     <div class="auth-shell">
-      <div class="auth-brand">
-        <div class="auth-logo" aria-label="KidsSync">Kids<span>Sync</span></div>
-        <div class="language-switch" role="group" aria-label="Language" data-i18n-aria="aria.language">
-          <button class="language-option" type="button" data-language="en" aria-pressed="true">EN</button>
-          <button class="language-option" type="button" data-language="zh" aria-pressed="false">中文</button>
+      <div class="auth-form-side">
+        <div class="auth-brand">
+          <div class="auth-logo" aria-label="KidsSync"><span class="auth-logo-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="auth-logo-word">Kids<span>Sync</span></span></div>
+          <div class="language-switch" role="group" aria-label="Language" data-i18n-aria="aria.language">
+            <button class="language-option" type="button" data-language="en" aria-pressed="true">EN</button>
+            <button class="language-option" type="button" data-language="zh" aria-pressed="false">中文</button>
+          </div>
+        </div>
+
+        <div class="auth-panel">
+          <p class="auth-eyebrow" data-i18n="auth.eyebrow">Your family week, in one place</p>
+          <h1 id="authHeading" data-i18n="auth.welcome">Welcome to KidsSync</h1>
+          <p class="auth-prompt" id="authPrompt" data-i18n="auth.prompt">Sign in to your family calendar.</p>
+          <p class="auth-cloud-note" id="inviteAuthNotice" role="status" hidden data-i18n="invitations.signInNotice">Sign in with the invited email address to respond.</p>
+
+          <div class="auth-tabs" role="tablist" aria-label="Account access" data-i18n-aria="auth.access">
+            <button class="auth-tab is-active" type="button" role="tab" data-auth-view="signin" aria-selected="true" data-i18n="auth.signIn">Sign In</button>
+            <button class="auth-tab" type="button" role="tab" data-auth-view="signup" aria-selected="false" data-i18n="auth.createAccount">Create Account</button>
+          </div>
+
+          <form class="auth-form" id="signInForm">
+            <label>
+              <span data-i18n="auth.email">Email</span>
+              <input id="signInEmail" type="email" autocomplete="email" required>
+            </label>
+            <label>
+              <span data-i18n="auth.password">Password</span>
+              <input id="signInPassword" type="password" autocomplete="current-password" required>
+            </label>
+            <button class="auth-link-btn" type="button" id="forgotPassword" data-i18n="auth.forgotPassword">Forgot password?</button>
+            <p class="auth-error" id="signInError" role="alert"></p>
+            <button class="auth-submit" type="submit" data-i18n="auth.submitSignIn">Sign In</button>
+          </form>
+
+          <form class="auth-form" id="passwordResetRequestForm" hidden>
+            <label>
+              <span data-i18n="auth.email">Email</span>
+              <input id="passwordResetEmail" type="email" autocomplete="email" required>
+            </label>
+            <p class="auth-help" data-i18n="auth.resetHelp">We will email you a secure password-reset link.</p>
+            <p class="auth-error" id="passwordResetRequestStatus" role="status"></p>
+            <button class="auth-submit" type="submit" data-i18n="auth.sendReset">Send Reset Link</button>
+            <button class="auth-link-btn" type="button" id="backToSignIn" data-i18n="auth.backToSignIn">Back to sign in</button>
+          </form>
+
+          <form class="auth-form" id="passwordUpdateForm" hidden>
+            <label>
+              <span data-i18n="auth.newPassword">New password</span>
+              <input id="passwordUpdateValue" type="password" autocomplete="new-password" minlength="8" required>
+            </label>
+            <label>
+              <span data-i18n="auth.confirmPassword">Confirm password</span>
+              <input id="passwordUpdateConfirm" type="password" autocomplete="new-password" minlength="8" required>
+            </label>
+            <p class="auth-help" data-i18n="auth.passwordHelp">Use at least 8 characters.</p>
+            <p class="auth-error" id="passwordUpdateStatus" role="alert"></p>
+            <button class="auth-submit" type="submit" data-i18n="auth.updatePassword">Update Password</button>
+          </form>
+
+          <form class="auth-form" id="signUpForm" hidden>
+            <label>
+              <span data-i18n="auth.familyName">Family name</span>
+              <input id="signUpFamily" type="text" autocomplete="organization" maxlength="50" required>
+            </label>
+            <label>
+              <span data-i18n="auth.email">Email</span>
+              <input id="signUpEmail" type="email" autocomplete="email" required>
+            </label>
+            <label>
+              <span data-i18n="auth.password">Password</span>
+              <input id="signUpPassword" type="password" autocomplete="new-password" minlength="8" required>
+            </label>
+            <p class="auth-help" data-i18n="auth.passwordHelp">Use at least 8 characters.</p>
+            <label>
+              <span data-i18n="auth.confirmPassword">Confirm password</span>
+              <input id="signUpConfirm" type="password" autocomplete="new-password" minlength="8" required>
+            </label>
+            <p class="auth-error" id="signUpError" role="alert"></p>
+            <button class="auth-submit" type="submit" data-i18n="auth.submitCreate">Create Family Account</button>
+          </form>
+
+          <button class="auth-preview-btn" type="button" id="continuePreview" data-i18n="auth.continuePreview">Continue without signing in</button>
+          <button class="auth-back-btn" type="button" id="backToWelcome" data-i18n="welcome.back">Back to welcome page</button>
+          <p class="auth-cloud-note" id="authCloudNote" role="status"></p>
         </div>
       </div>
 
-      <div class="auth-panel">
-        <h1 id="authHeading" data-i18n="auth.welcome">Welcome to KidsSync</h1>
-        <p class="auth-prompt" id="authPrompt" data-i18n="auth.prompt">Sign in to your family calendar.</p>
-        <p class="auth-cloud-note" id="inviteAuthNotice" role="status" hidden data-i18n="invitations.signInNotice">Sign in with the invited email address to respond.</p>
-
-        <div class="auth-tabs" role="tablist" aria-label="Account access" data-i18n-aria="auth.access">
-          <button class="auth-tab is-active" type="button" role="tab" data-auth-view="signin" aria-selected="true" data-i18n="auth.signIn">Sign In</button>
-          <button class="auth-tab" type="button" role="tab" data-auth-view="signup" aria-selected="false" data-i18n="auth.createAccount">Create Account</button>
+      <aside class="auth-visual" aria-label="A family planning their week" data-i18n-aria="auth.visualLabel">
+        <img src="./assets/kidssync-auth-family.png" alt="" loading="lazy" decoding="async">
+        <div class="auth-visual-shade" aria-hidden="true"></div>
+        <div class="auth-visual-copy">
+          <span class="auth-visual-kicker" data-i18n="auth.visualKicker">A calmer family week</span>
+          <strong data-i18n="auth.visualTitle">Plans everyone can follow.</strong>
+          <p data-i18n="auth.visualBody">School, activities, pickups, and family time stay clear and connected.</p>
         </div>
-
-        <form class="auth-form" id="signInForm">
-          <label>
-            <span data-i18n="auth.email">Email</span>
-            <input id="signInEmail" type="email" autocomplete="email" required>
-          </label>
-          <label>
-            <span data-i18n="auth.password">Password</span>
-            <input id="signInPassword" type="password" autocomplete="current-password" required>
-          </label>
-          <button class="auth-link-btn" type="button" id="forgotPassword" data-i18n="auth.forgotPassword">Forgot password?</button>
-          <p class="auth-error" id="signInError" role="alert"></p>
-          <button class="auth-submit" type="submit" data-i18n="auth.submitSignIn">Sign In</button>
-        </form>
-
-        <form class="auth-form" id="passwordResetRequestForm" hidden>
-          <label>
-            <span data-i18n="auth.email">Email</span>
-            <input id="passwordResetEmail" type="email" autocomplete="email" required>
-          </label>
-          <p class="auth-help" data-i18n="auth.resetHelp">We will email you a secure password-reset link.</p>
-          <p class="auth-error" id="passwordResetRequestStatus" role="status"></p>
-          <button class="auth-submit" type="submit" data-i18n="auth.sendReset">Send Reset Link</button>
-          <button class="auth-link-btn" type="button" id="backToSignIn" data-i18n="auth.backToSignIn">Back to sign in</button>
-        </form>
-
-        <form class="auth-form" id="passwordUpdateForm" hidden>
-          <label>
-            <span data-i18n="auth.newPassword">New password</span>
-            <input id="passwordUpdateValue" type="password" autocomplete="new-password" minlength="8" required>
-          </label>
-          <label>
-            <span data-i18n="auth.confirmPassword">Confirm password</span>
-            <input id="passwordUpdateConfirm" type="password" autocomplete="new-password" minlength="8" required>
-          </label>
-          <p class="auth-help" data-i18n="auth.passwordHelp">Use at least 8 characters.</p>
-          <p class="auth-error" id="passwordUpdateStatus" role="alert"></p>
-          <button class="auth-submit" type="submit" data-i18n="auth.updatePassword">Update Password</button>
-        </form>
-
-        <form class="auth-form" id="signUpForm" hidden>
-          <label>
-            <span data-i18n="auth.familyName">Family name</span>
-            <input id="signUpFamily" type="text" autocomplete="organization" maxlength="50" required>
-          </label>
-          <label>
-            <span data-i18n="auth.email">Email</span>
-            <input id="signUpEmail" type="email" autocomplete="email" required>
-          </label>
-          <label>
-            <span data-i18n="auth.password">Password</span>
-            <input id="signUpPassword" type="password" autocomplete="new-password" minlength="8" required>
-          </label>
-          <p class="auth-help" data-i18n="auth.passwordHelp">Use at least 8 characters.</p>
-          <label>
-            <span data-i18n="auth.confirmPassword">Confirm password</span>
-            <input id="signUpConfirm" type="password" autocomplete="new-password" minlength="8" required>
-          </label>
-          <p class="auth-error" id="signUpError" role="alert"></p>
-          <button class="auth-submit" type="submit" data-i18n="auth.submitCreate">Create Family Account</button>
-        </form>
-
-        <button class="auth-preview-btn" type="button" id="continuePreview" data-i18n="auth.continuePreview">Continue without signing in</button>
-        <button class="auth-back-btn" type="button" id="backToWelcome" data-i18n="welcome.back">Back to welcome page</button>
-        <p class="auth-cloud-note" id="authCloudNote" role="status"></p>
-      </div>
+        <div class="auth-schedule-card" aria-hidden="true">
+          <div class="auth-schedule-heading"><span data-i18n="auth.visualToday">Today</span><b>3</b></div>
+          <div class="auth-schedule-item"><i class="blue">3:15</i><span data-i18n="auth.visualSchool">School pickup</span></div>
+          <div class="auth-schedule-item"><i class="green">4:30</i><span data-i18n="auth.visualSoccer">Soccer practice</span></div>
+          <div class="auth-schedule-item"><i class="coral">6:15</i><span data-i18n="auth.visualDinner">Family dinner</span></div>
+        </div>
+      </aside>
     </div>
   </section>
 
@@ -7677,6 +9234,41 @@
   </dialog>
 
   <main class="app" id="appShell" hidden>
+    <header class="app-sidebar" aria-label="KidsSync calendar controls" data-i18n-aria="sidebar.navigation">
+      <details class="sidebar-menu" id="sidebarMenu">
+        <summary class="sidebar-icon-button sidebar-tooltip sidebar-tooltip-left" aria-label="Open navigation menu" title="Open navigation menu" data-tooltip="Open navigation menu" data-i18n-aria="sidebar.openMenu" data-i18n-title="sidebar.openMenu" data-i18n-tooltip="sidebar.openMenu">
+          <span class="sidebar-menu-glyph" aria-hidden="true"><i></i><i></i><i></i></span>
+        </summary>
+        <nav class="sidebar-nav" aria-label="Planner sections" data-i18n-aria="sidebar.sections">
+          <button class="sidebar-nav-item is-active" type="button" data-sidebar-action="dashboard" aria-current="page"><span class="sidebar-nav-icon" aria-hidden="true">▦</span><span data-i18n="sidebar.dashboard">Dashboard</span></button>
+          <button class="sidebar-nav-item" type="button" data-sidebar-action="calendar"><span class="sidebar-nav-icon" aria-hidden="true">▣</span><span data-i18n="sidebar.calendar">Calendar</span></button>
+          <button class="sidebar-nav-item" type="button" data-sidebar-action="lists"><span class="sidebar-nav-icon" aria-hidden="true">☷</span><span data-i18n="sidebar.lists">Lists</span></button>
+          <button class="sidebar-nav-item" type="button" data-sidebar-action="holidays"><span class="sidebar-nav-icon" aria-hidden="true">☘</span><span data-i18n="sidebar.holidays">Holidays</span></button>
+          <button class="sidebar-nav-item" type="button" data-sidebar-action="special-days"><span class="sidebar-nav-icon" aria-hidden="true">★</span><span data-i18n="sidebar.specialDays">Special days</span></button>
+          <button class="sidebar-nav-item" type="button" data-sidebar-action="map"><span class="sidebar-nav-icon" aria-hidden="true">⌖</span><span data-i18n="sidebar.map">Map</span></button>
+          <div class="sidebar-calendar-switcher" id="sidebarCalendarSwitcher"></div>
+        </nav>
+      </details>
+      <div class="sidebar-brand" aria-label="KidsSync">
+        <span class="sidebar-brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span class="sidebar-brand-copy"><strong>Kids<span>Sync</span></strong><small data-i18n="sidebar.familyPlanner">Family planner</small></span>
+      </div>
+      <div class="sidebar-date-controls">
+        <button class="sidebar-today" type="button" id="jumpToday" data-i18n="actions.today">Today</button>
+        <button class="sidebar-icon-button sidebar-tooltip" type="button" id="prevWeek" aria-label="Previous period" title="Previous period" data-tooltip="Previous period" data-i18n-aria="aria.previousPeriod" data-i18n-title="aria.previousPeriod" data-i18n-tooltip="aria.previousPeriod"><span aria-hidden="true">‹</span></button>
+        <button class="sidebar-icon-button sidebar-tooltip" type="button" id="nextWeek" aria-label="Next period" title="Next period" data-tooltip="Next period" data-i18n-aria="aria.nextPeriod" data-i18n-title="aria.nextPeriod" data-i18n-tooltip="aria.nextPeriod"><span aria-hidden="true">›</span></button>
+        <button class="sidebar-period-button" type="button" id="openPeriodPicker" aria-label="Choose a date" title="Choose a date" data-i18n-aria="sidebar.chooseDate" data-i18n-title="sidebar.chooseDate">
+          <span class="week-label" id="weekLabel">Aug 3 - Aug 7</span><span class="sidebar-period-chevron" aria-hidden="true">▼</span>
+        </button>
+        <input class="sidebar-date-picker" id="periodDatePicker" type="date" aria-label="Choose a date" data-i18n-aria="sidebar.chooseDate">
+      </div>
+      <span class="sidebar-spacer" aria-hidden="true"></span>
+      <div class="sidebar-tools">
+        <button class="sidebar-icon-button sidebar-tooltip" type="button" id="focusScheduleSearch" aria-label="Search schedule" title="Search schedule" data-tooltip="Search schedule" data-i18n-aria="search.label" data-i18n-title="search.label" data-i18n-tooltip="search.label"><span class="sidebar-search-glyph" aria-hidden="true"></span></button>
+        <button class="sidebar-icon-button sidebar-tooltip" type="button" data-sidebar-action="help" aria-label="Help" title="Help" data-tooltip="Help" data-i18n-aria="sidebar.help" data-i18n-title="sidebar.help" data-i18n-tooltip="sidebar.help"><span aria-hidden="true">?</span></button>
+        <button class="sidebar-icon-button sidebar-tooltip sidebar-tooltip-right" type="button" id="openSettings" aria-label="Settings" title="Settings" data-tooltip="Settings" data-i18n-aria="settings.open" data-i18n-title="settings.open" data-i18n-tooltip="settings.open"><span aria-hidden="true">⚙</span></button>
+      </div>
+    </header>
     <div class="account-bar" aria-label="Family account" data-i18n-aria="auth.familyAccount">
       <span class="save-status" id="saveStatus" role="status" data-i18n="save.saved">Saved on this device</span>
       <span class="account-avatar" id="accountAvatar" aria-hidden="true"><span id="accountAvatarFallback">👤</span><img id="accountAvatarImage" alt="" hidden></span>
@@ -7684,10 +9276,6 @@
         <span class="account-family" id="accountFamily"></span>
         <span class="account-email" id="accountEmail"></span>
       </div>
-      <button class="settings-btn" type="button" id="openSettings" aria-label="Settings" data-i18n-aria="settings.open">
-        <span aria-hidden="true">⚙</span>
-        <span data-i18n="settings.open">Settings</span>
-      </button>
       <button class="settings-btn invitation-button" type="button" id="openInvitations" hidden aria-label="Invitation mailbox" data-i18n-aria="invitations.mailboxAria">
         <span aria-hidden="true">📬</span>
         <span data-i18n="invitations.open">Mailbox</span>
@@ -7733,12 +9321,6 @@
           <select id="calendarSelect" aria-label="Current calendar"></select>
           <button class="icon-btn manage-calendars-btn" type="button" id="manageCalendars" aria-label="Manage calendars" data-i18n-aria="calendars.manage" data-i18n-title="calendars.manage" title="Manage calendars"><span aria-hidden="true">⚙</span></button>
         </div>
-        <div class="week-controls has-today-shortcut">
-          <button class="icon-btn" type="button" id="prevWeek" aria-label="Previous period" data-i18n-aria="aria.previousPeriod">‹</button>
-          <div class="week-label" id="weekLabel">Aug 3 - Aug 7</div>
-          <button class="period-today" type="button" id="jumpToday" data-i18n="actions.today">Today</button>
-          <button class="icon-btn" type="button" id="nextWeek" aria-label="Next period" data-i18n-aria="aria.nextPeriod">›</button>
-        </div>
         <div class="language-switch" role="group" aria-label="Language" data-i18n-aria="aria.language">
           <button class="language-option" type="button" data-language="en" aria-pressed="true">EN</button>
           <button class="language-option" type="button" data-language="zh" aria-pressed="false">中文</button>
@@ -7748,8 +9330,20 @@
         <div class="view-switch" role="tablist" aria-label="Calendar view" data-i18n-aria="aria.calendarView">
           <button class="view-option" type="button" data-view="today" role="tab" aria-selected="false" data-i18n="view.today">Today</button>
           <button class="view-option is-active" type="button" data-view="week" role="tab" aria-selected="true" data-i18n="view.week">Week</button>
+          <button class="view-option" type="button" data-view="four" role="tab" aria-selected="false" data-i18n="view.four">4 days</button>
           <button class="view-option" type="button" data-view="month" role="tab" aria-selected="false" data-i18n="view.month">Month</button>
         </div>
+        <details class="calendar-view-menu" id="calendarViewMenu">
+          <summary><span data-i18n="view.menu">View</span><span aria-hidden="true">⌄</span></summary>
+          <div class="calendar-view-menu-panel">
+            <button type="button" data-view="today"><span data-i18n="view.today">Day</span><kbd>D</kbd></button>
+            <button type="button" data-view="week"><span data-i18n="view.week">Week</span><kbd>W</kbd></button>
+            <button type="button" data-view="four"><span data-i18n="view.four">4 days</span><kbd>X</kbd></button>
+            <button type="button" data-view="month"><span data-i18n="view.month">Month</span><kbd>M</kbd></button>
+            <div class="calendar-view-menu-divider"></div>
+            <button type="button" id="toggleWeekendsMenu"><span data-i18n="view.showWeekends">Show weekends</span><kbd aria-hidden="true">✓</kbd></button>
+          </div>
+        </details>
         <div class="calendar-zoom" id="calendarZoom" role="group" aria-label="Calendar zoom" data-i18n-aria="aria.calendarZoom">
           <button class="calendar-zoom-button" type="button" id="zoomOut" aria-label="Zoom out calendar" title="Zoom out calendar" data-i18n-aria="aria.zoomOut" data-i18n-title="aria.zoomOut"><span aria-hidden="true">−</span></button>
           <span class="calendar-zoom-level" id="zoomLevel" aria-live="polite">100%</span>
@@ -7774,8 +9368,8 @@
 
     <section class="schedule-overview" aria-label="Schedule overview and search" data-i18n-aria="aria.scheduleOverview">
       <label class="calendar-search">
-        <span class="calendar-search-icon" aria-hidden="true">⌕</span>
-        <input id="scheduleSearch" type="search" autocomplete="off" placeholder="Search events, people, or places" data-i18n-placeholder="search.placeholder" aria-label="Search schedule" data-i18n-aria="search.label">
+        <span class="calendar-search-label" aria-hidden="true"><span class="calendar-search-icon">⌕</span><span data-i18n="search.shortLabel">Search</span></span>
+        <input id="scheduleSearch" type="search" autocomplete="off" placeholder="Activities, children, locations, or notes" data-i18n-placeholder="search.placeholder" aria-label="Search activities" data-i18n-aria="search.label" aria-keyshortcuts="/ Escape">
         <button class="clear-search" id="clearSearch" type="button" aria-label="Clear search" data-i18n-aria="search.clear" hidden>×</button>
       </label>
       <div class="overview-stats" aria-live="polite">
@@ -7811,44 +9405,45 @@
       <button class="ghost-btn" type="button" id="resetScheduleFilters" data-i18n="search.reset">Clear search and filters</button>
     </section>
 
-    <section class="schedule-shell calendar-view" id="weekSchedule" aria-label="Weekly schedule" data-i18n-aria="aria.weeklySchedule">
-      <div class="schedule-grid" id="scheduleGrid"></div>
-    </section>
+    <div class="calendar-stage">
+      <aside class="mini-calendar" aria-label="Mini calendar" data-i18n-aria="miniCalendar.label">
+        <h2 class="calendar-sidebar-heading"><span aria-hidden="true">🗓️</span><span data-i18n="miniCalendar.sidebarTitle">Calendars</span></h2>
+        <div class="mini-calendar-header">
+          <h2 class="mini-calendar-title" id="miniCalendarTitle"></h2>
+          <button class="mini-calendar-nav" type="button" id="miniCalendarPrevious" aria-label="Previous month" data-i18n-aria="miniCalendar.previous">‹</button>
+          <button class="mini-calendar-nav" type="button" id="miniCalendarNext" aria-label="Next month" data-i18n-aria="miniCalendar.next">›</button>
+        </div>
+        <div class="mini-calendar-weekdays" id="miniCalendarWeekdays" aria-hidden="true"></div>
+        <div class="mini-calendar-grid" id="miniCalendarGrid"></div>
+        <nav class="mini-calendar-tools" aria-label="Calendar tools" data-i18n-aria="miniCalendar.tools">
+          <h3 data-i18n="miniCalendar.tools">Calendar tools</h3>
+          <button class="mini-calendar-tool is-primary" type="button" id="miniAddActivity"><span class="mini-calendar-tool-icon" aria-hidden="true">＋</span><span data-i18n="miniCalendar.addEvent">Add event</span><span class="mini-calendar-tool-chevron" aria-hidden="true">›</span></button>
+          <button class="mini-calendar-tool" type="button" id="miniOpenDashboard"><span class="mini-calendar-tool-icon" aria-hidden="true">▦</span><span data-i18n="dashboard.open">Dashboard</span><span class="mini-calendar-tool-chevron" aria-hidden="true">›</span></button>
+          <button class="mini-calendar-tool" type="button" id="miniOpenReminders"><span class="mini-calendar-tool-icon" aria-hidden="true">🔔</span><span data-i18n="reminders.open">Reminders</span><span class="mini-calendar-tool-chevron" aria-hidden="true">›</span></button>
+          <button class="mini-calendar-tool" type="button" id="miniShareSchedule"><span class="mini-calendar-tool-icon" aria-hidden="true">↗</span><span data-i18n="sharing.share">Share</span><span class="mini-calendar-tool-chevron" aria-hidden="true">›</span></button>
+          <button class="mini-calendar-tool" type="button" id="miniManageCalendars"><span class="mini-calendar-tool-icon" aria-hidden="true">⚙</span><span data-i18n="calendars.manage">Manage calendars</span><span class="mini-calendar-tool-chevron" aria-hidden="true">›</span></button>
+        </nav>
+      </aside>
 
-    <section class="mobile-agenda calendar-view" id="mobileAgenda" aria-label="Mobile weekly agenda" data-i18n-aria="aria.mobileAgenda"></section>
+      <div class="calendar-stage-main">
+        <section class="schedule-shell calendar-view" id="weekSchedule" aria-label="Weekly schedule" data-i18n-aria="aria.weeklySchedule">
+          <div class="schedule-grid" id="scheduleGrid"></div>
+        </section>
 
-    <section class="today-view calendar-view" id="todayView" aria-label="Daily schedule" data-i18n-aria="aria.dailySchedule" hidden>
-      <div class="view-heading"><h2 id="todayHeading"></h2></div>
-      <div class="today-list" id="todayList"></div>
-    </section>
+        <section class="mobile-agenda calendar-view" id="mobileAgenda" aria-label="Mobile weekly agenda" data-i18n-aria="aria.mobileAgenda"></section>
 
-    <section class="month-view calendar-view" id="monthView" aria-label="Monthly schedule" data-i18n-aria="aria.monthlySchedule" hidden>
-      <div class="month-weekdays" id="monthWeekdays"></div>
-      <div class="month-grid" id="monthGrid"></div>
-    </section>
+        <section class="today-view calendar-view" id="todayView" aria-label="Daily schedule" data-i18n-aria="aria.dailySchedule" hidden>
+          <div class="view-heading"><h2 id="todayHeading"></h2></div>
+          <div class="today-list" id="todayList"></div>
+        </section>
 
-    <section class="goals" aria-label="Family goals" data-i18n-aria="aria.familyGoals">
-      <article class="goal">
-        <div class="goal-icon" aria-hidden="true">🎯</div>
-        <div><h3 data-i18n="goals.learningTitle">Learning</h3><p data-i18n="goals.learningBody">Track classes, tutoring, homework, and practice blocks.</p></div>
-      </article>
-      <article class="goal">
-        <div class="goal-icon" aria-hidden="true">👟</div>
-        <div><h3 data-i18n="goals.activitiesTitle">Activities</h3><p data-i18n="goals.activitiesBody">Coordinate sports, clubs, lessons, and pickup times.</p></div>
-      </article>
-      <article class="goal">
-        <div class="goal-icon" aria-hidden="true">📚</div>
-        <div><h3 data-i18n="goals.routinesTitle">Routines</h3><p data-i18n="goals.routinesBody">Keep reading, chores, and recurring family habits visible.</p></div>
-      </article>
-      <article class="goal">
-        <div class="goal-icon" aria-hidden="true">👨‍👩‍👧‍👦</div>
-        <div><h3 data-i18n="goals.familyTitle">Family Time</h3><p data-i18n="goals.familyBody">Protect meals, weekend plans, and moments together.</p></div>
-      </article>
-      <article class="goal">
-        <div class="goal-icon" aria-hidden="true">🗓️</div>
-        <div><h3 data-i18n="goals.gapsTitle">Time Gaps</h3><p data-i18n="goals.gapsBody">Find open windows before adding another commitment.</p></div>
-      </article>
-    </section>
+        <section class="month-view calendar-view" id="monthView" aria-label="Monthly schedule" data-i18n-aria="aria.monthlySchedule" hidden>
+          <div class="month-weekdays" id="monthWeekdays"></div>
+          <div class="month-grid" id="monthGrid"></div>
+        </section>
+      </div>
+    </div>
+
   </main>
 
   <div class="undo-toast" id="undoToast" role="region" aria-live="polite" aria-atomic="true" aria-label="Recent action" data-i18n-aria="undo.region" hidden>
@@ -8068,6 +9663,15 @@
           </select>
         </label>
       </div>
+      <fieldset class="event-visual-options advanced-event-field" data-event-step="4">
+        <legend data-i18n="form.eventColor">Color</legend>
+        <input id="eventColor" type="hidden" value="default">
+        <div class="event-color-options" id="eventColorOptions" role="radiogroup" aria-label="Event color" data-i18n-aria="form.eventColor"></div>
+      </fieldset>
+      <fieldset class="event-visual-options advanced-event-field" data-event-step="4">
+        <legend data-i18n="form.attendees">Attendees</legend>
+        <div class="event-attendee-options" id="eventAttendeeOptions"></div>
+      </fieldset>
       <div class="logistics-grid advanced-event-field" data-event-step="4">
         <label>
           <span data-i18n="form.location">Location</span>
@@ -8350,10 +9954,23 @@
           </select>
         </label>
         <p class="notification-status" id="notificationStatus" role="status"></p>
+        <div class="email-notification-note" id="emailNotificationNote">
+          <span data-i18n="settings.emailNotifications">Email reminders</span>
+          <p id="emailNotificationStatus" role="status"></p>
+          <button class="small-btn" type="button" id="notificationSignIn" data-i18n="settings.signInForEmail">Sign in to enable</button>
+        </div>
       </section>
 
       <section class="settings-group">
         <h3 data-i18n="settings.appearance">Appearance</h3>
+        <label class="setting-row">
+          <span data-i18n="settings.appearanceMode">Appearance mode</span>
+          <select id="appearanceModeSelect">
+            <option value="light" data-i18n="appearance.light">Light</option>
+            <option value="dark" data-i18n="appearance.dark">Dark</option>
+            <option value="device" data-i18n="appearance.device">Device default</option>
+          </select>
+        </label>
         <label class="setting-row">
           <span data-i18n="settings.darkMode">Dark mode</span>
           <input class="setting-toggle" id="darkModeEnabled" type="checkbox">
@@ -8393,6 +10010,7 @@
           <select id="defaultView">
             <option value="today" data-i18n="view.today">Today</option>
             <option value="week" data-i18n="view.week">Week</option>
+            <option value="four" data-i18n="view.four">4 days</option>
             <option value="month" data-i18n="view.month">Month</option>
           </select>
         </label>
@@ -8422,18 +10040,67 @@
     </form>
   </dialog>
 
+  <dialog class="appearance-dialog" id="appearanceDialog" aria-labelledby="appearanceDialogTitle">
+    <div class="appearance-dialog-body">
+      <div class="appearance-dialog-heading">
+        <p class="appearance-dialog-kicker" data-i18n="appearance.kicker">New appearance option</p>
+        <h2 id="appearanceDialogTitle" data-i18n="appearance.title">Calendar is now available in dark mode!</h2>
+        <p data-i18n="appearance.body">You can change this now or anytime in Appearance.</p>
+      </div>
+      <div class="appearance-choice-grid" role="radiogroup" aria-label="Appearance" data-i18n-aria="appearance.group">
+        <button class="appearance-choice" type="button" data-appearance-choice="light" role="radio" aria-checked="false">
+          <span class="appearance-preview-card appearance-preview-light" aria-hidden="true"><span class="appearance-preview-date">31</span><span class="appearance-preview-control">＋ ───</span><span class="appearance-preview-lines"><i></i><i></i><i></i></span></span>
+          <span class="appearance-choice-label" data-i18n="appearance.light">Light</span>
+        </button>
+        <button class="appearance-choice" type="button" data-appearance-choice="dark" role="radio" aria-checked="false">
+          <span class="appearance-preview-card appearance-preview-dark" aria-hidden="true"><span class="appearance-preview-date">31</span><span class="appearance-preview-control">＋ ───</span><span class="appearance-preview-lines"><i></i><i></i><i></i></span></span>
+          <span class="appearance-choice-label" data-i18n="appearance.dark">Dark</span>
+        </button>
+        <button class="appearance-choice" type="button" data-appearance-choice="device" role="radio" aria-checked="false">
+          <span class="appearance-preview-card appearance-preview-device" aria-hidden="true"><span class="appearance-preview-date">31</span><span class="appearance-preview-control">＋ ───</span><span class="appearance-preview-lines"><i></i><i></i><i></i></span></span>
+          <span class="appearance-choice-label" data-i18n="appearance.device">Device default</span>
+        </button>
+      </div>
+      <button class="appearance-dialog-done" type="button" id="appearanceDialogDone" data-i18n="appearance.done">Got it</button>
+    </div>
+  </dialog>
+
   <dialog class="insights-dialog" id="dashboardDialog">
     <div class="modal-header">
       <h2 data-i18n="dashboard.title">Family Dashboard</h2>
       <button class="close-btn" type="button" id="closeDashboard" aria-label="Close" data-i18n-aria="aria.close">×</button>
     </div>
     <div class="dashboard-body">
+      <p class="dashboard-greeting" id="dashboardGreeting"></p>
+      <div class="dashboard-overview-grid">
+        <section class="dashboard-section dashboard-upcoming-section"><div class="dashboard-section-heading"><div><h3 data-i18n="dashboard.upcomingTitle">Upcoming</h3><p class="dashboard-section-note" data-i18n="dashboard.upcomingNote">Your next events and holidays.</p></div><button class="small-btn" type="button" id="dashboardGoCalendar" data-i18n="dashboard.openCalendar">Open calendar</button></div><div class="dashboard-list" id="dashboardUpcoming"></div></section>
+        <section class="dashboard-section dashboard-updates-section"><h3 data-i18n="dashboard.updatesTitle">Recent updates</h3><p class="dashboard-section-note" data-i18n="dashboard.updatesNote">Changes made by your family.</p><div class="history-list" id="dashboardUpdates"></div></section>
+      </div>
       <div class="dashboard-stats" id="dashboardStats"></div>
       <div class="dashboard-grid">
         <section class="dashboard-section dashboard-busy-section"><h3 data-i18n="dashboard.busyDays">Busy days</h3><p class="dashboard-section-note" data-i18n="dashboard.busyNote">Select a day to open it in the calendar.</p><div class="busy-day-scroll"><div class="busy-day-chart" id="dashboardBusyDays"></div></div></section>
         <section class="dashboard-section"><h3 data-i18n="dashboard.workload">Workload by child</h3><p class="dashboard-section-note" data-i18n="dashboard.workloadNote">Compare each child’s event count and scheduled time this week.</p><div class="kid-load-list" id="dashboardKidLoad"></div></section>
         <section class="dashboard-section"><h3 data-i18n="dashboard.deadlines">Upcoming deadlines</h3><p class="dashboard-section-note" data-i18n="dashboard.deadlinesNote">Dates marked as deadlines appear here for the next 30 days.</p><div class="deadline-list" id="dashboardDeadlines"></div></section>
       </div>
+    </div>
+  </dialog>
+
+  <dialog class="map-dialog" id="mapDialog">
+    <div class="modal-header">
+      <div><p class="eyebrow" data-i18n="map.eyebrow">Explore nearby</p><h2 data-i18n="map.title">Family map</h2></div>
+      <button class="close-btn" type="button" id="closeMap" aria-label="Close" data-i18n-aria="aria.close">×</button>
+    </div>
+    <div class="map-body">
+      <p class="dialog-intro" data-i18n="map.intro">Find restaurants, parks, activities, and useful places for your family.</p>
+      <div class="map-search-row"><input id="mapSearch" type="search" autocomplete="off" data-i18n-placeholder="map.searchPlaceholder" placeholder="Search nearby places"><button class="primary-btn" type="button" id="mapSearchButton" data-i18n="map.search">Search</button></div>
+      <div class="map-category-row" role="group" aria-label="Nearby place categories">
+        <button class="map-category is-selected" type="button" data-map-category="restaurants" data-i18n="map.restaurants">Restaurants</button>
+        <button class="map-category" type="button" data-map-category="family activities" data-i18n="map.activities">Activities</button>
+        <button class="map-category" type="button" data-map-category="parks" data-i18n="map.parks">Parks</button>
+        <button class="map-category" type="button" data-map-category="libraries" data-i18n="map.libraries">Libraries</button>
+        <button class="map-category" type="button" data-map-category="cafes" data-i18n="map.cafes">Cafes</button>
+      </div>
+      <div class="map-results" id="mapResults"></div>
     </div>
   </dialog>
 
@@ -8448,6 +10115,27 @@
         <button class="ghost-btn" type="button" id="reminderSettings" data-i18n="reminders.settings">Notification settings</button>
       </div>
       <div class="reminder-list" id="reminderList"></div>
+    </div>
+  </dialog>
+
+  <dialog class="insights-dialog lists-dialog" id="listsDialog" aria-labelledby="listsDialogTitle">
+    <div class="modal-header">
+      <div><p class="eyebrow" data-i18n="lists.kicker">Activity timeline</p><h2 id="listsDialogTitle" data-i18n="lists.title">Lists</h2></div>
+      <button class="close-btn" type="button" id="closeLists" aria-label="Close" data-i18n-aria="aria.close">×</button>
+    </div>
+    <div class="lists-body">
+      <p class="lists-intro" data-i18n="lists.intro">See what has already happened and what is coming next across your family calendar.</p>
+      <div class="lists-summary" id="listsSummary" aria-live="polite"></div>
+      <div class="lists-grid">
+        <section class="activity-list-section activity-list-upcoming" aria-labelledby="upcomingActivitiesTitle">
+          <div class="activity-list-heading"><div><p class="activity-list-kicker" data-i18n="lists.next90">Next 90 days</p><h3 id="upcomingActivitiesTitle" data-i18n="lists.upcoming">Upcoming activities</h3></div><span class="activity-list-count" id="upcomingActivitiesCount"></span></div>
+          <div class="activity-list" id="upcomingActivitiesList"></div>
+        </section>
+        <section class="activity-list-section activity-list-past" aria-labelledby="pastActivitiesTitle">
+          <div class="activity-list-heading"><div><p class="activity-list-kicker" data-i18n="lists.last90">Previous 90 days</p><h3 id="pastActivitiesTitle" data-i18n="lists.past">Already happened</h3></div><span class="activity-list-count" id="pastActivitiesCount"></span></div>
+          <div class="activity-list" id="pastActivitiesList"></div>
+        </section>
+      </div>
     </div>
   </dialog>
 
@@ -8485,6 +10173,24 @@
     <div class="history-body">
       <p class="history-intro" id="versionHistoryIntro"></p>
       <div class="history-list" id="versionHistoryList"></div>
+    </div>
+  </dialog>
+
+  <dialog class="sidebar-help-dialog" id="sidebarHelpDialog">
+    <div class="modal-header"><div><p class="eyebrow" data-i18n="sidebar.help">Help</p><h2 data-i18n="sidebar.helpTitle">How KidsSync works</h2></div><button class="close-btn" type="button" id="closeSidebarHelp" aria-label="Close" data-i18n-aria="aria.close">×</button></div>
+    <div class="sidebar-help-body">
+      <p class="dialog-intro" data-i18n="sidebar.helpIntro">A few quick ways to move through your family week.</p>
+      <div class="sidebar-help-grid">
+        <article><strong data-i18n="sidebar.helpClickTitle">Click a time</strong><p data-i18n="sidebar.helpClickBody">Click any open hour to start an event there.</p></article>
+        <article><strong data-i18n="sidebar.helpDayTitle">Click a day</strong><p data-i18n="sidebar.helpDayBody">Click a day header or date to open an event with that day already selected.</p></article>
+        <article><strong data-i18n="sidebar.helpColorTitle">Choose a color</strong><p data-i18n="sidebar.helpColorBody">Use the color dots in event details to make important plans easy to spot.</p></article>
+        <article><strong data-i18n="sidebar.helpAttendeesTitle">Add attendees</strong><p data-i18n="sidebar.helpAttendeesBody">Choose All or select the family members connected to an event.</p></article>
+        <article><strong data-i18n="sidebar.helpDragTitle">Move an event</strong><p data-i18n="sidebar.helpDragBody">Drag an event to another day or time. Click it to edit details.</p></article>
+        <article><strong data-i18n="sidebar.helpShareTitle">Share with care</strong><p data-i18n="sidebar.helpShareBody">Sign in to share with viewers, commenters, or editors.</p></article>
+        <article><strong data-i18n="sidebar.helpHolidayTitle">Use holidays</strong><p data-i18n="sidebar.helpHolidayBody">Open Holidays to see built-in holidays, then add your own event on the same date.</p></article>
+        <article><strong data-i18n="sidebar.helpSettingsTitle">Personalize Settings</strong><p data-i18n="sidebar.helpSettingsBody">Change appearance, time format, default view, event length, and motion preferences in Settings.</p></article>
+      </div>
+      <div class="form-actions"><span></span><button class="primary-btn" type="button" id="doneSidebarHelp" data-i18n="actions.done">Done</button></div>
     </div>
   </dialog>
 
@@ -8570,12 +10276,12 @@
         "welcome.aboutKicker": "Why we built KidsSync",
         "welcome.aboutTitle": "Family organization should feel lighter.",
         "welcome.aboutBody": "KidsSync is designed for parents who carry dozens of small commitments in their heads. We turn those moving pieces into a week the whole family can understand.",
-        "welcome.aboutOneTitle": "Built around families",
-        "welcome.aboutOneBody": "Different kids, different colors, one dependable plan.",
-        "welcome.aboutTwoTitle": "Useful from day one",
-        "welcome.aboutTwoBody": "No complicated setup before you can see whether it works for you.",
-        "welcome.aboutThreeTitle": "Ready to grow smarter",
-        "welcome.aboutThreeBody": "A strong scheduling foundation for conflict help and family planning suggestions.",
+        "welcome.aboutOneTitle": "See the week at a glance",
+        "welcome.aboutOneBody": "The Dashboard brings upcoming events, holidays, and family updates into one calm view.",
+        "welcome.aboutTwoTitle": "Stay in sync",
+        "welcome.aboutTwoBody": "Shared calendars show what changed, who changed it, and what your family needs to know next.",
+        "welcome.aboutThreeTitle": "Find what’s nearby",
+        "welcome.aboutThreeBody": "Use Map to discover restaurants, parks, activities, and other useful places close to your family.",
         "welcome.footer": "A clearer week for every family.",
         "welcome.back": "Back to welcome page",
         "aria.overview": "Family schedule overview",
@@ -8597,8 +10303,50 @@
         "aria.monthlySchedule": "Monthly schedule",
         "aria.familyGoals": "Family goals",
         "aria.close": "Close",
+        "sidebar.navigation": "KidsSync navigation",
+        "sidebar.sections": "Planner sections",
+        "sidebar.openMenu": "Open navigation menu",
+        "sidebar.chooseDate": "Choose a date",
+        "sidebar.familyPlanner": "Family planner",
+        "sidebar.activities": "Activities",
+        "sidebar.dashboard": "Dashboard",
+        "sidebar.calendar": "Calendar",
+        "sidebar.lists": "Lists",
+        "sidebar.holidays": "Holidays",
+        "sidebar.specialDays": "Special days",
+        "sidebar.map": "Map",
+        "sidebar.help": "Help",
+        "sidebar.settings": "Settings",
+        "sidebar.synced": "Your family week, in one place",
+        "sidebar.helpTitle": "How KidsSync works",
+        "sidebar.helpIntro": "A few quick ways to move through your family week.",
+        "sidebar.helpClickTitle": "Click a time",
+        "sidebar.helpClickBody": "Click any open hour to start an event there.",
+        "sidebar.helpDayTitle": "Click a day",
+        "sidebar.helpDayBody": "Click a day header or date to open an event with that day already selected.",
+        "sidebar.helpColorTitle": "Choose a color",
+        "sidebar.helpColorBody": "Use the color dots in event details to make important plans easy to spot.",
+        "sidebar.helpAttendeesTitle": "Add attendees",
+        "sidebar.helpAttendeesBody": "Choose All or select the family members connected to an event.",
+        "sidebar.helpDragTitle": "Drag to move",
+        "sidebar.helpDragBody": "Drag an event to another day or time. Click it to edit details.",
+        "sidebar.helpShareTitle": "Share with care",
+        "sidebar.helpShareBody": "Sign in to share with viewers, commenters, or editors.",
+        "sidebar.helpHolidayTitle": "Use holidays",
+        "sidebar.helpHolidayBody": "Open Holidays to see built-in holidays, then add your own event on the same date.",
+        "sidebar.helpSettingsTitle": "Personalize Settings",
+        "sidebar.helpSettingsBody": "Change appearance, time format, default view, event length, and motion preferences in Settings.",
         "auth.welcome": "Welcome to KidsSync",
         "auth.prompt": "Sign in to sync your family calendar across devices.",
+        "auth.eyebrow": "Your family week, in one place",
+        "auth.visualLabel": "A family planning their week",
+        "auth.visualKicker": "A calmer family week",
+        "auth.visualTitle": "Plans everyone can follow.",
+        "auth.visualBody": "School, activities, pickups, and family time stay clear and connected.",
+        "auth.visualToday": "Today",
+        "auth.visualSchool": "School pickup",
+        "auth.visualSoccer": "Soccer practice",
+        "auth.visualDinner": "Family dinner",
         "auth.access": "Account access",
         "auth.signIn": "Sign In",
         "auth.createAccount": "Create Account",
@@ -8687,7 +10435,16 @@
         "settings.reminder60": "1 hour",
         "settings.reminderDay": "1 day",
         "settings.appearance": "Appearance",
+        "settings.appearanceMode": "Appearance mode",
         "settings.darkMode": "Dark mode",
+        "appearance.kicker": "Choose your appearance",
+        "appearance.title": "How should KidsSync look?",
+        "appearance.body": "Choose a preference to start. You can change it later in Settings.",
+        "appearance.group": "Appearance options",
+        "appearance.light": "Light",
+        "appearance.dark": "Dark",
+        "appearance.device": "Device default",
+        "appearance.done": "Save preference",
         "settings.theme": "Color theme",
         "settings.iconPack": "Icon pack",
         "settings.iconPreview": "Preview",
@@ -8715,6 +10472,10 @@
         "settings.notificationsOff": "Notifications are off.",
         "settings.notificationsDenied": "Notifications are blocked in your browser settings.",
         "settings.notificationsUnavailable": "Notifications are unavailable in this browser.",
+        "settings.emailNotifications": "Email reminders",
+        "settings.emailGuest": "Email reminders require a signed-in account. Browser alerts can still work on this device.",
+        "settings.emailSignedIn": "Signed in. Email summaries use your mail app; automatic alerts work while KidsSync is open.",
+        "settings.signInForEmail": "Sign in to enable",
         "calendars.select": "Calendar",
         "calendars.manage": "Manage calendars",
         "calendars.title": "Manage Calendars",
@@ -8728,6 +10489,8 @@
         "calendars.default": "Family",
         "calendars.minimum": "Keep at least one calendar.",
         "calendars.confirmDelete": "Delete calendar “{name}” and its schedule?",
+        "calendars.myCalendars": "My calendars",
+        "calendars.otherCalendars": "Other calendars",
         "sharing.share": "Share",
         "sharing.title": "Share calendar",
         "sharing.description": "Create a secure link for one person, choose what they can do, and include a note.",
@@ -8900,6 +10663,13 @@
         "dashboard.none": "None",
         "dashboard.noEvents": "No upcoming events in the next 7 days.",
         "dashboard.eventsCount": "{count} events",
+        "dashboard.greeting": "Welcome back, {name}.",
+        "dashboard.greetingGuest": "Welcome to your family dashboard.",
+        "dashboard.upcomingTitle": "Upcoming",
+        "dashboard.upcomingNote": "Your next events and holidays.",
+        "dashboard.openCalendar": "Open calendar",
+        "dashboard.updatesTitle": "Recent updates",
+        "dashboard.updatesNote": "Changes made by your family.",
         "reminders.open": "Reminders",
         "reminders.title": "Reminders",
         "reminders.upcoming": "Coming up",
@@ -8907,6 +10677,20 @@
         "reminders.summaryOn": "Browser alerts are on · {lead} before each event.",
         "reminders.summaryOff": "Browser alerts are off. Your upcoming events still appear here.",
         "reminders.empty": "Nothing scheduled in the next 7 days.",
+        "lists.kicker": "Activity timeline",
+        "lists.title": "Lists",
+        "lists.intro": "See what has already happened and what is coming next across your family calendar.",
+        "lists.upcoming": "Upcoming activities",
+        "lists.past": "Already happened",
+        "lists.next90": "Next 90 days",
+        "lists.last90": "Previous 90 days",
+        "lists.upcomingSummary": "Upcoming in the next 90 days",
+        "lists.pastSummary": "Completed in the previous 90 days",
+        "lists.viewUpcoming": "View upcoming activities",
+        "lists.viewPast": "View completed activities",
+        "lists.items": "{count} activities",
+        "lists.emptyUpcoming": "Nothing is scheduled in the next 90 days.",
+        "lists.emptyPast": "No activities happened in the previous 90 days.",
         "save.saved": "Saved on this device",
         "save.cloudSaved": "Saved to cloud",
         "save.syncing": "Saving to cloud...",
@@ -8938,6 +10722,18 @@
         "welcomeBack.intro": "Here’s what changed in your family calendar while you were away.",
         "welcomeBack.empty": "No new updates from other family members.",
         "welcomeBack.actorFallback": "A family member",
+        "map.eyebrow": "Explore nearby",
+        "map.title": "Family map",
+        "map.intro": "Find restaurants, parks, activities, and useful places for your family.",
+        "map.searchPlaceholder": "Search nearby places",
+        "map.search": "Search",
+        "map.restaurants": "Restaurants",
+        "map.activities": "Activities",
+        "map.parks": "Parks",
+        "map.libraries": "Libraries",
+        "map.cafes": "Cafes",
+        "map.open": "Open in Maps",
+        "map.searching": "Search for {query} nearby",
         "versions.open": "Version history",
         "versions.title": "Version history",
         "versions.intro": "{calendar} · latest 20 saved versions",
@@ -8968,7 +10764,10 @@
         "actions.dismiss": "Dismiss",
         "view.today": "Today",
         "view.week": "Week",
+        "view.four": "4 days",
         "view.month": "Month",
+        "view.menu": "View",
+        "view.showWeekends": "Show weekends",
         "goals.learningTitle": "Learning",
         "goals.learningBody": "Track classes, tutoring, homework, and practice blocks.",
         "goals.activitiesTitle": "Activities",
@@ -8999,6 +10798,9 @@
         "form.icon": "Icon",
         "form.colorStyle": "Color style",
         "form.childColor": "Child color",
+        "form.eventColor": "Color",
+        "form.attendees": "Attendees",
+        "form.attendeeAll": "All",
         "form.purple": "Purple highlight",
         "form.status": "Status",
         "form.travelTime": "Travel time needed before",
@@ -9126,6 +10928,12 @@
         "presets.confirmExample": "Load the Andrew and Mark preset? This will replace the current kids and schedule.",
         "calendar.empty": "No activities yet.",
         "calendar.today": "Today",
+        "miniCalendar.label": "Mini calendar",
+        "miniCalendar.sidebarTitle": "Calendars",
+        "miniCalendar.tools": "Calendar tools",
+        "miniCalendar.addEvent": "Add event",
+        "miniCalendar.previous": "Previous month",
+        "miniCalendar.next": "Next month",
         "calendar.conflict": "Schedule conflict",
         "calendar.weekly": "Weekly activity",
         "calendar.allDay": "All day",
@@ -9141,8 +10949,9 @@
         "today.afternoon": "Afternoon",
         "today.evening": "Evening",
         "today.addToday": "Add event today",
-        "search.label": "Search schedule",
-        "search.placeholder": "Search events, people, or places",
+        "search.label": "Search activities",
+        "search.shortLabel": "Search",
+        "search.placeholder": "Activities, children, locations, or notes",
         "search.clear": "Clear search",
         "search.noResultsTitle": "No matching events",
         "search.noResultsBody": "Try another search or clear the active filters.",
@@ -9170,6 +10979,16 @@
         "filters.activities": "Activities",
         "filters.important": "Important",
         "month.more": "+{count} more",
+        "holiday.newYear": "New Year’s Day",
+        "holiday.valentines": "Valentine’s Day",
+        "holiday.stPatricks": "St. Patrick’s Day",
+        "holiday.memorial": "Memorial Day",
+        "holiday.independence": "Independence Day",
+        "holiday.labor": "Labor Day",
+        "holiday.halloween": "Halloween",
+        "holiday.thanksgiving": "Thanksgiving",
+        "holiday.christmas": "Christmas Day",
+        "holiday.newYearsEve": "New Year’s Eve",
         "stack.next": "Show next overlapping activity. {child} {title} is in front.",
         "stack.tooltip": "Show next activity ({child}: {title})",
         "validation.endAfter": "End time must be after start time.",
@@ -9269,12 +11088,12 @@
         "welcome.aboutKicker": "我们为什么打造 KidsSync",
         "welcome.aboutTitle": "家庭安排，本该更轻松。",
         "welcome.aboutBody": "KidsSync 为每天在脑中记着无数小安排的家长而设计。我们把这些不断变化的事项，整理成全家都能看懂的一周。",
-        "welcome.aboutOneTitle": "围绕家庭设计",
-        "welcome.aboutOneBody": "不同的孩子，不同的颜色，一个可靠的计划。",
-        "welcome.aboutTwoTitle": "从第一天就实用",
-        "welcome.aboutTwoBody": "无需复杂设置，就能先看看它是否适合你的家庭。",
-        "welcome.aboutThreeTitle": "为更聪明的规划打好基础",
-        "welcome.aboutThreeBody": "以可靠日程为基础，逐步加入冲突处理和家庭规划建议。",
+        "welcome.aboutOneTitle": "一眼看清全周安排",
+        "welcome.aboutOneBody": "家庭概览把即将到来的活动、节假日和家庭更新放在一个清晰的视图里。",
+        "welcome.aboutTwoTitle": "保持同步",
+        "welcome.aboutTwoBody": "共享日历会显示发生了什么更改、由谁更改，以及家人下一步需要知道什么。",
+        "welcome.aboutThreeTitle": "发现附近地点",
+        "welcome.aboutThreeBody": "使用地图查找附近的餐厅、公园、活动和其他适合家人的地点。",
         "welcome.footer": "让每个家庭的一周更清晰。",
         "welcome.back": "返回欢迎页面",
         "aria.overview": "家庭日程概览",
@@ -9296,8 +11115,50 @@
         "aria.monthlySchedule": "每月安排",
         "aria.familyGoals": "家庭目标",
         "aria.close": "关闭",
+        "sidebar.navigation": "KidsSync 导航",
+        "sidebar.sections": "计划功能",
+        "sidebar.openMenu": "打开导航菜单",
+        "sidebar.chooseDate": "选择日期",
+        "sidebar.familyPlanner": "家庭规划",
+        "sidebar.activities": "活动",
+        "sidebar.dashboard": "家庭概览",
+        "sidebar.calendar": "日历",
+        "sidebar.lists": "列表",
+        "sidebar.holidays": "节假日",
+        "sidebar.specialDays": "特别日子",
+        "sidebar.map": "地图",
+        "sidebar.help": "帮助",
+        "sidebar.settings": "设置",
+        "sidebar.synced": "把家庭一周安排放在一起",
+        "sidebar.helpTitle": "KidsSync 使用方法",
+        "sidebar.helpIntro": "几种快速安排家庭一周的方法。",
+        "sidebar.helpClickTitle": "点击时间",
+        "sidebar.helpClickBody": "点击任意空闲时间即可在那里创建活动。",
+        "sidebar.helpDayTitle": "点击日期",
+        "sidebar.helpDayBody": "点击日期标题或日期数字，即可打开已自动选好日期的活动表单。",
+        "sidebar.helpColorTitle": "选择颜色",
+        "sidebar.helpColorBody": "在活动详情中使用彩色圆点，让重要安排更容易找到。",
+        "sidebar.helpAttendeesTitle": "添加参与者",
+        "sidebar.helpAttendeesBody": "选择全部，或选择与这项活动相关的家庭成员。",
+        "sidebar.helpDragTitle": "拖动移动",
+        "sidebar.helpDragBody": "将活动拖到另一天或另一个时间。点击活动即可编辑详情。",
+        "sidebar.helpShareTitle": "安心共享",
+        "sidebar.helpShareBody": "登录后即可与查看者、评论者或编辑者共享。",
+        "sidebar.helpHolidayTitle": "使用节假日",
+        "sidebar.helpHolidayBody": "打开节假日查看内置节日，也可以在同一天添加自己的活动。",
+        "sidebar.helpSettingsTitle": "自定义设置",
+        "sidebar.helpSettingsBody": "在设置中更改外观、时间格式、默认视图、活动时长和动画偏好。",
         "auth.welcome": "欢迎使用 KidsSync",
         "auth.prompt": "登录后可在不同设备间同步家庭日历。",
+        "auth.eyebrow": "全家一周安排，尽在一处",
+        "auth.visualLabel": "一家人正在安排本周日程",
+        "auth.visualKicker": "更从容的家庭一周",
+        "auth.visualTitle": "每个人都能轻松跟上的安排。",
+        "auth.visualBody": "学校、活动、接送和家庭时间，清晰相连。",
+        "auth.visualToday": "今天",
+        "auth.visualSchool": "放学接送",
+        "auth.visualSoccer": "足球训练",
+        "auth.visualDinner": "家庭晚餐",
         "auth.access": "账户访问",
         "auth.signIn": "登录",
         "auth.createAccount": "创建账户",
@@ -9386,7 +11247,16 @@
         "settings.reminder60": "1 小时",
         "settings.reminderDay": "1 天",
         "settings.appearance": "外观",
+        "settings.appearanceMode": "外观模式",
         "settings.darkMode": "深色模式",
+        "appearance.kicker": "选择外观",
+        "appearance.title": "你希望 KidsSync 使用哪种外观？",
+        "appearance.body": "先选择一种偏好。之后可以在设置中更改。",
+        "appearance.group": "外观选项",
+        "appearance.light": "浅色",
+        "appearance.dark": "深色",
+        "appearance.device": "跟随设备",
+        "appearance.done": "保存偏好",
         "settings.theme": "颜色主题",
         "settings.iconPack": "图标套装",
         "settings.iconPreview": "预览",
@@ -9414,6 +11284,10 @@
         "settings.notificationsOff": "通知已关闭。",
         "settings.notificationsDenied": "通知已在浏览器设置中被阻止。",
         "settings.notificationsUnavailable": "此浏览器不支持通知。",
+        "settings.emailNotifications": "电子邮件提醒",
+        "settings.emailGuest": "电子邮件提醒需要登录账户。浏览器提醒仍可在此设备上使用。",
+        "settings.emailSignedIn": "已登录。邮件摘要会使用你的邮件应用；KidsSync 打开时会发送自动浏览器提醒。",
+        "settings.signInForEmail": "登录后启用",
         "calendars.select": "日历",
         "calendars.manage": "管理日历",
         "calendars.title": "管理日历",
@@ -9427,6 +11301,8 @@
         "calendars.default": "家庭",
         "calendars.minimum": "至少保留一个日历。",
         "calendars.confirmDelete": "删除日历“{name}”及其中的日程吗？",
+        "calendars.myCalendars": "我的日历",
+        "calendars.otherCalendars": "其他日历",
         "sharing.share": "分享",
         "sharing.title": "共享日历",
         "sharing.description": "为一位成员创建安全链接，选择对方权限，并可附上一段说明。",
@@ -9585,6 +11461,13 @@
         "dashboard.none": "无",
         "dashboard.noEvents": "未来 7 天没有即将开始的事件。",
         "dashboard.eventsCount": "{count} 个事件",
+        "dashboard.greeting": "欢迎回来，{name}。",
+        "dashboard.greetingGuest": "欢迎来到家庭概览。",
+        "dashboard.upcomingTitle": "即将到来",
+        "dashboard.upcomingNote": "接下来的活动和节假日。",
+        "dashboard.openCalendar": "打开日历",
+        "dashboard.updatesTitle": "最近更新",
+        "dashboard.updatesNote": "家庭成员做出的更改。",
         "reminders.open": "提醒",
         "reminders.title": "提醒",
         "reminders.upcoming": "即将开始",
@@ -9592,6 +11475,20 @@
         "reminders.summaryOn": "浏览器提醒已开启 · 每个事件提前 {lead} 提醒。",
         "reminders.summaryOff": "浏览器提醒已关闭。即将开始的事件仍会显示在这里。",
         "reminders.empty": "未来 7 天没有安排。",
+        "lists.kicker": "活动时间线",
+        "lists.title": "列表",
+        "lists.intro": "查看家庭日历中已经发生的活动，以及接下来即将发生的活动。",
+        "lists.upcoming": "即将发生的活动",
+        "lists.past": "已经发生",
+        "lists.next90": "未来 90 天",
+        "lists.last90": "过去 90 天",
+        "lists.upcomingSummary": "未来 90 天的活动",
+        "lists.pastSummary": "过去 90 天已完成的活动",
+        "lists.viewUpcoming": "查看即将发生的活动",
+        "lists.viewPast": "查看已完成的活动",
+        "lists.items": "{count} 个活动",
+        "lists.emptyUpcoming": "未来 90 天没有安排。",
+        "lists.emptyPast": "过去 90 天没有活动。",
         "save.saved": "已保存到此设备",
         "save.cloudSaved": "已保存到云端",
         "save.syncing": "正在保存到云端...",
@@ -9623,6 +11520,18 @@
         "welcomeBack.intro": "这是你离开期间家庭日历的更新。",
         "welcomeBack.empty": "没有其他家庭成员的新更新。",
         "welcomeBack.actorFallback": "家庭成员",
+        "map.eyebrow": "探索附近",
+        "map.title": "家庭地图",
+        "map.intro": "查找适合家人的餐厅、公园、活动和实用地点。",
+        "map.searchPlaceholder": "搜索附近地点",
+        "map.search": "搜索",
+        "map.restaurants": "餐厅",
+        "map.activities": "活动",
+        "map.parks": "公园",
+        "map.libraries": "图书馆",
+        "map.cafes": "咖啡馆",
+        "map.open": "在地图中打开",
+        "map.searching": "搜索附近的{query}",
         "versions.open": "版本历史",
         "versions.title": "版本历史",
         "versions.intro": "{calendar} · 最近保存的 20 个版本",
@@ -9653,7 +11562,10 @@
         "actions.dismiss": "关闭",
         "view.today": "今天",
         "view.week": "周",
+        "view.four": "4 天",
         "view.month": "月",
+        "view.menu": "视图",
+        "view.showWeekends": "显示周末",
         "goals.learningTitle": "学习",
         "goals.learningBody": "记录课程、辅导、作业和练习时间。",
         "goals.activitiesTitle": "课外活动",
@@ -9684,6 +11596,9 @@
         "form.icon": "图标",
         "form.colorStyle": "颜色样式",
         "form.childColor": "孩子的颜色",
+        "form.eventColor": "颜色",
+        "form.attendees": "参与者",
+        "form.attendeeAll": "全部",
         "form.purple": "紫色标记",
         "form.status": "状态",
         "form.travelTime": "活动前所需路程时间",
@@ -9825,6 +11740,12 @@
         "presets.confirmExample": "载入 Andrew 和 Mark 示例？这会替换当前的孩子和日程。",
         "calendar.empty": "还没有活动。",
         "calendar.today": "今天",
+        "miniCalendar.label": "迷你日历",
+        "miniCalendar.sidebarTitle": "日历",
+        "miniCalendar.tools": "日历工具",
+        "miniCalendar.addEvent": "添加活动",
+        "miniCalendar.previous": "上个月",
+        "miniCalendar.next": "下个月",
         "calendar.conflict": "日程冲突",
         "calendar.weekly": "每周活动",
         "calendar.allDay": "全天",
@@ -9840,8 +11761,9 @@
         "today.afternoon": "下午",
         "today.evening": "晚上",
         "today.addToday": "添加今天的活动",
-        "search.label": "搜索日程",
-        "search.placeholder": "搜索活动、人员或地点",
+        "search.label": "搜索活动",
+        "search.shortLabel": "搜索",
+        "search.placeholder": "活动、孩子、地点或备注",
         "search.clear": "清除搜索",
         "search.noResultsTitle": "没有匹配的活动",
         "search.noResultsBody": "请尝试其他关键词，或清除当前筛选条件。",
@@ -9869,6 +11791,16 @@
         "filters.activities": "活动",
         "filters.important": "重要日程",
         "month.more": "还有 {count} 项",
+        "holiday.newYear": "元旦",
+        "holiday.valentines": "情人节",
+        "holiday.stPatricks": "圣帕特里克节",
+        "holiday.memorial": "阵亡将士纪念日",
+        "holiday.independence": "独立日",
+        "holiday.labor": "劳动节",
+        "holiday.halloween": "万圣节",
+        "holiday.thanksgiving": "感恩节",
+        "holiday.christmas": "圣诞节",
+        "holiday.newYearsEve": "除夕",
         "stack.next": "显示下一个重叠活动。当前显示 {child} 的{title}。",
         "stack.tooltip": "显示下一个活动（{child}：{title}）",
         "validation.endAfter": "结束时间必须晚于开始时间。",
@@ -10554,6 +12486,7 @@
       startGuestPreviewTimer();
       trackProductEvent("Planner Preview Started");
       window.scrollTo({ top: 0, behavior: "auto" });
+      window.setTimeout(maybeShowAppearancePrompt, 250);
     }
 
     function showAuthScreen(view = "signin") {
@@ -10835,16 +12768,18 @@
       { key: "saturday", labelKey: "day.saturday", weather: "☀️", theme: "green" },
       { key: "sunday", labelKey: "day.sunday", weather: "🌤️", theme: "blue" }
     ];
-    const scheduleStartMinutes = 8 * 60;
-    // Keep the evening visible for after-school activities and family plans.
-    const scheduleEndMinutes = 23 * 60;
+    const scheduleStartMinutes = 1 * 60;
+    // Show the full day so early flights and midnight plans fit naturally.
+    const scheduleEndMinutes = 24 * 60;
     const scheduleDurationMinutes = scheduleEndMinutes - scheduleStartMinutes;
     const CALENDAR_ZOOM_LEVELS = [0.75, 1, 1.25, 1.5];
     const FAMILY_CHILD = "__family__";
+    const APPEARANCE_PROMPT_SEEN_KEY = "kidssync.appearance-preference-seen";
     const DEFAULT_SETTINGS = {
       notifications: false,
       reminderMinutes: 30,
       darkMode: false,
+      appearanceMode: "light",
       colorTheme: "classic",
       iconPack: "classic",
       use24Hour: false,
@@ -10862,6 +12797,20 @@
       coral: { label: "Coral", color: "#b9645c", soft: "#f8e9e7", line: "#ce9a94", ink: "#673530" },
       gold: { label: "Gold", color: "#9b772d", soft: "#f8f0dc", line: "#c8ae71", ink: "#594514" }
     };
+    const EVENT_COLOR_OPTIONS = [
+      { id: "default", value: "#4285f4", soft: "#e4efff", line: "#4285f4", ink: "#174a9e" },
+      { id: "red", value: "#ea4335", soft: "#fde9e7", line: "#ea4335", ink: "#9d2118" },
+      { id: "yellow", value: "#fbbc04", soft: "#fff5d8", line: "#d99a00", ink: "#7c5500" },
+      { id: "purple", value: "#9334e6", soft: "#f2e7ff", line: "#9334e6", ink: "#5b168e" },
+      { id: "coral", value: "#e87972", soft: "#fdebea", line: "#d65d55", ink: "#8a2e29" },
+      { id: "green", value: "#34a853", soft: "#e3f4e7", line: "#249342", ink: "#17662b" },
+      { id: "orange", value: "#f4511e", soft: "#ffebe4", line: "#dd3e10", ink: "#8b260d" },
+      { id: "teal", value: "#00897b", soft: "#dff5f1", line: "#00897b", ink: "#006258" },
+      { id: "gray", value: "#6b7280", soft: "#edf0f3", line: "#6b7280", ink: "#3e4650" },
+      { id: "indigo", value: "#5c6bc0", soft: "#e9ebfb", line: "#5c6bc0", ink: "#303d8e" },
+      { id: "cyan", value: "#03a9f4", soft: "#e2f5fd", line: "#0395d7", ink: "#05648d" },
+      { id: "brown", value: "#a87845", soft: "#f5ece3", line: "#976c3d", ink: "#694521" }
+    ];
 
     const ICON_PACKS = {
       classic: {},
@@ -10944,6 +12893,7 @@
     let selectedDate = new Date();
     let currentWeekStart = getMonday(selectedDate);
     let currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+    let miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
     let currentView = userSettings.defaultView;
 
     const state = {
@@ -10979,11 +12929,15 @@
     const kidsDialog = document.getElementById("kidsDialog");
     const presetDialog = document.getElementById("presetDialog");
     const settingsDialog = document.getElementById("settingsDialog");
+    const appearanceDialog = document.getElementById("appearanceDialog");
     const dashboardDialog = document.getElementById("dashboardDialog");
+    const mapDialog = document.getElementById("mapDialog");
     const remindersDialog = document.getElementById("remindersDialog");
+    const listsDialog = document.getElementById("listsDialog");
     const activityHistoryDialog = document.getElementById("activityHistoryDialog");
     const welcomeBackDialog = document.getElementById("welcomeBackDialog");
     const versionHistoryDialog = document.getElementById("versionHistoryDialog");
+    const sidebarHelpDialog = document.getElementById("sidebarHelpDialog");
     const form = document.getElementById("activityForm");
     const kidsForm = document.getElementById("kidsForm");
     const presetForm = document.getElementById("presetForm");
@@ -11030,6 +12984,7 @@
       icon: document.getElementById("icon"),
       customIcon: document.getElementById("customIcon"),
       style: document.getElementById("style"),
+      color: document.getElementById("eventColor"),
       status: document.getElementById("status"),
       travelMinutes: document.getElementById("travelMinutes"),
       notes: document.getElementById("notes"),
@@ -11068,6 +13023,9 @@
       document.querySelectorAll("[data-i18n-title]").forEach(element => {
         element.setAttribute("title", t(element.dataset.i18nTitle));
       });
+      document.querySelectorAll("[data-i18n-tooltip]").forEach(element => {
+        element.dataset.tooltip = t(element.dataset.i18nTooltip);
+      });
       document.querySelectorAll("[data-i18n-label]").forEach(element => {
         element.label = t(element.dataset.i18nLabel);
       });
@@ -11090,8 +13048,10 @@
       renderAll();
       if (!document.getElementById("appShell").hidden) updateAccountIdentity();
       if (settingsDialog.open) renderSettingsDialog();
+      if (appearanceDialog.open) renderAppearanceDialog();
       if (dashboardDialog.open) renderDashboard();
       if (remindersDialog.open) renderReminders();
+      if (listsDialog.open) renderActivityLists();
       if (document.getElementById("previewLimitDialog").open) {
         renderPreviewScheduleAdvice();
         renderPreviewProfileAvatar();
@@ -11125,6 +13085,10 @@
 
       status.textContent = t(key);
       status.classList.toggle("is-error", isError);
+      const emailStatus = document.getElementById("emailNotificationStatus");
+      const emailSignIn = document.getElementById("notificationSignIn");
+      if (emailStatus) emailStatus.textContent = t(activeAccount ? "settings.emailSignedIn" : "settings.emailGuest");
+      if (emailSignIn) emailSignIn.hidden = Boolean(activeAccount);
     }
 
     function renderCloudSettings() {
@@ -11180,7 +13144,8 @@
       notificationsEnabled.disabled = permission === "unavailable" || permission === "denied";
       document.getElementById("reminderMinutes").value = String(userSettings.reminderMinutes);
       document.getElementById("reminderMinutes").disabled = !notificationsEnabled.checked || notificationsEnabled.disabled;
-      document.getElementById("darkModeEnabled").checked = userSettings.darkMode;
+      document.getElementById("appearanceModeSelect").value = userSettings.appearanceMode || (userSettings.darkMode ? "dark" : "light");
+      document.getElementById("darkModeEnabled").checked = userSettings.appearanceMode === "dark";
       document.getElementById("colorTheme").value = userSettings.colorTheme;
       document.getElementById("iconPack").value = userSettings.iconPack;
       document.getElementById("iconPackPreview").textContent = ICON_PACK_PREVIEWS[userSettings.iconPack] || ICON_PACK_PREVIEWS.classic;
@@ -11194,14 +13159,115 @@
     }
 
     function applySettings() {
-      document.documentElement.classList.toggle("dark-mode", userSettings.darkMode);
+      const appearanceMode = userSettings.appearanceMode || (userSettings.darkMode ? "dark" : "light");
+      const devicePrefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+      document.documentElement.classList.toggle("dark-mode", appearanceMode === "dark" || (appearanceMode === "device" && devicePrefersDark));
       document.documentElement.classList.toggle("reduce-motion", userSettings.reduceMotion);
       document.documentElement.dataset.theme = userSettings.colorTheme;
+    }
+
+    function renderAppearanceDialog() {
+      const mode = userSettings.appearanceMode || (userSettings.darkMode ? "dark" : "light");
+      document.querySelectorAll("[data-appearance-choice]").forEach(choice => {
+        const selected = choice.dataset.appearanceChoice === mode;
+        choice.classList.toggle("is-selected", selected);
+        choice.setAttribute("aria-checked", String(selected));
+      });
+    }
+
+    function setAppearanceMode(mode) {
+      if (!["light", "dark", "device"].includes(mode)) return;
+      userSettings.appearanceMode = mode;
+      userSettings.darkMode = mode === "dark";
+      saveSettings();
+      applySettings();
+      renderAppearanceDialog();
+      renderSettingsDialog();
+    }
+
+    function openAppearanceDialog() {
+      renderAppearanceDialog();
+      appearanceDialog.showModal();
+    }
+
+    function dismissAppearanceDialog() {
+      localStorage.setItem(APPEARANCE_PROMPT_SEEN_KEY, "true");
+      appearanceDialog.close();
+    }
+
+    function maybeShowAppearancePrompt() {
+      if (localStorage.getItem(APPEARANCE_PROMPT_SEEN_KEY) === "true") return;
+      if (appearanceDialog.open || document.getElementById("appShell").hidden) return;
+      openAppearanceDialog();
     }
 
     function openSettingsDialog() {
       renderSettingsDialog();
       settingsDialog.showModal();
+    }
+
+    function setSidebarActive(action) {
+      document.querySelectorAll("[data-sidebar-action]").forEach(button => {
+        const active = button.dataset.sidebarAction === action;
+        button.classList.toggle("is-active", active);
+        if (active) button.setAttribute("aria-current", "page");
+        else button.removeAttribute("aria-current");
+      });
+    }
+
+    function openSidebarHelp() {
+      setSidebarActive("help");
+      sidebarHelpDialog.showModal();
+    }
+
+    function closeSidebarHelpDialog() {
+      if (sidebarHelpDialog?.open) sidebarHelpDialog.close();
+    }
+
+    function handleSidebarAction(action) {
+      document.getElementById("sidebarMenu").open = false;
+      if (action === "dashboard") {
+        setSidebarActive(action);
+        openDashboardDialog();
+        return;
+      }
+      if (action === "map") {
+        setSidebarActive(action);
+        openMapDialog();
+        return;
+      }
+      if (action === "lists") {
+        setSidebarActive(action);
+        openListsDialog();
+        return;
+      }
+      if (action === "calendar") {
+        state.eventFilter = "all";
+        setSidebarActive(action);
+        activateCalendarView("week", true);
+        weekSchedule.scrollIntoView({ behavior: userSettings.reduceMotion ? "auto" : "smooth", block: "start" });
+        return;
+      }
+      if (action === "holidays") {
+        state.eventFilter = "holidays";
+        setSidebarActive(action);
+        activateCalendarView("month", true);
+        return;
+      }
+      if (action === "special-days") {
+        state.eventFilter = "important";
+        setSidebarActive(action);
+        activateCalendarView("month", true);
+        return;
+      }
+      if (action === "help") {
+        openSidebarHelp();
+        return;
+      }
+      if (action === "settings") {
+        setSidebarActive(action);
+        openSettingsDialog();
+      }
     }
 
     function closeSettingsDialog() {
@@ -11865,12 +13931,16 @@
         settings.reminderMinutes = [10, 30, 60, 1440].includes(Number(settings.reminderMinutes))
           ? Number(settings.reminderMinutes)
           : DEFAULT_SETTINGS.reminderMinutes;
-        settings.defaultView = ["today", "week", "month"].includes(settings.defaultView)
+        settings.defaultView = ["today", "week", "four", "month"].includes(settings.defaultView)
           ? settings.defaultView
           : DEFAULT_SETTINGS.defaultView;
         settings.defaultEventDuration = [30, 45, 60, 90, 120].includes(Number(settings.defaultEventDuration))
           ? Number(settings.defaultEventDuration)
           : DEFAULT_SETTINGS.defaultEventDuration;
+        settings.appearanceMode = ["light", "dark", "device"].includes(settings.appearanceMode)
+          ? settings.appearanceMode
+          : settings.darkMode ? "dark" : "light";
+        settings.darkMode = settings.appearanceMode === "dark";
         settings.showWeekends = settings.showWeekends !== false;
         settings.colorTheme = ["classic", "garden", "sunrise", "bold"].includes(settings.colorTheme) ? settings.colorTheme : "classic";
         settings.iconPack = ["classic", "playful", "simple"].includes(settings.iconPack) ? settings.iconPack : "classic";
@@ -11949,6 +14019,59 @@
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
       return `${year}-${month}-${day}`;
+    }
+
+    function nthWeekdayOfMonth(year, month, weekday, occurrence) {
+      const first = new Date(year, month, 1);
+      const offset = (weekday - first.getDay() + 7) % 7;
+      return new Date(year, month, 1 + offset + (occurrence - 1) * 7);
+    }
+
+    function lastWeekdayOfMonth(year, month, weekday) {
+      const last = new Date(year, month + 1, 0);
+      const offset = (last.getDay() - weekday + 7) % 7;
+      return new Date(year, month, last.getDate() - offset);
+    }
+
+    function builtInHolidayActivities(date) {
+      const year = date.getFullYear();
+      const holidays = [
+        { date: new Date(year, 0, 1), titleKey: "holiday.newYear", icon: "🎉" },
+        { date: new Date(year, 1, 14), titleKey: "holiday.valentines", icon: "💌" },
+        { date: new Date(year, 2, 17), titleKey: "holiday.stPatricks", icon: "☘️" },
+        { date: lastWeekdayOfMonth(year, 4, 1), titleKey: "holiday.memorial", icon: "🌿" },
+        { date: new Date(year, 6, 4), titleKey: "holiday.independence", icon: "🎆" },
+        { date: nthWeekdayOfMonth(year, 8, 1, 1), titleKey: "holiday.labor", icon: "🛠️" },
+        { date: new Date(year, 9, 31), titleKey: "holiday.halloween", icon: "🎃" },
+        { date: nthWeekdayOfMonth(year, 10, 4, 4), titleKey: "holiday.thanksgiving", icon: "🦃" },
+        { date: new Date(year, 11, 25), titleKey: "holiday.christmas", icon: "🎄" },
+        { date: new Date(year, 11, 31), titleKey: "holiday.newYearsEve", icon: "✨" }
+      ];
+      const key = dateKey(date);
+      return holidays
+        .filter(holiday => dateKey(holiday.date) === key)
+        .map(holiday => ({
+          id: `builtin-holiday-${key}`,
+          child: FAMILY_CHILD,
+          startDate: key,
+          eventType: "holiday",
+          recurrence: "yearly",
+          repeatInterval: 1,
+          repeatUntil: "",
+          repeatDays: [],
+          allDay: true,
+          start: "00:00",
+          end: "23:59",
+          title: t(holiday.titleKey),
+          icon: holiday.icon,
+          style: "holiday",
+          status: "confirmed",
+          notes: "",
+          location: "",
+          responsible: "",
+          items: "",
+          isBuiltInHoliday: true
+        }));
     }
 
     function parseDateKey(value) {
@@ -12031,21 +14154,30 @@
       if (state.eventFilter === "all") return true;
       const eventType = activity.eventType || "activity";
       if (state.eventFilter === "activity") return eventType === "activity";
+      if (state.eventFilter === "holidays") return eventType === "holiday";
       return eventType !== "activity";
     }
 
     function occurrencesOnDate(date, { ignoreSearch = false, ignoreFilter = false } = {}) {
       const day = days[(date.getDay() + 6) % 7];
-      return state.activities
+      const activities = state.activities
         .filter(activity => activity.child === FAMILY_CHILD || state.visibleKids.has(activity.child))
         .filter(activity => ignoreSearch || activityMatchesSearch(activity))
         .filter(activity => ignoreFilter || activityMatchesEventFilter(activity))
         .filter(activity => activityOccursOn(activity, date))
         .map(activity => ({ ...activity, day: day.key, occurrenceDate: dateKey(date) }));
+      const holidays = activityMatchesEventFilter({ eventType: "holiday" })
+        ? builtInHolidayActivities(date).filter(activity => ignoreSearch || activityMatchesSearch(activity))
+        : [];
+      return [...activities, ...holidays];
     }
 
     function weekOccurrences(options = {}) {
       return days.flatMap((day, index) => occurrencesOnDate(addDays(currentWeekStart, index), options));
+    }
+
+    function fourDayOccurrences(options = {}) {
+      return days.slice(0, 4).flatMap((day, index) => occurrencesOnDate(addDays(currentWeekStart, index), options));
     }
 
     function monthOccurrences(options = {}) {
@@ -12058,6 +14190,7 @@
     function currentPeriodOccurrences(options = {}) {
       if (currentView === "today") return occurrencesOnDate(selectedDate, options);
       if (currentView === "month") return monthOccurrences(options);
+      if (currentView === "four") return fourDayOccurrences(options);
       return weekOccurrences(options);
     }
 
@@ -12086,17 +14219,17 @@
         );
         return;
       }
-      const sunday = addDays(currentWeekStart, 6);
-      const sameMonth = currentWeekStart.getMonth() === sunday.getMonth();
+      const periodEnd = addDays(currentWeekStart, currentView === "four" ? 3 : 6);
+      const sameMonth = currentWeekStart.getMonth() === periodEnd.getMonth();
       if (currentLanguage === "zh") {
         document.getElementById("weekLabel").textContent = sameMonth
-          ? `${currentWeekStart.getMonth() + 1}月${currentWeekStart.getDate()}日 - ${sunday.getDate()}日`
-          : `${formatShortDate(currentWeekStart)} - ${formatShortDate(sunday)}`;
+          ? `${currentWeekStart.getMonth() + 1}月${currentWeekStart.getDate()}日 - ${periodEnd.getDate()}日`
+          : `${formatShortDate(currentWeekStart)} - ${formatShortDate(periodEnd)}`;
         return;
       }
       document.getElementById("weekLabel").textContent = sameMonth
-        ? `${currentWeekStart.toLocaleDateString("en-US", { month: "short" })} ${currentWeekStart.getDate()} - ${sunday.getDate()}`
-        : `${formatShortDate(currentWeekStart)} - ${formatShortDate(sunday)}`;
+        ? `${currentWeekStart.toLocaleDateString("en-US", { month: "short" })} ${currentWeekStart.getDate()} - ${periodEnd.getDate()}`
+        : `${formatShortDate(currentWeekStart)} - ${formatShortDate(periodEnd)}`;
     }
 
     function escapeHtml(value) {
@@ -12171,7 +14304,18 @@
       return `${displayHour}:${String(minute).padStart(2, "0")} ${suffix}`;
     }
 
+    function localTimeZoneLabel() {
+      const parts = new Intl.DateTimeFormat("en-US", { timeZoneName: "shortOffset" }).formatToParts(new Date());
+      const value = parts.find(part => part.type === "timeZoneName")?.value || "GMT";
+      return value.replace(/^(GMT[+-])(\d)(?::(\d{2}))?$/, (_, prefix, hour, minutes = "") => `${prefix}0${hour}${minutes ? `:${minutes}` : ""}`);
+    }
+
     function eventColors(activity) {
+      if (activity.isBuiltInHoliday) {
+        return { soft: "#d9f3e2", line: "#138548", ink: "#0b6335" };
+      }
+      const selectedColor = EVENT_COLOR_OPTIONS.find(option => option.id === activity.color);
+      if (selectedColor && activity.color !== "default") return selectedColor;
       if (activity.style === "purple") {
         return { soft: "var(--purple-soft)", line: "var(--purple-line)", ink: "#39205f" };
       }
@@ -12183,10 +14327,11 @@
     }
 
     function visibleActivities() {
-      return weekOccurrences();
+      return currentView === "four" ? fourDayOccurrences() : weekOccurrences();
     }
 
     function visibleWeekDays() {
+      if (currentView === "four") return days.slice(0, 4);
       return state.showWeekends ? days : days.slice(0, 5);
     }
 
@@ -12283,7 +14428,7 @@
           const current = queue.shift();
           group.push(current);
           activities.forEach(candidate => {
-            if (!visited.has(candidate.id) && activitiesOverlap(current, candidate)) {
+            if (!visited.has(candidate.id) && current.child === candidate.child && activitiesOverlap(current, candidate)) {
               visited.add(candidate.id);
               queue.push(candidate);
             }
@@ -12408,7 +14553,7 @@
         const boundedStart = Math.min(Math.max(startMinute, scheduleStartMinutes), scheduleEndMinutes - duration);
         activity.start = `${String(Math.floor(boundedStart / 60)).padStart(2, "0")}:${String(boundedStart % 60).padStart(2, "0")}`;
         const endMinute = boundedStart + duration;
-        activity.end = `${String(Math.floor(endMinute / 60)).padStart(2, "0")}:${String(endMinute % 60).padStart(2, "0")}`;
+        activity.end = timeInputValue(endMinute);
       }
       saveActivities();
       auditActivity("moved", beforeMove, activity);
@@ -12488,12 +14633,13 @@
       const pixelsPerMinute = 2 * userSettings.calendarZoom;
       grid.style.setProperty("--schedule-height", `${scheduleDurationMinutes * pixelsPerMinute}px`);
       grid.style.setProperty("--half-hour-row", `${30 * pixelsPerMinute}px`);
+      grid.style.gridTemplateColumns = `106px repeat(${displayDays.length}, minmax(220px, 1fr))`;
       grid.classList.toggle("weekdays-only", !state.showWeekends);
       grid.innerHTML = "";
 
       const timeHead = document.createElement("div");
       timeHead.className = "time-head";
-      timeHead.textContent = "◷";
+      timeHead.innerHTML = `<span class="time-zone-label">${escapeHtml(localTimeZoneLabel())}</span>`;
       grid.appendChild(timeHead);
 
       displayDays.forEach(day => {
@@ -12504,6 +14650,17 @@
         const head = document.createElement("div");
         head.className = `day-head ${day.theme}${isToday ? " is-today" : ""}`;
         head.innerHTML = `<span class="weather" aria-hidden="true">${day.weather}</span><span class="day-head-label"><span class="day-head-label-row"><span>${dayLabel(day)}</span>${isToday ? `<span class="day-today-badge">${escapeHtml(t("calendar.today"))}</span>` : ""}${dayActivities.length ? `<span class="day-event-count" aria-label="${escapeHtml(countLabel)}">${dayActivities.length}</span>` : ""}</span><small>${formatShortDate(date)}</small></span>`;
+        head.tabIndex = 0;
+        head.setAttribute("role", "button");
+        head.setAttribute("aria-label", `${t("actions.addActivity")} — ${formatFullDate(date)}`);
+        head.title = t("actions.addActivity");
+        head.addEventListener("click", () => openNewEventForDate(date, preferredNewEventChild()));
+        head.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openNewEventForDate(date, preferredNewEventChild());
+          }
+        });
         grid.appendChild(head);
       });
 
@@ -12523,15 +14680,15 @@
             const colors = eventColors(activity);
             const event = document.createElement("button");
             event.type = "button";
-            event.className = "all-day-event";
+            event.className = `all-day-event${activity.isBuiltInHoliday ? " is-built-in-holiday" : ""}`;
             event.style.setProperty("--event-bg", colors.soft);
             event.style.setProperty("--event-line", colors.line);
             event.style.setProperty("--event-ink", colors.ink);
             event.dataset.occurrenceKey = occurrenceKey(activity);
             event.innerHTML = `<span aria-hidden="true">${escapeHtml(displayIcon(activity))}</span><span>${escapeHtml(activityCompactTitle(activity))} · ${escapeHtml(displayChild(activity))}</span>`;
-            setupDraggableEvent(event, activity);
+            if (!activity.isBuiltInHoliday) setupDraggableEvent(event, activity);
             event.addEventListener("click", () => {
-              if (Date.now() > suppressEventClickUntil) openDialog(activity);
+              if (Date.now() > suppressEventClickUntil) openCalendarActivity(activity);
             });
             cell.appendChild(event);
           });
@@ -12554,6 +14711,13 @@
         const column = document.createElement("div");
         column.className = "day-column";
         setupDropTarget(column, targetDate);
+        column.addEventListener("click", event => {
+          if (Date.now() <= suppressEventClickUntil || event.target.closest(".event, .stack-switcher")) return;
+          const bounds = column.getBoundingClientRect();
+          const rawMinute = scheduleStartMinutes + ((event.clientY - bounds.top) / bounds.height) * scheduleDurationMinutes;
+          const snappedMinute = Math.round(rawMinute / 15) * 15;
+          openNewEventAtTime(targetDate, snappedMinute);
+        });
         const dayActivities = activities
           .filter(activity => activity.day === day.key && !activity.allDay)
           .sort((a, b) => minutes(a.start) - minutes(b.start));
@@ -12579,11 +14743,11 @@
             event.style.setProperty("--event-ink", colors.ink);
             event.dataset.occurrenceKey = occurrenceKey(activity);
             if (group.length > 1) {
-              const offset = Math.min(stackIndex, 2) * 12;
-              const verticalOffset = Math.min(stackIndex, 2) * 22;
-              event.style.left = `${10 + offset}px`;
-              event.style.right = "10px";
-              event.style.top = `calc(${top}% + ${verticalOffset}px)`;
+              const laneWidth = 100 / group.length;
+              const laneGap = 8;
+              event.style.left = `calc(${stackIndex * laneWidth}% + ${laneGap}px)`;
+              event.style.right = `calc(${(group.length - stackIndex - 1) * laneWidth}% + ${laneGap}px)`;
+              event.style.top = `${top}%`;
               event.style.zIndex = frontActivity.id === activity.id ? "30" : `${2 + stackIndex}`;
             }
             event.innerHTML = eventCardMarkup(activity, {
@@ -12592,7 +14756,7 @@
             });
             setupDraggableEvent(event, activity);
             event.addEventListener("click", () => {
-              if (Date.now() > suppressEventClickUntil) openDialog(activity);
+              if (Date.now() > suppressEventClickUntil) openCalendarActivity(activity);
             });
             column.appendChild(event);
           });
@@ -12681,7 +14845,7 @@
             detail: activity.notes || "",
             showRecurrence: !agendaDetails
           });
-          item.addEventListener("click", () => openDialog(activity));
+          item.addEventListener("click", () => openCalendarActivity(activity));
           list.appendChild(item);
         });
         mobileAgenda.appendChild(card);
@@ -12794,7 +14958,7 @@
             badgeClass: isConflict ? "is-conflict" : "",
             showRecurrence: true
           });
-          event.addEventListener("click", () => openDialog(activity));
+          event.addEventListener("click", () => openCalendarActivity(activity));
           section.appendChild(event);
         });
 
@@ -12894,7 +15058,7 @@
       toggleWeekendsButton.textContent = t(state.showWeekends ? "actions.hideWeekends" : "actions.showWeekends");
       toggleWeekendsButton.setAttribute("aria-pressed", String(!state.showWeekends));
       const zoomIndex = CALENDAR_ZOOM_LEVELS.indexOf(userSettings.calendarZoom);
-      calendarZoom.hidden = currentView !== "week";
+      calendarZoom.hidden = !["week", "four"].includes(currentView);
       zoomLevel.textContent = `${Math.round(userSettings.calendarZoom * 100)}%`;
       zoomOutButton.disabled = zoomIndex <= 0;
       zoomInButton.disabled = zoomIndex >= CALENDAR_ZOOM_LEVELS.length - 1;
@@ -12903,11 +15067,13 @@
         ? isSameDate(selectedDate, now)
         : currentView === "month"
           ? currentMonthStart.getFullYear() === now.getFullYear() && currentMonthStart.getMonth() === now.getMonth()
-          : dateSerial(now) >= dateSerial(currentWeekStart) && dateSerial(now) <= dateSerial(addDays(currentWeekStart, 6));
+          : dateSerial(now) >= dateSerial(currentWeekStart) && dateSerial(now) <= dateSerial(addDays(currentWeekStart, currentView === "four" ? 3 : 6));
       const todayButton = document.getElementById("jumpToday");
       todayButton.classList.toggle("is-current", isCurrentPeriod);
       if (isCurrentPeriod) todayButton.setAttribute("aria-current", "date");
       else todayButton.removeAttribute("aria-current");
+      const weekendMenu = document.getElementById("toggleWeekendsMenu");
+      if (weekendMenu) weekendMenu.querySelector("kbd").textContent = state.showWeekends ? "✓" : "";
     }
 
     function changeCalendarZoom(direction) {
@@ -13008,23 +15174,20 @@
         dateButton.className = "month-date";
         dateButton.textContent = date.getDate();
         dateButton.setAttribute("aria-label", formatFullDate(date));
-        dateButton.addEventListener("click", () => {
-          selectedDate = new Date(date);
-          activateCalendarView("today", true);
-        });
+        dateButton.addEventListener("click", () => openNewEventForDate(date, preferredNewEventChild()));
         cell.appendChild(dateButton);
 
         activities.slice(0, 3).forEach(activity => {
           const colors = eventColors(activity);
           const event = document.createElement("button");
           event.type = "button";
-          event.className = `month-event${conflicts.has(occurrenceKey(activity)) ? " conflict" : ""}`;
+          event.className = `month-event${conflicts.has(occurrenceKey(activity)) ? " conflict" : ""}${activity.isBuiltInHoliday ? " is-built-in-holiday" : ""}`;
           event.style.setProperty("--event-bg", colors.soft);
           event.style.setProperty("--event-line", colors.line);
           event.style.setProperty("--event-ink", colors.ink);
           event.dataset.occurrenceKey = occurrenceKey(activity);
           event.textContent = `${activity.allDay ? "" : `${timeLabel(activity.start)} `}${displayIcon(activity)} ${activityCompactTitle(activity)}`;
-          event.addEventListener("click", () => openDialog(activity));
+          event.addEventListener("click", () => openCalendarActivity(activity));
           cell.appendChild(event);
         });
 
@@ -13039,8 +15202,50 @@
       }
     }
 
+    function renderMiniCalendar() {
+      const locale = currentLanguage === "zh" ? "zh-CN" : "en-US";
+      const title = document.getElementById("miniCalendarTitle");
+      const weekdayRow = document.getElementById("miniCalendarWeekdays");
+      const miniGrid = document.getElementById("miniCalendarGrid");
+      if (!title || !weekdayRow || !miniGrid) return;
+
+      title.textContent = miniCalendarMonth.toLocaleDateString(locale, { year: "numeric", month: "long" });
+      const sunday = new Date(2026, 0, 4);
+      weekdayRow.innerHTML = Array.from({ length: 7 }, (_, index) => {
+        const label = addDays(sunday, index).toLocaleDateString(locale, { weekday: "narrow" });
+        return `<span>${escapeHtml(label)}</span>`;
+      }).join("");
+
+      const firstOfMonth = new Date(miniCalendarMonth.getFullYear(), miniCalendarMonth.getMonth(), 1);
+      const gridStart = addDays(firstOfMonth, -firstOfMonth.getDay());
+      const today = new Date();
+      miniGrid.innerHTML = "";
+
+      Array.from({ length: 42 }, (_, index) => addDays(gridStart, index)).forEach(date => {
+        const button = document.createElement("button");
+        const isToday = isSameDate(date, today);
+        const isSelected = isSameDate(date, selectedDate);
+        const isOutside = date.getMonth() !== miniCalendarMonth.getMonth();
+        button.type = "button";
+        button.className = `mini-calendar-day${isOutside ? " is-outside" : ""}${isSelected ? " is-selected" : ""}${isToday ? " is-today" : ""}`;
+        button.textContent = date.getDate();
+        button.dataset.date = dateKey(date);
+        button.setAttribute("aria-label", formatFullDate(date));
+        button.setAttribute("aria-pressed", String(isSelected));
+        if (isToday) button.setAttribute("aria-current", "date");
+        button.addEventListener("click", () => {
+          selectedDate = new Date(date);
+          currentWeekStart = getMonday(selectedDate);
+          currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+          miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+          activateCalendarView("week", true);
+        });
+        miniGrid.appendChild(button);
+      });
+    }
+
     function updateCalendarView() {
-      const showWeek = currentView === "week";
+      const showWeek = currentView === "week" || currentView === "four";
       calendarEmptyState.classList.toggle("is-week", showWeek);
       weekSchedule.hidden = !showWeek;
       mobileAgenda.hidden = !showWeek;
@@ -13054,12 +15259,55 @@
     }
 
     function activateCalendarView(view, preserveDate = false) {
-      currentView = ["today", "week", "month"].includes(view) ? view : "week";
+      currentView = ["today", "week", "four", "month"].includes(view) ? view : "week";
       if (currentView === "today" && !preserveDate) selectedDate = new Date();
-      if (currentView === "week") currentWeekStart = getMonday(selectedDate);
+      if (currentView === "week" || currentView === "four") currentWeekStart = getMonday(selectedDate);
       if (currentView === "month") currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       persistScheduleData("view", currentView);
       renderAll();
+    }
+
+    function renderEventColorOptions(selected = "default") {
+      const container = document.getElementById("eventColorOptions");
+      if (!container) return;
+      container.innerHTML = EVENT_COLOR_OPTIONS.map(option => `
+        <button class="event-color-swatch${option.id === selected ? " is-selected" : ""}" type="button" role="radio" aria-checked="${option.id === selected}" aria-label="${escapeHtml(option.id)}" data-event-color="${option.id}" style="--swatch:${option.value}"></button>
+      `).join("");
+      fields.color.value = EVENT_COLOR_OPTIONS.some(option => option.id === selected) ? selected : "default";
+      container.querySelectorAll("[data-event-color]").forEach(button => {
+        button.addEventListener("click", () => renderEventColorOptions(button.dataset.eventColor));
+      });
+    }
+
+    function renderAttendeeOptions(selected = ["all"]) {
+      const container = document.getElementById("eventAttendeeOptions");
+      if (!container) return;
+      const selectedSet = new Set(selected.length ? selected : ["all"]);
+      const options = [{ id: "all", label: t("form.attendeeAll"), avatar: "👥" }, ...kidProfiles.map(kid => ({ id: kid.name, label: kid.name, avatar: kid.avatar }))];
+      container.innerHTML = options.map(option => `
+        <label class="event-attendee-option${selectedSet.has(option.id) ? " is-selected" : ""}">
+          <input type="checkbox" value="${escapeHtml(option.id)}"${selectedSet.has(option.id) ? " checked" : ""}>
+          <span class="event-attendee-avatar" aria-hidden="true">${escapeHtml(option.avatar)}</span>
+          <span>${escapeHtml(option.label)}</span>
+        </label>
+      `).join("");
+      container.querySelectorAll("input").forEach(input => input.addEventListener("change", () => {
+        const all = container.querySelector('input[value="all"]');
+        const people = [...container.querySelectorAll('input:not([value="all"]):checked')];
+        if (input.value === "all" && input.checked) {
+          container.querySelectorAll('input:not([value="all"])').forEach(item => { item.checked = false; item.closest("label").classList.remove("is-selected"); });
+        } else if (input.value !== "all" && input.checked) {
+          all.checked = false;
+        }
+        if (input.value !== "all" && !people.length && !all.checked) all.checked = true;
+        container.querySelectorAll("label").forEach(label => label.classList.toggle("is-selected", label.querySelector("input").checked));
+      }));
+    }
+
+    function selectedAttendees() {
+      const selected = [...document.querySelectorAll("#eventAttendeeOptions input:checked")].map(input => input.value);
+      return selected.length ? selected : ["all"];
     }
 
     function populateFormOptions() {
@@ -13067,6 +15315,8 @@
         `<option value="${FAMILY_CHILD}">${t("calendar.family")}</option>`,
         ...Object.entries(kids).map(([name, kid]) => `<option value="${escapeHtml(name)}">${escapeHtml(kid.avatar)} ${escapeHtml(name)}</option>`)
       ].join("");
+      renderEventColorOptions("default");
+      renderAttendeeOptions();
     }
 
     function preferredNewEventChild() {
@@ -13314,12 +15564,15 @@
         || (activity.eventType && activity.eventType !== "activity")
         || fields.icon.value === CUSTOM_ICON_VALUE
         || activity.style === "purple"
+        || activity.color && activity.color !== "default"
+        || Array.isArray(activity.attendees) && activity.attendees.length && !(activity.attendees.length === 1 && activity.attendees[0] === "all")
         || activityStatus(activity) !== "confirmed"
         || Number(activity.travelMinutes) > 0
         || Boolean(activity.location || activity.responsible || activity.items || activity.notes);
     }
 
     function timeInputValue(totalMinutes) {
+      totalMinutes = Math.min(23 * 60 + 59, Math.max(0, Number(totalMinutes) || 0));
       return `${String(Math.floor(totalMinutes / 60)).padStart(2, "0")}:${String(totalMinutes % 60).padStart(2, "0")}`;
     }
 
@@ -13435,6 +15688,8 @@
       fields.title.value = activity?.title || "";
       setIconField(activity?.icon || "📖");
       fields.style.value = activity?.style || "child";
+      renderEventColorOptions(activity?.color || "default");
+      renderAttendeeOptions(activity?.attendees || ["all"]);
       fields.status.value = activityStatus(activity);
       fields.travelMinutes.value = String(Math.max(0, Number(activity?.travelMinutes) || 0));
       fields.notes.value = activity?.notes || "";
@@ -13475,6 +15730,33 @@
       fields.date.value = dateKey(date);
       fields.child.value = child;
       chooseInitialOpenTime();
+      updateConflictSuggestions();
+    }
+
+    function openCalendarActivity(activity) {
+      if (!activity?.isBuiltInHoliday) {
+        openDialog(activity);
+        return;
+      }
+      openNewEventForDate(parseDateKey(activity.startDate), FAMILY_CHILD);
+      fields.title.value = activity.title;
+      fields.eventType.value = "holiday";
+      fields.allDay.checked = true;
+      fields.recurrence.value = "yearly";
+      setIconField(activity.icon);
+      updateAllDayFields();
+      updateRecurrenceFields();
+    }
+
+    function openNewEventAtTime(date, startMinute) {
+      const safeStart = Math.min(Math.max(startMinute, scheduleStartMinutes), scheduleEndMinutes - 15);
+      const duration = Math.max(15, Number(userSettings.defaultEventDuration) || 30);
+      const safeEnd = Math.min(scheduleEndMinutes, safeStart + duration);
+      openDialog();
+      fields.date.value = dateKey(date);
+      fields.child.value = preferredNewEventChild();
+      fields.start.value = timeInputValue(safeStart);
+      fields.end.value = timeInputValue(safeEnd);
       updateConflictSuggestions();
     }
 
@@ -13753,6 +16035,26 @@
     }
 
     function renderDashboard() {
+      const profile = loadFamilyProfile();
+      const accountName = profile.name || activeAccount?.email?.split("@")[0] || "there";
+      document.getElementById("dashboardGreeting").textContent = activeAccount ? t("dashboard.greeting", { name: accountName }) : t("dashboard.greetingGuest");
+      const upcomingList = document.getElementById("dashboardUpcoming");
+      const upcoming = upcomingOccurrences(30).slice(0, 8);
+      upcomingList.innerHTML = "";
+      if (!upcoming.length) {
+        upcomingList.innerHTML = `<p class="dashboard-empty">${escapeHtml(t("dashboard.noEvents"))}</p>`;
+      } else {
+        upcoming.forEach(activity => upcomingList.appendChild(dashboardEventElement(activity, "dashboard-event")));
+      }
+      const updatesList = document.getElementById("dashboardUpdates");
+      const updates = (recentExternalAudit().length ? recentExternalAudit() : activityAudit).slice(0, 6);
+      updatesList.innerHTML = updates.length ? updates.map(entry => {
+        const actionKey = `history.${entry.action}`;
+        const action = t(actionKey) === actionKey ? entry.action : t(actionKey);
+        const count = entry.count > 1 ? ` (${entry.count})` : "";
+        const icon = entry.action === "deleted" ? "🗑️" : entry.action === "moved" ? "↔️" : entry.action === "created" ? "➕" : "✏️";
+        return `<article class="history-item"><span class="history-item-icon" aria-hidden="true">${icon}</span><span class="history-item-copy"><strong>${escapeHtml(`${action} ${entry.title || "Untitled event"}${count}`)}</strong><span>${escapeHtml(entry.actor || t("welcomeBack.actorFallback"))}</span></span><time class="history-item-time" datetime="${escapeHtml(entry.at || "")}">${escapeHtml(formatDateTime(entry.at))}</time></article>`;
+      }).join("") : `<p class="history-empty">${escapeHtml(t("history.empty"))}</p>`;
       const now = new Date();
       const monday = getMonday(now);
       const dayLoads = days.map((day, index) => {
@@ -13857,14 +16159,147 @@
       upcoming.slice(0, 12).forEach(activity => list.appendChild(dashboardEventElement(activity, "reminder-item")));
     }
 
+    function occurrenceEndDateTime(activity) {
+      const value = activity.occurrenceDate || activity.startDate;
+      if (!value) return null;
+      const date = parseDateKey(value);
+      if (activity.allDay) {
+        date.setHours(23, 59, 59, 999);
+        return date;
+      }
+      const endValue = activity.end || activity.start || "23:59";
+      const [hour, minute] = endValue.split(":").map(Number);
+      date.setHours(hour, minute, 0, 0);
+      return date;
+    }
+
+    function activityOccurrencesBetween(startDate, endDate) {
+      const activities = [];
+      const totalDays = dateSerial(endDate) - dateSerial(startDate);
+      for (let index = 0; index <= totalDays; index += 1) {
+        const date = addDays(startDate, index);
+        const day = days[(date.getDay() + 6) % 7];
+        state.activities
+          .filter(activity => activityStatus(activity) !== "cancelled")
+          .filter(activity => activityOccursOn(activity, date))
+          .forEach(activity => activities.push({ ...activity, day: day.key, occurrenceDate: dateKey(date) }));
+      }
+      return activities;
+    }
+
+    function activityListItem(activity) {
+      const date = parseDateKey(activity.occurrenceDate || activity.startDate);
+      const colors = eventColors(activity);
+      const locale = currentLanguage === "zh" ? "zh-CN" : "en-US";
+      const month = date.toLocaleDateString(locale, { month: "short" });
+      const day = date.toLocaleDateString(locale, { day: "numeric" });
+      const time = activity.allDay
+        ? t("calendar.allDay")
+        : `${formatTimeLabel(minutes(activity.start))} - ${formatTimeLabel(minutes(activity.end || activity.start))}`;
+      const details = [displayChild(activity), activity.location].filter(Boolean).join(" · ");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "activity-list-item";
+      button.style.setProperty("--list-accent", colors.line);
+      button.innerHTML = `
+        <span class="activity-list-date">${escapeHtml(month)}<strong>${escapeHtml(day)}</strong></span>
+        <span class="activity-list-icon" aria-hidden="true">${escapeHtml(displayIcon(activity))}</span>
+        <span class="activity-list-copy"><strong>${escapeHtml(activityCompactTitle(activity))}</strong><span>${escapeHtml(details)}</span></span>
+        <span class="activity-list-time">${escapeHtml(time)}</span>
+      `;
+      button.addEventListener("click", () => {
+        selectedDate = new Date(date);
+        currentWeekStart = getMonday(selectedDate);
+        currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+        listsDialog.close();
+        setSidebarActive("calendar");
+        openDialog(activity);
+      });
+      return button;
+    }
+
+    function renderActivityLists() {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const rangeStart = addDays(today, -90);
+      const rangeEnd = addDays(today, 90);
+      rangeEnd.setHours(23, 59, 59, 999);
+      const occurrences = activityOccurrencesBetween(rangeStart, rangeEnd);
+      const upcoming = occurrences
+        .filter(activity => occurrenceEndDateTime(activity)?.getTime() >= now.getTime())
+        .sort((first, second) => occurrenceDateTime(first) - occurrenceDateTime(second));
+      const past = occurrences
+        .filter(activity => occurrenceEndDateTime(activity)?.getTime() < now.getTime())
+        .sort((first, second) => occurrenceDateTime(second) - occurrenceDateTime(first));
+
+      document.getElementById("listsSummary").innerHTML = `
+        <button class="lists-summary-item" type="button" data-list-jump="upcoming" aria-label="${escapeHtml(t("lists.viewUpcoming"))}"><span class="lists-summary-icon" aria-hidden="true">↑</span><span class="lists-summary-copy"><strong>${escapeHtml(upcoming.length)}</strong><span>${escapeHtml(t("lists.upcomingSummary"))}</span></span><span class="lists-summary-jump" aria-hidden="true">›</span></button>
+        <button class="lists-summary-item is-past" type="button" data-list-jump="past" aria-label="${escapeHtml(t("lists.viewPast"))}"><span class="lists-summary-icon" aria-hidden="true">✓</span><span class="lists-summary-copy"><strong>${escapeHtml(past.length)}</strong><span>${escapeHtml(t("lists.pastSummary"))}</span></span><span class="lists-summary-jump" aria-hidden="true">›</span></button>
+      `;
+      document.querySelectorAll("[data-list-jump]").forEach(button => {
+        button.addEventListener("click", () => {
+          const target = document.querySelector(button.dataset.listJump === "past" ? ".activity-list-past" : ".activity-list-upcoming");
+          target?.scrollIntoView({ behavior: userSettings.reduceMotion ? "auto" : "smooth", block: "start" });
+        });
+      });
+      document.getElementById("upcomingActivitiesCount").textContent = t("lists.items", { count: upcoming.length });
+      document.getElementById("pastActivitiesCount").textContent = t("lists.items", { count: past.length });
+
+      const upcomingList = document.getElementById("upcomingActivitiesList");
+      const pastList = document.getElementById("pastActivitiesList");
+      upcomingList.innerHTML = "";
+      pastList.innerHTML = "";
+      if (!upcoming.length) upcomingList.innerHTML = `<p class="activity-list-empty">${escapeHtml(t("lists.emptyUpcoming"))}</p>`;
+      else upcoming.forEach(activity => upcomingList.appendChild(activityListItem(activity)));
+      if (!past.length) pastList.innerHTML = `<p class="activity-list-empty">${escapeHtml(t("lists.emptyPast"))}</p>`;
+      else past.forEach(activity => pastList.appendChild(activityListItem(activity)));
+    }
+
+    function openListsDialog() {
+      renderActivityLists();
+      listsDialog.showModal();
+    }
+
     function openDashboardDialog() {
       renderDashboard();
       dashboardDialog.showModal();
     }
 
+    function renderMapResults(query = "restaurants") {
+      const cleanQuery = String(query || "restaurants").trim() || "family activities";
+      const results = document.getElementById("mapResults");
+      const encodedQuery = encodeURIComponent(`${cleanQuery} near me`);
+      results.innerHTML = `<div class="map-result-card"><span class="map-result-icon" aria-hidden="true">⌖</span><div><strong>${escapeHtml(t("map.searching", { query: cleanQuery }))}</strong><p>Open a live map search to see places, hours, directions, and reviews.</p></div><a class="small-btn" href="https://www.google.com/maps/search/?api=1&query=${encodedQuery}" target="_blank" rel="noopener">${escapeHtml(t("map.open"))}</a></div>`;
+    }
+
+    function openMapDialog() {
+      document.getElementById("mapSearch").value = "";
+      document.querySelectorAll("[data-map-category]").forEach(button => button.classList.toggle("is-selected", button.dataset.mapCategory === "restaurants"));
+      renderMapResults("restaurants");
+      mapDialog.showModal();
+    }
+
     function openRemindersDialog() {
       renderReminders();
       remindersDialog.showModal();
+    }
+
+    function renderSidebarCalendarSwitcher() {
+      const host = document.getElementById("sidebarCalendarSwitcher");
+      if (!host) return;
+      const mine = calendars.slice(0, 1);
+      const other = calendars.slice(1);
+      const group = (label, items) => items.length ? `<div class="sidebar-calendar-group"><div class="sidebar-calendar-heading"><span>${escapeHtml(label)}</span>${label === t("calendars.myCalendars") ? `<button type="button" data-sidebar-add-calendar aria-label="${escapeHtml(t("calendars.add"))}" title="${escapeHtml(t("calendars.add"))}">＋</button>` : ""}</div>${items.map(calendar => `<button class="sidebar-calendar-row${calendar.id === currentCalendarId ? " is-selected" : ""}" type="button" data-sidebar-calendar="${escapeHtml(calendar.id)}" aria-pressed="${calendar.id === currentCalendarId}"><span class="sidebar-calendar-check" style="background:${escapeHtml(calendar.color || "#1f6898")}">${calendar.id === currentCalendarId ? "✓" : ""}</span><span class="sidebar-calendar-name">${escapeHtml(calendar.name)}</span><span class="sidebar-calendar-more" aria-hidden="true">⋮</span></button>`).join("")}</div>` : "";
+      host.innerHTML = group(t("calendars.myCalendars"), mine) + group(t("calendars.otherCalendars"), other);
+      host.querySelectorAll("[data-sidebar-calendar]").forEach(button => button.addEventListener("click", () => {
+        switchCalendar(button.dataset.sidebarCalendar);
+        document.getElementById("sidebarMenu").open = false;
+      }));
+      host.querySelector("[data-sidebar-add-calendar]")?.addEventListener("click", event => {
+        event.stopPropagation();
+        document.getElementById("sidebarMenu").open = false;
+        document.getElementById("manageCalendars").click();
+      });
     }
 
     function renderCalendarSelector() {
@@ -13873,6 +16308,7 @@
       select.innerHTML = calendars.map(calendar => `<option value="${escapeHtml(calendar.id)}"${calendar.id === currentCalendarId ? " selected" : ""}>${escapeHtml(calendar.icon || "📅")} ${escapeHtml(calendar.name)}</option>`).join("");
       const activeCalendar = calendars.find(calendar => calendar.id === currentCalendarId);
       document.querySelector(".calendar-workspace")?.style.setProperty("--calendar-accent", activeCalendar?.color || "#2f7fd3");
+      renderSidebarCalendarSwitcher();
     }
 
     function renderCalendarList() {
@@ -14982,6 +17418,7 @@
       renderKidFilters();
       updateCalendarControls();
       updateWeekLabel();
+      renderMiniCalendar();
       renderGrid();
       renderAgenda();
       renderToday();
@@ -14994,7 +17431,7 @@
     }
 
     function scrollWeekToFirstActivity() {
-      if (currentView !== "week" || window.matchMedia("(max-width: 740px)").matches) return;
+      if (!["week", "four"].includes(currentView) || window.matchMedia("(max-width: 740px)").matches) return;
       const timedActivities = visibleActivities().filter(activity => !activity.allDay && activity.start);
       if (!timedActivities.length) return;
       const firstStart = Math.min(...timedActivities.map(activity => minutes(activity.start)));
@@ -15018,9 +17455,10 @@
         currentMonthStart = new Date(currentMonthStart.getFullYear(), currentMonthStart.getMonth() + direction, 1);
         selectedDate = new Date(currentMonthStart);
       } else {
-        currentWeekStart = addDays(currentWeekStart, direction * 7);
+        currentWeekStart = addDays(currentWeekStart, direction * (currentView === "four" ? 4 : 7));
         selectedDate = new Date(currentWeekStart);
       }
+      miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       renderAll();
     }
 
@@ -15028,8 +17466,9 @@
       selectedDate = new Date();
       currentWeekStart = getMonday(selectedDate);
       currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       renderAll();
-      if (currentView === "week" && userSettings.focusFirstEvent) {
+      if (["week", "four"].includes(currentView) && userSettings.focusFirstEvent) {
         requestAnimationFrame(scrollWeekToFirstActivity);
       }
     }
@@ -15087,7 +17526,41 @@
     document.getElementById("continuePreview").addEventListener("click", showGuestPreview);
     document.getElementById("backToWelcome").addEventListener("click", showWelcomeScreen);
     document.getElementById("logoutButton").addEventListener("click", logOut);
-    document.getElementById("openSettings").addEventListener("click", openSettingsDialog);
+    document.getElementById("openSettings").addEventListener("click", () => { setSidebarActive("settings"); openSettingsDialog(); });
+    document.querySelectorAll("[data-sidebar-action]").forEach(button => {
+      button.addEventListener("click", () => handleSidebarAction(button.dataset.sidebarAction));
+    });
+    document.getElementById("focusScheduleSearch").addEventListener("click", () => {
+      document.querySelector(".schedule-overview").scrollIntoView({
+        behavior: userSettings.reduceMotion ? "auto" : "smooth",
+        block: "center"
+      });
+      window.setTimeout(() => scheduleSearch.focus(), userSettings.reduceMotion ? 0 : 250);
+    });
+    const periodDatePicker = document.getElementById("periodDatePicker");
+    document.getElementById("openPeriodPicker").addEventListener("click", () => {
+      periodDatePicker.value = dateKey(selectedDate);
+      if (typeof periodDatePicker.showPicker === "function") periodDatePicker.showPicker();
+      else {
+        periodDatePicker.focus();
+        periodDatePicker.click();
+      }
+    });
+    periodDatePicker.addEventListener("change", event => {
+      if (!event.currentTarget.value) return;
+      selectedDate = parseDateKey(event.currentTarget.value);
+      currentWeekStart = getMonday(selectedDate);
+      currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      renderAll();
+    });
+    document.getElementById("closeSidebarHelp").addEventListener("click", closeSidebarHelpDialog);
+    document.getElementById("doneSidebarHelp").addEventListener("click", closeSidebarHelpDialog);
+    sidebarHelpDialog.addEventListener("cancel", event => {
+      event.preventDefault();
+      closeSidebarHelpDialog();
+    });
+    sidebarHelpDialog.addEventListener("close", () => setSidebarActive("calendar"));
     document.getElementById("calendarSelect").addEventListener("change", event => switchCalendar(event.currentTarget.value));
     document.getElementById("manageCalendars").addEventListener("click", openCalendarDialog);
     document.getElementById("closeCalendarDialog").addEventListener("click", () => document.getElementById("calendarDialog").close());
@@ -15214,8 +17687,24 @@
     });
     document.getElementById("openDashboard").addEventListener("click", openDashboardDialog);
     document.getElementById("closeDashboard").addEventListener("click", () => dashboardDialog.close());
+    document.getElementById("dashboardGoCalendar").addEventListener("click", () => {
+      dashboardDialog.close();
+      handleSidebarAction("calendar");
+    });
+    document.getElementById("closeMap").addEventListener("click", () => mapDialog.close());
+    document.getElementById("mapSearchButton").addEventListener("click", () => renderMapResults(document.getElementById("mapSearch").value));
+    document.getElementById("mapSearch").addEventListener("keydown", event => {
+      if (event.key === "Enter") renderMapResults(event.currentTarget.value);
+    });
+    document.querySelectorAll("[data-map-category]").forEach(button => button.addEventListener("click", () => {
+      document.querySelectorAll("[data-map-category]").forEach(item => item.classList.toggle("is-selected", item === button));
+      document.getElementById("mapSearch").value = button.dataset.mapCategory;
+      renderMapResults(button.dataset.mapCategory);
+    }));
     document.getElementById("openReminders").addEventListener("click", openRemindersDialog);
     document.getElementById("closeReminders").addEventListener("click", () => remindersDialog.close());
+    document.getElementById("closeLists").addEventListener("click", () => listsDialog.close());
+    listsDialog.addEventListener("close", () => setSidebarActive("calendar"));
     document.getElementById("openActivityHistory").addEventListener("click", () => {
       document.getElementById("moreActions").open = false;
       renderActivityHistory();
@@ -15250,15 +17739,30 @@
       openSettingsDialog();
     });
     document.getElementById("cloudSyncAction").addEventListener("click", handleCloudSyncAction);
+    document.getElementById("notificationSignIn").addEventListener("click", () => {
+      closeSettingsDialog();
+      showAuthScreen("signin");
+    });
     document.getElementById("closeSettings").addEventListener("click", closeSettingsDialog);
     document.getElementById("doneSettings").addEventListener("click", closeSettingsDialog);
+    document.querySelectorAll("[data-appearance-choice]").forEach(choice => {
+      choice.addEventListener("click", () => setAppearanceMode(choice.dataset.appearanceChoice));
+    });
+    document.getElementById("appearanceDialogDone").addEventListener("click", dismissAppearanceDialog);
+    appearanceDialog.addEventListener("cancel", event => {
+      event.preventDefault();
+      dismissAppearanceDialog();
+    });
     document.getElementById("notificationsEnabled").addEventListener("change", handleNotificationToggle);
     document.getElementById("reminderMinutes").addEventListener("change", event => {
       saveSetting("reminderMinutes", Number(event.currentTarget.value));
       startNotificationChecks();
     });
     document.getElementById("darkModeEnabled").addEventListener("change", event => {
-      saveSetting("darkMode", event.currentTarget.checked);
+      setAppearanceMode(event.currentTarget.checked ? "dark" : "light");
+    });
+    document.getElementById("appearanceModeSelect").addEventListener("change", event => {
+      setAppearanceMode(event.currentTarget.value);
     });
     document.getElementById("colorTheme").addEventListener("change", event => {
       saveSetting("colorTheme", event.currentTarget.value, { rerender: true });
@@ -15285,7 +17789,7 @@
     document.getElementById("focusFirstEvent").addEventListener("change", event => {
       saveSetting("focusFirstEvent", event.currentTarget.checked);
     });
-    document.getElementById("addActivity").addEventListener("click", () => openDialog());
+    document.getElementById("addActivity").addEventListener("click", () => { setSidebarActive("activities"); openDialog(); });
     document.getElementById("loadPreset").addEventListener("click", loadAndrewMarkPreset);
     document.getElementById("emptyAddKid").addEventListener("click", openKidsDialogWithStarter);
     document.getElementById("emptyAddEvent").addEventListener("click", () => openNewEventForDate(selectedDate, FAMILY_CHILD));
@@ -15308,8 +17812,13 @@
       button.addEventListener("click", () => setLanguage(button.dataset.language));
     });
     document.querySelectorAll("[data-view]").forEach(button => {
-      button.addEventListener("click", () => activateCalendarView(button.dataset.view));
+      button.addEventListener("click", () => {
+        setSidebarActive("calendar");
+        document.getElementById("calendarViewMenu").open = false;
+        activateCalendarView(button.dataset.view);
+      });
     });
+    document.getElementById("toggleWeekendsMenu").addEventListener("click", () => toggleWeekendsButton.click());
     scheduleSearch.addEventListener("input", event => {
       state.searchQuery = event.currentTarget.value;
       conflictCursor = 0;
@@ -15323,6 +17832,27 @@
       travelCursor = 0;
       renderAll();
       scheduleSearch.focus();
+    });
+    document.addEventListener("keydown", event => {
+      const target = event.target;
+      const isTyping = target instanceof HTMLElement && target.matches("input, textarea, select, [contenteditable='true']");
+      if (event.key === "/" && !isTyping && !document.querySelector("dialog[open]")) {
+        event.preventDefault();
+        document.querySelector(".schedule-overview").scrollIntoView({
+          behavior: userSettings.reduceMotion ? "auto" : "smooth",
+          block: "center"
+        });
+        scheduleSearch.focus();
+        scheduleSearch.select();
+      }
+      if (event.key === "Escape" && document.activeElement === scheduleSearch && state.searchQuery) {
+        event.preventDefault();
+        state.searchQuery = "";
+        scheduleSearch.value = "";
+        conflictCursor = 0;
+        travelCursor = 0;
+        renderAll();
+      }
     });
     document.getElementById("resetScheduleFilters").addEventListener("click", resetScheduleFilters);
     jumpConflictButton.addEventListener("click", jumpToNextConflict);
@@ -15376,6 +17906,8 @@
     document.addEventListener("click", event => {
       const menu = document.getElementById("moreActions");
       if (menu.open && !menu.contains(event.target)) menu.open = false;
+      const sidebarMenu = document.getElementById("sidebarMenu");
+      if (sidebarMenu.open && !sidebarMenu.contains(event.target)) sidebarMenu.open = false;
     });
     presetForm.addEventListener("submit", event => event.preventDefault());
     settingsForm.addEventListener("submit", event => event.preventDefault());
@@ -15399,6 +17931,19 @@
       navigateCalendar(1);
     });
     document.getElementById("jumpToday").addEventListener("click", jumpToToday);
+    document.getElementById("miniCalendarPrevious").addEventListener("click", () => {
+      miniCalendarMonth = new Date(miniCalendarMonth.getFullYear(), miniCalendarMonth.getMonth() - 1, 1);
+      renderMiniCalendar();
+    });
+    document.getElementById("miniCalendarNext").addEventListener("click", () => {
+      miniCalendarMonth = new Date(miniCalendarMonth.getFullYear(), miniCalendarMonth.getMonth() + 1, 1);
+      renderMiniCalendar();
+    });
+    document.getElementById("miniAddActivity").addEventListener("click", () => document.getElementById("addActivity").click());
+    document.getElementById("miniOpenDashboard").addEventListener("click", () => document.getElementById("openDashboard").click());
+    document.getElementById("miniOpenReminders").addEventListener("click", () => document.getElementById("openReminders").click());
+    document.getElementById("miniShareSchedule").addEventListener("click", () => document.getElementById("shareSchedule").click());
+    document.getElementById("miniManageCalendars").addEventListener("click", () => document.getElementById("manageCalendars").click());
     window.setInterval(updateCurrentTimeMarkers, 60000);
 
     form.addEventListener("submit", event => {
@@ -15431,6 +17976,8 @@
         title: fields.title.value.trim(),
         icon: selectedEventIcon(),
         style: fields.style.value,
+        color: fields.color.value || "default",
+        attendees: selectedAttendees(),
         status: fields.status.value,
         travelMinutes: Math.max(0, Number(fields.travelMinutes.value) || 0),
         notes: fields.notes.value.trim(),
@@ -15547,9 +18094,15 @@
       });
     }
 
+    const deviceAppearanceQuery = window.matchMedia?.("(prefers-color-scheme: dark)");
+    deviceAppearanceQuery?.addEventListener?.("change", () => {
+      if (userSettings.appearanceMode === "device") applySettings();
+    });
+
     applySettings();
     applyStaticTranslations();
     initializeAuthUI();
+    window.setTimeout(maybeShowAppearancePrompt, 650);
     populateFormOptions();
     renderAll();
     startNotificationChecks();

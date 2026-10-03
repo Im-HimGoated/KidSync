@@ -1,10 +1,11 @@
-const CACHE_NAME = "kidssync-shell-v17";
+const CACHE_NAME = "kidssync-shell-v30";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
   "./assets/kidssync-family-table-v2.png",
   "./assets/kidssync-family-hero.jpg",
+  "./assets/kidssync-auth-family.png",
   "./assets/jspdf.umd.min.js"
 ];
 
