@@ -30,7 +30,7 @@ The publishable key is designed for browser use. Never add a `service_role` or s
 
 ## Security Advisor notes
 
-After running `supabase/schema.sql`, rerun the Supabase Security Advisor. Owner-managed member updates use `SECURITY INVOKER`, restricted column grants, and RLS, so they should not appear under **Signed-In Users Can Execute SECURITY DEFINER Function**.
+If the live database predates the current schema, run `supabase/security-advisor-fix.sql` in the KidsSync SQL Editor, then rerun the Security Advisor. It replaces the two owner-managed member update functions with `SECURITY INVOKER` versions, restricts their column grants, and ensures the owner update policy exists. It does not delete calendar data.
 
 Two reviewed functions intentionally remain `SECURITY DEFINER` because they perform narrowly scoped cross-owner operations:
 
@@ -38,3 +38,5 @@ Two reviewed functions intentionally remain `SECURITY DEFINER` because they perf
 - `update_shared_calendar_activities` updates only one shared calendar's activities after checking the signed-in user is its active editor.
 
 Both functions use an empty `search_path`, fully qualified table names, explicit input validation, and execution grants limited to `authenticated`. Removing that grant will break invitation acceptance or editor access; moving those operations to a server-side Edge Function is the larger alternative if a zero-finding Advisor report is required.
+
+**Leaked Password Protection Disabled** cannot be resolved on a Free plan. Supabase makes that Auth setting available on Pro and above. Upgrading is a billing decision; do not replace this with a browser-only password check, which cannot enforce the policy for all sign-up and password-change routes.

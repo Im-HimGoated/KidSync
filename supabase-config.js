@@ -10,3 +10,9 @@ window.KIDSSYNC_SUPABASE = {
 window.KIDSSYNC_MONITORING = {
   sentryLoaderUrl: ""
 };
+
+// Optional browser-restricted Google Maps Embed API key for the in-app map.
+// Enable the Maps Embed API and restrict the key to your site's HTTP referrers.
+window.KIDSSYNC_GOOGLE_MAPS = {
+  embedApiKey: ""
+};

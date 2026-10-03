@@ -1704,7 +1704,6 @@
       line-height: 1.35;
     }
 
-    .app.is-calendar-empty .calendar-view,
     .app.has-no-search-results .calendar-view {
       display: none !important;
     }
@@ -2105,6 +2104,21 @@
     .event:hover {
       outline: 3px solid rgba(25, 118, 210, 0.18);
     }
+
+    .event-peek { position:fixed; z-index:600; width:min(310px,calc(100vw - 24px)); padding:14px; border:1px solid var(--line); border-radius:12px; color:var(--ink); background:var(--panel); box-shadow:0 16px 40px rgba(17,39,58,.22); }
+    .event-peek[hidden] { display:none; }
+    .event-peek strong, .event-peek span { display:block; }
+    .event-peek strong { font-size:15px; line-height:1.25; }
+    .event-peek span { margin-top:5px; color:var(--muted); font-size:12px; line-height:1.4; }
+    .event-peek-actions { display:flex; gap:8px; margin-top:12px; }
+    .event-peek-actions button { flex:1; }
+    .event-details-dialog { width:min(480px,calc(100% - 24px)); }
+    .event-details-body { padding:20px; }
+    .event-details-body h3 { margin:0 0 16px; color:var(--ink); font-size:20px; }
+    .event-details-body dl { display:grid; gap:12px; margin:0; }
+    .event-details-body dt { color:var(--muted); font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; }
+    .event-details-body dd { margin:3px 0 0; color:var(--ink); font-size:14px; overflow-wrap:anywhere; white-space:pre-wrap; }
+    .event-details-actions { display:flex; justify-content:flex-end; gap:8px; padding:0 20px 20px; }
 
     .event.is-draggable,
     .all-day-event.is-draggable {
@@ -2981,7 +2995,7 @@
     .dashboard-overview-grid .dashboard-section { padding:16px; border:1px solid var(--line); border-radius:12px; background:var(--panel); }
     .dashboard-section-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
     .dashboard-section-heading .dashboard-section-note { margin-bottom:0; }
-    .map-dialog { width:min(680px,calc(100% - 24px)); }
+    .map-dialog { width:min(900px,calc(100% - 24px)); max-height:min(92vh,900px); }
     .map-body { padding:20px; }
     .map-search-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; margin-top:16px; }
     .map-search-row input { min-width:0; min-height:42px; padding:0 12px; border:1px solid var(--line); border-radius:9px; color:var(--ink); background:var(--panel); font:inherit; }
@@ -2992,8 +3006,17 @@
     .map-result-icon { display:grid; width:38px; height:38px; place-items:center; border-radius:12px; color:#fff; background:var(--blue); font-size:22px; }
     .map-result-card strong { display:block; color:var(--ink); font-size:15px; }
     .map-result-card p { margin:4px 0 0; color:var(--muted); font-size:12px; line-height:1.4; }
+    .map-location-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    .map-location-row span { color:var(--muted); font-size:12px; }
+    .map-live-view { display:grid; min-height:340px; place-items:center; overflow:hidden; border:1px solid var(--line); border-radius:12px; background:var(--panel); }
+    .map-live-view.is-unconfigured { min-height:100px; }
+    .map-live-view iframe { display:block; width:100%; height:340px; border:0; }
+    .map-live-view iframe[hidden] { display:none; }
+    .map-live-empty { max-width:420px; padding:24px; color:var(--muted); text-align:center; line-height:1.5; }
+    .map-results { margin-top:12px; }
+    .map-result-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
     html.dark-mode .map-category:hover, html.dark-mode .map-category.is-selected { color:#b8dbff; background:#213541; }
-    @media (max-width:700px) { .dashboard-overview-grid { grid-template-columns:1fr; } .dashboard-section-heading { flex-direction:column; } .map-result-card { grid-template-columns:36px minmax(0,1fr); } .map-result-card .small-btn { grid-column:2; justify-self:start; } }
+    @media (max-width:700px) { .dashboard-overview-grid { grid-template-columns:1fr; } .dashboard-section-heading { flex-direction:column; } .map-result-card { grid-template-columns:36px minmax(0,1fr); } .map-result-actions { grid-column:2; justify-content:flex-start; } .map-live-view:not(.is-unconfigured), .map-live-view iframe { min-height:280px; height:280px; } }
     .dashboard-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
     .dashboard-stat { min-width: 0; padding: 18px; border-right: 1px solid var(--line); background: var(--panel); }
     .dashboard-stat:last-child { border-right: 0; }
@@ -5504,9 +5527,25 @@
       line-height: 1.55;
     }
 
+    .preview-week-summary {
+      padding: 16px;
+      border: 1px solid #cadbd5;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .72);
+    }
+
+    .preview-week-summary h3 { margin: 0; color: #244d68; font-size: 15px; }
+    .preview-week-summary p { margin: 3px 0 16px; color: #4e6371; font-size: 13px; }
+    .preview-week-chart { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+    .preview-week-day { display: grid; grid-template-rows: auto 70px auto; gap: 5px; min-width: 0; color: #36596d; text-align: center; }
+    .preview-week-day strong { font-size: 12px; }
+    .preview-week-day > span:last-child { font-size: 11px; font-weight: 800; }
+    .preview-week-bar-track { display: flex; align-items: end; justify-content: center; overflow: hidden; border-radius: 6px; background: #e4efea; }
+    .preview-week-bar { width: 58%; height: var(--preview-load); border-radius: 5px 5px 2px 2px; background: #2e7b66; }
+    .preview-week-day.is-busy .preview-week-bar { background: #1f6898; }
+
     .preview-advice-title {
-      margin: auto 0 0;
-      padding-top: 8px;
+      margin: 20px 0 0;
       color: #244d68;
       font-size: 14px;
     }
@@ -5741,6 +5780,10 @@
     html.dark-mode .preview-limit-review > p:not(.preview-limit-kicker),
     html.dark-mode .preview-advice-list li { color: var(--muted); }
     html.dark-mode .preview-advice-list li { border-color: var(--line); }
+    html.dark-mode .preview-week-summary { border-color: var(--line); background: #223a37; }
+    html.dark-mode .preview-week-summary h3, html.dark-mode .preview-week-day { color: var(--ink); }
+    html.dark-mode .preview-week-summary p { color: var(--muted); }
+    html.dark-mode .preview-week-bar-track { background: #344e49; }
     html.dark-mode .preview-loss-warning { border-color: #7c6334; color: #f0d8a8; background: #332b1b; }
     html.dark-mode .preview-photo-button,
     html.dark-mode .preview-icon-option span { border-color: var(--line); color: var(--ink); background: #1d2b35; }
@@ -5768,6 +5811,8 @@
       .preview-limit-review { padding: 22px 18px; }
       .preview-limit-kicker { margin-bottom: 14px; }
       .preview-limit-review h2 { font-size: 23px; }
+      .preview-week-summary { padding: 12px; }
+      .preview-week-day { grid-template-rows: auto 54px auto; }
       .preview-advice-list li { padding: 10px 0; }
       .preview-profile-form { padding: 22px 18px 24px; }
       .preview-icon-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -8833,6 +8878,369 @@
         .activity-list-time { grid-column:3; justify-self:start; }
       }
     </style>
+    <style>
+      /* Give the main calendar roughly four fifths of the planner width. */
+      @media (min-width: 901px) {
+        #appShell { width: calc(100% - 24px); max-width: none; }
+        .calendar-stage { grid-template-columns: minmax(0, 4fr) minmax(205px, 1fr); gap: 12px; }
+      }
+      @media (max-width: 900px) {
+        .calendar-stage-main { grid-column: 1; grid-row: 1; }
+        .mini-calendar { grid-column: 1; grid-row: 2; }
+      }
+    </style>
+    <style>
+      /* Dashboard is a full planner view, not a dialog layered over the calendar. */
+      .app.is-dashboard-view > .topbar,
+      .app.is-dashboard-view > .toolbar,
+      .app.is-dashboard-view > .schedule-overview,
+      .app.is-dashboard-view > .calendar-empty-state,
+      .app.is-dashboard-view > .search-empty-state,
+      .app.is-dashboard-view > .calendar-stage { display:none !important; }
+      .dashboard-page:not([hidden]) { display:block; min-height:calc(100vh - 154px); }
+      .dashboard-page-header { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; padding:26px 2px 20px; border-bottom:1px solid var(--line); }
+      .dashboard-page-kicker, .dashboard-panel-kicker { margin:0 0 6px; color:#2f7654; font-size:10px; font-weight:900; text-transform:uppercase; }
+      .dashboard-page-header h1 { margin:0; color:var(--ink); font-size:36px; line-height:1.05; letter-spacing:0; }
+      .dashboard-page-header .dashboard-greeting { margin:8px 0 0; color:var(--muted); font-size:14px; font-weight:700; letter-spacing:0; }
+      .dashboard-page-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
+      .dashboard-page-actions button { min-height:42px; }
+      .dashboard-page-actions button > span:first-child { font-size:17px; line-height:1; }
+      .dashboard-page .dashboard-stats { grid-template-columns:repeat(4,minmax(0,1fr)); margin:18px 0; border-radius:8px; background:var(--panel); }
+      .dashboard-page .dashboard-stat { padding:15px 18px; }
+      .dashboard-page .dashboard-stat strong { font-size:26px; }
+      .dashboard-page-grid { display:grid; grid-template-columns:minmax(0,1.48fr) minmax(320px,.72fr); gap:18px; align-items:start; }
+      .dashboard-main-column, .dashboard-side-column { min-width:0; display:grid; gap:18px; }
+      .dashboard-panel { min-width:0; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--panel); box-shadow:0 9px 24px rgba(31,49,86,.06); }
+      .dashboard-panel-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:18px 20px; border-bottom:1px solid var(--line); }
+      .dashboard-panel-heading h2 { margin:0; color:var(--ink); font-size:18px; line-height:1.2; letter-spacing:0; }
+      .dashboard-panel-heading p:not(.dashboard-panel-kicker) { margin:5px 0 0; color:var(--muted); font-size:12px; font-weight:700; line-height:1.45; }
+      .dashboard-map-canvas { position:relative; min-height:360px; overflow:hidden; isolation:isolate; background:#e7f0e8; }
+      .dashboard-map-canvas::before { content:""; position:absolute; inset:0; z-index:-3; background-image:linear-gradient(90deg,transparent 24%,rgba(112,157,119,.14) 25%,rgba(112,157,119,.14) 26%,transparent 27%,transparent 71%,rgba(112,157,119,.12) 72%,rgba(112,157,119,.12) 74%,transparent 75%),linear-gradient(0deg,transparent 18%,rgba(112,157,119,.13) 19%,rgba(112,157,119,.13) 21%,transparent 22%,transparent 69%,rgba(112,157,119,.12) 70%,rgba(112,157,119,.12) 72%,transparent 73%); background-size:190px 150px; }
+      .dashboard-map-canvas::after { content:""; position:absolute; inset:9% 8%; z-index:-2; border:18px solid #c7e2e7; border-radius:45% 18% 38% 24%; transform:rotate(-8deg); opacity:.9; }
+      .dashboard-map-road { position:absolute; z-index:-1; height:30px; border:7px solid rgba(255,255,255,.95); border-inline:0; background:#d4dce0; box-shadow:0 0 0 1px rgba(126,145,152,.2); }
+      .dashboard-map-road.road-one { width:130%; top:42%; left:-14%; transform:rotate(-9deg); }
+      .dashboard-map-road.road-two { width:105%; top:58%; left:22%; transform:rotate(57deg); }
+      .dashboard-map-road.road-three { width:78%; top:17%; left:-8%; transform:rotate(31deg); }
+      .dashboard-map-pins { position:absolute; inset:0; }
+      .dashboard-map-pin { position:absolute; left:var(--pin-x); top:var(--pin-y); max-width:min(220px,42%); display:flex; align-items:center; gap:7px; padding:7px 10px 7px 7px; border:1px solid rgba(31,91,74,.28); border-radius:8px; color:#173f33; background:rgba(255,255,255,.96); box-shadow:0 7px 18px rgba(22,59,49,.18); font-size:11px; font-weight:850; text-align:left; transform:translate(-50%,-100%); }
+      .dashboard-map-pin::after { content:""; position:absolute; left:20px; bottom:-7px; width:12px; height:12px; border-right:1px solid rgba(31,91,74,.28); border-bottom:1px solid rgba(31,91,74,.28); background:#fff; transform:rotate(45deg); }
+      .dashboard-map-pin:hover, .dashboard-map-pin:focus-visible { border-color:#2f7654; background:#fff; outline:3px solid rgba(47,118,84,.2); transform:translate(-50%,-100%); }
+      .dashboard-map-pin-icon { position:relative; z-index:1; display:grid; flex:0 0 29px; width:29px; height:29px; place-items:center; border-radius:50%; color:#fff; background:#2877a7; font-size:16px; }
+      .dashboard-map-pin-copy { position:relative; z-index:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .dashboard-map-empty { position:absolute; inset:0; display:grid; align-content:center; justify-items:center; gap:10px; padding:30px; color:#426153; background:rgba(236,245,238,.82); text-align:center; }
+      .dashboard-map-empty[hidden] { display:none; }
+      .dashboard-map-empty span { display:grid; width:46px; height:46px; place-items:center; border-radius:50%; color:#fff; background:#2f7654; font-size:24px; }
+      .dashboard-map-empty strong { max-width:280px; font-size:13px; }
+      .dashboard-location-list { display:flex; gap:8px; overflow:auto; padding:12px 16px; border-top:1px solid var(--line); scrollbar-width:thin; }
+      .dashboard-location-chip { flex:0 0 auto; display:inline-flex; align-items:center; gap:6px; min-height:32px; padding:0 10px; border:1px solid var(--line); border-radius:7px; color:var(--ink); background:transparent; font-size:11px; font-weight:800; }
+      .dashboard-location-chip:hover, .dashboard-location-chip:focus-visible { border-color:#73a894; background:#ecf5ef; outline:none; transform:none; }
+      .dashboard-timeline, .dashboard-feed { display:grid; }
+      .dashboard-timeline-item { width:100%; display:grid; grid-template-columns:48px minmax(0,1fr); gap:12px; align-items:center; min-height:82px; padding:12px 16px; border:0; border-bottom:1px solid var(--line); color:var(--ink); background:transparent; text-align:left; }
+      .dashboard-timeline-item:last-child { border-bottom:0; }
+      .dashboard-timeline-item:hover, .dashboard-timeline-item:focus-visible { background:var(--blue-soft); outline:none; transform:none; }
+      .dashboard-event-date { display:grid; width:48px; min-height:50px; place-items:center; align-content:center; border:1px solid var(--line); border-top:5px solid var(--event-accent,#2877a7); border-radius:7px; background:var(--panel); color:var(--muted); font-size:9px; font-weight:900; line-height:1; text-transform:uppercase; }
+      .dashboard-event-date strong { margin-top:4px; color:var(--ink); font-size:20px; line-height:1; }
+      .dashboard-event-content { min-width:0; display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:10px; row-gap:4px; }
+      .dashboard-event-content strong { overflow:hidden; color:var(--ink); font-size:13px; text-overflow:ellipsis; white-space:nowrap; }
+      .dashboard-event-time { color:#1f5c85; font-size:11px; font-weight:900; white-space:nowrap; }
+      .dashboard-event-meta { grid-column:1 / -1; overflow:hidden; color:var(--muted); font-size:11px; font-weight:700; text-overflow:ellipsis; white-space:nowrap; }
+      .dashboard-event-relative { grid-column:1 / -1; color:#2f7654; font-size:10px; font-weight:900; }
+      .dashboard-past-panel .dashboard-timeline-item { opacity:.86; }
+      .dashboard-past-panel .dashboard-event-relative { color:#6b7780; }
+      .dashboard-feed-item { display:grid; grid-template-columns:42px minmax(0,1fr) auto; gap:12px; align-items:start; padding:15px 20px; border-bottom:1px solid var(--line); }
+      .dashboard-feed-item:last-child { border-bottom:0; }
+      .dashboard-feed-icon { display:grid; width:42px; height:42px; place-items:center; border-radius:8px; color:#fff; background:#2877a7; font-size:19px; }
+      .dashboard-feed-copy { min-width:0; }
+      .dashboard-feed-copy strong { display:block; color:var(--ink); font-size:13px; line-height:1.4; }
+      .dashboard-feed-copy span { display:block; margin-top:4px; color:var(--muted); font-size:11px; font-weight:700; }
+      .dashboard-feed-time { color:#2f7654; font-size:10px; font-weight:900; white-space:nowrap; }
+      .dashboard-empty { display:grid; min-height:120px; place-items:center; margin:0; padding:22px; color:var(--muted); font-size:12px; font-weight:750; text-align:center; }
+      html.dark-mode .dashboard-panel, html.dark-mode .dashboard-stat { background:#1b2a34; }
+      html.dark-mode .dashboard-map-canvas { background:#233d36; }
+      html.dark-mode .dashboard-map-canvas::before { opacity:.42; }
+      html.dark-mode .dashboard-map-canvas::after { border-color:#27515b; }
+      html.dark-mode .dashboard-map-road { border-color:#30414b; background:#68747c; }
+      html.dark-mode .dashboard-map-pin { border-color:#59766b; color:#e8f4ed; background:#1c302a; }
+      html.dark-mode .dashboard-map-pin::after { border-color:#59766b; background:#1c302a; }
+      html.dark-mode .dashboard-location-chip:hover, html.dark-mode .dashboard-location-chip:focus-visible { background:#244438; }
+      html.dark-mode .dashboard-event-time { color:#b8dbff; }
+      html.dark-mode .dashboard-event-relative, html.dark-mode .dashboard-feed-time { color:#9fd3b6; }
+      @media (max-width:980px) {
+        .dashboard-page-grid { grid-template-columns:minmax(0,1fr); }
+        .dashboard-side-column { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      }
+      @media (max-width:700px) {
+        .dashboard-page:not([hidden]) { min-height:0; }
+        .dashboard-page-header { align-items:flex-start; padding:18px 0 16px; }
+        .dashboard-page-actions { max-width:170px; }
+        .dashboard-page-actions button { width:46px; min-width:46px; padding:0; }
+        .dashboard-page-actions button > span:last-child { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+        .dashboard-page .dashboard-stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        .dashboard-page .dashboard-stat:nth-child(2) { border-right:0; }
+        .dashboard-page .dashboard-stat:nth-child(-n+2) { border-bottom:1px solid var(--line); }
+        .dashboard-side-column { grid-template-columns:minmax(0,1fr); }
+        .dashboard-map-canvas { min-height:310px; }
+      }
+      @media (max-width:440px) {
+        .dashboard-page-header { gap:12px; }
+        .dashboard-page-header h1 { font-size:27px; }
+        .dashboard-page-actions { width:102px; gap:5px; }
+        .dashboard-page-actions button { width:46px; }
+        .dashboard-page-actions button:last-child { width:97px; }
+        .dashboard-panel-heading { padding:15px; }
+        .dashboard-map-canvas { min-height:270px; }
+        .dashboard-map-pin { max-width:48%; padding-right:8px; }
+        .dashboard-feed-item { grid-template-columns:38px minmax(0,1fr); padding:13px 15px; }
+        .dashboard-feed-icon { width:38px; height:38px; }
+        .dashboard-feed-time { grid-column:2; justify-self:start; }
+      }
+    </style>
+    <style>
+      /* Compact calendar command bar: preserve every action without the bulk. */
+      .calendar-view-menu { display:none; }
+      .compact-toolbar-action {
+        position:relative;
+        display:inline-grid;
+        place-items:center;
+        flex:0 0 42px;
+        width:42px;
+        min-width:42px;
+        height:42px;
+        min-height:42px;
+        padding:0;
+        border-radius:8px;
+      }
+      .compact-toolbar-label {
+        position:absolute;
+        width:1px;
+        height:1px;
+        overflow:hidden;
+        clip:rect(0,0,0,0);
+        white-space:nowrap;
+      }
+      .compact-toolbar-symbol { font-size:24px; font-weight:700; line-height:1; }
+      .compact-toolbar-more { font-size:17px; letter-spacing:0; }
+      #openDashboard .button-icon { font-size:17px; }
+      .more-actions { flex:0 0 42px; width:42px; }
+      .more-actions > summary.compact-toolbar-action { width:42px; min-width:42px; padding:0; gap:0; }
+
+      .toolbar { gap:7px; padding:7px 8px; }
+      .toolbar-leading { gap:7px; }
+      .calendar-workspace,
+      .toolbar-leading > .language-switch { height:44px; }
+      .calendar-workspace { max-width:360px; padding-block:3px; }
+      .calendar-workspace select { min-height:34px; }
+      .manage-calendars-btn { width:34px; min-height:34px; flex-basis:34px; }
+      .schedule-actions { gap:6px; flex-wrap:nowrap; }
+      .schedule-actions > .view-switch { margin-right:0; height:42px; min-height:42px; }
+      .schedule-actions > .view-switch { grid-template-columns:repeat(4,minmax(0,1fr)); }
+      .view-option { min-height:34px; padding-inline:11px; }
+      .calendar-zoom { height:42px; min-height:42px; }
+      .calendar-zoom-button { width:36px; min-width:36px; }
+      .calendar-zoom-level { min-width:50px; }
+
+      @media (min-width:1100px) {
+        .toolbar {
+          grid-template-columns:minmax(280px,1fr) auto;
+          align-items:center;
+        }
+        .toolbar-leading {
+          display:grid;
+          grid-template-columns:minmax(220px,360px) 96px;
+          justify-content:start;
+        }
+        .toolbar-leading > .language-switch { width:96px; }
+        .schedule-actions { justify-content:flex-end; }
+      }
+
+      @media (max-width:1099px) {
+        .toolbar { grid-template-columns:minmax(0,1fr); }
+        .calendar-workspace { max-width:none; }
+      }
+
+      @media (min-width:561px) and (max-width:1099px) {
+        .schedule-actions { display:flex; flex-wrap:nowrap; }
+        .schedule-actions > .view-switch { flex:1 1 auto; width:auto; }
+        .schedule-actions > .compact-toolbar-action,
+        .schedule-actions > .more-actions {
+          flex:0 0 42px;
+          width:42px;
+          min-width:42px;
+          margin:0;
+        }
+        .more-actions > summary.compact-toolbar-action { width:42px; }
+      }
+
+      @media (max-width:560px) {
+        .toolbar { padding:6px; }
+        .schedule-actions { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+        .schedule-actions .view-switch { grid-column:1 / -1; grid-row:1; }
+        .schedule-actions > #openDashboard { grid-column:1; grid-row:2; }
+        .schedule-actions > #addActivity { grid-column:2; grid-row:2; }
+        .schedule-actions > #moreActions { grid-column:3; grid-row:2; }
+        .schedule-actions > .compact-toolbar-action,
+        .schedule-actions > .more-actions {
+          width:100%;
+          min-width:0;
+          margin:0;
+        }
+        .more-actions > summary.compact-toolbar-action { width:100%; }
+        .view-option { padding-inline:6px; font-size:12px; }
+      }
+
+      /* An empty calendar is still a useful calendar. Keep the active view visible
+         and let it occupy the workspace below the compact getting-started banner. */
+      .app.is-calendar-empty .calendar-stage-main {
+        min-height:clamp(430px,calc(100vh - 330px),720px);
+      }
+      .app.is-calendar-empty .schedule-shell:not([hidden]) {
+        width:100%;
+        min-height:clamp(430px,calc(100vh - 330px),720px);
+      }
+      .app.is-calendar-empty .calendar-empty-state {
+        gap:12px;
+        padding:12px 14px;
+      }
+      .app.is-calendar-empty .calendar-empty-state h2 { font-size:18px; }
+      .app.is-calendar-empty .calendar-empty-state p { margin-top:3px; }
+      .app.is-calendar-empty .empty-actions { gap:6px; }
+      .app.is-calendar-empty .empty-actions button {
+        min-height:36px;
+        padding:7px 11px;
+      }
+
+      @media (min-width:901px) {
+        .calendar-stage { align-items:stretch; }
+        .calendar-stage-main { height:100%; }
+        .calendar-stage-main > .calendar-view:not([hidden]) {
+          box-sizing:border-box;
+          min-height:100%;
+        }
+        .calendar-stage-main > .schedule-shell:not([hidden]) {
+          height:100%;
+        }
+      }
+
+      @media (max-width:740px) {
+        .app.is-calendar-empty .calendar-stage-main { min-height:0; }
+        .app.is-calendar-empty .calendar-empty-state { grid-template-columns:minmax(0,1fr); }
+        .app.is-calendar-empty .empty-actions {
+          display:grid;
+          grid-template-columns:repeat(3,minmax(0,1fr));
+        }
+        .app.is-calendar-empty .empty-actions button {
+          width:100%;
+          min-width:0;
+          white-space:normal;
+        }
+      }
+
+      @media (max-width:430px) {
+        .app.is-calendar-empty .empty-actions { grid-template-columns:minmax(0,1fr); }
+      }
+
+      .google-import-dialog { width:min(620px,calc(100% - 24px)); }
+      .google-import-body { display:grid; gap:16px; padding:4px 20px 20px; }
+      .google-import-intro { margin:0; color:var(--muted); font-size:14px; line-height:1.5; }
+      .google-import-steps {
+        display:grid;
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        margin:0;
+        padding:0;
+        list-style:none;
+        border:1px solid var(--line);
+        border-radius:8px;
+        overflow:hidden;
+        background:var(--panel);
+      }
+      .google-import-steps li { min-width:0; padding:14px; color:var(--ink); font-size:13px; font-weight:750; line-height:1.4; }
+      .google-import-steps li + li { border-left:1px solid var(--line); }
+      .google-import-step-number {
+        display:grid;
+        place-items:center;
+        width:26px;
+        height:26px;
+        margin-bottom:8px;
+        border-radius:50%;
+        color:#fff;
+        background:#236fb1;
+        font-size:12px;
+        font-weight:900;
+      }
+      .google-import-actions { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:stretch; }
+      .google-import-picker {
+        display:flex;
+        align-items:center;
+        min-width:0;
+        min-height:44px;
+        padding:8px 12px;
+        border:1px solid var(--line);
+        border-radius:8px;
+        color:var(--ink);
+        background:var(--panel);
+        font-size:13px;
+        font-weight:800;
+        cursor:pointer;
+      }
+      .google-import-picker:hover { border-color:var(--blue-line); background:var(--blue-soft); }
+      .google-import-picker input { position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; }
+      .google-import-file-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .google-import-help { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; }
+      .google-import-help a { color:var(--blue); font-size:13px; font-weight:850; }
+      .google-import-status { min-height:20px; margin:0; color:var(--muted); font-size:13px; font-weight:750; }
+      .calendar-import-row { display:flex; justify-content:flex-end; padding:0 20px 12px; }
+      html.dark-mode .google-import-steps,
+      html.dark-mode .google-import-picker { border-color:var(--line); color:var(--ink); background:#1d2b35; }
+
+      @media (max-width:560px) {
+        .google-import-body { padding-inline:14px; }
+        .google-import-steps { grid-template-columns:minmax(0,1fr); }
+        .google-import-steps li + li { border-top:1px solid var(--line); border-left:0; }
+        .google-import-steps li { display:grid; grid-template-columns:28px minmax(0,1fr); gap:9px; align-items:center; padding:10px; }
+        .google-import-step-number { margin:0; }
+        .google-import-actions { grid-template-columns:minmax(0,1fr); }
+        .google-import-actions button { width:100%; }
+      }
+    </style>
+    <style>
+      .game-scan-panel { display:grid; gap:12px; margin-bottom:14px; padding:15px; border:1px solid #b8cfdd; border-radius:8px; background:#f4f9fb; }
+      .game-scan-heading { display:grid; grid-template-columns:40px minmax(0,1fr); gap:11px; align-items:start; }
+      .game-scan-icon { display:grid; width:40px; height:40px; place-items:center; border-radius:8px; color:#fff; background:#26729c; font-size:21px; }
+      .game-scan-heading h3 { margin:1px 0 4px; color:var(--ink); font-size:15px; letter-spacing:0; }
+      .game-scan-heading p { margin:0; color:var(--muted); font-size:12px; font-weight:700; line-height:1.45; }
+      .game-scan-actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+      .game-scan-button { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:40px; padding:0 13px; border:1px solid #26729c; border-radius:8px; color:#fff; background:#26729c; font-size:12px; font-weight:850; cursor:pointer; }
+      .game-scan-button:hover { background:#1f5d80; }
+      .game-scan-private { display:inline-flex; align-items:center; gap:5px; color:#3c6757; font-size:10px; font-weight:800; }
+      .game-scan-progress { display:flex; align-items:center; gap:9px; min-height:38px; padding:8px 10px; border-left:3px solid #26729c; color:#28536c; background:#e7f2f7; font-size:11px; font-weight:800; }
+      .game-scan-progress.is-complete { border-left-color:#2f7654; color:#2f664e; background:#e8f4ed; }
+      .game-scan-progress.is-error { border-left-color:#b04a54; color:#813840; background:#fbedee; }
+      .game-scan-progress.is-complete .game-scan-spinner, .game-scan-progress.is-error .game-scan-spinner { display:none; }
+      .game-scan-spinner { width:16px; height:16px; border:2px solid #aac6d6; border-top-color:#26729c; border-radius:50%; animation:game-scan-spin .8s linear infinite; }
+      @keyframes game-scan-spin { to { transform:rotate(360deg); } }
+      .game-scan-review { display:grid; grid-template-columns:82px minmax(0,1fr); gap:12px; align-items:start; padding-top:12px; border-top:1px solid #c7d9e3; }
+      .game-scan-review img { width:82px; height:82px; object-fit:cover; border:1px solid var(--line); border-radius:8px; background:#fff; }
+      .game-scan-review-copy > strong { display:block; margin-bottom:7px; color:var(--ink); font-size:12px; }
+      .game-scan-summary { display:flex; flex-wrap:wrap; gap:6px; }
+      .game-scan-summary span { display:inline-flex; min-height:26px; align-items:center; padding:3px 8px; border:1px solid #b9d0dc; border-radius:7px; color:#24495f; background:#fff; font-size:10px; font-weight:800; }
+      .game-scan-text { border-top:1px solid #c7d9e3; padding-top:10px; }
+      .game-scan-text summary { color:#245777; font-size:11px; font-weight:850; cursor:pointer; }
+      .game-scan-text p { margin:7px 0; color:var(--muted); font-size:10px; font-weight:700; }
+      .game-scan-text textarea { width:100%; min-height:100px; resize:vertical; margin-bottom:8px; padding:10px; border:1px solid #b9cad6; border-radius:8px; color:var(--ink); background:var(--panel); font:inherit; font-size:12px; line-height:1.45; }
+      html.dark-mode .game-scan-panel { border-color:#466273; background:#1d303b; }
+      html.dark-mode .game-scan-progress { color:#c4e4f4; background:#223d4b; }
+      html.dark-mode .game-scan-review, html.dark-mode .game-scan-text { border-color:#466273; }
+      html.dark-mode .game-scan-summary span { border-color:#466273; color:#dcecf4; background:#172630; }
+      @media (max-width:560px) {
+        .game-scan-panel { padding:12px; }
+        .game-scan-review { grid-template-columns:64px minmax(0,1fr); }
+        .game-scan-review img { width:64px; height:64px; }
+        .game-scan-button { width:100%; }
+        .dashboard-page-actions { width:151px; max-width:151px; display:grid; grid-template-columns:repeat(2,46px); justify-content:end; }
+        .dashboard-page-actions button:last-child { width:46px; }
+      }
+      @media (prefers-reduced-motion:reduce) { .game-scan-spinner { animation:none; } }
+    </style>
 </head>
 <body>
   <section class="welcome-screen" id="welcomeScreen" aria-labelledby="welcomeBrand" hidden>
@@ -9171,6 +9579,11 @@
         <p class="preview-limit-kicker" data-i18n="previewGate.kicker">10-minute preview complete</p>
         <h2 id="previewLimitTitle" data-i18n="previewGate.title">Your family plan is taking shape.</h2>
         <p data-i18n="previewGate.body">Here is a quick checkup based on the week you built.</p>
+        <div class="preview-week-summary" aria-labelledby="previewWeekTitle">
+          <h3 id="previewWeekTitle" data-i18n="previewGate.weekTitle">Your week at a glance</h3>
+          <p id="previewWeekSummaryCount"></p>
+          <div class="preview-week-chart" id="previewWeekChart"></div>
+        </div>
         <h3 class="preview-advice-title" data-i18n="previewGate.reviewTitle">A few ways to make it work even better</h3>
         <ul class="preview-advice-list" id="previewScheduleAdvice"></ul>
       </section>
@@ -9284,6 +9697,81 @@
       <button class="auth-entry-btn" type="button" id="guestAuthButton" data-i18n="auth.signIn">Sign In</button>
       <button class="logout-btn" type="button" id="logoutButton" data-i18n="auth.logout">Log Out</button>
     </div>
+    <section class="dashboard-page" id="dashboardPage" aria-labelledby="dashboardPageTitle" hidden>
+      <header class="dashboard-page-header">
+        <div>
+          <p class="dashboard-page-kicker" data-i18n="dashboard.overviewKicker">Family overview</p>
+          <h1 id="dashboardPageTitle" data-i18n="dashboard.title">Family Dashboard</h1>
+          <p class="dashboard-greeting" id="dashboardGreeting"></p>
+        </div>
+        <div class="dashboard-page-actions" aria-label="Dashboard actions" data-i18n-aria="dashboard.actions">
+          <button class="primary-btn" type="button" id="dashboardAddEvent"><span aria-hidden="true">＋</span><span data-i18n="dashboard.addEvent">Add event</span></button>
+          <button class="ghost-btn" type="button" id="dashboardScanGame"><span aria-hidden="true">▣</span><span data-i18n="gameScan.dashboardAction">Scan game</span></button>
+          <button class="ghost-btn" type="button" id="dashboardOpenLists"><span aria-hidden="true">☷</span><span data-i18n="dashboard.openLists">Open lists</span></button>
+          <button class="ghost-btn" type="button" id="dashboardGoCalendar"><span aria-hidden="true">▣</span><span data-i18n="dashboard.openCalendar">Open calendar</span></button>
+        </div>
+      </header>
+
+      <div class="dashboard-stats" id="dashboardStats"></div>
+
+      <div class="dashboard-page-grid">
+        <div class="dashboard-main-column">
+          <section class="dashboard-panel dashboard-map-panel" aria-labelledby="dashboardMapTitle">
+            <div class="dashboard-panel-heading">
+              <div>
+                <p class="dashboard-panel-kicker" data-i18n="dashboard.locationKicker">Where everyone is headed</p>
+                <h2 id="dashboardMapTitle" data-i18n="dashboard.mapTitle">Family map</h2>
+                <p data-i18n="dashboard.mapNote">See the places connected to your next family activities.</p>
+              </div>
+              <button class="small-btn" type="button" id="dashboardOpenMap" data-i18n="dashboard.openMap">Explore map</button>
+            </div>
+            <div class="dashboard-map-canvas" id="dashboardMapCanvas" aria-label="Upcoming activity locations" data-i18n-aria="dashboard.mapAria">
+              <span class="dashboard-map-road road-one" aria-hidden="true"></span>
+              <span class="dashboard-map-road road-two" aria-hidden="true"></span>
+              <span class="dashboard-map-road road-three" aria-hidden="true"></span>
+              <div class="dashboard-map-pins" id="dashboardMapPins"></div>
+              <div class="dashboard-map-empty" id="dashboardMapEmpty" hidden><span aria-hidden="true">⌖</span><strong data-i18n="dashboard.noLocations">Add a location to an event to see it here.</strong></div>
+            </div>
+            <div class="dashboard-location-list" id="dashboardLocations"></div>
+          </section>
+
+          <section class="dashboard-panel dashboard-updates-panel" aria-labelledby="dashboardUpdatesTitle">
+            <div class="dashboard-panel-heading">
+              <div>
+                <p class="dashboard-panel-kicker" data-i18n="dashboard.activityKicker">Family activity</p>
+                <h2 id="dashboardUpdatesTitle" data-i18n="dashboard.updatesTitle">Recent updates</h2>
+                <p data-i18n="dashboard.updatesNote">Changes and recently completed activities, with live timestamps.</p>
+              </div>
+            </div>
+            <div class="dashboard-feed" id="dashboardUpdates"></div>
+          </section>
+        </div>
+
+        <aside class="dashboard-side-column" aria-label="Activity timeline" data-i18n-aria="dashboard.timelineAria">
+          <section class="dashboard-panel dashboard-timeline-panel" aria-labelledby="dashboardUpcomingTitle">
+            <div class="dashboard-panel-heading">
+              <div>
+                <p class="dashboard-panel-kicker" data-i18n="dashboard.nextKicker">Next up</p>
+                <h2 id="dashboardUpcomingTitle" data-i18n="dashboard.upcomingTitle">Upcoming events</h2>
+                <p data-i18n="dashboard.upcomingNote">The next activities and important dates.</p>
+              </div>
+            </div>
+            <div class="dashboard-timeline" id="dashboardUpcoming"></div>
+          </section>
+
+          <section class="dashboard-panel dashboard-timeline-panel dashboard-past-panel" aria-labelledby="dashboardPastTitle">
+            <div class="dashboard-panel-heading">
+              <div>
+                <p class="dashboard-panel-kicker" data-i18n="dashboard.completedKicker">Recently completed</p>
+                <h2 id="dashboardPastTitle" data-i18n="dashboard.pastTitle">Past events</h2>
+                <p data-i18n="dashboard.pastNote">A record of what already happened.</p>
+              </div>
+            </div>
+            <div class="dashboard-timeline" id="dashboardPast"></div>
+          </section>
+        </aside>
+      </div>
+    </section>
     <section class="topbar" aria-label="Family schedule overview" data-i18n-aria="aria.overview">
       <div class="brand">
         <div class="calendar-mark" aria-hidden="true">
@@ -9349,10 +9837,10 @@
           <span class="calendar-zoom-level" id="zoomLevel" aria-live="polite">100%</span>
           <button class="calendar-zoom-button" type="button" id="zoomIn" aria-label="Zoom in calendar" title="Zoom in calendar" data-i18n-aria="aria.zoomIn" data-i18n-title="aria.zoomIn"><span aria-hidden="true">+</span></button>
         </div>
-        <button class="ghost-btn feature-btn" type="button" id="openDashboard" aria-label="Dashboard" data-i18n-aria="dashboard.open"><span class="button-icon" aria-hidden="true">▦</span><span data-i18n="dashboard.open">Dashboard</span></button>
-        <button class="primary-btn" type="button" id="addActivity" data-i18n="actions.addActivity">＋ Add Event</button>
+        <button class="ghost-btn feature-btn compact-toolbar-action sidebar-tooltip" type="button" id="openDashboard" aria-label="Dashboard" title="Dashboard" data-tooltip="Dashboard" data-i18n-aria="dashboard.open" data-i18n-title="dashboard.open" data-i18n-tooltip="dashboard.open"><span class="button-icon" aria-hidden="true">▦</span><span class="compact-toolbar-label" data-i18n="dashboard.open">Dashboard</span></button>
+        <button class="primary-btn compact-toolbar-action sidebar-tooltip" type="button" id="addActivity" aria-label="Add Event" title="Add Event" data-tooltip="Add Event" data-i18n-aria="actions.addActivity" data-i18n-title="actions.addActivity" data-i18n-tooltip="actions.addActivity"><span class="compact-toolbar-symbol" aria-hidden="true">+</span><span class="compact-toolbar-label" data-i18n="actions.addActivity">Add Event</span></button>
         <details class="more-actions" id="moreActions">
-          <summary><span aria-hidden="true">•••</span><span data-i18n="actions.more">More</span></summary>
+          <summary class="compact-toolbar-action sidebar-tooltip sidebar-tooltip-right" aria-label="More" title="More" data-tooltip="More" data-i18n-aria="actions.more" data-i18n-title="actions.more" data-i18n-tooltip="actions.more"><span class="compact-toolbar-symbol compact-toolbar-more" aria-hidden="true">•••</span><span class="compact-toolbar-label" data-i18n="actions.more">More</span></summary>
           <div class="more-actions-menu">
             <button class="ghost-btn" type="button" id="loadPreset" data-i18n="actions.loadExample">Load Example</button>
             <button class="ghost-btn" type="button" id="managePresets" data-i18n="actions.presets">Presets &amp; Rewind</button>
@@ -9420,6 +9908,7 @@
           <button class="mini-calendar-tool is-primary" type="button" id="miniAddActivity"><span class="mini-calendar-tool-icon" aria-hidden="true">＋</span><span data-i18n="miniCalendar.addEvent">Add event</span><span class="mini-calendar-tool-chevron" aria-hidden="true">›</span></button>
           <button class="mini-calendar-tool" type="button" id="miniOpenDashboard"><span class="mini-calendar-tool-icon" aria-hidden="true">▦</span><span data-i18n="dashboard.open">Dashboard</span><span class="mini-calendar-tool-chevron" aria-hidden="true">›</span></button>
           <button class="mini-calendar-tool" type="button" id="miniOpenReminders"><span class="mini-calendar-tool-icon" aria-hidden="true">🔔</span><span data-i18n="reminders.open">Reminders</span><span class="mini-calendar-tool-chevron" aria-hidden="true">›</span></button>
+          <button class="mini-calendar-tool" type="button" id="miniImportGoogle"><span class="mini-calendar-tool-icon" aria-hidden="true">G</span><span data-i18n="googleImport.short">Import Google</span><span class="mini-calendar-tool-chevron" aria-hidden="true">›</span></button>
           <button class="mini-calendar-tool" type="button" id="miniShareSchedule"><span class="mini-calendar-tool-icon" aria-hidden="true">↗</span><span data-i18n="sharing.share">Share</span><span class="mini-calendar-tool-chevron" aria-hidden="true">›</span></button>
           <button class="mini-calendar-tool" type="button" id="miniManageCalendars"><span class="mini-calendar-tool-icon" aria-hidden="true">⚙</span><span data-i18n="calendars.manage">Manage calendars</span><span class="mini-calendar-tool-chevron" aria-hidden="true">›</span></button>
         </nav>
@@ -9452,6 +9941,18 @@
     <button class="dismiss-undo" type="button" id="dismissUndo" aria-label="Dismiss" data-i18n-aria="actions.dismiss">×</button>
   </div>
 
+  <aside class="event-peek" id="eventPeek" hidden aria-label="Event quick actions">
+    <strong id="eventPeekTitle"></strong>
+    <span id="eventPeekMeta"></span>
+    <div class="event-peek-actions"><button class="small-btn" type="button" id="eventPeekView" data-i18n="eventPreview.view">View details</button><button class="small-btn" type="button" id="eventPeekEdit" data-i18n="eventPreview.edit">Edit</button></div>
+  </aside>
+
+  <dialog class="event-details-dialog" id="eventDetailsDialog" aria-labelledby="eventDetailsTitle">
+    <div class="modal-header"><h2 id="eventDetailsTitle" data-i18n="eventPreview.details">Event details</h2><button class="close-btn" type="button" id="closeEventDetails" aria-label="Close" data-i18n-aria="aria.close">×</button></div>
+    <div class="event-details-body" id="eventDetailsBody"></div>
+    <div class="event-details-actions"><button class="small-btn" type="button" id="eventDetailsDone" data-i18n="eventPreview.done">Close</button><button class="primary-btn" type="button" id="eventDetailsEdit" data-i18n="eventPreview.edit">Edit</button></div>
+  </dialog>
+
   <dialog id="activityDialog">
     <div class="modal-header">
       <h2 id="dialogTitle" data-i18n="dialog.addTitle">Add Event</h2>
@@ -9466,6 +9967,37 @@
         </div>
         <div class="event-step-track" role="progressbar" aria-valuemin="1" aria-valuemax="4" aria-valuenow="1" aria-label="Event setup progress" data-i18n-aria="eventSteps.progress"><span></span></div>
       </div>
+      <section class="game-scan-panel" id="gameScanPanel" data-event-step="1" aria-labelledby="gameScanTitle">
+        <div class="game-scan-heading">
+          <span class="game-scan-icon" aria-hidden="true">▣</span>
+          <div>
+            <h3 id="gameScanTitle" data-i18n="gameScan.title">Scan game details</h3>
+            <p data-i18n="gameScan.intro">Take a photo of the PlayMetrics game description. KidsSync will fill this game’s date, time, and location.</p>
+          </div>
+        </div>
+        <div class="game-scan-actions">
+          <label class="game-scan-button" for="gameScanPhoto"><span aria-hidden="true">＋</span><span data-i18n="gameScan.takePhoto">Take or choose photo</span></label>
+          <input id="gameScanPhoto" type="file" accept="image/png,image/jpeg,image/webp" capture="environment" hidden>
+          <span class="game-scan-private"><span aria-hidden="true">✓</span><span data-i18n="gameScan.private">The photo is read on this device.</span></span>
+        </div>
+        <div class="game-scan-progress" id="gameScanProgress" role="status" aria-live="polite" hidden>
+          <span class="game-scan-spinner" aria-hidden="true"></span>
+          <span id="gameScanProgressText"></span>
+        </div>
+        <div class="game-scan-review" id="gameScanReview" hidden>
+          <img id="gameScanPreview" alt="" hidden>
+          <div class="game-scan-review-copy">
+            <strong data-i18n="gameScan.reviewTitle">Review what KidsSync found</strong>
+            <div class="game-scan-summary" id="gameScanSummary"></div>
+          </div>
+        </div>
+        <details class="game-scan-text" id="gameScanTextDetails">
+          <summary data-i18n="gameScan.pasteInstead">Paste the description instead</summary>
+          <p data-i18n="gameScan.pasteHelp">This also works when you copy the game description from PlayMetrics.</p>
+          <textarea id="gameScanText" rows="5" placeholder="Game title, date, time, and location" data-i18n-placeholder="gameScan.textPlaceholder"></textarea>
+          <button class="small-btn" type="button" id="parseGameScanText" data-i18n="gameScan.useText">Use these details</button>
+        </details>
+      </section>
       <details class="event-template-strip" id="eventTemplates" data-event-step="3">
         <summary><span aria-hidden="true">▦</span><span data-i18n="templates.title">Event shortcuts</span></summary>
         <div class="event-template-options">
@@ -9773,6 +10305,9 @@
       <h2 data-i18n="calendars.title">Manage Calendars</h2>
       <button class="close-btn" type="button" id="closeCalendarDialog" aria-label="Close" data-i18n-aria="aria.close">×</button>
     </div>
+    <div class="calendar-import-row">
+      <button class="ghost-btn feature-btn" type="button" id="openGoogleImport"><span class="button-icon" aria-hidden="true">G</span><span data-i18n="googleImport.open">Import Google Calendar</span></button>
+    </div>
     <form id="calendarForm">
       <div class="preset-row" style="padding: 0 20px 16px">
         <label>
@@ -9864,6 +10399,32 @@
       </div>
     </div>
     <p class="preset-status" id="shareStatus" style="padding: 0 20px 16px"></p>
+  </dialog>
+
+  <dialog class="google-import-dialog" id="googleImportDialog">
+    <div class="modal-header">
+      <h2><span aria-hidden="true">G</span> <span data-i18n="googleImport.title">Import Google Calendar</span></h2>
+      <button class="close-btn" type="button" id="closeGoogleImport" aria-label="Close" data-i18n-aria="aria.close">×</button>
+    </div>
+    <div class="google-import-body">
+      <p class="google-import-intro" data-i18n="googleImport.intro">Bring a copy of your Google Calendar events into KidsSync. Your file is read only in this browser and is never uploaded to Google.</p>
+      <ol class="google-import-steps">
+        <li><span class="google-import-step-number">1</span><span data-i18n="googleImport.stepOne">Open Google Calendar settings and choose Import &amp; export.</span></li>
+        <li><span class="google-import-step-number">2</span><span data-i18n="googleImport.stepTwo">Export your calendar and unzip the downloaded file if needed.</span></li>
+        <li><span class="google-import-step-number">3</span><span data-i18n="googleImport.stepThree">Choose the .ics file here, then import its events.</span></li>
+      </ol>
+      <div class="google-import-help">
+        <a href="https://calendar.google.com/calendar/u/0/r/settings/export" target="_blank" rel="noopener noreferrer" data-i18n="googleImport.openGoogle">Open Google Calendar export</a>
+        <span class="google-import-status" id="googleImportStatus" role="status"></span>
+      </div>
+      <div class="google-import-actions">
+        <label class="google-import-picker" for="googleImportFile">
+          <span class="google-import-file-name" id="googleImportFileName" data-i18n="googleImport.chooseFile">Choose a Google Calendar .ics file</span>
+          <input id="googleImportFile" type="file" accept=".ics,text/calendar">
+        </label>
+        <button class="primary-btn" type="button" id="googleImportSchedule" disabled data-i18n="googleImport.import">Import calendar</button>
+      </div>
+    </div>
   </dialog>
 
   <dialog class="share-dialog" id="invitationsDialog">
@@ -10065,26 +10626,6 @@
     </div>
   </dialog>
 
-  <dialog class="insights-dialog" id="dashboardDialog">
-    <div class="modal-header">
-      <h2 data-i18n="dashboard.title">Family Dashboard</h2>
-      <button class="close-btn" type="button" id="closeDashboard" aria-label="Close" data-i18n-aria="aria.close">×</button>
-    </div>
-    <div class="dashboard-body">
-      <p class="dashboard-greeting" id="dashboardGreeting"></p>
-      <div class="dashboard-overview-grid">
-        <section class="dashboard-section dashboard-upcoming-section"><div class="dashboard-section-heading"><div><h3 data-i18n="dashboard.upcomingTitle">Upcoming</h3><p class="dashboard-section-note" data-i18n="dashboard.upcomingNote">Your next events and holidays.</p></div><button class="small-btn" type="button" id="dashboardGoCalendar" data-i18n="dashboard.openCalendar">Open calendar</button></div><div class="dashboard-list" id="dashboardUpcoming"></div></section>
-        <section class="dashboard-section dashboard-updates-section"><h3 data-i18n="dashboard.updatesTitle">Recent updates</h3><p class="dashboard-section-note" data-i18n="dashboard.updatesNote">Changes made by your family.</p><div class="history-list" id="dashboardUpdates"></div></section>
-      </div>
-      <div class="dashboard-stats" id="dashboardStats"></div>
-      <div class="dashboard-grid">
-        <section class="dashboard-section dashboard-busy-section"><h3 data-i18n="dashboard.busyDays">Busy days</h3><p class="dashboard-section-note" data-i18n="dashboard.busyNote">Select a day to open it in the calendar.</p><div class="busy-day-scroll"><div class="busy-day-chart" id="dashboardBusyDays"></div></div></section>
-        <section class="dashboard-section"><h3 data-i18n="dashboard.workload">Workload by child</h3><p class="dashboard-section-note" data-i18n="dashboard.workloadNote">Compare each child’s event count and scheduled time this week.</p><div class="kid-load-list" id="dashboardKidLoad"></div></section>
-        <section class="dashboard-section"><h3 data-i18n="dashboard.deadlines">Upcoming deadlines</h3><p class="dashboard-section-note" data-i18n="dashboard.deadlinesNote">Dates marked as deadlines appear here for the next 30 days.</p><div class="deadline-list" id="dashboardDeadlines"></div></section>
-      </div>
-    </div>
-  </dialog>
-
   <dialog class="map-dialog" id="mapDialog">
     <div class="modal-header">
       <div><p class="eyebrow" data-i18n="map.eyebrow">Explore nearby</p><h2 data-i18n="map.title">Family map</h2></div>
@@ -10093,13 +10634,16 @@
     <div class="map-body">
       <p class="dialog-intro" data-i18n="map.intro">Find restaurants, parks, activities, and useful places for your family.</p>
       <div class="map-search-row"><input id="mapSearch" type="search" autocomplete="off" data-i18n-placeholder="map.searchPlaceholder" placeholder="Search nearby places"><button class="primary-btn" type="button" id="mapSearchButton" data-i18n="map.search">Search</button></div>
+      <div class="map-location-row"><button class="small-btn" type="button" id="mapUseLocation" data-i18n="map.useLocation">Use my location</button><span id="mapLocationStatus" role="status" data-i18n="map.locationOptional">Location is optional. Map apps can find places near you.</span></div>
       <div class="map-category-row" role="group" aria-label="Nearby place categories">
         <button class="map-category is-selected" type="button" data-map-category="restaurants" data-i18n="map.restaurants">Restaurants</button>
         <button class="map-category" type="button" data-map-category="family activities" data-i18n="map.activities">Activities</button>
+        <button class="map-category" type="button" data-map-category="entertainment" data-i18n="map.entertainment">Entertainment</button>
         <button class="map-category" type="button" data-map-category="parks" data-i18n="map.parks">Parks</button>
         <button class="map-category" type="button" data-map-category="libraries" data-i18n="map.libraries">Libraries</button>
         <button class="map-category" type="button" data-map-category="cafes" data-i18n="map.cafes">Cafes</button>
       </div>
+      <div class="map-live-view"><iframe id="mapLiveFrame" title="Nearby places on Google Maps" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" hidden></iframe><p class="map-live-empty" id="mapLiveEmpty" data-i18n="map.setupNeeded">Live map preview needs a Google Maps Embed API key. You can still search in Google or Apple Maps below.</p></div>
       <div class="map-results" id="mapResults"></div>
     </div>
   </dialog>
@@ -10392,6 +10936,11 @@
         "previewGate.kicker": "10-minute preview complete",
         "previewGate.title": "Keep the calendar you just made.",
         "previewGate.body": "Before you save it, here is a quick checkup based on the week you built.",
+        "previewGate.weekTitle": "Your week at a glance",
+        "previewGate.weekCount": "{count} plans across {days} days",
+        "previewGate.weekCountOne": "1 plan across {days} day",
+        "previewGate.weekEmpty": "Your week is ready for its first plan.",
+        "previewGate.dayCount": "{day}: {count} plans",
         "previewGate.reviewTitle": "A few ways to make it work even better",
         "previewGate.profileTitle": "Make this calendar yours",
         "previewGate.profileBody": "Set up the parent profile that will manage this family schedule.",
@@ -10417,6 +10966,20 @@
         "previewGate.adviceDetails": "Add a location or responsible adult to {count} activities before the weekly handoff.",
         "previewGate.adviceFamily": "Protect one open block for a meal or family time.",
         "previewGate.adviceStrong": "Your week is balanced and conflict-free. Add pickup details to make handoffs effortless.",
+        "previewGate.adviceEmptySchool": "Block out school and pickup times next so the rest of the week has clear boundaries.",
+        "previewGate.adviceEmptyOpen": "Leave one evening open before adding optional activities.",
+        "previewGate.adviceTravelOne": "Add more travel time before one tight trip so the next activity starts calmly.",
+        "previewGate.adviceTravelMany": "Add more travel time before {count} tight trips this week.",
+        "previewGate.adviceBuffer": "Give {count} back-to-back activities a short buffer for snacks, gear, or pickup changes.",
+        "previewGate.adviceLate": "Review {count} late-ending activities and protect enough wind-down time afterward.",
+        "previewGate.adviceTentative": "Confirm or remove {count} tentative plans before sharing the final week.",
+        "previewGate.adviceRoutine": "Turn one repeated school, bedtime, or chore block into a recurring event.",
+        "previewGate.advicePrep": "Add a short packing or preparation note to {count} activities.",
+        "previewGate.adviceOpenDay": "Keep {day} open as a recovery day, or use it for flexible family time.",
+        "previewGate.adviceUnscheduledChild": "Add one important plan for {child} so everyone is represented this week.",
+        "previewGate.adviceDeadline": "Add a reminder or preparation note to {count} upcoming deadlines.",
+        "previewGate.adviceReminder": "Set reminders on the plans that require equipment, forms, or an on-time departure.",
+        "previewGate.adviceShare": "After signing up, invite another caregiver so pickup changes do not live in one person's head.",
         "settings.open": "Settings",
         "settings.accountSync": "Account & sync",
         "settings.syncGuest": "Sign in to use this schedule on your other devices.",
@@ -10599,6 +11162,27 @@
         "popularTimes.evening": "Evening",
         "popularTimes.allDay": "All day",
         "popularTimes.noTime": "No time needed",
+        "gameScan.dashboardAction": "Scan game",
+        "gameScan.title": "Scan game details",
+        "gameScan.intro": "Take a photo of the PlayMetrics game description. KidsSync will fill this game’s date, time, and location.",
+        "gameScan.takePhoto": "Take or choose photo",
+        "gameScan.private": "The photo is read on this device.",
+        "gameScan.loading": "Preparing the private photo scanner…",
+        "gameScan.reading": "Reading the game details… {progress}%",
+        "gameScan.reviewTitle": "Review what KidsSync found",
+        "gameScan.pasteInstead": "Paste the description instead",
+        "gameScan.pasteHelp": "This also works when you copy the game description from PlayMetrics.",
+        "gameScan.textPlaceholder": "Game title, date, time, and location",
+        "gameScan.useText": "Use these details",
+        "gameScan.noText": "No readable text was found. Try a clearer crop or paste the description below.",
+        "gameScan.failed": "The photo could not be read. Paste the description below or try another picture.",
+        "gameScan.applied": "Game details added. Review each field before saving.",
+        "gameScan.partial": "Some details were added. Please check the date and time before saving.",
+        "gameScan.oneTime": "One-time game",
+        "gameScan.fieldTitle": "Title: {value}",
+        "gameScan.fieldDate": "Date: {value}",
+        "gameScan.fieldTime": "Time: {value}",
+        "gameScan.fieldLocation": "Location: {value}",
         "eventSteps.event": "Event",
         "eventSteps.when": "Date & time",
         "eventSteps.schedule": "Schedule",
@@ -10619,6 +11203,19 @@
         "transfer.invalid": "That file could not be imported.",
         "transfer.backupDownloaded": "KidsSync backup downloaded.",
         "transfer.icsDownloaded": "Calendar file downloaded.",
+        "googleImport.open": "Import Google Calendar",
+        "googleImport.short": "Import Google",
+        "googleImport.title": "Import Google Calendar",
+        "googleImport.intro": "Bring a copy of your Google Calendar events into KidsSync. Your file is read only in this browser and is never uploaded to Google.",
+        "googleImport.stepOne": "Open Google Calendar settings and choose Import & export.",
+        "googleImport.stepTwo": "Export your calendar and unzip the downloaded file if needed.",
+        "googleImport.stepThree": "Choose the .ics file here, then import its events.",
+        "googleImport.openGoogle": "Open Google Calendar export",
+        "googleImport.chooseFile": "Choose a Google Calendar .ics file",
+        "googleImport.selected": "Selected: {name}",
+        "googleImport.import": "Import calendar",
+        "googleImport.success": "Imported {count} Google Calendar events.",
+        "googleImport.invalid": "Choose a valid Google Calendar .ics file.",
         "drag.hint": "Drag to move · Alt + arrow keys also work",
         "drag.rewindLabel": "Before dragging an event",
         "repeat.every": "Repeat every",
@@ -10665,11 +11262,43 @@
         "dashboard.eventsCount": "{count} events",
         "dashboard.greeting": "Welcome back, {name}.",
         "dashboard.greetingGuest": "Welcome to your family dashboard.",
-        "dashboard.upcomingTitle": "Upcoming",
-        "dashboard.upcomingNote": "Your next events and holidays.",
+        "dashboard.overviewKicker": "Family overview",
+        "dashboard.actions": "Dashboard actions",
+        "dashboard.addEvent": "Add event",
+        "dashboard.openLists": "Open lists",
+        "dashboard.upcomingTitle": "Upcoming events",
+        "dashboard.upcomingNote": "The next activities and important dates.",
         "dashboard.openCalendar": "Open calendar",
+        "dashboard.locationKicker": "Where everyone is headed",
+        "dashboard.mapTitle": "Family map",
+        "dashboard.mapNote": "See the places connected to your next family activities.",
+        "dashboard.openMap": "Explore map",
+        "dashboard.mapAria": "Upcoming activity locations",
+        "dashboard.noLocations": "Add a location to an event to see it here.",
+        "dashboard.activityKicker": "Family activity",
         "dashboard.updatesTitle": "Recent updates",
-        "dashboard.updatesNote": "Changes made by your family.",
+        "dashboard.updatesNote": "Changes and recently completed activities, with live timestamps.",
+        "dashboard.nextKicker": "Next up",
+        "dashboard.completedKicker": "Recently completed",
+        "dashboard.pastTitle": "Past events",
+        "dashboard.pastNote": "A record of what already happened.",
+        "dashboard.noPast": "No activities have happened in the last 90 days.",
+        "dashboard.timelineAria": "Activity timeline",
+        "dashboard.happened": "Happened {time}",
+        "dashboard.ends": "Ends {time}",
+        "time.justNow": "just now",
+        "time.minuteAgo": "1 minute ago",
+        "time.minutesAgo": "{count} minutes ago",
+        "time.hourAgo": "1 hour ago",
+        "time.hoursAgo": "{count} hours ago",
+        "time.dayAgo": "yesterday",
+        "time.daysAgo": "{count} days ago",
+        "time.inMinute": "in 1 minute",
+        "time.inMinutes": "in {count} minutes",
+        "time.inHour": "in 1 hour",
+        "time.inHours": "in {count} hours",
+        "time.tomorrow": "tomorrow",
+        "time.inDays": "in {count} days",
         "reminders.open": "Reminders",
         "reminders.title": "Reminders",
         "reminders.upcoming": "Coming up",
@@ -10729,11 +11358,21 @@
         "map.search": "Search",
         "map.restaurants": "Restaurants",
         "map.activities": "Activities",
+        "map.entertainment": "Entertainment",
         "map.parks": "Parks",
         "map.libraries": "Libraries",
         "map.cafes": "Cafes",
         "map.open": "Open in Maps",
         "map.searching": "Search for {query} nearby",
+        "map.google": "Google Maps",
+        "map.apple": "Apple Maps",
+        "map.useLocation": "Use my location",
+        "map.locationOptional": "Location is optional. Map apps can find places near you.",
+        "map.locating": "Finding your location…",
+        "map.locationReady": "Showing places near your location.",
+        "map.locationUnavailable": "Location unavailable. You can still search in a map app.",
+        "map.setupNeeded": "Live map preview needs a Google Maps Embed API key. You can still search in Google or Apple Maps below.",
+        "map.resultsNote": "Browse live places, hours, reviews, and directions in your map app.",
         "versions.open": "Version history",
         "versions.title": "Version history",
         "versions.intro": "{calendar} · latest 20 saved versions",
@@ -10780,6 +11419,19 @@
         "goals.gapsBody": "Find open windows before adding another commitment.",
         "dialog.addTitle": "Add Event",
         "dialog.editTitle": "Edit Event",
+        "eventPreview.view": "View details",
+        "eventPreview.edit": "Edit",
+        "eventPreview.addEvent": "Add event",
+        "eventPreview.details": "Event details",
+        "eventPreview.done": "Close",
+        "eventPreview.when": "When",
+        "eventPreview.who": "For",
+        "eventPreview.where": "Location",
+        "eventPreview.responsible": "Responsible",
+        "eventPreview.items": "Bring",
+        "eventPreview.notes": "Notes",
+        "eventPreview.repeats": "Repeats",
+        "eventPreview.status": "Status",
         "dialog.duplicateTitle": "Duplicate Event",
         "form.child": "Child",
         "form.day": "Day",
@@ -11204,6 +11856,11 @@
         "previewGate.kicker": "10 分钟试用已完成",
         "previewGate.title": "保留你刚刚创建的日历。",
         "previewGate.body": "保存之前，先看看根据这一周安排生成的快速建议。",
+        "previewGate.weekTitle": "本周安排一览",
+        "previewGate.weekCount": "{days} 天共 {count} 项安排",
+        "previewGate.weekCountOne": "{days} 天共 1 项安排",
+        "previewGate.weekEmpty": "这一周还可以添加第一项安排。",
+        "previewGate.dayCount": "{day}：{count} 项安排",
         "previewGate.reviewTitle": "让日程更顺畅的几个方法",
         "previewGate.profileTitle": "把这个日历变成你的",
         "previewGate.profileBody": "设置负责管理家庭日程的家长资料。",
@@ -11229,6 +11886,20 @@
         "previewGate.adviceDetails": "为 {count} 项活动补充地点或负责接送的成人，方便全家交接。",
         "previewGate.adviceFamily": "保留一段空闲时间用于家庭用餐或陪伴。",
         "previewGate.adviceStrong": "这一周安排均衡且没有冲突。补充接送信息后会更加轻松。",
+        "previewGate.adviceEmptySchool": "接下来先加入上学和接送时间，让本周其他安排有清晰边界。",
+        "previewGate.adviceEmptyOpen": "添加可选活动前，先保留一个空闲的晚上。",
+        "previewGate.adviceTravelOne": "为一段紧凑行程增加路程时间，让下一项活动从容开始。",
+        "previewGate.adviceTravelMany": "为本周 {count} 段紧凑行程增加路程时间。",
+        "previewGate.adviceBuffer": "为 {count} 组连续活动留出短暂缓冲，用于吃点心、准备装备或调整接送。",
+        "previewGate.adviceLate": "检查 {count} 项较晚结束的活动，并在之后保留足够的放松时间。",
+        "previewGate.adviceTentative": "分享最终日程前，确认或移除 {count} 项暂定计划。",
+        "previewGate.adviceRoutine": "把重复的上学、就寝或家务时段设为重复活动。",
+        "previewGate.advicePrep": "为 {count} 项活动添加简短的打包或准备备注。",
+        "previewGate.adviceOpenDay": "让{day}保持空闲，作为休息日或灵活的家庭时间。",
+        "previewGate.adviceUnscheduledChild": "为{child}添加一项重要安排，让本周日程包含每位家庭成员。",
+        "previewGate.adviceDeadline": "为 {count} 项即将到期的事项添加提醒或准备备注。",
+        "previewGate.adviceReminder": "为需要装备、表格或准时出发的安排设置提醒。",
+        "previewGate.adviceShare": "注册后邀请另一位照顾者，让接送变化不再只由一个人记住。",
         "settings.open": "设置",
         "settings.accountSync": "账户与同步",
         "settings.syncGuest": "登录后可在其他设备上使用此日程。",
@@ -11411,6 +12082,27 @@
         "popularTimes.evening": "晚上",
         "popularTimes.allDay": "全天",
         "popularTimes.noTime": "无需设置时间",
+        "gameScan.dashboardAction": "扫描比赛",
+        "gameScan.title": "扫描比赛信息",
+        "gameScan.intro": "拍摄 PlayMetrics 比赛说明。KidsSync 会填写这场比赛的日期、时间和地点。",
+        "gameScan.takePhoto": "拍照或选择图片",
+        "gameScan.private": "图片只在此设备上读取。",
+        "gameScan.loading": "正在准备私密图片扫描…",
+        "gameScan.reading": "正在读取比赛信息… {progress}%",
+        "gameScan.reviewTitle": "检查 KidsSync 找到的信息",
+        "gameScan.pasteInstead": "改为粘贴比赛说明",
+        "gameScan.pasteHelp": "从 PlayMetrics 复制比赛说明后也可以使用此功能。",
+        "gameScan.textPlaceholder": "比赛名称、日期、时间和地点",
+        "gameScan.useText": "使用这些信息",
+        "gameScan.noText": "没有找到清晰文字。请裁剪清楚后重试，或在下方粘贴说明。",
+        "gameScan.failed": "无法读取此图片。请在下方粘贴说明或换一张图片。",
+        "gameScan.applied": "已添加比赛信息。保存前请检查每个字段。",
+        "gameScan.partial": "已添加部分信息。保存前请检查日期和时间。",
+        "gameScan.oneTime": "单次比赛",
+        "gameScan.fieldTitle": "名称：{value}",
+        "gameScan.fieldDate": "日期：{value}",
+        "gameScan.fieldTime": "时间：{value}",
+        "gameScan.fieldLocation": "地点：{value}",
         "eventSteps.event": "活动",
         "eventSteps.when": "日期与时间",
         "eventSteps.schedule": "安排方式",
@@ -11431,6 +12123,19 @@
         "transfer.invalid": "无法导入此文件。",
         "transfer.backupDownloaded": "KidsSync 备份已下载。",
         "transfer.icsDownloaded": "日历文件已下载。",
+        "googleImport.open": "导入 Google 日历",
+        "googleImport.short": "导入 Google",
+        "googleImport.title": "导入 Google 日历",
+        "googleImport.intro": "将 Google 日历活动的副本导入 KidsSync。文件只会在此浏览器中读取，不会上传到 Google。",
+        "googleImport.stepOne": "打开 Google 日历设置，然后选择“导入和导出”。",
+        "googleImport.stepTwo": "导出日历，并在需要时解压下载的文件。",
+        "googleImport.stepThree": "在这里选择 .ics 文件，然后导入活动。",
+        "googleImport.openGoogle": "打开 Google 日历导出页面",
+        "googleImport.chooseFile": "选择 Google 日历 .ics 文件",
+        "googleImport.selected": "已选择：{name}",
+        "googleImport.import": "导入日历",
+        "googleImport.success": "已导入 {count} 个 Google 日历活动。",
+        "googleImport.invalid": "请选择有效的 Google 日历 .ics 文件。",
         "drag.hint": "拖动以移动 · 也可使用 Alt + 方向键",
         "drag.rewindLabel": "拖动事件之前",
         "notifications.title": "{title} 即将开始",
@@ -11463,11 +12168,43 @@
         "dashboard.eventsCount": "{count} 个事件",
         "dashboard.greeting": "欢迎回来，{name}。",
         "dashboard.greetingGuest": "欢迎来到家庭概览。",
-        "dashboard.upcomingTitle": "即将到来",
-        "dashboard.upcomingNote": "接下来的活动和节假日。",
+        "dashboard.overviewKicker": "家庭概览",
+        "dashboard.actions": "概览操作",
+        "dashboard.addEvent": "添加事件",
+        "dashboard.openLists": "打开列表",
+        "dashboard.upcomingTitle": "即将发生的事件",
+        "dashboard.upcomingNote": "接下来的活动和重要日期。",
         "dashboard.openCalendar": "打开日历",
+        "dashboard.locationKicker": "大家接下来要去的地方",
+        "dashboard.mapTitle": "家庭地图",
+        "dashboard.mapNote": "查看与近期家庭活动相关的地点。",
+        "dashboard.openMap": "探索地图",
+        "dashboard.mapAria": "即将进行的活动地点",
+        "dashboard.noLocations": "为事件添加地点后，它会显示在这里。",
+        "dashboard.activityKicker": "家庭动态",
         "dashboard.updatesTitle": "最近更新",
-        "dashboard.updatesNote": "家庭成员做出的更改。",
+        "dashboard.updatesNote": "查看更改和最近完成的活动，并显示实时相对时间。",
+        "dashboard.nextKicker": "接下来",
+        "dashboard.completedKicker": "最近完成",
+        "dashboard.pastTitle": "过去的事件",
+        "dashboard.pastNote": "查看已经发生的活动记录。",
+        "dashboard.noPast": "过去 90 天没有已完成的活动。",
+        "dashboard.timelineAria": "活动时间线",
+        "dashboard.happened": "发生于{time}",
+        "dashboard.ends": "结束于{time}",
+        "time.justNow": "刚刚",
+        "time.minuteAgo": "1 分钟前",
+        "time.minutesAgo": "{count} 分钟前",
+        "time.hourAgo": "1 小时前",
+        "time.hoursAgo": "{count} 小时前",
+        "time.dayAgo": "昨天",
+        "time.daysAgo": "{count} 天前",
+        "time.inMinute": "1 分钟后",
+        "time.inMinutes": "{count} 分钟后",
+        "time.inHour": "1 小时后",
+        "time.inHours": "{count} 小时后",
+        "time.tomorrow": "明天",
+        "time.inDays": "{count} 天后",
         "reminders.open": "提醒",
         "reminders.title": "提醒",
         "reminders.upcoming": "即将开始",
@@ -11527,11 +12264,21 @@
         "map.search": "搜索",
         "map.restaurants": "餐厅",
         "map.activities": "活动",
+        "map.entertainment": "娱乐",
         "map.parks": "公园",
         "map.libraries": "图书馆",
         "map.cafes": "咖啡馆",
         "map.open": "在地图中打开",
         "map.searching": "搜索附近的{query}",
+        "map.google": "谷歌地图",
+        "map.apple": "苹果地图",
+        "map.useLocation": "使用我的位置",
+        "map.locationOptional": "位置可选。地图应用可查找你附近的地点。",
+        "map.locating": "正在查找你的位置…",
+        "map.locationReady": "正在显示你附近的地点。",
+        "map.locationUnavailable": "无法获取位置。你仍可在地图应用中搜索。",
+        "map.setupNeeded": "实时地图预览需要 Google Maps Embed API 密钥。你仍可在下方打开谷歌或苹果地图搜索。",
+        "map.resultsNote": "在地图应用中查看实时地点、营业时间、评价和路线。",
         "versions.open": "版本历史",
         "versions.title": "版本历史",
         "versions.intro": "{calendar} · 最近保存的 20 个版本",
@@ -11578,6 +12325,19 @@
         "goals.gapsBody": "添加新安排前先找到合适的空档。",
         "dialog.addTitle": "添加事件",
         "dialog.editTitle": "编辑事件",
+        "eventPreview.view": "查看详情",
+        "eventPreview.edit": "编辑",
+        "eventPreview.addEvent": "添加事件",
+        "eventPreview.details": "事件详情",
+        "eventPreview.done": "关闭",
+        "eventPreview.when": "时间",
+        "eventPreview.who": "参与者",
+        "eventPreview.where": "地点",
+        "eventPreview.responsible": "负责人",
+        "eventPreview.items": "携带物品",
+        "eventPreview.notes": "备注",
+        "eventPreview.repeats": "重复",
+        "eventPreview.status": "状态",
         "dialog.duplicateTitle": "复制事件",
         "form.child": "孩子",
         "form.day": "星期",
@@ -12315,28 +13075,90 @@
       guestPreviewTimer = window.setInterval(recordGuestPreviewTime, 1000);
     }
 
-    function previewScheduleAdvice() {
-      const week = weekOccurrences({ ignoreSearch: true });
-      if (!week.length) return [{ icon: "＋", text: t("previewGate.adviceEmpty") }];
+    function previewAdviceSeed() {
+      const storageKey = "kidssync.preview-advice-seed";
+      try {
+        let seed = localStorage.getItem(storageKey);
+        if (!seed) {
+          seed = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+          localStorage.setItem(storageKey, seed);
+        }
+        return seed;
+      } catch {
+        return dateKey(new Date());
+      }
+    }
 
-      const advice = [];
+    function previewAdviceHash(value) {
+      let hash = 2166136261;
+      for (const character of value) {
+        hash ^= character.codePointAt(0);
+        hash = Math.imul(hash, 16777619);
+      }
+      return hash >>> 0;
+    }
+
+    function choosePreviewAdvice(urgent, candidates, week) {
+      const uniqueUrgent = [...new Map(urgent.map(item => [item.text, item])).values()];
+      const urgentTexts = new Set(uniqueUrgent.map(item => item.text));
+      const uniqueCandidates = [...new Map(candidates
+        .filter(item => !urgentTexts.has(item.text))
+        .map(item => [item.text, item])).values()];
+      const fingerprint = week
+        .map(activity => [activity.id, activity.occurrenceDate, activity.start, activity.end, activity.child].join(":"))
+        .sort()
+        .join("|");
+      const offset = uniqueCandidates.length
+        ? previewAdviceHash(`${previewAdviceSeed()}|${fingerprint}`) % uniqueCandidates.length
+        : 0;
+      const rotated = uniqueCandidates.slice(offset).concat(uniqueCandidates.slice(0, offset));
+      return uniqueUrgent.slice(0, 2).concat(rotated).slice(0, 3);
+    }
+
+    function previewScheduleAdvice() {
+      const week = weekOccurrences({ ignoreSearch: true, ignoreFilter: true });
+      if (!week.length) {
+        return choosePreviewAdvice([], [
+          { icon: "＋", text: t("previewGate.adviceEmpty") },
+          { icon: "▦", text: t("previewGate.adviceEmptySchool") },
+          { icon: "○", text: t("previewGate.adviceEmptyOpen") },
+          { icon: "↗", text: t("previewGate.adviceShare") }
+        ], week);
+      }
+
+      const urgent = [];
+      const candidates = [];
       const conflictCount = findConflictPairs(week).length;
       if (conflictCount) {
-        advice.push({
+        urgent.push({
           icon: "!",
           text: t(conflictCount === 1 ? "previewGate.adviceConflictOne" : "previewGate.adviceConflicts", { count: conflictCount })
         });
       }
 
+      const travelCount = findTravelWarnings(week).length;
+      if (travelCount) {
+        urgent.push({
+          icon: "→",
+          text: t(travelCount === 1 ? "previewGate.adviceTravelOne" : "previewGate.adviceTravelMany", { count: travelCount })
+        });
+      }
+
       const dayLoads = days.map((day, index) => {
         const date = addDays(currentWeekStart, index);
-        const events = occurrencesOnDate(date, { ignoreSearch: true });
+        const events = occurrencesOnDate(date, { ignoreSearch: true, ignoreFilter: true });
         return { date, count: events.length };
       });
       const busiest = dayLoads.reduce((current, item) => item.count > current.count ? item : current, dayLoads[0]);
       if (busiest?.count >= 4) {
         const day = busiest.date.toLocaleDateString(currentLanguage === "zh" ? "zh-CN" : "en-US", { weekday: "long" });
-        advice.push({ icon: "↔", text: t("previewGate.adviceBusy", { day, count: busiest.count }) });
+        candidates.push({ icon: "↔", text: t("previewGate.adviceBusy", { day, count: busiest.count }) });
+      }
+
+      const openDay = dayLoads.find(item => item.count === 0);
+      if (openDay) {
+        const day = openDay.date.toLocaleDateString(currentLanguage === "zh" ? "zh-CN" : "en-US", { weekday: "long" });
+        candidates.push({ icon: "○", text: t("previewGate.adviceOpenDay", { day }) });
       }
 
       const workloads = kidProfiles.map(kid => {
@@ -12347,24 +13169,78 @@
           minutes: activities.reduce((total, activity) => total + eventDurationMinutes(activity), 0)
         };
       }).sort((first, second) => (second.minutes || second.count) - (first.minutes || first.count));
+      const unscheduledChild = workloads.find(workload => workload.count === 0);
+      if (unscheduledChild) {
+        candidates.push({ icon: "+", text: t("previewGate.adviceUnscheduledChild", { child: unscheduledChild.name }) });
+      }
       if (workloads.length > 1) {
         const heaviest = workloads[0];
         const lightest = workloads[workloads.length - 1];
         if (heaviest.count - lightest.count >= 3 || heaviest.minutes - lightest.minutes >= 180) {
-          advice.push({ icon: "⚖", text: t("previewGate.adviceBalance", { child: heaviest.name }) });
+          candidates.push({ icon: "⚖", text: t("previewGate.adviceBalance", { child: heaviest.name }) });
         }
       }
 
       const uniqueActivities = [...new Map(week.map(activity => [activity.id, activity])).values()];
       const missingDetails = uniqueActivities.filter(activity => !activity.location || !activity.responsible).length;
       if (missingDetails >= 2) {
-        advice.push({ icon: "⌖", text: t("previewGate.adviceDetails", { count: missingDetails }) });
+        candidates.push({ icon: "⌖", text: t("previewGate.adviceDetails", { count: missingDetails }) });
+      }
+
+      const missingPrep = uniqueActivities.filter(activity => !activity.notes && !activity.items).length;
+      if (missingPrep >= 3) {
+        candidates.push({ icon: "✓", text: t("previewGate.advicePrep", { count: missingPrep }) });
+      }
+
+      const tentativeCount = uniqueActivities.filter(activity => activityStatus(activity) === "tentative").length;
+      if (tentativeCount) {
+        candidates.push({ icon: "?", text: t("previewGate.adviceTentative", { count: tentativeCount }) });
+      }
+
+      const lateCount = week.filter(activity => !activity.allDay && activity.end && minutes(activity.end) >= 20 * 60).length;
+      if (lateCount) {
+        candidates.push({ icon: "◐", text: t("previewGate.adviceLate", { count: lateCount }) });
+      }
+
+      const timedGroups = new Map();
+      week.filter(activity => !activity.allDay && activity.start && activity.end && activityStatus(activity) !== "cancelled")
+        .forEach(activity => {
+          const key = `${activity.occurrenceDate || activity.day}:${activity.child}`;
+          if (!timedGroups.has(key)) timedGroups.set(key, []);
+          timedGroups.get(key).push(activity);
+        });
+      let backToBackCount = 0;
+      timedGroups.forEach(group => {
+        group.sort((first, second) => minutes(first.start) - minutes(second.start));
+        for (let index = 1; index < group.length; index += 1) {
+          const gap = minutes(group[index].start) - minutes(group[index - 1].end);
+          if (gap >= 0 && gap < 20) backToBackCount += 1;
+        }
+      });
+      if (backToBackCount) {
+        candidates.push({ icon: "…", text: t("previewGate.adviceBuffer", { count: backToBackCount }) });
+      }
+
+      const deadlineCount = uniqueActivities.filter(activity => activity.eventType === "deadline").length;
+      if (deadlineCount) {
+        candidates.push({ icon: "!", text: t("previewGate.adviceDeadline", { count: deadlineCount }) });
+      }
+
+      if (!uniqueActivities.some(activity => recurrenceValue(activity) !== "none") && uniqueActivities.length >= 3) {
+        candidates.push({ icon: "↻", text: t("previewGate.adviceRoutine") });
       }
       if (!week.some(activity => activity.child === FAMILY_CHILD)) {
-        advice.push({ icon: "♡", text: t("previewGate.adviceFamily") });
+        candidates.push({ icon: "♡", text: t("previewGate.adviceFamily") });
       }
-      if (!advice.length) advice.push({ icon: "✓", text: t("previewGate.adviceStrong") });
-      return advice.slice(0, 3);
+
+      candidates.push(
+        { icon: "◷", text: t("previewGate.adviceReminder") },
+        { icon: "↗", text: t("previewGate.adviceShare") }
+      );
+      if (!conflictCount && !travelCount) {
+        candidates.push({ icon: "✓", text: t("previewGate.adviceStrong") });
+      }
+      return choosePreviewAdvice(urgent, candidates, week);
     }
 
     function renderPreviewScheduleAdvice() {
@@ -12372,6 +13248,26 @@
       list.innerHTML = previewScheduleAdvice()
         .map(item => `<li><span aria-hidden="true">${escapeHtml(item.icon)}</span><span>${escapeHtml(item.text)}</span></li>`)
         .join("");
+    }
+
+    function renderPreviewWeekSummary() {
+      const weekDays = days.map((_, index) => {
+        const date = addDays(currentWeekStart, index);
+        const count = occurrencesOnDate(date, { ignoreSearch: true, ignoreFilter: true })
+          .filter(activity => activityStatus(activity) !== "cancelled").length;
+        return { date, count };
+      });
+      const total = weekDays.reduce((sum, day) => sum + day.count, 0);
+      const activeDays = weekDays.filter(day => day.count > 0).length;
+      const maximum = Math.max(1, ...weekDays.map(day => day.count));
+      document.getElementById("previewWeekSummaryCount").textContent = total
+        ? t(total === 1 ? "previewGate.weekCountOne" : "previewGate.weekCount", { count: total, days: activeDays })
+        : t("previewGate.weekEmpty");
+      document.getElementById("previewWeekChart").innerHTML = weekDays.map(({ date, count }) => {
+        const day = date.toLocaleDateString(currentLanguage === "zh" ? "zh-CN" : "en-US", { weekday: "short" });
+        const height = count ? Math.max(8, Math.round(count / maximum * 100)) : 0;
+        return `<div class="preview-week-day${count === maximum && count > 0 ? " is-busy" : ""}" aria-label="${escapeHtml(t("previewGate.dayCount", { day, count }))}"><strong>${escapeHtml(day)}</strong><span class="preview-week-bar-track" aria-hidden="true"><span class="preview-week-bar" style="--preview-load:${height}%"></span></span><span>${count}</span></div>`;
+      }).join("");
     }
 
     function renderPreviewProfileAvatar() {
@@ -12398,6 +13294,7 @@
       if (icon) icon.checked = true;
       document.getElementById("previewProfileStatus").textContent = "";
       renderPreviewProfileAvatar();
+      renderPreviewWeekSummary();
       renderPreviewScheduleAdvice();
       previewDialog.showModal();
       requestAnimationFrame(() => document.getElementById("previewProfileName").focus());
@@ -12483,6 +13380,7 @@
       document.getElementById("authScreen").hidden = true;
       document.getElementById("appShell").hidden = false;
       updateAccountIdentity();
+      showDashboardPage({ scroll: false });
       startGuestPreviewTimer();
       trackProductEvent("Planner Preview Started");
       window.scrollTo({ top: 0, behavior: "auto" });
@@ -12539,6 +13437,8 @@
         document.getElementById("authScreen").hidden = true;
         document.getElementById("appShell").hidden = false;
         updateAccountIdentity();
+        showCalendarPage();
+        setSidebarActive("calendar");
         openLinkedCalendarPreview();
         return;
       }
@@ -12548,6 +13448,7 @@
         document.getElementById("authScreen").hidden = true;
         document.getElementById("appShell").hidden = false;
         updateAccountIdentity();
+        showDashboardPage({ scroll: false });
         return;
       }
 
@@ -12930,7 +13831,7 @@
     const presetDialog = document.getElementById("presetDialog");
     const settingsDialog = document.getElementById("settingsDialog");
     const appearanceDialog = document.getElementById("appearanceDialog");
-    const dashboardDialog = document.getElementById("dashboardDialog");
+    const dashboardPage = document.getElementById("dashboardPage");
     const mapDialog = document.getElementById("mapDialog");
     const remindersDialog = document.getElementById("remindersDialog");
     const listsDialog = document.getElementById("listsDialog");
@@ -12939,6 +13840,15 @@
     const versionHistoryDialog = document.getElementById("versionHistoryDialog");
     const sidebarHelpDialog = document.getElementById("sidebarHelpDialog");
     const form = document.getElementById("activityForm");
+    const gameScanInput = document.getElementById("gameScanPhoto");
+    const gameScanText = document.getElementById("gameScanText");
+    const gameScanProgress = document.getElementById("gameScanProgress");
+    const gameScanProgressText = document.getElementById("gameScanProgressText");
+    const gameScanReview = document.getElementById("gameScanReview");
+    const gameScanPreview = document.getElementById("gameScanPreview");
+    let gameScanPreviewUrl = "";
+    let gameScanRunning = false;
+    let ocrLibraryPromise = null;
     const kidsForm = document.getElementById("kidsForm");
     const presetForm = document.getElementById("presetForm");
     const settingsForm = document.getElementById("settingsForm");
@@ -13049,10 +13959,11 @@
       if (!document.getElementById("appShell").hidden) updateAccountIdentity();
       if (settingsDialog.open) renderSettingsDialog();
       if (appearanceDialog.open) renderAppearanceDialog();
-      if (dashboardDialog.open) renderDashboard();
+      if (!dashboardPage.hidden) renderDashboard();
       if (remindersDialog.open) renderReminders();
       if (listsDialog.open) renderActivityLists();
       if (document.getElementById("previewLimitDialog").open) {
+        renderPreviewWeekSummary();
         renderPreviewScheduleAdvice();
         renderPreviewProfileAvatar();
       }
@@ -13215,6 +14126,22 @@
       });
     }
 
+    function showDashboardPage({ scroll = true } = {}) {
+      const appShell = document.getElementById("appShell");
+      appShell.classList.add("is-dashboard-view");
+      dashboardPage.hidden = false;
+      setSidebarActive("dashboard");
+      renderDashboard();
+      if (scroll) window.scrollTo({ top: 0, behavior: userSettings.reduceMotion ? "auto" : "smooth" });
+    }
+
+    function showCalendarPage({ scroll = false } = {}) {
+      const appShell = document.getElementById("appShell");
+      appShell.classList.remove("is-dashboard-view");
+      dashboardPage.hidden = true;
+      if (scroll) weekSchedule.scrollIntoView({ behavior: userSettings.reduceMotion ? "auto" : "smooth", block: "start" });
+    }
+
     function openSidebarHelp() {
       setSidebarActive("help");
       sidebarHelpDialog.showModal();
@@ -13227,8 +14154,7 @@
     function handleSidebarAction(action) {
       document.getElementById("sidebarMenu").open = false;
       if (action === "dashboard") {
-        setSidebarActive(action);
-        openDashboardDialog();
+        showDashboardPage();
         return;
       }
       if (action === "map") {
@@ -13242,6 +14168,7 @@
         return;
       }
       if (action === "calendar") {
+        showCalendarPage();
         state.eventFilter = "all";
         setSidebarActive(action);
         activateCalendarView("week", true);
@@ -13249,12 +14176,14 @@
         return;
       }
       if (action === "holidays") {
+        showCalendarPage();
         state.eventFilter = "holidays";
         setSidebarActive(action);
         activateCalendarView("month", true);
         return;
       }
       if (action === "special-days") {
+        showCalendarPage();
         state.eventFilter = "important";
         setSidebarActive(action);
         activateCalendarView("month", true);
@@ -13999,6 +14928,27 @@
       });
     }
 
+    function formatRelativeTime(value, reference = new Date()) {
+      const target = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(target.getTime())) return "";
+      const differenceMinutes = Math.round((target.getTime() - reference.getTime()) / 60000);
+      const future = differenceMinutes > 0;
+      const absoluteMinutes = Math.abs(differenceMinutes);
+      if (absoluteMinutes < 1) return t("time.justNow");
+      if (absoluteMinutes < 60) {
+        if (future) return t(absoluteMinutes === 1 ? "time.inMinute" : "time.inMinutes", { count: absoluteMinutes });
+        return t(absoluteMinutes === 1 ? "time.minuteAgo" : "time.minutesAgo", { count: absoluteMinutes });
+      }
+      const hours = Math.round(absoluteMinutes / 60);
+      if (hours < 24) {
+        if (future) return t(hours === 1 ? "time.inHour" : "time.inHours", { count: hours });
+        return t(hours === 1 ? "time.hourAgo" : "time.hoursAgo", { count: hours });
+      }
+      const daysAway = Math.round(hours / 24);
+      if (future) return t(daysAway === 1 ? "time.tomorrow" : "time.inDays", { count: daysAway });
+      return t(daysAway === 1 ? "time.dayAgo" : "time.daysAgo", { count: daysAway });
+    }
+
     function getMonday(date) {
       const result = new Date(date);
       const day = result.getDay();
@@ -14457,6 +15407,7 @@
         if (!pointerDragging && distance < 8) return;
         if (!pointerDragging) {
           pointerDragging = true;
+          hideEventPeek();
           draggedOccurrence = { id: activity.id, occurrenceDate: activity.occurrenceDate || activity.startDate, allDay: Boolean(activity.allDay) };
           element.setPointerCapture(event.pointerId);
           element.classList.add("is-dragging");
@@ -14505,6 +15456,7 @@
         rescheduleDraggedEvent(addDays(sourceDate, dayOffset), activity.allDay ? null : minutes(activity.start) + minuteOffset, activity.allDay);
       });
       element.addEventListener("dragstart", event => {
+        hideEventPeek();
         draggedOccurrence = {
           id: activity.id,
           occurrenceDate: activity.occurrenceDate || activity.startDate,
@@ -14687,9 +15639,7 @@
             event.dataset.occurrenceKey = occurrenceKey(activity);
             event.innerHTML = `<span aria-hidden="true">${escapeHtml(displayIcon(activity))}</span><span>${escapeHtml(activityCompactTitle(activity))} · ${escapeHtml(displayChild(activity))}</span>`;
             if (!activity.isBuiltInHoliday) setupDraggableEvent(event, activity);
-            event.addEventListener("click", () => {
-              if (Date.now() > suppressEventClickUntil) openCalendarActivity(activity);
-            });
+            bindCalendarEventActions(event, activity, true);
             cell.appendChild(event);
           });
         grid.appendChild(cell);
@@ -14755,9 +15705,7 @@
               badgeClass: "is-conflict"
             });
             setupDraggableEvent(event, activity);
-            event.addEventListener("click", () => {
-              if (Date.now() > suppressEventClickUntil) openCalendarActivity(activity);
-            });
+            bindCalendarEventActions(event, activity, true);
             column.appendChild(event);
           });
 
@@ -14845,7 +15793,7 @@
             detail: activity.notes || "",
             showRecurrence: !agendaDetails
           });
-          item.addEventListener("click", () => openCalendarActivity(activity));
+          bindCalendarEventActions(item, activity);
           list.appendChild(item);
         });
         mobileAgenda.appendChild(card);
@@ -14958,7 +15906,7 @@
             badgeClass: isConflict ? "is-conflict" : "",
             showRecurrence: true
           });
-          event.addEventListener("click", () => openCalendarActivity(activity));
+          bindCalendarEventActions(event, activity);
           section.appendChild(event);
         });
 
@@ -15187,7 +16135,7 @@
           event.style.setProperty("--event-ink", colors.ink);
           event.dataset.occurrenceKey = occurrenceKey(activity);
           event.textContent = `${activity.allDay ? "" : `${timeLabel(activity.start)} `}${displayIcon(activity)} ${activityCompactTitle(activity)}`;
-          event.addEventListener("click", () => openCalendarActivity(activity));
+          bindCalendarEventActions(event, activity);
           cell.appendChild(event);
         });
 
@@ -15645,6 +16593,235 @@
       fields.end.value = timeInputValue(alternative.end);
     }
 
+    function resetGameScan() {
+      if (gameScanPreviewUrl) URL.revokeObjectURL(gameScanPreviewUrl);
+      gameScanPreviewUrl = "";
+      gameScanInput.value = "";
+      gameScanText.value = "";
+      gameScanProgress.hidden = true;
+      gameScanProgress.classList.remove("is-complete", "is-error");
+      gameScanProgressText.textContent = "";
+      gameScanReview.hidden = true;
+      gameScanPreview.hidden = true;
+      gameScanPreview.removeAttribute("src");
+      document.getElementById("gameScanSummary").innerHTML = "";
+      document.getElementById("gameScanTextDetails").open = false;
+      gameScanRunning = false;
+    }
+
+    function ensureOcrLibrary() {
+      if (window.Tesseract?.createWorker) return Promise.resolve(window.Tesseract);
+      if (ocrLibraryPromise) return ocrLibraryPromise;
+      ocrLibraryPromise = new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/tesseract.js@6/dist/tesseract.min.js";
+        script.crossOrigin = "anonymous";
+        script.referrerPolicy = "no-referrer";
+        script.dataset.kidssyncOcr = "true";
+        script.addEventListener("load", () => window.Tesseract?.createWorker ? resolve(window.Tesseract) : reject(new Error("OCR library unavailable")), { once: true });
+        script.addEventListener("error", () => reject(new Error("OCR library failed to load")), { once: true });
+        document.head.appendChild(script);
+      }).catch(error => {
+        ocrLibraryPromise = null;
+        throw error;
+      });
+      return ocrLibraryPromise;
+    }
+
+    function validScannedDate(year, month, day) {
+      const candidate = new Date(year, month, day);
+      if (candidate.getFullYear() !== year || candidate.getMonth() !== month || candidate.getDate() !== day) return null;
+      return candidate;
+    }
+
+    function scannedYearOrNext(month, day, yearText) {
+      let year = yearText ? Number(yearText) : new Date().getFullYear();
+      if (year < 100) year += 2000;
+      let candidate = validScannedDate(year, month, day);
+      if (!yearText && candidate && candidate.getTime() < addDays(new Date(), -30).getTime()) {
+        candidate = validScannedDate(year + 1, month, day);
+      }
+      return candidate;
+    }
+
+    function parseScannedDate(text) {
+      const iso = text.match(/\b(20\d{2})-(\d{1,2})-(\d{1,2})\b/);
+      if (iso) {
+        const candidate = validScannedDate(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+        if (candidate) return dateKey(candidate);
+      }
+      const numeric = text.match(/\b(0?[1-9]|1[0-2])\/(0?[1-9]|[12]\d|3[01])(?:\/(\d{2,4}))?\b/);
+      if (numeric) {
+        const candidate = scannedYearOrNext(Number(numeric[1]) - 1, Number(numeric[2]), numeric[3]);
+        if (candidate) return dateKey(candidate);
+      }
+      const monthNames = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
+      const named = text.match(/\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(\d{4}))?/i);
+      if (!named) return "";
+      const candidate = scannedYearOrNext(monthNames[named[1].slice(0, 3).toLowerCase()], Number(named[2]), named[3]);
+      return candidate ? dateKey(candidate) : "";
+    }
+
+    function scannedClockValue(hourText, minuteText, meridiemText) {
+      let hour = Number(hourText);
+      const minute = Number(minuteText || 0);
+      const meridiem = String(meridiemText || "").toLowerCase().replace(/\./g, "");
+      if (minute > 59 || hour > 23) return null;
+      if (meridiem) {
+        if (hour < 1 || hour > 12) return null;
+        if (meridiem === "pm" && hour !== 12) hour += 12;
+        if (meridiem === "am" && hour === 12) hour = 0;
+      }
+      return hour * 60 + minute;
+    }
+
+    function parseScannedTimes(text) {
+      const range = text.match(/\b(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?\s*(?:-|–|—|to)\s*(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)\b/i);
+      if (range) {
+        let start = scannedClockValue(range[1], range[2], range[3] || range[6]);
+        const end = scannedClockValue(range[4], range[5], range[6]);
+        if (start !== null && end !== null && end <= start && !range[3] && String(range[6]).toLowerCase().startsWith("p")) {
+          start = scannedClockValue(range[1], range[2], "am");
+        }
+        if (start !== null && end !== null && end > start) return { start: timeInputValue(start), end: timeInputValue(end) };
+      }
+      const startMatch = text.match(/(?:start|arrival|kickoff|tipoff|game\s*time)(?:\s*time)?\s*[:\-]?\s*(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)/i);
+      const endMatch = text.match(/(?:end|finish)(?:\s*time)?\s*[:\-]?\s*(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)/i);
+      const anyTime = text.match(/\b(\d{1,2})(?::(\d{2}))\s*(a\.?m\.?|p\.?m\.?)\b/i);
+      const source = startMatch || anyTime;
+      if (!source) return { start: "", end: "" };
+      const start = scannedClockValue(source[1], source[2], source[3]);
+      const explicitEnd = endMatch ? scannedClockValue(endMatch[1], endMatch[2], endMatch[3]) : null;
+      if (start === null) return { start: "", end: "" };
+      const end = explicitEnd !== null && explicitEnd > start
+        ? explicitEnd
+        : Math.min(start + Math.max(30, userSettings.defaultEventDuration), 23 * 60 + 59);
+      return { start: timeInputValue(start), end: timeInputValue(end) };
+    }
+
+    function scannedLineValue(lines, labels) {
+      for (let index = 0; index < lines.length; index += 1) {
+        const line = lines[index];
+        const match = line.match(new RegExp(`^(?:${labels.join("|")})\\s*[:\\-]\\s*(.+)$`, "i"));
+        if (match?.[1]) return match[1].trim();
+        if (new RegExp(`^(?:${labels.join("|")})\\s*:?$`, "i").test(line) && lines[index + 1]) return lines[index + 1];
+      }
+      return "";
+    }
+
+    function parseScannedGameDetails(rawText) {
+      const text = String(rawText || "").replace(/\r/g, "").replace(/[|]+/g, " ").trim();
+      const lines = text.split("\n").map(line => line.replace(/\s+/g, " ").trim()).filter(Boolean);
+      const date = parseScannedDate(text);
+      const times = parseScannedTimes(text);
+      let title = scannedLineValue(lines, ["event", "game", "match", "title"]);
+      if (title && (parseScannedDate(title) || /\b\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)\b/i.test(title))) title = "";
+      const opponent = scannedLineValue(lines, ["opponent", "versus", "vs\\.?"]);
+      if (!title && opponent) title = `Game vs ${opponent}`;
+      if (!title) {
+        title = lines.find(line => /\b(vs\.?|versus|game|match|tournament)\b/i.test(line)
+          && !/^game\s*(details|description)?$/i.test(line)
+          && !/\b(?:am|pm)\b/i.test(line)) || "Game";
+      }
+      let location = scannedLineValue(lines, ["location", "venue", "field", "address"]);
+      if (!location) {
+        location = lines.find(line => /\b(field|stadium|park|gym|complex|school|center|centre|arena)\b/i.test(line)
+          && !/^(location|venue|field)\s*:?$/i.test(line)) || "";
+      }
+      return { text, title: title.slice(0, 100), date, start: times.start, end: times.end, location: location.slice(0, 100) };
+    }
+
+    function renderScannedGameSummary(details) {
+      const values = [
+        t("gameScan.oneTime"),
+        t("gameScan.fieldTitle", { value: details.title }),
+        details.date ? t("gameScan.fieldDate", { value: formatShortDate(parseDateKey(details.date)) }) : "",
+        details.start ? t("gameScan.fieldTime", { value: `${formatTimeLabel(minutes(details.start))} - ${formatTimeLabel(minutes(details.end))}` }) : "",
+        details.location ? t("gameScan.fieldLocation", { value: details.location }) : ""
+      ].filter(Boolean);
+      document.getElementById("gameScanSummary").innerHTML = values.map(value => `<span>${escapeHtml(value)}</span>`).join("");
+      gameScanReview.hidden = false;
+    }
+
+    function applyScannedGameDetails(rawText) {
+      const details = parseScannedGameDetails(rawText);
+      if (!details.text) {
+        gameScanProgress.hidden = false;
+        gameScanProgress.classList.add("is-error");
+        gameScanProgressText.textContent = t("gameScan.noText");
+        document.getElementById("gameScanTextDetails").open = true;
+        return false;
+      }
+      fields.title.value = details.title || "Game";
+      if (details.date) fields.date.value = details.date;
+      if (details.start) {
+        fields.start.value = details.start;
+        fields.end.value = details.end;
+        fields.allDay.checked = false;
+      }
+      fields.location.value = details.location;
+      fields.eventType.value = "activity";
+      fields.recurrence.value = "none";
+      fields.repeatInterval.value = "1";
+      fields.repeatUntil.value = "";
+      fields.notes.value = details.text;
+      const inferred = inferredEventDefaults(normalizedEventTitle(details.title));
+      setIconField(inferred?.icon || "⚽");
+      smartDefaultsAppliedTitle = normalizedEventTitle(fields.title.value);
+      updateAllDayFields();
+      updateRecurrenceFields({ resetDays: true });
+      updateConflictSuggestions();
+      gameScanText.value = details.text;
+      renderScannedGameSummary(details);
+      gameScanProgress.hidden = false;
+      gameScanProgress.classList.add("is-complete");
+      gameScanProgress.classList.remove("is-error");
+      gameScanProgressText.textContent = t(details.date && details.start ? "gameScan.applied" : "gameScan.partial");
+      return true;
+    }
+
+    async function scanGamePhoto(file) {
+      if (!file || gameScanRunning) return;
+      if (!/^image\/(png|jpeg|webp)$/i.test(file.type)) {
+        gameScanProgress.hidden = false;
+        gameScanProgress.classList.add("is-error");
+        gameScanProgressText.textContent = t("gameScan.failed");
+        return;
+      }
+      gameScanRunning = true;
+      if (gameScanPreviewUrl) URL.revokeObjectURL(gameScanPreviewUrl);
+      gameScanPreviewUrl = URL.createObjectURL(file);
+      gameScanPreview.src = gameScanPreviewUrl;
+      gameScanPreview.hidden = false;
+      gameScanReview.hidden = false;
+      gameScanProgress.hidden = false;
+      gameScanProgress.classList.remove("is-complete", "is-error");
+      gameScanProgressText.textContent = t("gameScan.loading");
+      let worker;
+      try {
+        const ocr = await ensureOcrLibrary();
+        worker = await ocr.createWorker("eng", 1, {
+          logger: message => {
+            if (message.status !== "recognizing text") return;
+            gameScanProgressText.textContent = t("gameScan.reading", { progress: Math.round((message.progress || 0) * 100) });
+          }
+        });
+        const result = await worker.recognize(file);
+        const detectedText = result?.data?.text?.trim() || "";
+        if (!detectedText) throw new Error("No OCR text");
+        applyScannedGameDetails(detectedText);
+        document.getElementById("gameScanTextDetails").open = true;
+      } catch (error) {
+        reportClientError(error, "game-photo-scan");
+        gameScanProgress.classList.add("is-error");
+        gameScanProgressText.textContent = t(error?.message === "No OCR text" ? "gameScan.noText" : "gameScan.failed");
+        document.getElementById("gameScanTextDetails").open = true;
+      } finally {
+        if (worker) await worker.terminate().catch(() => {});
+        gameScanRunning = false;
+      }
+    }
+
     function applyEventTypeDefaults() {
       if (fields.eventType.value === "deadline") {
         fields.recurrence.value = "none";
@@ -15669,6 +16846,7 @@
       const defaultStart = 15 * 60;
       const defaultEnd = Math.min(scheduleEndMinutes, defaultStart + userSettings.defaultEventDuration);
       populateFormOptions();
+      resetGameScan();
       renderEventTitleSuggestions();
       smartDefaultsAppliedTitle = "";
       document.getElementById("dialogTitle").textContent = isEdit ? t("dialog.editTitle") : t("dialog.addTitle");
@@ -15731,6 +16909,71 @@
       fields.child.value = child;
       chooseInitialOpenTime();
       updateConflictSuggestions();
+    }
+
+    const eventPeek = document.getElementById("eventPeek");
+    const eventDetailsDialog = document.getElementById("eventDetailsDialog");
+    let eventPeekActivity = null;
+    let eventDetailsActivity = null;
+    let eventPeekHideTimer = 0;
+
+    function hideEventPeek() {
+      clearTimeout(eventPeekHideTimer);
+      eventPeek.hidden = true;
+      eventPeekActivity = null;
+    }
+
+    function scheduleEventPeekHide() {
+      clearTimeout(eventPeekHideTimer);
+      eventPeekHideTimer = setTimeout(() => {
+        if (!eventPeek.contains(document.activeElement)) hideEventPeek();
+      }, 220);
+    }
+
+    function showEventPeek(anchor, activity) {
+      clearTimeout(eventPeekHideTimer);
+      eventPeekActivity = activity;
+      const date = parseDateKey(activity.occurrenceDate || activity.startDate || dateKey(selectedDate));
+      document.getElementById("eventPeekTitle").textContent = `${displayIcon(activity)} ${activityTitle(activity)}`;
+      document.getElementById("eventPeekMeta").textContent = [formatFullDate(date), eventTimeText(activity), displayChild(activity), activity.location].filter(Boolean).join(" · ");
+      document.getElementById("eventPeekEdit").textContent = t(activity.isBuiltInHoliday ? "eventPreview.addEvent" : "eventPreview.edit");
+      eventPeek.hidden = false;
+      const bounds = anchor.getBoundingClientRect();
+      const width = eventPeek.offsetWidth;
+      const height = eventPeek.offsetHeight;
+      eventPeek.style.left = `${Math.max(12, Math.min(bounds.left, window.innerWidth - width - 12))}px`;
+      eventPeek.style.top = `${Math.max(12, bounds.bottom + height + 8 <= window.innerHeight ? bounds.bottom + 8 : bounds.top - height - 8)}px`;
+    }
+
+    function showEventDetails(activity) {
+      hideEventPeek();
+      eventDetailsActivity = activity;
+      const date = parseDateKey(activity.occurrenceDate || activity.startDate || dateKey(selectedDate));
+      const rows = [
+        ["eventPreview.when", `${formatFullDate(date)} · ${eventTimeText(activity)}`],
+        ["eventPreview.who", displayChild(activity)],
+        ["eventPreview.where", activity.location],
+        ["eventPreview.responsible", activity.responsible],
+        ["eventPreview.items", activity.items],
+        ["eventPreview.notes", activity.notes],
+        ["eventPreview.repeats", recurrenceLabel(activity)],
+        ["eventPreview.status", activityStatusLabel(activity)]
+      ].filter(([, value]) => value);
+      document.getElementById("eventDetailsBody").innerHTML = `<h3>${escapeHtml(displayIcon(activity))} ${escapeHtml(activityTitle(activity))}</h3><dl>${rows.map(([label, value]) => `<div><dt>${escapeHtml(t(label))}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>`;
+      document.getElementById("eventDetailsEdit").textContent = t(activity.isBuiltInHoliday ? "eventPreview.addEvent" : "eventPreview.edit");
+      eventDetailsDialog.showModal();
+    }
+
+    function bindCalendarEventActions(element, activity, suppressDraggedClick = false) {
+      element.addEventListener("pointerenter", event => {
+        if (event.pointerType === "mouse") showEventPeek(element, activity);
+      });
+      element.addEventListener("pointerleave", scheduleEventPeekHide);
+      element.addEventListener("focus", () => showEventPeek(element, activity));
+      element.addEventListener("blur", scheduleEventPeekHide);
+      element.addEventListener("click", () => {
+        if (!suppressDraggedClick || Date.now() > suppressEventClickUntil) showEventDetails(activity);
+      });
     }
 
     function openCalendarActivity(activity) {
@@ -15931,6 +17174,7 @@
     function closeDialog() {
       dialog.close();
       form.reset();
+      resetGameScan();
       updateCustomIconField();
       setEventDetailsExpanded(true);
       eventFormStep = 1;
@@ -16004,7 +17248,10 @@
         <span class="${className}-time">${escapeHtml(activity.allDay ? t("calendar.allDay") : formatTimeLabel(minutes(activity.start)))}</span>
       `;
       event.addEventListener("click", () => {
-        if (dashboardDialog.open) dashboardDialog.close();
+        if (!dashboardPage.hidden) {
+          showCalendarPage();
+          setSidebarActive("calendar");
+        }
         if (remindersDialog.open) remindersDialog.close();
         openDialog(activity);
       });
@@ -16016,46 +17263,126 @@
       return Math.max(0, minutes(activity.end) - minutes(activity.start));
     }
 
-    function workloadDurationLabel(totalMinutes) {
-      const hours = Math.floor(totalMinutes / 60);
-      const remainingMinutes = totalMinutes % 60;
-      if (!hours) return t("dashboard.minutes", { count: remainingMinutes });
-      if (!remainingMinutes) return t("dashboard.hours", { count: hours });
-      return `${t("dashboard.hours", { count: hours })} ${t("dashboard.minutes", { count: remainingMinutes })}`;
+    function dashboardTimelineElement(activity, { past = false } = {}) {
+      const date = parseDateKey(activity.occurrenceDate || activity.startDate);
+      const locale = currentLanguage === "zh" ? "zh-CN" : "en-US";
+      const month = date.toLocaleDateString(locale, { month: "short" });
+      const day = date.toLocaleDateString(locale, { day: "numeric" });
+      const time = activity.allDay ? t("calendar.allDay") : formatTimeLabel(minutes(activity.start));
+      const relativeTarget = past || activity.allDay ? occurrenceEndDateTime(activity) : occurrenceDateTime(activity);
+      const relative = formatRelativeTime(relativeTarget);
+      const meta = [displayChild(activity), activity.location].filter(Boolean).join(" · ");
+      const colors = eventColors(activity);
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "dashboard-timeline-item";
+      button.style.setProperty("--event-accent", colors.line);
+      button.innerHTML = `
+        <span class="dashboard-event-date">${escapeHtml(month)}<strong>${escapeHtml(day)}</strong></span>
+        <span class="dashboard-event-content">
+          <strong>${escapeHtml(`${displayIcon(activity)} ${activityCompactTitle(activity)}`)}</strong>
+          <span class="dashboard-event-time">${escapeHtml(time)}</span>
+          <span class="dashboard-event-meta">${escapeHtml(meta || formatShortDate(date))}</span>
+          <span class="dashboard-event-relative">${escapeHtml(t(past ? "dashboard.happened" : "dashboard.ends", { time: relative }))}</span>
+        </span>
+      `;
+      button.addEventListener("click", () => {
+        selectedDate = new Date(date);
+        currentWeekStart = getMonday(selectedDate);
+        currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+        showCalendarPage();
+        setSidebarActive("calendar");
+        openDialog(activity);
+      });
+      return button;
     }
 
-    function openDashboardDay(date) {
-      selectedDate = new Date(date);
-      currentWeekStart = getMonday(selectedDate);
-      currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-      currentView = "today";
-      persistScheduleData("view", currentView);
-      dashboardDialog.close();
-      renderAll();
+    function renderDashboardMap(upcoming) {
+      const pins = document.getElementById("dashboardMapPins");
+      const locationList = document.getElementById("dashboardLocations");
+      const empty = document.getElementById("dashboardMapEmpty");
+      const seen = new Set();
+      const locations = upcoming.filter(activity => {
+        const location = String(activity.location || "").trim();
+        if (!location || seen.has(location.toLowerCase())) return false;
+        seen.add(location.toLowerCase());
+        return true;
+      }).slice(0, 4);
+      const positions = [[24, 36], [67, 31], [43, 72], [78, 76]];
+      pins.innerHTML = "";
+      locationList.innerHTML = "";
+      empty.hidden = locations.length > 0;
+      locations.forEach((activity, index) => {
+        const [x, y] = positions[index];
+        const pin = document.createElement("button");
+        pin.type = "button";
+        pin.className = "dashboard-map-pin";
+        pin.style.setProperty("--pin-x", `${x}%`);
+        pin.style.setProperty("--pin-y", `${y}%`);
+        pin.innerHTML = `<span class="dashboard-map-pin-icon" aria-hidden="true">${escapeHtml(displayIcon(activity) || "⌖")}</span><span class="dashboard-map-pin-copy">${escapeHtml(activity.location)}</span>`;
+        pin.addEventListener("click", () => dashboardTimelineElement(activity).click());
+        pins.appendChild(pin);
+
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "dashboard-location-chip";
+        chip.innerHTML = `<span aria-hidden="true">⌖</span><span>${escapeHtml(activity.location)}</span>`;
+        chip.addEventListener("click", () => {
+          document.getElementById("mapSearch").value = activity.location;
+          renderMapResults(activity.location, true);
+          mapDialog.showModal();
+        });
+        locationList.appendChild(chip);
+      });
     }
 
     function renderDashboard() {
       const profile = loadFamilyProfile();
       const accountName = profile.name || activeAccount?.email?.split("@")[0] || "there";
       document.getElementById("dashboardGreeting").textContent = activeAccount ? t("dashboard.greeting", { name: accountName }) : t("dashboard.greetingGuest");
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const historyStart = addDays(today, -90);
+      const upcoming = upcomingOccurrences(90).slice(0, 8);
+      const past = activityOccurrencesBetween(historyStart, today)
+        .filter(activity => occurrenceEndDateTime(activity)?.getTime() < now.getTime())
+        .sort((first, second) => occurrenceEndDateTime(second) - occurrenceEndDateTime(first))
+        .slice(0, 8);
+
       const upcomingList = document.getElementById("dashboardUpcoming");
-      const upcoming = upcomingOccurrences(30).slice(0, 8);
       upcomingList.innerHTML = "";
       if (!upcoming.length) {
         upcomingList.innerHTML = `<p class="dashboard-empty">${escapeHtml(t("dashboard.noEvents"))}</p>`;
       } else {
-        upcoming.forEach(activity => upcomingList.appendChild(dashboardEventElement(activity, "dashboard-event")));
+        upcoming.forEach(activity => upcomingList.appendChild(dashboardTimelineElement(activity)));
       }
+
+      const pastList = document.getElementById("dashboardPast");
+      pastList.innerHTML = "";
+      if (!past.length) pastList.innerHTML = `<p class="dashboard-empty">${escapeHtml(t("dashboard.noPast"))}</p>`;
+      else past.forEach(activity => pastList.appendChild(dashboardTimelineElement(activity, { past: true })));
+
+      renderDashboardMap(upcoming);
+
       const updatesList = document.getElementById("dashboardUpdates");
       const updates = (recentExternalAudit().length ? recentExternalAudit() : activityAudit).slice(0, 6);
-      updatesList.innerHTML = updates.length ? updates.map(entry => {
+      if (updates.length) {
+        updatesList.innerHTML = updates.map(entry => {
         const actionKey = `history.${entry.action}`;
         const action = t(actionKey) === actionKey ? entry.action : t(actionKey);
         const count = entry.count > 1 ? ` (${entry.count})` : "";
         const icon = entry.action === "deleted" ? "🗑️" : entry.action === "moved" ? "↔️" : entry.action === "created" ? "➕" : "✏️";
-        return `<article class="history-item"><span class="history-item-icon" aria-hidden="true">${icon}</span><span class="history-item-copy"><strong>${escapeHtml(`${action} ${entry.title || "Untitled event"}${count}`)}</strong><span>${escapeHtml(entry.actor || t("welcomeBack.actorFallback"))}</span></span><time class="history-item-time" datetime="${escapeHtml(entry.at || "")}">${escapeHtml(formatDateTime(entry.at))}</time></article>`;
-      }).join("") : `<p class="history-empty">${escapeHtml(t("history.empty"))}</p>`;
-      const now = new Date();
+        return `<article class="dashboard-feed-item"><span class="dashboard-feed-icon" aria-hidden="true">${icon}</span><span class="dashboard-feed-copy"><strong>${escapeHtml(`${action} ${entry.title || "Untitled event"}${count}`)}</strong><span>${escapeHtml(entry.actor || t("welcomeBack.actorFallback"))}</span></span><time class="dashboard-feed-time" datetime="${escapeHtml(entry.at || "")}" title="${escapeHtml(formatDateTime(entry.at))}">${escapeHtml(formatRelativeTime(entry.at))}</time></article>`;
+        }).join("");
+      } else if (past.length) {
+        updatesList.innerHTML = past.slice(0, 5).map(activity => {
+          const endedAt = occurrenceEndDateTime(activity);
+          return `<article class="dashboard-feed-item"><span class="dashboard-feed-icon" aria-hidden="true">${escapeHtml(displayIcon(activity))}</span><span class="dashboard-feed-copy"><strong>${escapeHtml(activityCompactTitle(activity))}</strong><span>${escapeHtml([displayChild(activity), activity.location].filter(Boolean).join(" · "))}</span></span><time class="dashboard-feed-time" datetime="${escapeHtml(endedAt.toISOString())}" title="${escapeHtml(formatDateTime(endedAt))}">${escapeHtml(formatRelativeTime(endedAt))}</time></article>`;
+        }).join("");
+      } else {
+        updatesList.innerHTML = `<p class="dashboard-empty">${escapeHtml(t("history.empty"))}</p>`;
+      }
+
       const monday = getMonday(now);
       const dayLoads = days.map((day, index) => {
         const date = addDays(monday, index);
@@ -16079,62 +17406,6 @@
       document.getElementById("dashboardStats").innerHTML = stats
         .map(([key, value]) => `<div class="dashboard-stat"><span>${escapeHtml(t(key))}</span><strong>${escapeHtml(value)}</strong></div>`)
         .join("");
-
-      const busyChart = document.getElementById("dashboardBusyDays");
-      const maximumLoad = Math.max(1, ...dayLoads.map(item => item.count));
-      busyChart.innerHTML = "";
-      dayLoads.forEach(item => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = `busy-day${item === busiest && item.count ? " is-busiest" : ""}`;
-        button.style.setProperty("--busy-height", `${Math.max(5, (item.count / maximumLoad) * 100)}%`);
-        const dayLabel = item.date.toLocaleDateString(currentLanguage === "zh" ? "zh-CN" : "en-US", { weekday: "short", month: "short", day: "numeric" });
-        const countLabel = t(item.count === 1 ? "dashboard.dayEventOne" : "dashboard.dayEvents", { count: item.count });
-        button.setAttribute("aria-label", `${dayLabel}: ${countLabel}`);
-        button.innerHTML = `<span class="busy-day-label">${escapeHtml(dayLabel)}</span><span class="busy-day-bar-track" aria-hidden="true"><span class="busy-day-bar"></span></span><span class="busy-day-count">${escapeHtml(countLabel)}</span>`;
-        button.addEventListener("click", () => openDashboardDay(item.date));
-        busyChart.appendChild(button);
-      });
-
-      const loadList = document.getElementById("dashboardKidLoad");
-      loadList.innerHTML = "";
-      const workloads = kidProfiles.map(kid => {
-        const events = week.filter(activity => activity.child === kid.name);
-        return { kid, count: events.length, duration: events.reduce((total, activity) => total + eventDurationMinutes(activity), 0) };
-      });
-      const maximum = Math.max(1, ...workloads.map(item => item.duration || item.count));
-      if (!workloads.length) {
-        loadList.innerHTML = `<p class="dashboard-empty">${escapeHtml(t("empty.addKid"))}</p>`;
-      } else {
-        workloads.forEach(({ kid, count, duration }) => {
-          const color = palettes[kid.palette]?.color || palettes.blue.color;
-          const item = document.createElement("div");
-          item.className = "kid-load-item";
-          item.style.setProperty("--kid-color", color);
-          item.style.setProperty("--load", `${Math.max(6, ((duration || count) / maximum) * 100)}%`);
-          item.innerHTML = `<span aria-hidden="true">${escapeHtml(kid.avatar || KID_AVATARS[0])}</span><span><strong>${escapeHtml(kid.name)}</strong><br>${escapeHtml(t(count === 1 ? "dashboard.workloadSummaryOne" : "dashboard.workloadSummary", { count, duration: workloadDurationLabel(duration) }))}</span><span class="load-meter" aria-hidden="true"><span></span></span>`;
-          loadList.appendChild(item);
-        });
-      }
-
-      const deadlineList = document.getElementById("dashboardDeadlines");
-      deadlineList.innerHTML = "";
-      if (!deadlines.length) {
-        deadlineList.innerHTML = `<p class="dashboard-empty">${escapeHtml(t("dashboard.noDeadlines"))}</p>`;
-      } else {
-        deadlines.slice(0, 8).forEach(activity => {
-          const date = occurrenceDateTime(activity);
-          const button = document.createElement("button");
-          button.type = "button";
-          button.className = "deadline-event";
-          button.innerHTML = `<span class="deadline-event-icon" aria-hidden="true">${escapeHtml(displayIcon(activity) || "📌")}</span><span class="deadline-event-copy"><strong>${escapeHtml(activityTitle(activity))}</strong><span>${escapeHtml(displayChild(activity))}</span></span><span class="deadline-event-date">${escapeHtml(formatShortDate(date))}</span>`;
-          button.addEventListener("click", () => {
-            dashboardDialog.close();
-            openDialog(activity);
-          });
-          deadlineList.appendChild(button);
-        });
-      }
     }
 
     function reminderLeadLabel() {
@@ -16260,16 +17531,24 @@
       listsDialog.showModal();
     }
 
-    function openDashboardDialog() {
-      renderDashboard();
-      dashboardDialog.showModal();
-    }
-
-    function renderMapResults(query = "restaurants") {
-      const cleanQuery = String(query || "restaurants").trim() || "family activities";
-      const results = document.getElementById("mapResults");
-      const encodedQuery = encodeURIComponent(`${cleanQuery} near me`);
-      results.innerHTML = `<div class="map-result-card"><span class="map-result-icon" aria-hidden="true">⌖</span><div><strong>${escapeHtml(t("map.searching", { query: cleanQuery }))}</strong><p>Open a live map search to see places, hours, directions, and reviews.</p></div><a class="small-btn" href="https://www.google.com/maps/search/?api=1&query=${encodedQuery}" target="_blank" rel="noopener">${escapeHtml(t("map.open"))}</a></div>`;
+    let mapCoordinates = null;
+    let mapSearchIsExact = false;
+    function renderMapResults(query = "restaurants", exact = false) {
+      const cleanQuery = String(query || "restaurants").trim().slice(0, 150) || "family activities";
+      mapSearchIsExact = exact;
+      const coordinates = mapCoordinates ? `${mapCoordinates.latitude.toFixed(5)},${mapCoordinates.longitude.toFixed(5)}` : "";
+      const searchQuery = exact ? cleanQuery : `${cleanQuery} near ${coordinates || "me"}`;
+      const encodedQuery = encodeURIComponent(searchQuery);
+      const googleUrl = `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`;
+      const appleUrl = `https://maps.apple.com/?q=${encodeURIComponent(cleanQuery)}${coordinates ? `&near=${encodeURIComponent(coordinates)}` : ""}`;
+      const embedKey = String(window.KIDSSYNC_GOOGLE_MAPS?.embedApiKey || "").trim();
+      const frame = document.getElementById("mapLiveFrame");
+      const empty = document.getElementById("mapLiveEmpty");
+      frame.hidden = !embedKey;
+      empty.hidden = Boolean(embedKey);
+      frame.parentElement.classList.toggle("is-unconfigured", !embedKey);
+      frame.src = embedKey ? `https://www.google.com/maps/embed/v1/search?key=${encodeURIComponent(embedKey)}&q=${encodedQuery}` : "about:blank";
+      document.getElementById("mapResults").innerHTML = `<div class="map-result-card"><span class="map-result-icon" aria-hidden="true">⌖</span><div><strong>${escapeHtml(t("map.searching", { query: cleanQuery }))}</strong><p>${escapeHtml(t("map.resultsNote"))}</p></div><div class="map-result-actions"><a class="small-btn" href="${googleUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(t("map.google"))}</a><a class="small-btn" href="${appleUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(t("map.apple"))}</a></div></div>`;
     }
 
     function openMapDialog() {
@@ -16620,6 +17899,33 @@
         id: makeId("activity"),
         child: activity.child === FAMILY_CHILD || kidProfiles.some(kid => kid.name === activity.child) ? activity.child : FAMILY_CHILD
       }));
+    }
+
+    async function importCalendarFile(file, { input, button, status, allowBackup = true, successKey = "transfer.imported", invalidKey = "transfer.invalid" }) {
+      if (!file) return 0;
+      try {
+        const content = await file.text();
+        const trimmed = content.trimStart();
+        const isBackup = allowBackup && (file.name.toLowerCase().endsWith(".json") || trimmed.startsWith("{") || trimmed.startsWith("["));
+        const imported = isBackup ? importBackupEvents(content) : importIcsEvents(content);
+        if (!imported.length) throw new Error("No importable events");
+        rememberCurrentSchedule(t("versions.beforeImport", { name: file.name }));
+        state.activities.push(...imported);
+        state.visibleKids = new Set(kidProfiles.map(kid => kid.name));
+        saveKids();
+        saveActivities();
+        auditActivity("imported", imported[0], imported[0], imported.length);
+        populateFormOptions();
+        renderAll();
+        document.getElementById("shareText").value = buildShareText();
+        status.textContent = t(successKey, { count: imported.length });
+        input.value = "";
+        button.disabled = true;
+        return imported.length;
+      } catch {
+        status.textContent = t(invalidKey);
+        return 0;
+      }
     }
 
     function loadCalendarMembers() {
@@ -17428,6 +18734,7 @@
       renderSearchEmptyState();
       renderReminders();
       updateCalendarView();
+      if (!dashboardPage.hidden) renderDashboard();
     }
 
     function scrollWeekToFirstActivity() {
@@ -17531,6 +18838,8 @@
       button.addEventListener("click", () => handleSidebarAction(button.dataset.sidebarAction));
     });
     document.getElementById("focusScheduleSearch").addEventListener("click", () => {
+      showCalendarPage();
+      setSidebarActive("calendar");
       document.querySelector(".schedule-overview").scrollIntoView({
         behavior: userSettings.reduceMotion ? "auto" : "smooth",
         block: "center"
@@ -17627,29 +18936,47 @@
     document.getElementById("importSchedule").addEventListener("click", async () => {
       const input = document.getElementById("importFile");
       const file = input.files?.[0];
-      if (!file) return;
-      try {
-        const content = await file.text();
-        const trimmed = content.trimStart();
-        const imported = file.name.toLowerCase().endsWith(".json") || trimmed.startsWith("{") || trimmed.startsWith("[")
-          ? importBackupEvents(content)
-          : importIcsEvents(content);
-        if (!imported.length) throw new Error("No importable events");
-        rememberCurrentSchedule(t("versions.beforeImport", { name: file.name }));
-        state.activities.push(...imported);
-        state.visibleKids = new Set(kidProfiles.map(kid => kid.name));
-        saveKids();
-        saveActivities();
-        auditActivity("imported", imported[0], imported[0], imported.length);
-        populateFormOptions();
-        renderAll();
-        document.getElementById("shareText").value = buildShareText();
-        document.getElementById("shareStatus").textContent = t("transfer.imported", { count: imported.length });
-        input.value = "";
-        document.getElementById("importSchedule").disabled = true;
-      } catch {
-        document.getElementById("shareStatus").textContent = t("transfer.invalid");
-      }
+      await importCalendarFile(file, {
+        input,
+        button: document.getElementById("importSchedule"),
+        status: document.getElementById("shareStatus")
+      });
+    });
+
+    const googleImportDialog = document.getElementById("googleImportDialog");
+    const googleImportFile = document.getElementById("googleImportFile");
+    const googleImportButton = document.getElementById("googleImportSchedule");
+    const googleImportStatus = document.getElementById("googleImportStatus");
+    const googleImportFileName = document.getElementById("googleImportFileName");
+    function openGoogleImportDialog() {
+      googleImportFile.value = "";
+      googleImportButton.disabled = true;
+      googleImportStatus.textContent = "";
+      googleImportFileName.textContent = t("googleImport.chooseFile");
+      googleImportDialog.showModal();
+    }
+    document.getElementById("openGoogleImport").addEventListener("click", () => {
+      const calendarDialog = document.getElementById("calendarDialog");
+      if (calendarDialog.open) calendarDialog.close();
+      window.setTimeout(openGoogleImportDialog, 0);
+    });
+    document.getElementById("closeGoogleImport").addEventListener("click", () => googleImportDialog.close());
+    googleImportFile.addEventListener("change", () => {
+      const file = googleImportFile.files?.[0];
+      googleImportButton.disabled = !file;
+      googleImportStatus.textContent = "";
+      googleImportFileName.textContent = file ? t("googleImport.selected", { name: file.name }) : t("googleImport.chooseFile");
+    });
+    googleImportButton.addEventListener("click", async () => {
+      const count = await importCalendarFile(googleImportFile.files?.[0], {
+        input: googleImportFile,
+        button: googleImportButton,
+        status: googleImportStatus,
+        allowBackup: false,
+        successKey: "googleImport.success",
+        invalidKey: "googleImport.invalid"
+      });
+      if (count) googleImportFileName.textContent = t("googleImport.chooseFile");
     });
     document.getElementById("copySchedule").addEventListener("click", async () => {
       const text = document.getElementById("shareText").value;
@@ -17685,14 +19012,54 @@
         if (error?.name !== "AbortError") document.getElementById("shareStatus").textContent = t("sharing.unavailable");
       }
     });
-    document.getElementById("openDashboard").addEventListener("click", openDashboardDialog);
-    document.getElementById("closeDashboard").addEventListener("click", () => dashboardDialog.close());
-    document.getElementById("dashboardGoCalendar").addEventListener("click", () => {
-      dashboardDialog.close();
-      handleSidebarAction("calendar");
+    document.getElementById("openDashboard").addEventListener("click", showDashboardPage);
+    document.getElementById("dashboardGoCalendar").addEventListener("click", () => handleSidebarAction("calendar"));
+    document.getElementById("dashboardAddEvent").addEventListener("click", () => openDialog());
+    document.getElementById("dashboardScanGame").addEventListener("click", () => {
+      openDialog();
+      gameScanInput.click();
+    });
+    document.getElementById("dashboardOpenLists").addEventListener("click", openListsDialog);
+    document.getElementById("dashboardOpenMap").addEventListener("click", openMapDialog);
+    eventPeek.addEventListener("pointerenter", () => clearTimeout(eventPeekHideTimer));
+    eventPeek.addEventListener("pointerleave", scheduleEventPeekHide);
+    eventPeek.addEventListener("focusin", () => clearTimeout(eventPeekHideTimer));
+    eventPeek.addEventListener("focusout", scheduleEventPeekHide);
+    document.getElementById("eventPeekView").addEventListener("click", () => {
+      if (eventPeekActivity) showEventDetails(eventPeekActivity);
+    });
+    document.getElementById("eventPeekEdit").addEventListener("click", () => {
+      const activity = eventPeekActivity;
+      hideEventPeek();
+      if (activity) openCalendarActivity(activity);
+    });
+    document.getElementById("closeEventDetails").addEventListener("click", () => eventDetailsDialog.close());
+    document.getElementById("eventDetailsDone").addEventListener("click", () => eventDetailsDialog.close());
+    document.getElementById("eventDetailsEdit").addEventListener("click", () => {
+      const activity = eventDetailsActivity;
+      eventDetailsDialog.close();
+      if (activity) openCalendarActivity(activity);
+    });
+    window.addEventListener("scroll", hideEventPeek, true);
+    window.addEventListener("resize", hideEventPeek);
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && !eventDetailsDialog.open) hideEventPeek();
     });
     document.getElementById("closeMap").addEventListener("click", () => mapDialog.close());
     document.getElementById("mapSearchButton").addEventListener("click", () => renderMapResults(document.getElementById("mapSearch").value));
+    document.getElementById("mapUseLocation").addEventListener("click", () => {
+      const status = document.getElementById("mapLocationStatus");
+      if (!navigator.geolocation) {
+        status.textContent = t("map.locationUnavailable");
+        return;
+      }
+      status.textContent = t("map.locating");
+      navigator.geolocation.getCurrentPosition(position => {
+        mapCoordinates = { latitude: position.coords.latitude, longitude: position.coords.longitude };
+        status.textContent = t("map.locationReady");
+        renderMapResults(document.getElementById("mapSearch").value || "restaurants", mapSearchIsExact);
+      }, () => { status.textContent = t("map.locationUnavailable"); }, { timeout: 10000, maximumAge: 300000 });
+    });
     document.getElementById("mapSearch").addEventListener("keydown", event => {
       if (event.key === "Enter") renderMapResults(event.currentTarget.value);
     });
@@ -17704,7 +19071,8 @@
     document.getElementById("openReminders").addEventListener("click", openRemindersDialog);
     document.getElementById("closeReminders").addEventListener("click", () => remindersDialog.close());
     document.getElementById("closeLists").addEventListener("click", () => listsDialog.close());
-    listsDialog.addEventListener("close", () => setSidebarActive("calendar"));
+    listsDialog.addEventListener("close", () => setSidebarActive(dashboardPage.hidden ? "calendar" : "dashboard"));
+    mapDialog.addEventListener("close", () => setSidebarActive(dashboardPage.hidden ? "calendar" : "dashboard"));
     document.getElementById("openActivityHistory").addEventListener("click", () => {
       document.getElementById("moreActions").open = false;
       renderActivityHistory();
@@ -17875,6 +19243,8 @@
     zoomOutButton.addEventListener("click", () => changeCalendarZoom(-1));
     zoomInButton.addEventListener("click", () => changeCalendarZoom(1));
     fields.title.addEventListener("change", applySmartEventDefaults);
+    gameScanInput.addEventListener("change", event => scanGamePhoto(event.currentTarget.files?.[0]));
+    document.getElementById("parseGameScanText").addEventListener("click", () => applyScannedGameDetails(gameScanText.value));
     fields.eventType.addEventListener("change", applyEventTypeDefaults);
     fields.recurrence.addEventListener("change", () => updateRecurrenceFields({ resetDays: true }));
     fields.date.addEventListener("change", () => {
@@ -17942,6 +19312,7 @@
     document.getElementById("miniAddActivity").addEventListener("click", () => document.getElementById("addActivity").click());
     document.getElementById("miniOpenDashboard").addEventListener("click", () => document.getElementById("openDashboard").click());
     document.getElementById("miniOpenReminders").addEventListener("click", () => document.getElementById("openReminders").click());
+    document.getElementById("miniImportGoogle").addEventListener("click", openGoogleImportDialog);
     document.getElementById("miniShareSchedule").addEventListener("click", () => document.getElementById("shareSchedule").click());
     document.getElementById("miniManageCalendars").addEventListener("click", () => document.getElementById("manageCalendars").click());
     window.setInterval(updateCurrentTimeMarkers, 60000);
