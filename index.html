@@ -9140,6 +9140,18 @@
       }
 
       .google-import-dialog { width:min(620px,calc(100% - 24px)); }
+      .dashboard-week-body { padding:18px; }
+      .dashboard-week-chart { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:8px; }
+      .dashboard-week-chart .busy-day { min-height:180px; padding:10px 5px; cursor:pointer; }
+      .dashboard-week-chart .busy-day-bar { min-height:0; }
+      .dashboard-week-body h3 { margin:22px 0 12px; color:var(--ink); font-size:16px; }
+      .dashboard-week-body .kid-load-item { grid-template-columns:24px minmax(0,1fr) 72px; }
+      @media (max-width:560px) {
+        .dashboard-week-body { padding:12px; }
+        .dashboard-week-chart { gap:4px; }
+        .dashboard-week-chart .busy-day { min-height:150px; padding:8px 2px; }
+        .dashboard-week-chart .busy-day-label { font-size:10px; text-transform:none; }
+      }
       .google-import-body { display:grid; gap:16px; padding:4px 20px 20px; }
       .google-import-intro { margin:0; color:var(--muted); font-size:14px; line-height:1.5; }
       .google-import-steps {
@@ -9242,6 +9254,123 @@
         .dashboard-page-actions button:last-child { width:46px; }
       }
       @media (prefers-reduced-motion:reduce) { .game-scan-spinner { animation:none; } }
+    </style>
+    <style>
+      /* Two visible planner bars: navigation/account, then calendar controls. */
+      #appShell { padding-top:8px; }
+      #appShell > .app-sidebar { min-height:54px; margin-bottom:7px; padding:5px 9px; }
+      #appShell .app-sidebar > .account-bar {
+        flex:0 1 auto; min-width:0; min-height:0; margin:0; padding:0;
+        gap:7px; border:0; border-radius:0; background:transparent;
+        box-shadow:none; backdrop-filter:none;
+      }
+      #appShell .app-sidebar .save-status { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+      #appShell .app-sidebar .account-identity { flex:0 1 150px; min-width:0; max-width:150px; }
+      #appShell .app-sidebar .account-family,
+      #appShell .app-sidebar .account-email { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      #appShell .app-sidebar .invitation-button,
+      #appShell .app-sidebar .auth-entry-btn,
+      #appShell .app-sidebar .logout-btn { min-height:36px; padding:5px 9px; }
+      #appShell > .toolbar { position:relative; z-index:90; margin-bottom:8px; padding:5px 7px; overflow:visible; }
+      #appShell .planner-options { position:relative; flex:0 0 auto; }
+      #appShell .planner-options-toggle {
+        display:inline-flex; align-items:center; justify-content:center; gap:6px;
+        min-height:42px; padding:0 10px; border:1px solid var(--line);
+        border-radius:8px; color:var(--ink); background:var(--panel);
+        font-size:13px; font-weight:800; list-style:none; white-space:nowrap; cursor:pointer;
+      }
+      #appShell .planner-options-toggle::-webkit-details-marker { display:none; }
+      #appShell .planner-options-toggle:hover,
+      #appShell .planner-options-toggle:focus-visible,
+      #appShell .planner-options[open] > .planner-options-toggle { border-color:var(--blue-line); background:var(--blue-soft); }
+      #appShell .planner-options-panel {
+        position:absolute; top:calc(100% + 9px); right:0; z-index:100;
+        width:min(680px,calc(100vw - 26px)); max-height:min(74dvh,650px); overflow:auto;
+        padding:12px; border:1px solid var(--line); border-radius:12px;
+        color:var(--ink); background:var(--panel); box-shadow:0 18px 48px rgba(19,47,67,.22);
+      }
+      #appShell .planner-options-panel .topbar { display:block; margin:0 0 8px; }
+      #appShell .planner-options-panel #kidFilters { width:100%; min-height:0; }
+      #appShell .planner-options-panel .schedule-overview {
+        display:grid; grid-template-columns:minmax(0,1fr); gap:8px;
+        width:100%; margin:0; padding:0;
+      }
+      #appShell .planner-options-panel .calendar-search,
+      #appShell .planner-options-panel .overview-stats,
+      #appShell .planner-options-panel .event-filter { width:100%; min-width:0; }
+      @media (min-width:1100px) {
+        #appShell > .toolbar { grid-template-columns:minmax(240px,1fr) auto; }
+      }
+      @media (max-width:1099px) {
+        #appShell .planner-options-toggle { width:42px; padding:0; }
+        #appShell .planner-options-toggle span { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+      }
+      @media (max-width:900px) {
+        #appShell > .app-sidebar { grid-template-columns:44px minmax(0,1fr) auto auto; }
+        #appShell .app-sidebar > .account-bar { grid-column:3; grid-row:1; }
+        #appShell .app-sidebar .account-identity { display:none; }
+        #appShell .app-sidebar .sidebar-tools { grid-column:4; }
+      }
+      @media (max-width:560px) {
+        #appShell > .toolbar { padding:6px; }
+        #appShell .app-sidebar .sidebar-tools > #openSettings,
+        #appShell .app-sidebar .sidebar-tools > [data-sidebar-action="help"] { display:none; }
+        #appShell .app-sidebar .sidebar-brand { min-width:0; }
+        #appShell .app-sidebar .sidebar-brand-copy strong { font-size:18px; }
+        #appShell .app-sidebar > .account-bar { gap:3px; }
+        #appShell .app-sidebar .auth-entry-btn { min-height:32px; padding:4px 7px; font-size:11px; }
+        #appShell .toolbar-leading { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px; }
+        #appShell .calendar-workspace { grid-column:1; height:44px; }
+        #appShell .toolbar-leading > .language-switch { grid-column:2; height:44px; width:88px; }
+        #appShell .schedule-actions { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; }
+        #appShell .schedule-actions .view-switch { grid-column:1 / -1; grid-row:1; }
+        #appShell .schedule-actions > #openDashboard { grid-column:1; grid-row:2; }
+        #appShell .schedule-actions > #addActivity { grid-column:2; grid-row:2; }
+        #appShell .schedule-actions > #moreActions { grid-column:4; grid-row:2; }
+        #appShell .schedule-actions > .planner-options { grid-column:3; grid-row:2; }
+        #appShell .planner-options { position:static; }
+        #appShell .planner-options-toggle { width:100%; min-height:42px; }
+        #appShell .planner-options-panel { top:calc(100% + 7px); right:0; left:0; width:auto; }
+        #appShell .app-sidebar .account-avatar { width:32px; height:32px; }
+        #appShell .app-sidebar .logout-btn { min-height:32px; padding:4px 6px; font-size:11px; }
+      }
+
+      /* Timed activities get a readable lane instead of clipped, stacked cards. */
+      .day-column > .event,
+      .day-column > .event.overlap-offset {
+        display:block; padding:5px 7px; text-align:left;
+      }
+      .day-column > .event .event-icon { display:none; }
+      .day-column > .event .event-card-copy { display:grid; align-content:start; gap:2px; max-height:100%; overflow:hidden; }
+      .day-column > .event .event-time,
+      .day-column > .event.overlap-offset .event-time {
+        width:auto; max-width:none; padding:0; overflow:visible; border:0;
+        border-radius:0; background:transparent; font-size:12px;
+        line-height:1.15; text-overflow:clip; white-space:nowrap;
+      }
+      .day-column > .event .event-title,
+      .day-column > .event.overlap-offset .event-title {
+        display:-webkit-box; overflow:hidden; overflow-wrap:anywhere;
+        -webkit-box-orient:vertical; -webkit-line-clamp:2;
+        font-size:14px; line-height:1.13; white-space:normal;
+      }
+      .day-column > .event .event-child,
+      .day-column > .event .event-detail {
+        overflow:hidden; font-size:11px; line-height:1.1;
+        text-overflow:ellipsis; white-space:nowrap;
+      }
+      .day-column > .event.compact-duration,
+      .day-column > .event.compact-duration.overlap-offset { padding:2px 5px; }
+      .day-column > .event.compact-duration .event-card-copy { gap:0; }
+      .day-column > .event.compact-duration .event-time { font-size:11px; line-height:1.1; }
+      .day-column > .event.compact-duration .event-title { -webkit-line-clamp:1; font-size:12px; line-height:1.1; }
+      .day-column > .event.compact-duration .event-child,
+      .day-column > .event.compact-duration .event-detail,
+      .day-column > .event.compact-duration .event-badge { display:none; }
+      .day-column > .event.very-short,
+      .day-column > .event.very-short.overlap-offset { padding:1px 5px; }
+      .day-column > .event.very-short .event-time { font-size:10px; line-height:1; }
+      .day-column > .event.very-short .event-title { font-size:11px; line-height:1; }
     </style>
 </head>
 <body>
@@ -9683,8 +9812,7 @@
         <button class="sidebar-icon-button sidebar-tooltip" type="button" data-sidebar-action="help" aria-label="Help" title="Help" data-tooltip="Help" data-i18n-aria="sidebar.help" data-i18n-title="sidebar.help" data-i18n-tooltip="sidebar.help"><span aria-hidden="true">?</span></button>
         <button class="sidebar-icon-button sidebar-tooltip sidebar-tooltip-right" type="button" id="openSettings" aria-label="Settings" title="Settings" data-tooltip="Settings" data-i18n-aria="settings.open" data-i18n-title="settings.open" data-i18n-tooltip="settings.open"><span aria-hidden="true">⚙</span></button>
       </div>
-    </header>
-    <div class="account-bar" aria-label="Family account" data-i18n-aria="auth.familyAccount">
+      <div class="account-bar" aria-label="Family account" data-i18n-aria="auth.familyAccount">
       <span class="save-status" id="saveStatus" role="status" data-i18n="save.saved">Saved on this device</span>
       <span class="account-avatar" id="accountAvatar" aria-hidden="true"><span id="accountAvatarFallback">👤</span><img id="accountAvatarImage" alt="" hidden></span>
       <div class="account-identity">
@@ -9698,7 +9826,8 @@
       </button>
       <button class="auth-entry-btn" type="button" id="guestAuthButton" data-i18n="auth.signIn">Sign In</button>
       <button class="logout-btn" type="button" id="logoutButton" data-i18n="auth.logout">Log Out</button>
-    </div>
+      </div>
+    </header>
     <section class="dashboard-page" id="dashboardPage" aria-labelledby="dashboardPageTitle" hidden>
       <header class="dashboard-page-header">
         <div>
@@ -9708,7 +9837,7 @@
         </div>
         <div class="dashboard-page-actions" aria-label="Dashboard actions" data-i18n-aria="dashboard.actions">
           <button class="primary-btn" type="button" id="dashboardAddEvent"><span aria-hidden="true">＋</span><span data-i18n="dashboard.addEvent">Add event</span></button>
-          <button class="ghost-btn" type="button" id="dashboardScanGame"><span aria-hidden="true">▣</span><span data-i18n="gameScan.dashboardAction">Scan game</span></button>
+          <button class="ghost-btn" type="button" id="dashboardScanGame"><span aria-hidden="true">▣</span><span data-i18n="gameScan.dashboardAction">Scan document</span></button>
           <button class="ghost-btn" type="button" id="dashboardOpenLists"><span aria-hidden="true">☷</span><span data-i18n="dashboard.openLists">Open lists</span></button>
           <button class="ghost-btn" type="button" id="dashboardGoCalendar"><span aria-hidden="true">▣</span><span data-i18n="dashboard.openCalendar">Open calendar</span></button>
         </div>
@@ -9718,23 +9847,19 @@
 
       <div class="dashboard-page-grid">
         <div class="dashboard-main-column">
-          <section class="dashboard-panel dashboard-map-panel" aria-labelledby="dashboardMapTitle">
+          <section class="dashboard-panel dashboard-week-panel" aria-labelledby="dashboardWeekTitle">
             <div class="dashboard-panel-heading">
               <div>
-                <p class="dashboard-panel-kicker" data-i18n="dashboard.locationKicker">Where everyone is headed</p>
-                <h2 id="dashboardMapTitle" data-i18n="dashboard.mapTitle">Family map</h2>
-                <p data-i18n="dashboard.mapNote">See the places connected to your next family activities.</p>
+                <p class="dashboard-panel-kicker" data-i18n="dashboard.thisWeek">This week</p>
+                <h2 id="dashboardWeekTitle" data-i18n="dashboard.busyDays">Busy days</h2>
+                <p id="dashboardWeekRange"></p>
               </div>
-              <button class="small-btn" type="button" id="dashboardOpenMap" data-i18n="dashboard.openMap">Explore map</button>
             </div>
-            <div class="dashboard-map-canvas" id="dashboardMapCanvas" aria-label="Upcoming activity locations" data-i18n-aria="dashboard.mapAria">
-              <span class="dashboard-map-road road-one" aria-hidden="true"></span>
-              <span class="dashboard-map-road road-two" aria-hidden="true"></span>
-              <span class="dashboard-map-road road-three" aria-hidden="true"></span>
-              <div class="dashboard-map-pins" id="dashboardMapPins"></div>
-              <div class="dashboard-map-empty" id="dashboardMapEmpty" hidden><span aria-hidden="true">⌖</span><strong data-i18n="dashboard.noLocations">Add a location to an event to see it here.</strong></div>
+            <div class="dashboard-week-body">
+              <div class="dashboard-week-chart" id="dashboardWeekChart"></div>
+              <h3 data-i18n="dashboard.workload">Workload by child</h3>
+              <div class="kid-load-list" id="dashboardWeekWorkload"></div>
             </div>
-            <div class="dashboard-location-list" id="dashboardLocations"></div>
           </section>
 
           <section class="dashboard-panel dashboard-updates-panel" aria-labelledby="dashboardUpdatesTitle">
@@ -9774,36 +9899,6 @@
         </aside>
       </div>
     </section>
-    <section class="topbar" aria-label="Family schedule overview" data-i18n-aria="aria.overview">
-      <div class="brand">
-        <div class="calendar-mark" aria-hidden="true">
-          <div class="calendar-grid"><span></span><span></span><span></span><span></span></div>
-          <div class="clock-hand"></div>
-        </div>
-        <div class="brand-copy">
-          <h1>Kids<span>Sync</span></h1>
-          <div class="ribbon"><span>★</span><span data-i18n="brand.ribbon">Family Weekly Planner</span><span>★</span></div>
-          <p class="brand-subtitle" data-i18n="brand.subtitle">A shared schedule for parents managing school, activities, homework, and family time.</p>
-        </div>
-      </div>
-
-      <div class="panel kids-panel" id="kidFilters" aria-label="Child filters" data-i18n-aria="aria.childFilters"></div>
-
-      <div class="panel tip-panel" hidden>
-        <p class="panel-title"><span class="emoji" aria-hidden="true">💡</span><span data-i18n="tips.title">Tips</span></p>
-        <ul>
-          <li data-i18n="tips.one">See each child’s week at a glance.</li>
-          <li data-i18n="tips.two">Spot busy days before they become stressful.</li>
-          <li data-i18n="tips.three">Keep pickup, homework, and family time visible.</li>
-        </ul>
-      </div>
-
-      <div class="panel note-panel" hidden>
-        <p class="panel-title"><span class="emoji" aria-hidden="true">❤️</span><span data-i18n="note.title">Parent Note</span></p>
-        <p data-i18n="note.body">Start with a blank week, or load the example to see a fully editable schedule.</p>
-      </div>
-    </section>
-
     <section class="toolbar" aria-label="Schedule controls" data-i18n-aria="aria.scheduleControls">
       <div class="toolbar-leading">
         <div class="calendar-workspace">
@@ -9853,25 +9948,32 @@
             <button class="ghost-btn" type="button" id="openActivityHistory" data-i18n="history.open">Activity history</button>
           </div>
         </details>
-      </div>
-    </section>
-
-    <section class="schedule-overview" aria-label="Schedule overview and search" data-i18n-aria="aria.scheduleOverview">
-      <label class="calendar-search">
-        <span class="calendar-search-label" aria-hidden="true"><span class="calendar-search-icon">⌕</span><span data-i18n="search.shortLabel">Search</span></span>
-        <input id="scheduleSearch" type="search" autocomplete="off" placeholder="Activities, children, locations, or notes" data-i18n-placeholder="search.placeholder" aria-label="Search activities" data-i18n-aria="search.label" aria-keyshortcuts="/ Escape">
-        <button class="clear-search" id="clearSearch" type="button" aria-label="Clear search" data-i18n-aria="search.clear" hidden>×</button>
-      </label>
-      <div class="overview-stats" aria-live="polite">
-        <span class="overview-stat" id="overviewEvents"></span>
-        <button class="conflict-summary" id="jumpConflict" type="button" disabled></button>
-        <button class="overview-stat travel-summary" id="jumpTravel" type="button" disabled></button>
-        <button class="overview-next" id="jumpNextEvent" type="button"><span data-i18n="overview.next">Next</span><strong id="overviewNextEvent"></strong></button>
-      </div>
-      <div class="event-filter" role="group" aria-label="Filter events" data-i18n-aria="filters.label">
-        <button class="event-filter-option is-active" type="button" data-event-filter="all" aria-pressed="true" data-i18n="filters.all">All</button>
-        <button class="event-filter-option" type="button" data-event-filter="activity" aria-pressed="false" data-i18n="filters.activities">Activities</button>
-        <button class="event-filter-option" type="button" data-event-filter="important" aria-pressed="false" data-i18n="filters.important">Important</button>
+        <details class="planner-options" id="plannerOptions">
+        <summary class="planner-options-toggle" aria-label="Filters and search" title="Filters and search" data-i18n-aria="filters.searchMenu" data-i18n-title="filters.searchMenu">☷ <span data-i18n="filters.searchMenu">Filters &amp; search</span></summary>
+        <div class="planner-options-panel">
+          <section class="topbar" aria-label="Family schedule overview" data-i18n-aria="aria.overview">
+            <div class="panel kids-panel" id="kidFilters" aria-label="Child filters" data-i18n-aria="aria.childFilters"></div>
+          </section>
+          <section class="schedule-overview" aria-label="Schedule overview and search" data-i18n-aria="aria.scheduleOverview">
+            <label class="calendar-search">
+              <span class="calendar-search-label" aria-hidden="true"><span class="calendar-search-icon">⌕</span><span data-i18n="search.shortLabel">Search</span></span>
+              <input id="scheduleSearch" type="search" autocomplete="off" placeholder="Activities, children, locations, or notes" data-i18n-placeholder="search.placeholder" aria-label="Search activities" data-i18n-aria="search.label" aria-keyshortcuts="/ Escape">
+              <button class="clear-search" id="clearSearch" type="button" aria-label="Clear search" data-i18n-aria="search.clear" hidden>×</button>
+            </label>
+            <div class="overview-stats" aria-live="polite">
+              <span class="overview-stat" id="overviewEvents"></span>
+              <button class="conflict-summary" id="jumpConflict" type="button" disabled></button>
+              <button class="overview-stat travel-summary" id="jumpTravel" type="button" disabled></button>
+              <button class="overview-next" id="jumpNextEvent" type="button"><span data-i18n="overview.next">Next</span><strong id="overviewNextEvent"></strong></button>
+            </div>
+            <div class="event-filter" role="group" aria-label="Filter events" data-i18n-aria="filters.label">
+              <button class="event-filter-option is-active" type="button" data-event-filter="all" aria-pressed="true" data-i18n="filters.all">All</button>
+              <button class="event-filter-option" type="button" data-event-filter="activity" aria-pressed="false" data-i18n="filters.activities">Activities</button>
+              <button class="event-filter-option" type="button" data-event-filter="important" aria-pressed="false" data-i18n="filters.important">Important</button>
+            </div>
+          </section>
+        </div>
+        </details>
       </div>
     </section>
 
@@ -9973,7 +10075,7 @@
         <div class="game-scan-heading">
           <span class="game-scan-icon" aria-hidden="true">▣</span>
           <div>
-            <h3 id="gameScanTitle" data-i18n="gameScan.title">Scan game details</h3>
+            <h3 id="gameScanTitle" data-i18n="gameScan.title">Scan document</h3>
             <p data-i18n="gameScan.intro">Take a photo of the PlayMetrics game description. KidsSync will fill this game’s date, time, and location.</p>
           </div>
         </div>
@@ -10592,7 +10694,7 @@
           <input class="setting-toggle" id="showWeekendsDefault" type="checkbox">
         </label>
         <label class="setting-row">
-          <span data-i18n="settings.focusEvents">Jump to the first event</span>
+          <span data-i18n="settings.focusEvents">Jump to urgent or busiest time</span>
           <input class="setting-toggle" id="focusFirstEvent" type="checkbox">
         </label>
       </section>
@@ -11032,7 +11134,7 @@
         "settings.duration90": "1 hour 30 minutes",
         "settings.duration120": "2 hours",
         "settings.showWeekends": "Show weekends",
-        "settings.focusEvents": "Jump to the first event",
+        "settings.focusEvents": "Jump to urgent or busiest time",
         "settings.notificationsOn": "Notifications are on while KidsSync is open.",
         "settings.notificationsOff": "Notifications are off.",
         "settings.notificationsDenied": "Notifications are blocked in your browser settings.",
@@ -11164,8 +11266,8 @@
         "popularTimes.evening": "Evening",
         "popularTimes.allDay": "All day",
         "popularTimes.noTime": "No time needed",
-        "gameScan.dashboardAction": "Scan game",
-        "gameScan.title": "Scan game details",
+        "gameScan.dashboardAction": "Scan document",
+        "gameScan.title": "Scan document",
         "gameScan.intro": "Take a photo of the PlayMetrics game description. KidsSync will fill this game’s date, time, and location.",
         "gameScan.takePhoto": "Take or choose photo",
         "gameScan.private": "The photo is read on this device.",
@@ -11629,6 +11731,7 @@
         "overview.noUpcoming": "Nothing else scheduled",
         "overview.jumpNext": "Jump to the next event",
         "filters.label": "Filter events",
+        "filters.searchMenu": "Filters & search",
         "filters.all": "All",
         "filters.activities": "Activities",
         "filters.important": "Important",
@@ -11952,7 +12055,7 @@
         "settings.duration90": "1 小时 30 分钟",
         "settings.duration120": "2 小时",
         "settings.showWeekends": "显示周末",
-        "settings.focusEvents": "跳到第一个活动",
+        "settings.focusEvents": "跳到紧急事项或最忙时段",
         "settings.notificationsOn": "KidsSync 打开时会发送通知。",
         "settings.notificationsOff": "通知已关闭。",
         "settings.notificationsDenied": "通知已在浏览器设置中被阻止。",
@@ -12084,8 +12187,8 @@
         "popularTimes.evening": "晚上",
         "popularTimes.allDay": "全天",
         "popularTimes.noTime": "无需设置时间",
-        "gameScan.dashboardAction": "扫描比赛",
-        "gameScan.title": "扫描比赛信息",
+        "gameScan.dashboardAction": "扫描文档",
+        "gameScan.title": "扫描文档",
         "gameScan.intro": "拍摄 PlayMetrics 比赛说明。KidsSync 会填写这场比赛的日期、时间和地点。",
         "gameScan.takePhoto": "拍照或选择图片",
         "gameScan.private": "图片只在此设备上读取。",
@@ -12549,6 +12652,7 @@
         "overview.noUpcoming": "没有更多安排",
         "overview.jumpNext": "跳到下一项日程",
         "filters.label": "筛选日程",
+        "filters.searchMenu": "筛选与搜索",
         "filters.all": "全部",
         "filters.activities": "活动",
         "filters.important": "重要日程",
@@ -12808,6 +12912,7 @@
       applySettings();
       populateFormOptions();
       renderAll();
+      scheduleSmartCalendarFocus();
     }
 
     if (localStorage.getItem(LANGUAGE_STORAGE_KEY) === null) {
@@ -14907,7 +15012,7 @@
       saveActivities();
       populateFormOptions();
       renderAll();
-      if (userSettings.focusFirstEvent) requestAnimationFrame(scrollWeekToFirstActivity);
+      scheduleSmartCalendarFocus();
     }
 
     function rememberCurrentSchedule(label) {
@@ -15380,7 +15485,7 @@
           const current = queue.shift();
           group.push(current);
           activities.forEach(candidate => {
-            if (!visited.has(candidate.id) && current.child === candidate.child && activitiesOverlap(current, candidate)) {
+            if (!visited.has(candidate.id) && activitiesOverlap(current, candidate)) {
               visited.add(candidate.id);
               queue.push(candidate);
             }
@@ -15391,6 +15496,19 @@
       });
 
       return groups;
+    }
+
+    function layoutOverlapGroup(group) {
+      const laneEnds = [];
+      const items = group.map(activity => {
+        const start = minutes(activity.start);
+        const end = minutes(activity.end);
+        let lane = laneEnds.findIndex(laneEnd => laneEnd <= start);
+        if (lane < 0) lane = laneEnds.length;
+        laneEnds[lane] = end;
+        return { activity, lane };
+      });
+      return { items, laneCount: laneEnds.length };
     }
 
     function setupDraggableEvent(element, activity) {
@@ -15514,6 +15632,7 @@
       suppressEventClickUntil = Date.now() + 250;
       draggedOccurrence = null;
       renderAll();
+      scheduleSmartCalendarFocus();
     }
 
     function setupDropTarget(element, targetDate, allDay = false) {
@@ -15574,6 +15693,7 @@
             state.visibleKids.add(name);
           }
           renderAll();
+          scheduleSmartCalendarFocus();
         });
         list.appendChild(button);
       });
@@ -15585,9 +15705,18 @@
       const conflicts = findConflicts(activities);
       const displayDays = visibleWeekDays();
       const pixelsPerMinute = 2 * userSettings.calendarZoom;
+      const dayLayouts = new Map(displayDays.map(day => {
+        const timed = activities
+          .filter(activity => activity.day === day.key && !activity.allDay)
+          .sort((first, second) => minutes(first.start) - minutes(second.start));
+        return [day.key, buildOverlapGroups(timed).map(layoutOverlapGroup)];
+      }));
       grid.style.setProperty("--schedule-height", `${scheduleDurationMinutes * pixelsPerMinute}px`);
       grid.style.setProperty("--half-hour-row", `${30 * pixelsPerMinute}px`);
-      grid.style.gridTemplateColumns = `106px repeat(${displayDays.length}, minmax(220px, 1fr))`;
+      grid.style.gridTemplateColumns = `106px ${displayDays.map(day => {
+        const lanes = Math.max(1, ...dayLayouts.get(day.key).map(group => group.laneCount));
+        return `minmax(${Math.max(220, lanes * 180)}px, 1fr)`;
+      }).join(" ")}`;
       grid.classList.toggle("weekdays-only", !state.showWeekends);
       grid.innerHTML = "";
 
@@ -15664,71 +15793,42 @@
         column.className = "day-column";
         setupDropTarget(column, targetDate);
         column.addEventListener("click", event => {
-          if (Date.now() <= suppressEventClickUntil || event.target.closest(".event, .stack-switcher")) return;
+          if (Date.now() <= suppressEventClickUntil || event.target.closest(".event")) return;
           const bounds = column.getBoundingClientRect();
           const rawMinute = scheduleStartMinutes + ((event.clientY - bounds.top) / bounds.height) * scheduleDurationMinutes;
           const snappedMinute = Math.round(rawMinute / 15) * 15;
           openNewEventAtTime(targetDate, snappedMinute);
         });
-        const dayActivities = activities
-          .filter(activity => activity.day === day.key && !activity.allDay)
-          .sort((a, b) => minutes(a.start) - minutes(b.start));
-
-        buildOverlapGroups(dayActivities).forEach(group => {
-          const stackKey = `${day.key}:${group.map(activity => activity.id).sort().join("|")}`;
-          const savedFront = state.stackFront.get(stackKey);
-          const frontActivity = group.find(activity => activity.id === savedFront) || group[group.length - 1];
-
-          group.forEach((activity, stackIndex) => {
+        dayLayouts.get(day.key).forEach(({ items, laneCount }) => {
+          items.forEach(({ activity, lane }) => {
             const start = minutes(activity.start);
             const end = minutes(activity.end);
             const top = ((start - scheduleStartMinutes) / scheduleDurationMinutes) * 100;
-            const height = Math.max(((end - start) / scheduleDurationMinutes) * 100, 5.5);
             const colors = eventColors(activity);
             const event = document.createElement("button");
             event.type = "button";
-            event.className = `event${end - start <= 45 ? " small" : ""}${group.length > 1 ? " overlap-offset" : ""}${frontActivity.id === activity.id && group.length > 1 ? " stack-front" : ""}${conflicts.has(occurrenceKey(activity)) ? " conflict" : ""}`;
+            event.className = `event${end - start <= 45 ? " small" : ""}${end - start <= 30 ? " compact-duration" : ""}${end - start <= 20 ? " very-short" : ""}${laneCount > 1 ? " overlap-offset" : ""}${conflicts.has(occurrenceKey(activity)) ? " conflict" : ""}`;
             event.style.top = `${top}%`;
-            event.style.height = `${height}%`;
+            event.style.height = `${Math.max(15, end - start) * pixelsPerMinute}px`;
             event.style.setProperty("--event-bg", colors.soft);
             event.style.setProperty("--event-line", colors.line);
             event.style.setProperty("--event-ink", colors.ink);
             event.dataset.occurrenceKey = occurrenceKey(activity);
-            if (group.length > 1) {
-              const laneWidth = 100 / group.length;
-              const laneGap = 8;
-              event.style.left = `calc(${stackIndex * laneWidth}% + ${laneGap}px)`;
-              event.style.right = `calc(${(group.length - stackIndex - 1) * laneWidth}% + ${laneGap}px)`;
-              event.style.top = `${top}%`;
-              event.style.zIndex = frontActivity.id === activity.id ? "30" : `${2 + stackIndex}`;
+            if (laneCount > 1) {
+              const laneWidth = 100 / laneCount;
+              event.style.left = `calc(${lane * laneWidth}% + 6px)`;
+              event.style.right = `calc(${(laneCount - lane - 1) * laneWidth}% + 6px)`;
             }
             event.innerHTML = eventCardMarkup(activity, {
               badge: conflicts.has(occurrenceKey(activity)) ? t("calendar.conflict") : "",
               badgeClass: "is-conflict"
             });
             setupDraggableEvent(event, activity);
+            event.removeAttribute("title");
+            event.setAttribute("aria-label", `${eventTimeText(activity)} · ${activityTitle(activity)} · ${displayChild(activity)}`);
             bindCalendarEventActions(event, activity, true);
             column.appendChild(event);
           });
-
-          if (group.length > 1) {
-            const groupTop = ((Math.min(...group.map(activity => minutes(activity.start))) - scheduleStartMinutes) / scheduleDurationMinutes) * 100;
-            const switcher = document.createElement("button");
-            switcher.type = "button";
-            switcher.className = "stack-switcher";
-            switcher.style.top = groupTop > 1.5 ? `calc(${groupTop}% - 16px)` : "4px";
-            const frontTitle = activityTitle(frontActivity);
-            switcher.setAttribute("aria-label", t("stack.next", { child: frontActivity.child, title: frontTitle }));
-            switcher.title = t("stack.tooltip", { child: frontActivity.child, title: frontTitle });
-            switcher.innerHTML = `<span class="stack-switcher-icon" aria-hidden="true"></span><span class="stack-count">${group.length}</span>`;
-            switcher.addEventListener("click", () => {
-              const frontIndex = group.findIndex(activity => activity.id === frontActivity.id);
-              const nextActivity = group[(frontIndex + 1) % group.length];
-              state.stackFront.set(stackKey, nextActivity.id);
-              renderGrid();
-            });
-            column.appendChild(switcher);
-          }
         });
 
         if (isSameDate(targetDate, new Date())) {
@@ -15940,6 +16040,7 @@
       conflictCursor = 0;
       travelCursor = 0;
       renderAll();
+      scheduleSmartCalendarFocus();
       scheduleSearch.focus();
     }
 
@@ -16216,6 +16317,7 @@
       miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       persistScheduleData("view", currentView);
       renderAll();
+      scheduleSmartCalendarFocus();
     }
 
     function renderEventColorOptions(selected = "default") {
@@ -17169,7 +17271,7 @@
       saveActivities();
       populateFormOptions();
       renderAll();
-      if (userSettings.focusFirstEvent) requestAnimationFrame(scrollWeekToFirstActivity);
+      scheduleSmartCalendarFocus();
       showFeedbackToast(t("feedback.exampleLoaded"));
     }
 
@@ -17217,6 +17319,7 @@
         state.activities.push(restored);
         saveActivities();
         renderAll();
+        scheduleSmartCalendarFocus();
       }
       deletedActivityForUndo = null;
       window.clearTimeout(undoDeleteTimer);
@@ -17299,43 +17402,49 @@
       return button;
     }
 
-    function renderDashboardMap(upcoming) {
-      const pins = document.getElementById("dashboardMapPins");
-      const locationList = document.getElementById("dashboardLocations");
-      const empty = document.getElementById("dashboardMapEmpty");
-      const seen = new Set();
-      const locations = upcoming.filter(activity => {
-        const location = String(activity.location || "").trim();
-        if (!location || seen.has(location.toLowerCase())) return false;
-        seen.add(location.toLowerCase());
-        return true;
-      }).slice(0, 4);
-      const positions = [[24, 36], [67, 31], [43, 72], [78, 76]];
-      pins.innerHTML = "";
-      locationList.innerHTML = "";
-      empty.hidden = locations.length > 0;
-      locations.forEach((activity, index) => {
-        const [x, y] = positions[index];
-        const pin = document.createElement("button");
-        pin.type = "button";
-        pin.className = "dashboard-map-pin";
-        pin.style.setProperty("--pin-x", `${x}%`);
-        pin.style.setProperty("--pin-y", `${y}%`);
-        pin.innerHTML = `<span class="dashboard-map-pin-icon" aria-hidden="true">${escapeHtml(displayIcon(activity) || "⌖")}</span><span class="dashboard-map-pin-copy">${escapeHtml(activity.location)}</span>`;
-        pin.addEventListener("click", () => dashboardTimelineElement(activity).click());
-        pins.appendChild(pin);
-
-        const chip = document.createElement("button");
-        chip.type = "button";
-        chip.className = "dashboard-location-chip";
-        chip.innerHTML = `<span aria-hidden="true">⌖</span><span>${escapeHtml(activity.location)}</span>`;
-        chip.addEventListener("click", () => {
-          document.getElementById("mapSearch").value = activity.location;
-          renderMapResults(activity.location, true);
-          mapDialog.showModal();
+    function renderDashboardWeek(dayLoads, busiest) {
+      const locale = currentLanguage === "zh" ? "zh-CN" : "en-US";
+      document.getElementById("dashboardWeekRange").textContent = `${formatShortDate(dayLoads[0].date)} – ${formatShortDate(dayLoads[6].date)}`;
+      const maximum = Math.max(1, ...dayLoads.map(item => item.count));
+      const chart = document.getElementById("dashboardWeekChart");
+      chart.replaceChildren();
+      dayLoads.forEach(item => {
+        const label = item.date.toLocaleDateString(locale, { weekday: "short" });
+        const count = t(item.count === 1 ? "dashboard.dayEventOne" : "dashboard.dayEvents", { count: item.count });
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `busy-day${item === busiest && item.count ? " is-busiest" : ""}`;
+        button.style.setProperty("--busy-height", `${item.count / maximum * 100}%`);
+        button.setAttribute("aria-label", `${formatShortDate(item.date)}: ${count}`);
+        button.innerHTML = `<span class="busy-day-label">${escapeHtml(label)}</span><span class="busy-day-bar-track" aria-hidden="true"><span class="busy-day-bar"></span></span><span class="busy-day-count">${item.count}</span>`;
+        button.addEventListener("click", () => {
+          selectedDate = new Date(item.date);
+          currentWeekStart = getMonday(selectedDate);
+          currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+          miniCalendarMonth = new Date(currentMonthStart);
+          currentView = "today";
+          state.searchQuery = "";
+          scheduleSearch.value = "";
+          state.eventFilter = "all";
+          showCalendarPage();
+          setSidebarActive("calendar");
+          renderAll();
         });
-        locationList.appendChild(chip);
+        chart.appendChild(button);
       });
+      const week = dayLoads.flatMap(item => item.events);
+      const profiles = [...kidProfiles, { name: FAMILY_CHILD, avatar: "🏠", palette: "blue" }];
+      const workloads = profiles.map(kid => {
+        const events = week.filter(event => event.child === kid.name);
+        return { kid, count: events.length, duration: events.reduce((total, event) => total + eventDurationMinutes(event), 0) };
+      }).filter(item => item.kid.name !== FAMILY_CHILD || item.count);
+      const maxCount = Math.max(1, ...workloads.map(item => item.count));
+      document.getElementById("dashboardWeekWorkload").innerHTML = workloads.length ? workloads.map(({ kid, count, duration }) => {
+        const time = [Math.floor(duration / 60) ? t("dashboard.hours", { count: Math.floor(duration / 60) }) : "", duration % 60 || !duration ? t("dashboard.minutes", { count: duration % 60 }) : ""].filter(Boolean).join(" ");
+        const name = kid.name === FAMILY_CHILD ? t("calendar.family") : kid.name;
+        const summary = t(count === 1 ? "dashboard.workloadSummaryOne" : "dashboard.workloadSummary", { count, duration: time });
+        return `<div class="kid-load-item" style="--kid-color:${palettes[kid.palette]?.color || palettes.blue.color};--load:${count / maxCount * 100}%"><span aria-hidden="true">${escapeHtml(kid.avatar || "👤")}</span><span><strong>${escapeHtml(name)}</strong><br>${escapeHtml(summary)}</span><span class="load-meter" aria-hidden="true"><span></span></span></div>`;
+      }).join("") : `<p class="dashboard-empty">${escapeHtml(t("empty.body"))}</p>`;
     }
 
     function renderDashboard() {
@@ -17364,7 +17473,6 @@
       if (!past.length) pastList.innerHTML = `<p class="dashboard-empty">${escapeHtml(t("dashboard.noPast"))}</p>`;
       else past.forEach(activity => pastList.appendChild(dashboardTimelineElement(activity, { past: true })));
 
-      renderDashboardMap(upcoming);
 
       const updatesList = document.getElementById("dashboardUpdates");
       const updates = (recentExternalAudit().length ? recentExternalAudit() : activityAudit).slice(0, 6);
@@ -17388,7 +17496,7 @@
       const monday = getMonday(now);
       const dayLoads = days.map((day, index) => {
         const date = addDays(monday, index);
-        const events = occurrencesOnDate(date, { ignoreSearch: true })
+        const events = occurrencesOnDate(date, { ignoreSearch: true, ignoreFilter: true })
           .filter(activity => activityStatus(activity) !== "cancelled");
         return { day, date, events, count: events.length, duration: events.reduce((total, activity) => total + eventDurationMinutes(activity), 0) };
       });
@@ -17399,6 +17507,7 @@
       const busiestLabel = busiest?.count
         ? busiest.date.toLocaleDateString(currentLanguage === "zh" ? "zh-CN" : "en-US", { weekday: "short" })
         : t("dashboard.none");
+      renderDashboardWeek(dayLoads, busiest);
       const stats = [
         ["dashboard.thisWeek", week.length],
         ["dashboard.busiest", busiestLabel],
@@ -18739,21 +18848,109 @@
       if (!dashboardPage.hidden) renderDashboard();
     }
 
-    function scrollWeekToFirstActivity() {
-      if (!["week", "four"].includes(currentView) || window.matchMedia("(max-width: 740px)").matches) return;
-      const timedActivities = visibleActivities().filter(activity => !activity.allDay && activity.start);
-      if (!timedActivities.length) return;
-      const firstStart = Math.min(...timedActivities.map(activity => minutes(activity.start)));
+    function calendarFocusTimestamp(activity) {
+      const date = occurrenceDateTime(activity);
+      if (!date) return Number.POSITIVE_INFINITY;
+      if (activity.allDay) date.setHours(23, 59, 59, 999);
+      return date.getTime();
+    }
+
+    function smartCalendarFocusTarget() {
+      const visibleDayKeys = new Set(visibleWeekDays().map(day => day.key));
+      const activities = visibleActivities()
+        .filter(activity => visibleDayKeys.has(activity.day))
+        .filter(activity => activityStatus(activity) !== "cancelled");
+      if (!activities.length) return { minute: scheduleStartMinutes, activity: null };
+
+      const now = Date.now();
+      const urgentActivities = activities
+        .filter(activity => activity.eventType === "deadline")
+        .sort((first, second) => {
+          const firstTime = calendarFocusTimestamp(first);
+          const secondTime = calendarFocusTimestamp(second);
+          const firstIsFuture = firstTime >= now;
+          const secondIsFuture = secondTime >= now;
+          if (firstIsFuture !== secondIsFuture) return firstIsFuture ? -1 : 1;
+          return firstIsFuture ? firstTime - secondTime : secondTime - firstTime;
+        });
+      if (urgentActivities.length) {
+        const activity = urgentActivities[0];
+        return {
+          minute: activity.allDay || !activity.start ? scheduleStartMinutes : minutes(activity.start),
+          activity
+        };
+      }
+
+      const timedActivities = activities.filter(activity => !activity.allDay && activity.start && activity.end);
+      if (!timedActivities.length) return { minute: scheduleStartMinutes, activity: activities[0] };
+
+      const bucketMinutes = 30;
+      let bestMinute = Math.max(scheduleStartMinutes, Math.min(minutes(timedActivities[0].start), scheduleEndMinutes - bucketMinutes));
+      let bestScore = -1;
+      let bestStarts = -1;
+      for (let minute = scheduleStartMinutes; minute < scheduleEndMinutes; minute += bucketMinutes) {
+        let score = 0;
+        let starts = 0;
+        timedActivities.forEach(activity => {
+          const start = minutes(activity.start);
+          const end = Math.max(start + 15, minutes(activity.end));
+          if (start < minute + bucketMinutes && end > minute) score += 1;
+          if (start >= minute && start < minute + bucketMinutes) starts += 1;
+        });
+        if (score > bestScore || (score === bestScore && starts > bestStarts)) {
+          bestMinute = minute;
+          bestScore = score;
+          bestStarts = starts;
+        }
+      }
+
+      const activity = timedActivities
+        .filter(item => minutes(item.start) < bestMinute + bucketMinutes && Math.max(minutes(item.start) + 15, minutes(item.end)) > bestMinute)
+        .sort((first, second) => Math.abs(minutes(first.start) - bestMinute) - Math.abs(minutes(second.start) - bestMinute)
+          || calendarFocusTimestamp(first) - calendarFocusTimestamp(second))[0] || timedActivities[0];
+      return { minute: bestMinute, activity };
+    }
+
+    function scrollWeekToSmartTime() {
+      if (!["week", "four"].includes(currentView)) return;
+      const focus = smartCalendarFocusTarget();
+      if (window.matchMedia("(max-width: 740px)").matches) {
+        if (!focus.activity) return;
+        const key = occurrenceKey(focus.activity);
+        const target = [...mobileAgenda.querySelectorAll("[data-occurrence-key]")]
+          .find(element => element.dataset.occurrenceKey === key);
+        target?.scrollIntoView({
+          behavior: userSettings.reduceMotion ? "auto" : "smooth",
+          block: "center"
+        });
+        return;
+      }
+
       const timeline = grid.querySelector(".time-column");
       const headerHeight = (grid.querySelector(".time-head")?.offsetHeight || 70)
         + (grid.querySelector(".all-day-head")?.offsetHeight || 52);
-      const timelineHeight = timeline?.offsetHeight || 1440;
-      const focusMinute = Math.max(firstStart - 30, scheduleStartMinutes);
-      const top = headerHeight + ((focusMinute - scheduleStartMinutes) / scheduleDurationMinutes) * timelineHeight;
+      const timelineHeight = timeline?.offsetHeight || scheduleDurationMinutes * 2 * userSettings.calendarZoom;
+      const focusTop = headerHeight + ((focus.minute - scheduleStartMinutes) / scheduleDurationMinutes) * timelineHeight;
+      const context = Math.min(180, Math.max(80, weekSchedule.clientHeight * .24));
+      const maxScroll = Math.max(0, weekSchedule.scrollHeight - weekSchedule.clientHeight);
       weekSchedule.scrollTo({
-        top,
+        top: Math.min(maxScroll, Math.max(0, focusTop - context)),
         left: weekSchedule.scrollLeft,
         behavior: userSettings.reduceMotion ? "auto" : "smooth"
+      });
+    }
+
+    let smartCalendarFocusFrame = 0;
+    function scheduleSmartCalendarFocus() {
+      const appShell = document.getElementById("appShell");
+      if (!userSettings.focusFirstEvent || !["week", "four"].includes(currentView)
+        || appShell.hidden || appShell.classList.contains("is-dashboard-view")) return;
+      window.cancelAnimationFrame(smartCalendarFocusFrame);
+      smartCalendarFocusFrame = window.requestAnimationFrame(() => {
+        smartCalendarFocusFrame = window.requestAnimationFrame(() => {
+          smartCalendarFocusFrame = 0;
+          scrollWeekToSmartTime();
+        });
       });
     }
 
@@ -18769,6 +18966,7 @@
       }
       miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       renderAll();
+      scheduleSmartCalendarFocus();
     }
 
     function jumpToToday() {
@@ -18777,9 +18975,7 @@
       currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       renderAll();
-      if (["week", "four"].includes(currentView) && userSettings.focusFirstEvent) {
-        requestAnimationFrame(scrollWeekToFirstActivity);
-      }
+      scheduleSmartCalendarFocus();
     }
 
     document.querySelectorAll("[data-auth-view]").forEach(button => {
@@ -18842,11 +19038,8 @@
     document.getElementById("focusScheduleSearch").addEventListener("click", () => {
       showCalendarPage();
       setSidebarActive("calendar");
-      document.querySelector(".schedule-overview").scrollIntoView({
-        behavior: userSettings.reduceMotion ? "auto" : "smooth",
-        block: "center"
-      });
-      window.setTimeout(() => scheduleSearch.focus(), userSettings.reduceMotion ? 0 : 250);
+      document.getElementById("plannerOptions").open = true;
+      scheduleSearch.focus();
     });
     const periodDatePicker = document.getElementById("periodDatePicker");
     document.getElementById("openPeriodPicker").addEventListener("click", () => {
@@ -19022,7 +19215,6 @@
       gameScanInput.click();
     });
     document.getElementById("dashboardOpenLists").addEventListener("click", openListsDialog);
-    document.getElementById("dashboardOpenMap").addEventListener("click", openMapDialog);
     eventPeek.addEventListener("pointerenter", () => clearTimeout(eventPeekHideTimer));
     eventPeek.addEventListener("pointerleave", scheduleEventPeekHide);
     eventPeek.addEventListener("focusin", () => clearTimeout(eventPeekHideTimer));
@@ -19158,6 +19350,7 @@
     });
     document.getElementById("focusFirstEvent").addEventListener("change", event => {
       saveSetting("focusFirstEvent", event.currentTarget.checked);
+      if (event.currentTarget.checked) scheduleSmartCalendarFocus();
     });
     document.getElementById("addActivity").addEventListener("click", () => { setSidebarActive("activities"); openDialog(); });
     document.getElementById("loadPreset").addEventListener("click", loadAndrewMarkPreset);
@@ -19208,10 +19401,7 @@
       const isTyping = target instanceof HTMLElement && target.matches("input, textarea, select, [contenteditable='true']");
       if (event.key === "/" && !isTyping && !document.querySelector("dialog[open]")) {
         event.preventDefault();
-        document.querySelector(".schedule-overview").scrollIntoView({
-          behavior: userSettings.reduceMotion ? "auto" : "smooth",
-          block: "center"
-        });
+        document.getElementById("plannerOptions").open = true;
         scheduleSearch.focus();
         scheduleSearch.select();
       }
@@ -19234,6 +19424,7 @@
         conflictCursor = 0;
         travelCursor = 0;
         renderAll();
+        scheduleSmartCalendarFocus();
       });
     });
     toggleWeekendsButton.addEventListener("click", () => {
@@ -19241,6 +19432,7 @@
       userSettings.showWeekends = state.showWeekends;
       saveSettings();
       renderAll();
+      scheduleSmartCalendarFocus();
     });
     zoomOutButton.addEventListener("click", () => changeCalendarZoom(-1));
     zoomInButton.addEventListener("click", () => changeCalendarZoom(1));
@@ -19378,6 +19570,7 @@
       });
       closeDialog();
       renderAll();
+      scheduleSmartCalendarFocus();
       showFeedbackToast(t(existingIndex >= 0 ? "feedback.eventUpdated" : "feedback.eventCreated", {
         title: activityTitle(activity)
       }));
@@ -19438,6 +19631,7 @@
       auditActivity("deleted", deletedActivity, null);
       closeDialog();
       renderAll();
+      scheduleSmartCalendarFocus();
       showDeleteUndo(deletedActivity);
     });
 
