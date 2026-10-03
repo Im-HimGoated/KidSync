@@ -7009,6 +7009,292 @@
       }
     }
   </style>
+  <style>
+    /* Mobile clarity pass: each control gets a stable row so translated labels
+       and narrow custom viewports never have to fight for horizontal space. */
+    @media (max-width: 560px) {
+      .app {
+        width: calc(100% - 16px);
+        padding-top: max(8px, env(safe-area-inset-top));
+        padding-bottom: max(28px, env(safe-area-inset-bottom));
+      }
+
+      .account-bar,
+      .topbar,
+      .toolbar,
+      .schedule-overview,
+      .mobile-agenda,
+      .today-view,
+      .month-view,
+      .goals {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+      }
+
+      .toolbar-leading {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+      }
+
+      .calendar-workspace,
+      .week-controls,
+      .toolbar-leading > .language-switch {
+        grid-column: 1;
+        width: 100%;
+        min-width: 0;
+        height: 50px;
+      }
+
+      .calendar-workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 44px;
+        gap: 6px;
+      }
+
+      .calendar-workspace select {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .week-controls.has-today-shortcut {
+        grid-template-columns: 44px minmax(0, 1fr) auto 44px;
+        gap: 4px;
+      }
+
+      .week-controls .icon-btn {
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
+      }
+
+      .week-label {
+        width: 100%;
+        font-size: 15px;
+        line-height: 1.15;
+        text-align: center;
+      }
+
+      .period-today {
+        min-width: 0;
+        min-height: 44px;
+        padding-inline: 9px;
+        white-space: nowrap;
+      }
+
+      .toolbar-leading > .language-switch {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .language-option {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .schedule-actions {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-areas:
+          "views views"
+          "add add"
+          "dashboard more";
+        gap: 8px;
+      }
+
+      .schedule-actions .view-switch { grid-area: views; }
+      .schedule-actions #openDashboard { grid-area: dashboard; }
+      .schedule-actions #addActivity { grid-area: add; }
+      .schedule-actions #moreActions { grid-area: more; }
+
+      .schedule-actions > .ghost-btn,
+      .schedule-actions > .primary-btn,
+      .schedule-actions > .more-actions,
+      .more-actions summary {
+        width: 100%;
+        min-width: 0;
+        min-height: 48px;
+      }
+
+      .schedule-actions #openDashboard {
+        padding-inline: 10px;
+      }
+
+      .schedule-actions #openDashboard span:last-child,
+      .more-actions summary span:last-child {
+        display: inline;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .schedule-overview {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .calendar-search,
+      .overview-stats,
+      .event-filter {
+        grid-column: 1;
+        width: 100%;
+        min-width: 0;
+      }
+
+      .overview-stats {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      }
+
+      .overview-stat,
+      .conflict-summary,
+      .travel-summary,
+      .overview-next {
+        min-width: 0;
+        min-height: 44px;
+        line-height: 1.25;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+
+      .event-filter-option {
+        min-width: 0;
+        line-height: 1.15;
+        white-space: normal;
+      }
+
+      .day-card,
+      .agenda-item,
+      .today-event {
+        min-width: 0;
+      }
+
+      .agenda-day-heading {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .agenda-day-heading > span:first-child {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+
+      .event-card-copy,
+      .event-title,
+      .event-child,
+      .event-detail,
+      .agenda-title,
+      .agenda-meta {
+        min-width: 0;
+        max-width: 100%;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+
+      dialog,
+      .settings-dialog,
+      .calendar-dialog,
+      .share-dialog,
+      .insights-dialog {
+        width: calc(100% - 12px);
+        max-height: calc(100dvh - 12px);
+        margin: auto;
+      }
+
+      dialog .field-grid,
+      .member-invite-grid,
+      .settings-grid,
+      .kid-editor-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      dialog input,
+      dialog select,
+      dialog textarea,
+      dialog button {
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      #activityForm .form-actions,
+      .shared-event-form .form-actions {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+        padding-bottom: max(14px, env(safe-area-inset-bottom));
+      }
+
+      #activityForm .left-actions,
+      #activityForm .right-actions,
+      .shared-event-form .left-actions,
+      .shared-event-form .right-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        width: 100%;
+        gap: 8px;
+      }
+
+      #activityForm .left-actions > button,
+      #activityForm .right-actions > button,
+      .shared-event-form .left-actions > button,
+      .shared-event-form .right-actions > button {
+        width: 100%;
+        min-width: 0;
+        white-space: normal;
+      }
+
+      .more-actions-menu {
+        position: fixed;
+        left: 8px;
+        right: 8px;
+        bottom: max(8px, env(safe-area-inset-bottom));
+        width: auto;
+        max-height: min(70dvh, 520px);
+        overflow-y: auto;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .account-bar {
+        grid-template-columns: 38px minmax(0, 1fr) 44px;
+      }
+
+      .account-bar .invitation-button,
+      .account-bar .auth-entry-btn,
+      .account-bar .logout-btn {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        width: 100%;
+      }
+
+      .save-status { grid-row: 3; }
+      .brand h1 { font-size: 29px; }
+
+      .week-controls.has-today-shortcut {
+        grid-template-columns: 42px minmax(0, 1fr) auto 42px;
+      }
+
+      .week-controls .icon-btn {
+        width: 42px;
+        min-width: 42px;
+      }
+
+      .week-label { font-size: 14px; }
+      .period-today { padding-inline: 7px; font-size: 12px; }
+
+      .overview-stats {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .overview-next { grid-column: 1; }
+      .event-filter-option { padding-inline: 3px; font-size: 12px; }
+      .agenda-day-heading { grid-template-columns: minmax(0, 1fr) auto; }
+      .agenda-day-heading .day-event-count { grid-column: 2; }
+    }
+  </style>
 </head>
 <body>
   <section class="welcome-screen" id="welcomeScreen" aria-labelledby="welcomeBrand" hidden>
@@ -10674,6 +10960,8 @@
     let generatedShareDetails = null;
     let ownerCalendarComments = [];
     let sharedCalendarComments = [];
+    let sharedCalendarRefreshTimer = null;
+    let sharedCalendarRefreshBusy = false;
 
     const grid = document.getElementById("scheduleGrid");
     const mobileAgenda = document.getElementById("mobileAgenda");
@@ -14405,6 +14693,7 @@
         title.textContent = invitation.calendar_name;
         configureSharedCalendarAccess();
         renderSharedCalendarEvents();
+        startSharedCalendarLiveRefresh();
       } catch (error) {
         reportClientError(error, "shared-calendar-preview");
         list.innerHTML = `<p class="invitation-empty">${escapeHtml(t("invitations.unavailable"))}</p>`;
@@ -14471,9 +14760,56 @@
         sharedCalendarState = { invitation, schedule, shared };
         configureSharedCalendarAccess();
         renderSharedCalendarEvents();
+        startSharedCalendarLiveRefresh();
       } catch (error) {
         reportClientError(error, "shared-calendar-load");
         list.innerHTML = `<p class="invitation-empty">${escapeHtml(t("invitations.unavailable"))}</p>`;
+      }
+    }
+
+    function stopSharedCalendarLiveRefresh() {
+      window.clearInterval(sharedCalendarRefreshTimer);
+      sharedCalendarRefreshTimer = null;
+    }
+
+    function startSharedCalendarLiveRefresh() {
+      stopSharedCalendarLiveRefresh();
+      if (!sharedCalendarState?.invitation || (sharedCalendarState.publicPreview && !pendingInviteToken)) return;
+      sharedCalendarRefreshTimer = window.setInterval(refreshSharedCalendarLive, 5000);
+    }
+
+    async function refreshSharedCalendarLive() {
+      if (sharedCalendarRefreshBusy || document.hidden || !navigator.onLine || !sharedCalendarState?.invitation || !cloudClient) return;
+      sharedCalendarRefreshBusy = true;
+      const { invitation } = sharedCalendarState;
+      try {
+        let schedule = {};
+        let shared = {};
+        if (sharedCalendarState.publicPreview) {
+          const { data, error } = await cloudClient.rpc("get_shared_calendar_preview", { shared_invite_token: pendingInviteToken });
+          if (error) throw error;
+          shared = data?.shared || {};
+        } else {
+          const [{ data, error }] = await Promise.all([
+            cloudClient.from("family_schedules").select("schedule").eq("user_id", invitation.owner_id).maybeSingle(),
+            refreshSharedCalendarComments()
+          ]);
+          if (error) throw error;
+          schedule = data?.schedule || {};
+          shared = schedule.calendarData?.[invitation.calendar_id] || schedule;
+        }
+        const previousActivities = JSON.stringify(sharedCalendarState.shared?.activities || []);
+        const nextActivities = JSON.stringify(shared?.activities || []);
+        sharedCalendarState.schedule = schedule;
+        sharedCalendarState.shared = shared;
+        if (previousActivities !== nextActivities) {
+          configureSharedCalendarAccess();
+          renderSharedCalendarEvents();
+        }
+      } catch (error) {
+        reportClientError(error, "shared-calendar-refresh");
+      } finally {
+        sharedCalendarRefreshBusy = false;
       }
     }
 
@@ -14782,6 +15118,7 @@
     document.getElementById("closeInvitations").addEventListener("click", () => document.getElementById("invitationsDialog").close());
     document.getElementById("closeSharedCalendar").addEventListener("click", () => {
       document.getElementById("sharedCalendarDialog").close();
+      stopSharedCalendarLiveRefresh();
       sharedCalendarState = null;
     });
     document.getElementById("sharedCalendarSignIn").addEventListener("click", unlockLinkedCalendar);
