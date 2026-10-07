@@ -16945,7 +16945,7 @@
           event.style.setProperty("--event-line", colors.line);
           event.style.setProperty("--event-ink", colors.ink);
           event.dataset.occurrenceKey = occurrenceKey(activity);
-          event.textContent = `${activity.allDay ? "" : `${timeLabel(activity.start)} `}${displayIcon(activity)} ${activityCompactTitle(activity)}`;
+          event.innerHTML = `<span class="month-event-time">${activity.allDay ? "" : `${escapeHtml(timeLabel(activity.start))} `}${escapeHtml(displayIcon(activity))} </span><span class="month-event-title">${escapeHtml(activityCompactTitle(activity))}</span>`;
           bindCalendarEventActions(event, activity);
           cell.appendChild(event);
         });

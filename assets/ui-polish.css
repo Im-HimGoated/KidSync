@@ -25,7 +25,7 @@ button:not(.event), summary { transition: background-color 150ms ease, border-co
 #appShell .calendar-workspace { background: var(--panel); border-radius: 8px; }
 #appShell .calendar-workspace select { font-weight: 650; }
 #appShell .view-switch, #appShell .language-switch { padding: 3px; border-color: var(--line); border-radius: 9px; background: var(--soft-line); }
-#appShell .view-option, #appShell .language-option { font-size: 13px; font-weight: 650; line-height: 1.25; white-space: nowrap; }
+#appShell .view-option, #appShell .language-option { font-size: var(--workspace-text-size); font-weight: 650; line-height: 1.25; white-space: nowrap; }
 #appShell .view-option.is-active { color: var(--blue); background: var(--panel); box-shadow: 0 1px 4px rgb(23 42 58 / 13%); }
 #appShell .language-option.is-active { box-shadow: none; }
 #appShell .compact-toolbar-action, #appShell .planner-options-toggle { border-radius: 8px; box-shadow: none; }
@@ -57,7 +57,7 @@ button:not(.event), summary { transition: background-color 150ms ease, border-co
 #appShell .day-column > .event.very-short { padding: 1px 5px; }
 #appShell .event-badge { width: fit-content; max-width: 100%; font-size: 10px; }
 
-#appShell .mini-calendar { padding: 14px; border: 1px solid var(--line); border-radius: var(--ui-radius); background: var(--panel); }
+#appShell .mini-calendar { padding: var(--surface-padding); border: 1px solid var(--line); border-radius: var(--ui-radius); background: var(--panel); }
 #appShell .calendar-sidebar-heading { margin-bottom: 18px; font-size: 17px; font-weight: 700; }
 #appShell .mini-calendar-day { font-size: 12px; font-weight: 550; border-radius: 50%; }
 #appShell .mini-calendar-day.is-selected { box-shadow: none; }
@@ -71,15 +71,15 @@ button:not(.event), summary { transition: background-color 150ms ease, border-co
 #appShell .dashboard-greeting { margin-top: 8px; font-weight: 450; color: var(--muted); }
 #appShell .dashboard-page-actions button { box-shadow: none; font-weight: 650; }
 #appShell .dashboard-page .dashboard-stats { gap: 10px; border: 0; background: transparent; }
-#appShell .dashboard-page .dashboard-stat { padding: 16px; border: 1px solid var(--line); border-radius: var(--ui-radius); background: var(--panel); }
+#appShell .dashboard-page .dashboard-stat { padding: var(--surface-padding); border: 1px solid var(--line); border-radius: var(--ui-radius); background: var(--panel); }
 #appShell .dashboard-stat > span { font-size: 12px; font-weight: 500; }
 #appShell .dashboard-stat > strong { margin-top: 8px; font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
 #appShell .dashboard-panel { border: 1px solid var(--line); border-radius: var(--ui-radius); background: var(--panel); overflow: hidden; }
-#appShell .dashboard-panel-heading { padding: 16px; border-bottom: 1px solid var(--soft-line); }
+#appShell .dashboard-panel-heading { padding: var(--surface-padding); border-bottom: 1px solid var(--soft-line); }
 #appShell .dashboard-panel-heading h2 { font-size: 17px; font-weight: 700; }
 #appShell .dashboard-panel-heading p:not(.dashboard-panel-kicker) { margin-top: 6px; font-size: 12px; font-weight: 450; }
 #appShell .dashboard-panel-kicker, #appShell .dashboard-page-kicker { font-size: 10px; font-weight: 650; letter-spacing: .06em; }
-#appShell .dashboard-week-body { padding: 16px; }
+#appShell .dashboard-week-body { padding: var(--surface-padding); }
 #appShell .dashboard-week-chart .busy-day { border: 0; background: var(--soft-line); border-radius: 8px; }
 #appShell .dashboard-week-chart .busy-day-bar-track { height: 82px; background: transparent; }
 #appShell .dashboard-collapse { width: 32px; height: 32px; flex-basis: 32px; border-color: transparent; border-radius: 7px; color: var(--muted); }
@@ -90,6 +90,7 @@ button:not(.event), summary { transition: background-color 150ms ease, border-co
 #appShell .day-card, #appShell .today-view, #appShell .month-view { border-radius: var(--ui-radius); box-shadow: none; }
 #appShell .agenda-day-heading { font-size: 15px; font-weight: 650; }
 #appShell .agenda-item { padding: 12px; border-radius: 8px; }
+#appShell .month-event { font-weight: 600; }
 
 dialog { border-radius: 16px; box-shadow: 0 24px 80px rgb(13 30 45 / 24%); }
 dialog::backdrop { background: rgb(16 31 45 / 40%); backdrop-filter: blur(3px); }
@@ -153,5 +154,14 @@ html.dark-mode .workspace-panel-popover { box-shadow: 0 12px 36px rgb(0 0 0 / 35
   #appShell .dashboard-week-body, #appShell .dashboard-panel-heading { padding: 12px; }
   #appShell .dashboard-week-chart .busy-day-bar-track { height: 60px; }
   .welcome-about-point { padding: 18px; gap: 16px; }
+  #appShell .month-event-time { display: none; }
+}
+@media (max-width: 360px) {
+  #appShell > .toolbar { padding: 4px; }
+  #appShell .schedule-actions { gap: 2px; }
+  #appShell .calendar-view-menu > summary { font-size: 11px; gap: 2px; padding-inline: 4px; }
+  #appShell .calendar-view-menu > summary > span[aria-hidden] { font-size: 10px; }
+  #appShell #openLayoutEditor { width: 40px; min-width: 40px; padding: 6px; }
+  #appShell #openLayoutEditor > span:last-child { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
 @media (prefers-reduced-motion: reduce) { button, summary, #appShell .day-column > .event { transition: none; } }
