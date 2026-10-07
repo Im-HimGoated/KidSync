@@ -110,6 +110,115 @@ dialog .primary-btn, dialog .ghost-btn { border-radius: 8px; box-shadow: none; f
 .welcome-about-point > span { align-self: start; font-size: 26px; }
 .welcome-about-point h3 { font-size: 19px; }
 .welcome-about-point p { font-size: 15px; line-height: 1.6; }
+
+/* About interactions use separate motion properties so the entrance reveal can finish. */
+#welcomeAbout .welcome-about-point {
+  --about-reveal-delay: 0s;
+  --about-badge-turn: -6deg;
+  isolation: isolate;
+  overflow: hidden;
+  transition: opacity .55s ease var(--about-reveal-delay), transform .55s ease var(--about-reveal-delay), translate .28s cubic-bezier(.22, 1, .36, 1), box-shadow .28s ease, border-color .28s ease, background-color .28s ease;
+}
+#welcomeAbout .welcome-about-point:nth-child(2) { --about-reveal-delay: .08s; --about-badge-turn: 6deg; }
+#welcomeAbout .welcome-about-point:nth-child(3) { --about-reveal-delay: .16s; --about-badge-turn: -4deg; }
+#welcomeAbout .welcome-about-point > span {
+  position: relative;
+  transition: scale .3s cubic-bezier(.22, 1, .36, 1), rotate .3s ease, background-color .25s ease, border-color .25s ease, box-shadow .3s ease;
+}
+#welcomeAbout .welcome-about-point h3 { transition: color .25s ease; }
+#welcomeAbout .welcome-about-point::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  translate: -110% 0;
+  background: linear-gradient(110deg, transparent 25%, rgb(119 208 130 / 18%) 50%, transparent 75%);
+}
+#welcomeAbout .welcome-about-copy h2::after {
+  transform-origin: left center;
+  transition: scale .35s cubic-bezier(.22, 1, .36, 1), background-color .3s ease;
+}
+#welcomeAbout .welcome-section-kicker {
+  transition: translate .3s ease, background-color .3s ease, box-shadow .3s ease;
+}
+#welcomeAbout::after {
+  content: "";
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  left: 4%;
+  top: 20%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle, rgb(119 208 130 / 15%), transparent 70%);
+  transition: opacity .5s ease, translate .6s ease;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not(.reduce-motion) #welcomeAbout.is-visible .welcome-about-point:hover {
+    translate: 4px -5px;
+    border-color: #8fbfa1;
+    background-color: #f5fbf7;
+    box-shadow: 0 16px 32px rgb(27 53 74 / 13%);
+  }
+  html:not(.reduce-motion) #welcomeAbout .welcome-about-point:hover > span {
+    scale: 1.12;
+    rotate: var(--about-badge-turn);
+    border-color: #71a988;
+    background-color: #dcefe2;
+    box-shadow: 0 0 0 6px rgb(119 208 130 / 12%);
+  }
+  html:not(.reduce-motion) #welcomeAbout .welcome-about-point:hover h3 { color: #2f7654; }
+  html:not(.reduce-motion) #welcomeAbout .welcome-about-point:hover::after { animation: about-hover-sweep .7s ease-out; }
+  html:not(.reduce-motion) #welcomeAbout .welcome-about-copy:hover h2::after { scale: 1.8 1; background-color: #2f7654; }
+  html:not(.reduce-motion) #welcomeAbout .welcome-about-copy:hover .welcome-section-kicker {
+    translate: 0 -3px;
+    background-color: #eef7f0;
+    box-shadow: 0 5px 14px rgb(47 118 84 / 10%);
+  }
+  html:not(.reduce-motion) #welcomeAbout:hover::after { opacity: 1; translate: 18px -12px; }
+}
+@keyframes about-hover-sweep {
+  0% { opacity: 0; translate: -110% 0; }
+  20% { opacity: 1; }
+  100% { opacity: 0; translate: 110% 0; }
+}
+html.reduce-motion #welcomeAbout .welcome-about-copy,
+html.reduce-motion #welcomeAbout .welcome-about-point,
+html.reduce-motion #welcomeAbout .welcome-about-point > span,
+html.reduce-motion #welcomeAbout .welcome-about-point h3,
+html.reduce-motion #welcomeAbout .welcome-section-kicker,
+html.reduce-motion #welcomeAbout .welcome-about-copy h2::after {
+  opacity: 1;
+  transform: none;
+  translate: none;
+  scale: none;
+  rotate: none;
+  transition: none;
+  animation: none;
+}
+html.reduce-motion #welcomeAbout::after,
+html.reduce-motion #welcomeAbout .welcome-about-point::after { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  #welcomeAbout .welcome-about-copy,
+  #welcomeAbout .welcome-about-point,
+  #welcomeAbout .welcome-about-point > span,
+  #welcomeAbout .welcome-about-point h3,
+  #welcomeAbout .welcome-section-kicker,
+  #welcomeAbout .welcome-about-copy h2::after {
+    opacity: 1;
+    transform: none;
+    translate: none;
+    scale: none;
+    rotate: none;
+    transition: none;
+    animation: none;
+  }
+  #welcomeAbout::after,
+  #welcomeAbout .welcome-about-point::after { display: none; }
+}
 html.dark-mode #appShell .dashboard-panel { background: var(--panel); }
 html.dark-mode .workspace-panel-popover { box-shadow: 0 12px 36px rgb(0 0 0 / 35%); }
 
