@@ -1704,41 +1704,93 @@
       line-height: 1.35;
     }
 
-    .app.has-no-search-results .calendar-view {
-      display: none !important;
-    }
-
     .app.is-calendar-empty .schedule-overview {
       display: none;
     }
 
     .search-empty-state {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 18px;
+      grid-template-columns: 32px minmax(0, 1fr) auto;
+      gap: 12px;
       align-items: center;
+      width: fit-content;
+      max-width: 100%;
       margin: 0 0 14px;
-      padding: 18px 20px;
-      border: 1px dashed #aebfcb;
+      min-height: 0;
+      padding: 12px 14px;
+      border: 1px solid #bfd0dc;
+      border-left: 4px solid #2f729b;
       border-radius: 8px;
-      background: #f7fafc;
+      color: #173f59;
+      background: #f4f8fb;
+      box-shadow: none;
+    }
+
+    .search-empty-icon {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      border-radius: 50%;
+      color: #fff;
+      background: #2f729b;
+      font-size: 16px;
+      font-weight: 900;
+      line-height: 1;
     }
 
     .search-empty-state h2 {
       margin: 0;
-      color: var(--ink);
-      font-size: 20px;
+      color: #173f59;
+      font-size: 16px;
       line-height: 1.2;
     }
 
     .search-empty-state p {
-      margin: 5px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.45;
+      margin: 3px 0 0;
+      color: #526876;
+      font-size: 12px;
+      line-height: 1.4;
     }
 
-    .search-empty-state .ghost-btn { white-space: nowrap; }
+    .search-empty-state .ghost-btn {
+      justify-self: start;
+      min-height: 38px;
+      padding: 0 12px;
+      border-color: #8fb3c9;
+      color: #174f73;
+      background: #fff;
+      white-space: nowrap;
+    }
+
+    .search-empty-state .ghost-btn:hover {
+      background: #e7f2f7;
+    }
+
+    html.dark-mode .search-empty-state {
+      border-color: #466273;
+      border-left-color: #66a9cf;
+      color: #edf6fa;
+      background: #1d303b;
+    }
+
+    html.dark-mode .search-empty-icon {
+      color: #102c3d;
+      background: #86c4e6;
+    }
+
+    html.dark-mode .search-empty-state h2 { color: #edf6fa; }
+    html.dark-mode .search-empty-state p { color: #b9cad4; }
+
+    html.dark-mode .search-empty-state .ghost-btn {
+      border-color: #62889f;
+      color: #edf6fa;
+      background: #172630;
+    }
+
+    html.dark-mode .search-empty-state .ghost-btn:hover {
+      background: #244052;
+    }
 
     .empty-actions {
       display: flex;
@@ -3850,10 +3902,14 @@
       }
 
       .search-empty-state {
-        grid-template-columns: 1fr;
+        grid-template-columns: 32px minmax(0, 1fr);
+        padding: 12px;
       }
 
-      .search-empty-state .ghost-btn { width: 100%; }
+      .search-empty-state .ghost-btn {
+        grid-column: 1 / -1;
+        width: 100%;
+      }
 
       .empty-actions {
         display: grid;
@@ -6898,6 +6954,35 @@
     .welcome-back-item-time { white-space: nowrap; text-align: right; }
     .welcome-back-empty { padding: 26px 16px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); text-align: center; }
     .welcome-back-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+    .weekly-summary-dialog { width: min(760px, calc(100% - 24px)); }
+    .weekly-summary-body { padding: 20px 22px 24px; }
+    .weekly-summary-range { margin: 0 0 16px; color: var(--muted); font-size: 14px; font-weight: 750; }
+    .weekly-summary-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-block: 1px solid var(--line); }
+    .weekly-summary-stat { min-width: 0; padding: 14px 12px; }
+    .weekly-summary-stat + .weekly-summary-stat { border-left: 1px solid var(--line); }
+    .weekly-summary-stat span, .weekly-summary-stat strong { display: block; }
+    .weekly-summary-stat span { color: var(--muted); font-size: 11px; font-weight: 850; text-transform: uppercase; }
+    .weekly-summary-stat strong { margin-top: 5px; overflow: hidden; color: var(--ink); font-size: 22px; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
+    .weekly-summary-stat.is-alert strong { color: #9b3545; }
+    .weekly-summary-section { margin-top: 20px; }
+    .weekly-summary-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .weekly-summary-section-heading h3 { margin: 0; color: var(--ink); font-size: 16px; }
+    .weekly-summary-section-heading span { color: var(--muted); font-size: 11px; font-weight: 750; }
+    .weekly-summary-events { display: grid; gap: 7px; }
+    .weekly-summary-event { width: 100%; display: grid; grid-template-columns: 48px 32px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 58px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--panel); text-align: left; }
+    .weekly-summary-event:hover, .weekly-summary-event:focus-visible { border-color: var(--blue-line); background: var(--blue-soft); outline: none; }
+    .weekly-summary-event-date { color: var(--muted); font-size: 10px; font-weight: 850; line-height: 1.2; text-align: center; text-transform: uppercase; }
+    .weekly-summary-event-date strong { display: block; color: var(--ink); font-size: 18px; }
+    .weekly-summary-event-icon { font-size: 20px; text-align: center; }
+    .weekly-summary-event-copy { min-width: 0; }
+    .weekly-summary-event-copy strong, .weekly-summary-event-copy span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .weekly-summary-event-copy strong { font-size: 13px; }
+    .weekly-summary-event-copy span, .weekly-summary-event-time { color: var(--muted); font-size: 11px; font-weight: 750; }
+    .weekly-summary-event-time { white-space: nowrap; }
+    .weekly-summary-empty { margin: 0; padding: 24px 14px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); text-align: center; }
+    .weekly-summary-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+    html.dark-mode .weekly-summary-stat.is-alert strong { color: #f0a1ac; }
+    html.dark-mode .weekly-summary-event:hover, html.dark-mode .weekly-summary-event:focus-visible { background: #244052; }
     .version-item { align-items: center; }
     .version-item-actions { display: grid; justify-items: end; gap: 7px; }
     .version-item-actions .small-btn { min-width: 82px; }
@@ -6913,6 +6998,13 @@
       .welcome-back-item { grid-template-columns: 28px minmax(0, 1fr); }
       .welcome-back-item-time { grid-column: 2; text-align: left; }
       .welcome-back-actions { display: grid; grid-template-columns: 1fr; }
+      .weekly-summary-body { padding: 14px; }
+      .weekly-summary-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .weekly-summary-stat:nth-child(3) { border-left: 0; }
+      .weekly-summary-stat:nth-child(n + 3) { border-top: 1px solid var(--line); }
+      .weekly-summary-event { grid-template-columns: 42px 28px minmax(0, 1fr); }
+      .weekly-summary-event-time { grid-column: 3; }
+      .weekly-summary-actions { display: grid; grid-template-columns: 1fr; }
       .version-item-actions { grid-column: 2; width: 100%; grid-template-columns: minmax(0, 1fr) auto; align-items: center; justify-items: start; }
       .version-item-actions .small-btn { justify-self: end; min-height: 42px; }
     }
@@ -7599,73 +7691,72 @@
     }
 
     .appearance-dialog {
-      width: min(980px, calc(100% - 28px));
+      width: min(480px, calc(100% - 28px));
       padding: 0;
       overflow: hidden;
-      background: #edf3fc;
+      background: #ffffff;
     }
 
     .appearance-dialog-body {
-      padding: 54px 48px 34px;
-      text-align: center;
+      padding: 28px;
+      text-align: left;
     }
 
     .appearance-dialog-heading h2 {
       max-width: 760px;
       margin: 0 auto;
       color: #3f444b;
-      font-size: clamp(30px, 4vw, 44px);
-      font-weight: 500;
-      letter-spacing: -.03em;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 0;
       line-height: 1.12;
     }
 
     .appearance-dialog-heading p:last-child {
-      margin: 22px 0 0;
+      margin: 12px 0 0;
       color: #4d5158;
-      font-size: clamp(18px, 2.2vw, 27px);
+      font-size: 15px;
       line-height: 1.35;
     }
 
     .appearance-dialog-kicker {
       margin: 0 0 14px;
-      color: #176fc1;
+      color: #237653;
       font-size: 12px;
       font-weight: 850;
-      letter-spacing: .12em;
+      letter-spacing: 0;
       text-transform: uppercase;
     }
 
     .appearance-choice-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 28px;
-      margin: 48px auto 34px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
+      margin: 24px auto;
       max-width: 860px;
     }
 
     .appearance-choice {
-      display: grid;
-      gap: 14px;
-      justify-items: center;
-      padding: 14px;
-      border: 2px solid transparent;
-      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 16px;
+      border: 2px solid #dfe6e3;
+      border-radius: 8px;
       color: #272b31;
       background: transparent;
-      text-align: center;
+      text-align: left;
       transition: transform .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
     }
 
     .appearance-choice:hover {
-      transform: translateY(-3px);
-      background: rgba(255, 255, 255, .5);
+      background: #f5f8f6;
     }
 
     .appearance-choice.is-selected {
-      border-color: #1474c8;
-      background: rgba(213, 229, 255, .76);
-      box-shadow: 0 10px 26px rgba(37, 101, 175, .12);
+      border-color: #29815e;
+      background: #edf7f1;
+      box-shadow: none;
     }
 
     .appearance-preview-card {
@@ -7673,11 +7764,14 @@
       display: grid;
       align-content: start;
       gap: 14px;
-      width: min(100%, 250px);
-      min-height: 178px;
-      padding: 25px 25px 20px;
-      border-radius: 28px;
-      box-shadow: 0 6px 14px rgba(31, 49, 86, .12);
+      width: 40px;
+      height: 40px;
+      min-height: 40px;
+      flex: 0 0 40px;
+      padding: 0;
+      border: 1px solid #9aaea3;
+      border-radius: 50%;
+      box-shadow: none;
       text-align: left;
     }
 
@@ -7744,42 +7838,44 @@
 
     .appearance-choice-label {
       position: relative;
-      padding-left: 32px;
-      font-size: 22px;
-      font-weight: 500;
+      padding-left: 0;
+      padding-right: 32px;
+      flex: 1;
+      font-size: 16px;
+      font-weight: 700;
     }
 
     .appearance-choice-label::before {
       content: "";
       position: absolute;
-      left: 0;
+      right: 0;
       top: 50%;
-      width: 22px;
-      height: 22px;
-      border: 3px solid #51575c;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #78877e;
       border-radius: 50%;
       transform: translateY(-50%);
     }
 
     .appearance-choice.is-selected .appearance-choice-label::before {
-      border-color: #0d6fb9;
-      box-shadow: inset 0 0 0 5px #edf3fc, inset 0 0 0 10px #0d6fb9;
+      border-color: #29815e;
+      box-shadow: inset 0 0 0 4px #edf7f1, inset 0 0 0 9px #29815e;
     }
 
     .appearance-dialog-done {
-      min-width: 138px;
-      min-height: 58px;
+      width: 100%;
+      min-height: 46px;
       padding: 0 25px;
-      border-radius: 999px;
+      border-radius: 8px;
       color: #fff;
-      background: #1262d4;
-      font-size: 18px;
+      background: #237653;
+      font-size: 16px;
       font-weight: 750;
-      box-shadow: 0 8px 18px rgba(18, 98, 212, .22);
+      box-shadow: none;
     }
 
     .appearance-dialog-done:hover {
-      background: #0b51b7;
+      background: #195d40;
       transform: translateY(-1px);
     }
 
@@ -7884,19 +7980,19 @@
       #kidFilters { min-height: 78px; padding: 8px 11px; }
       #kidFilters .kids-list { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; }
       #kidFilters .kid-toggle { flex: 0 0 auto; min-height: 32px; }
-      .appearance-dialog-body { padding: 34px 18px 24px; }
-      .appearance-dialog-heading h2 { font-size: 30px; }
-      .appearance-dialog-heading p:last-child { margin-top: 14px; font-size: 18px; }
-      .appearance-choice-grid { gap: 8px; margin: 30px auto 26px; }
-      .appearance-choice { padding: 6px; border-radius: 16px; }
-      .appearance-preview-card { min-height: 120px; padding: 14px; border-radius: 18px; gap: 8px; }
+      .appearance-dialog-body { padding: 24px 18px; }
+      .appearance-dialog-heading h2 { font-size: 24px; }
+      .appearance-dialog-heading p:last-child { margin-top: 12px; font-size: 15px; }
+      .appearance-choice-grid { gap: 10px; margin: 22px auto; }
+      .appearance-choice { padding: 14px; border-radius: 8px; }
+      .appearance-preview-card { min-height: 40px; padding: 0; border-radius: 50%; }
       .appearance-preview-date { width: 25px; height: 25px; font-size: 13px; }
       .appearance-preview-control { padding: 9px 8px; border-radius: 12px; font-size: 13px; }
       .appearance-preview-lines { gap: 6px; }
       .appearance-preview-lines i { height: 2px; }
-      .appearance-choice-label { padding-left: 22px; font-size: 15px; }
+      .appearance-choice-label { padding-left: 0; font-size: 15px; }
       .appearance-choice-label::before { width: 15px; height: 15px; border-width: 2px; }
-      .appearance-choice.is-selected .appearance-choice-label::before { box-shadow: inset 0 0 0 3px #edf3fc, inset 0 0 0 7px #0d6fb9; }
+      .appearance-choice.is-selected .appearance-choice-label::before { box-shadow: inset 0 0 0 3px #edf7f1, inset 0 0 0 7px #29815e; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -8017,7 +8113,7 @@
       .sidebar-tools { display:flex; align-items:center; gap:2px; }
       .sidebar-search-glyph { position:relative; width:18px; height:18px; border:3px solid currentColor; border-radius:50%; }
       .sidebar-search-glyph::after { content:""; position:absolute; right:-7px; bottom:-4px; width:8px; height:3px; border-radius:999px; background:currentColor; transform:rotate(45deg); transform-origin:left center; }
-      .sidebar-nav { position:absolute; top:calc(100% + 8px); left:0; z-index:80; display:grid; gap:4px; width:232px; margin:0; padding:8px; border:1px solid var(--line); border-radius:10px; background:var(--panel); box-shadow:0 20px 46px rgba(19,47,67,.2); }
+      .sidebar-nav { position:fixed; top:var(--sidebar-nav-top,68px); left:var(--sidebar-nav-left,8px); z-index:80; display:grid; align-content:start; gap:4px; width:min(232px,calc(100vw - 16px)); max-height:calc(100vh - 76px); max-height:var(--sidebar-nav-max-height,calc(100dvh - 76px)); overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; margin:0; padding:8px; border:1px solid var(--line); border-radius:10px; background:var(--panel); box-shadow:0 20px 46px rgba(19,47,67,.2); }
       .sidebar-nav-item { display:grid; grid-template-columns:30px minmax(0,1fr); align-items:center; gap:10px; min-height:44px; padding:0 12px; border:0; border-radius:7px; color:var(--ink); background:transparent; font-size:14px; font-weight:800; text-align:left; }
       .sidebar-nav-item:hover,
       .sidebar-nav-item:focus-visible { color:var(--ink); background:#edf4f7; transform:none; }
@@ -8098,7 +8194,7 @@
         .sidebar-date-controls { grid-template-columns:auto 42px 42px minmax(0,1fr); }
         .sidebar-today { padding-inline:12px; }
         .sidebar-period-button { padding-inline:8px; font-size:14px; }
-        .sidebar-nav { position:fixed; top:68px; left:8px; right:8px; width:auto; }
+        .sidebar-nav { left:8px; right:8px; width:auto; }
       }
       @media (prefers-reduced-motion:reduce) { .sidebar-tooltip::after { transition:none; } }
     </style>
@@ -8362,11 +8458,11 @@
       html.dark-mode .appearance-dialog-kicker { color:#72bdf0; }
       html.dark-mode .appearance-choice { color:#e7eef3; }
       html.dark-mode .appearance-choice:hover { background:#20333f; }
-      html.dark-mode .appearance-choice.is-selected { border-color:#62a9d2; background:#244052; }
+      html.dark-mode .appearance-choice.is-selected { border-color:#80cba5; background:#203d32; }
       html.dark-mode .appearance-choice-label::before { border-color:#a9bbc6; }
       html.dark-mode .appearance-choice.is-selected .appearance-choice-label::before {
-        border-color:#72bdf0;
-        box-shadow:inset 0 0 0 5px #172630,inset 0 0 0 10px #72bdf0;
+        border-color:#80cba5;
+        box-shadow:inset 0 0 0 4px #203d32,inset 0 0 0 9px #80cba5;
       }
       html.dark-mode .calendar-empty-state h2 { color:#f3f7fa; }
       html.dark-mode .calendar-empty-state p { color:#b8c6cf; }
@@ -9259,6 +9355,7 @@
       /* Two visible planner bars: navigation/account, then calendar controls. */
       #appShell { padding-top:8px; }
       #appShell > .app-sidebar { min-height:54px; margin-bottom:7px; padding:5px 9px; }
+      #appShell > .app-sidebar:has(.sidebar-menu[open]) { z-index:100; }
       #appShell .app-sidebar > .account-bar {
         flex:0 1 auto; min-width:0; min-height:0; margin:0; padding:0;
         gap:7px; border:0; border-radius:0; background:transparent;
@@ -9321,7 +9418,8 @@
         #appShell .app-sidebar .auth-entry-btn { min-height:32px; padding:4px 7px; font-size:11px; }
         #appShell .toolbar-leading { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px; }
         #appShell .calendar-workspace { grid-column:1; height:44px; }
-        #appShell .toolbar-leading > .language-switch { grid-column:2; height:44px; width:88px; }
+        #appShell .toolbar-leading > .language-switch { grid-column:2; height:44px; width:102px; }
+        #appShell .toolbar-leading > .language-switch .language-option { min-width:0; padding-inline:4px; white-space:nowrap; }
         #appShell .schedule-actions { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; }
         #appShell .schedule-actions .view-switch { grid-column:1 / -1; grid-row:1; }
         #appShell .schedule-actions > #openDashboard { grid-column:1; grid-row:2; }
@@ -9372,6 +9470,194 @@
       .day-column > .event.very-short .event-time { font-size:10px; line-height:1; }
       .day-column > .event.very-short .event-title { font-size:11px; line-height:1; }
     </style>
+  <style>
+    /* Shared rhythm for the planner and dashboard. */
+    #appShell { --workspace-gap:16px; --surface-padding:16px; }
+    #appShell:not(.is-dashboard-view) { padding-bottom:env(safe-area-inset-bottom,0px); }
+    #appShell:not(.is-dashboard-view) > .calendar-stage { margin-bottom:0; }
+    body { background:var(--page); background-image:none; }
+    #appShell > .app-sidebar,
+    #appShell > .toolbar { border-radius:8px; border-color:var(--line); background:var(--panel); box-shadow:none; }
+    #appShell > .app-sidebar { gap:8px; padding:8px; margin-bottom:8px; }
+    /* Translation must not turn the compact header into a second row. */
+    #appShell .app-sidebar > .account-bar { flex-wrap:nowrap; white-space:nowrap; }
+    @media (min-width:901px) {
+      #appShell .app-sidebar .sidebar-date-controls { flex:0 1 auto; }
+      #appShell .app-sidebar .sidebar-period-button { flex:0 1 225px; width:225px; min-width:0; }
+    }
+    @media (min-width:901px) and (max-width:1199px) {
+      #appShell .app-sidebar .account-identity { display:none; }
+    }
+    #appShell > .toolbar { padding:8px; margin-bottom:var(--workspace-gap); }
+    #appShell .toolbar-leading,
+    #appShell .schedule-actions { gap:8px; }
+    #appShell .calendar-stage { gap:var(--workspace-gap); }
+    #appShell .mini-calendar { padding:var(--surface-padding); box-shadow:none; }
+    #appShell .mini-calendar-tools { gap:8px; margin-top:16px; padding-top:16px; }
+    #appShell .mini-calendar-tool-icon,
+    #appShell .dashboard-feed-icon { background:var(--trust-primary); }
+    #appShell .calendar-workspace { border-radius:8px; }
+    #appShell .day-head.blue,
+    #appShell .day-head.green,
+    #appShell .time-head { color:var(--ink); background:var(--panel); }
+    #appShell .day-head.is-today { background:var(--blue-soft); box-shadow:inset 0 3px var(--blue); }
+    #appShell .schedule-shell,
+    #appShell .month-view { border-radius:8px; border-color:var(--line); box-shadow:none; }
+    #appShell .dashboard-page-header { gap:16px; padding:24px 0 16px; }
+    #appShell .dashboard-page-header h1 { color:var(--ink); }
+    #appShell .dashboard-page-actions { gap:8px; }
+    #appShell .dashboard-page-actions button { min-height:44px; border-radius:8px; }
+    #appShell .dashboard-page .dashboard-stats { margin:16px 0; }
+    #appShell .dashboard-page .dashboard-stat { padding:16px; }
+    #appShell .dashboard-page-grid,
+    #appShell .dashboard-main-column,
+    #appShell .dashboard-side-column { gap:var(--workspace-gap); }
+    #appShell .dashboard-panel { border-radius:8px; background:var(--panel); box-shadow:none; }
+    #appShell .dashboard-panel-heading,
+    #appShell .dashboard-week-body,
+    #appShell .dashboard-feed-item,
+    #appShell .dashboard-timeline-item { padding:var(--surface-padding); }
+    #appShell .dashboard-week-chart { gap:8px; }
+    #appShell .dashboard-week-body h3 { margin:16px 0 8px; }
+    #appShell .dashboard-week-body .kid-load-list { gap:8px; }
+    #appShell .dashboard-panel-kicker,
+    #appShell .dashboard-page-kicker,
+    #appShell .dashboard-feed-time,
+    #appShell .dashboard-event-relative { color:var(--green); }
+    #appShell .dashboard-event-time { color:var(--blue); }
+    #appShell .dashboard-week-chart .busy-day { box-shadow:none; background:var(--panel); }
+    #appShell .dashboard-week-chart .busy-day:hover { background:var(--blue-soft); }
+    #appShell .dashboard-week-chart .busy-day-bar { background:var(--trust-primary); }
+    #appShell .dashboard-week-chart .busy-day.is-busiest .busy-day-bar { background:var(--green); }
+    #appShell .dashboard-week-chart .busy-day-bar-track { background:var(--soft-line); }
+    #appShell button:focus-visible { outline:2px solid var(--blue); outline-offset:3px; }
+    @media (max-width:760px) {
+      #appShell .dashboard-page-header { flex-direction:column; align-items:stretch; }
+      #appShell .dashboard-page-actions { width:100%; max-width:none; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); }
+      #appShell .dashboard-page-actions button,
+      #appShell .dashboard-page-actions button:last-child { width:100%; min-width:0; }
+      #appShell .dashboard-page-actions button > span:last-child { position:static; width:auto; height:auto; overflow:visible; clip:auto; font-size:12px; white-space:normal; }
+      #appShell .dashboard-page-actions button { display:flex; flex-direction:column; gap:6px; padding:10px 4px; line-height:1.3; }
+    }
+    @media (max-width:560px) {
+      #appShell { --workspace-gap:12px; --surface-padding:12px; }
+      #appShell .dashboard-page-header { padding:16px 0; }
+      #appShell .dashboard-week-chart { gap:4px; }
+      #appShell .dashboard-page .dashboard-stat { padding:12px; }
+      #appShell .mini-calendar-tools { margin-top:12px; padding-top:12px; }
+    }
+  </style>
+  <style>
+    #appShell .workspace-visibility { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:0 0 10px; padding:0; }
+    #appShell.is-dashboard-view .workspace-visibility [data-panel-toggle="controls"],
+    #appShell.is-dashboard-view .workspace-visibility [data-panel-toggle="side"],
+    #appShell.is-dashboard-view #toggleCalendarFocus { display:none; }
+    .workspace-visibility button { display:inline-flex; align-items:center; gap:6px; min-height:40px; padding:6px 10px; border:1px solid var(--line); border-radius:6px; color:var(--ink); background:var(--panel); font-size:12px; font-weight:750; }
+    .workspace-visibility button > span:first-child { width:16px; text-align:center; font-size:18px; }
+    .workspace-visibility button:hover, .workspace-visibility button:focus-visible { border-color:var(--blue); background:var(--blue-soft); }
+    .workspace-visibility button[aria-expanded="false"] { border-style:dashed; }
+    #appShell.panels-hide-header #calendarHeader,
+    #appShell.panels-hide-account #calendarAccount,
+    #appShell.panels-hide-controls #calendarControls,
+    #appShell.panels-hide-side #calendarSide { display:none !important; }
+    #appShell.panels-hide-side .calendar-stage { grid-template-columns:minmax(0,1fr); gap:0; }
+    #appShell.panels-hide-side .calendar-stage-main { grid-column:1; grid-row:1; }
+    @media (min-width:901px) {
+      #appShell.has-minimized-panels .calendar-stage-main { min-height:var(--calendar-available-height,60dvh); }
+      #appShell.has-minimized-panels #weekSchedule:not([hidden]) { height:var(--calendar-available-height,60dvh); min-height:0; max-height:none; }
+      #appShell.has-minimized-panels #monthView:not([hidden]),
+      #appShell.has-minimized-panels #todayView:not([hidden]) { min-height:var(--calendar-available-height,60dvh); }
+    }
+    @media (max-width:560px) {
+      .workspace-visibility button { min-height:44px; flex:1 1 auto; justify-content:center; }
+    }
+  </style>
+  <style>
+    :root { --workspace-text-size:14px; }
+    #appShell { --workspace-gap:14px; --surface-padding:14px; --workspace-side-width:260px; }
+    #appShell > .app-sidebar { border:0; border-bottom:1px solid var(--line); border-radius:0; padding:10px 0; }
+    #appShell .sidebar-brand-copy strong { font-size:24px; }
+    #appShell .workspace-visibility { gap:4px; padding-bottom:8px; border-bottom:1px solid var(--line); }
+    #appShell .workspace-visibility button { border-color:transparent; background:transparent; color:var(--muted); font-size:calc(var(--workspace-text-size) - 2px); }
+    #appShell .workspace-visibility button:hover,
+    #appShell .workspace-visibility button[aria-expanded="false"] { color:var(--ink); background:var(--panel); border-color:var(--line); }
+    #appShell #openLayoutEditor { margin-left:auto; color:var(--green); border:1px solid var(--line); background:var(--panel); }
+    #appShell .calendar-stage { gap:var(--workspace-gap); }
+    #appShell > .toolbar { padding:var(--surface-padding); margin-bottom:var(--workspace-gap); }
+    #appShell .mini-calendar { padding:var(--surface-padding); border:0; border-left:1px solid var(--line); border-radius:0; background:transparent; }
+    #appShell .mini-calendar-tools { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    #appShell .mini-calendar-tools h3 { grid-column:1 / -1; }
+    #appShell .mini-calendar-tool { display:flex; gap:6px; padding:8px; font-size:calc(var(--workspace-text-size) - 2px); }
+    #appShell .mini-calendar-tool-icon { flex:0 0 24px; width:24px; height:24px; background:transparent; color:var(--blue); }
+    #appShell .mini-calendar-tool.is-primary .mini-calendar-tool-icon { color:#fff; }
+    #appShell .mini-calendar-tool-chevron { display:none; }
+    #appShell .mini-calendar-title { font-size:calc(var(--workspace-text-size) + 2px); }
+    #appShell .mini-calendar-day { font-size:var(--workspace-text-size); }
+    #appShell .dashboard-page-header h1 { font-size:30px; line-height:1.2; }
+    #appShell .dashboard-greeting { font-size:var(--workspace-text-size); }
+    #appShell .dashboard-panel { border:0; border-top:1px solid var(--line); border-radius:0; background:transparent; }
+    #appShell .dashboard-panel-heading { gap:12px; align-items:center; padding:var(--surface-padding) 0; }
+    #appShell .dashboard-panel-heading h2 { font-size:calc(var(--workspace-text-size) + 4px); }
+    #appShell .dashboard-panel-heading p:not(.dashboard-panel-kicker) { font-size:calc(var(--workspace-text-size) - 1px); line-height:1.5; }
+    #appShell .dashboard-week-body { padding:0 0 var(--surface-padding); }
+    #appShell .dashboard-feed-item, #appShell .dashboard-timeline-item { padding:var(--surface-padding); border-radius:6px; }
+    #appShell .dashboard-event-title, #appShell .dashboard-feed-copy strong { font-size:var(--workspace-text-size); }
+    #appShell .dashboard-page .dashboard-stats { border-block:1px solid var(--line); background:var(--panel); }
+    #appShell .dashboard-page .dashboard-stat { padding:var(--surface-padding); border-radius:0; border:0; border-right:1px solid var(--line); background:transparent; }
+    #appShell .dashboard-page .dashboard-stat:last-child { border-right:0; }
+    .dashboard-collapse { display:grid; place-items:center; flex:0 0 40px; width:40px; height:40px; padding:0; margin-left:auto; border:1px solid var(--line); border-radius:6px; color:var(--ink); background:var(--panel); font-size:22px; }
+    .dashboard-panel.is-collapsed > :not(.dashboard-panel-heading) { display:none; }
+    #appShell .event, #appShell .today-event, #appShell .agenda-item { border-radius:6px; border-width:1px; border-left-width:4px; box-shadow:none; }
+    #appShell .event:hover, #appShell .today-event:hover, #appShell .agenda-item:hover { box-shadow:0 3px 10px rgba(0,0,0,.08); }
+    #appShell .today-event-title, #appShell .agenda-title { font-size:calc(var(--workspace-text-size) + 1px); }
+    #appShell .today-event-meta, #appShell .agenda-meta { font-size:calc(var(--workspace-text-size) - 2px); }
+    #appShell .day-head-label-row, #appShell .day-head-label > span { font-size:var(--workspace-text-size); }
+    #appShell .view-option, #appShell .language-option, #appShell .feature-btn { font-size:var(--workspace-text-size); }
+    #appShell .month-event { border-radius:4px; font-size:calc(var(--workspace-text-size) - 2px); }
+    #appShell .month-cell { min-width:0; }
+    #appShell.workspace-no-weather .weather { display:none; }
+    #appShell.workspace-simple-events .event-detail,
+    #appShell.workspace-simple-events .today-event-details { display:none; }
+    .layout-dialog { width:min(460px,calc(100% - 24px)); padding:0; border-radius:8px; }
+    .layout-editor-body { display:grid; gap:20px; padding:20px; }
+    .layout-fieldset { min-width:0; padding:0; margin:0; border:0; }
+    .layout-fieldset legend { margin-bottom:10px; font-size:14px; font-weight:750; }
+    .layout-segments { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; padding:4px; background:var(--soft-line); border-radius:6px; }
+    .layout-segments button { min-height:42px; padding:6px; border:0; border-radius:4px; font-size:13px; background:transparent; color:var(--ink); }
+    .layout-segments button[aria-pressed="true"] { background:var(--panel); box-shadow:0 1px 4px rgba(0,0,0,.1); color:var(--blue); font-weight:800; }
+    .layout-slider-row { display:grid; grid-template-columns:1fr auto; align-items:center; gap:8px; font-size:14px; font-weight:650; }
+    .layout-slider-row output { color:var(--muted); font-variant-numeric:tabular-nums; }
+    .layout-slider-row input { grid-column:1 / -1; width:100%; height:28px; padding:0; accent-color:var(--green); }
+    .layout-setting-row { display:flex; justify-content:space-between; align-items:center; gap:16px; font-size:14px; font-weight:650; }
+    .layout-setting-row select { max-width:48%; min-height:42px; padding:6px 10px; background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:6px; }
+    .layout-setting-row input { width:22px; height:22px; accent-color:var(--green); }
+    .layout-editor-actions { display:flex; justify-content:space-between; gap:12px; border-top:1px solid var(--line); padding-top:16px; }
+    html.dark-mode .layout-dialog { background:var(--panel); color:var(--ink); border-color:var(--line); }
+    html.dark-mode #appShell .dashboard-panel { background:transparent; }
+    @media (min-width:901px) {
+      #appShell .calendar-stage { grid-template-columns:minmax(0,1fr) var(--workspace-side-width); }
+      #appShell.workspace-side-left .calendar-stage { grid-template-columns:var(--workspace-side-width) minmax(0,1fr); }
+      #appShell.workspace-side-left .mini-calendar { grid-column:1; border-left:0; border-right:1px solid var(--line); }
+      #appShell.workspace-side-left .calendar-stage-main { grid-column:2; }
+      #appShell.panels-hide-side .calendar-stage { grid-template-columns:minmax(0,1fr); }
+      #appShell.panels-hide-side .calendar-stage-main { grid-column:1; }
+    }
+    @media (max-width:900px) {
+      #appShell .mini-calendar { border-left:0; border-top:1px solid var(--line); }
+      #appShell .mini-calendar-tools { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    }
+    @media (max-width:560px) {
+      #appShell .workspace-visibility { gap:4px; }
+      #appShell .workspace-visibility button { padding:6px; font-size:12px; }
+      #appShell .mini-calendar-tools { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      #appShell .mini-calendar-tool { min-height:44px; justify-content:center; }
+      #appShell .mini-calendar-tool > span:nth-child(2) { display:block; font-size:11px; }
+      #appShell .mini-calendar-tool-icon { display:none; }
+      #appShell .dashboard-page-header h1 { font-size:26px; }
+      #appShell .dashboard-page .dashboard-stat { border:0; }
+      .layout-editor-body { gap:16px; padding:16px; }
+    }
+  </style>
 </head>
 <body>
   <section class="welcome-screen" id="welcomeScreen" aria-labelledby="welcomeBrand" hidden>
@@ -9778,7 +10064,7 @@
   </dialog>
 
   <main class="app" id="appShell" hidden>
-    <header class="app-sidebar" aria-label="KidsSync calendar controls" data-i18n-aria="sidebar.navigation">
+    <header class="app-sidebar" id="calendarHeader" aria-label="KidsSync calendar controls" data-i18n-aria="sidebar.navigation">
       <details class="sidebar-menu" id="sidebarMenu">
         <summary class="sidebar-icon-button sidebar-tooltip sidebar-tooltip-left" aria-label="Open navigation menu" title="Open navigation menu" data-tooltip="Open navigation menu" data-i18n-aria="sidebar.openMenu" data-i18n-title="sidebar.openMenu" data-i18n-tooltip="sidebar.openMenu">
           <span class="sidebar-menu-glyph" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -9812,7 +10098,7 @@
         <button class="sidebar-icon-button sidebar-tooltip" type="button" data-sidebar-action="help" aria-label="Help" title="Help" data-tooltip="Help" data-i18n-aria="sidebar.help" data-i18n-title="sidebar.help" data-i18n-tooltip="sidebar.help"><span aria-hidden="true">?</span></button>
         <button class="sidebar-icon-button sidebar-tooltip sidebar-tooltip-right" type="button" id="openSettings" aria-label="Settings" title="Settings" data-tooltip="Settings" data-i18n-aria="settings.open" data-i18n-title="settings.open" data-i18n-tooltip="settings.open"><span aria-hidden="true">⚙</span></button>
       </div>
-      <div class="account-bar" aria-label="Family account" data-i18n-aria="auth.familyAccount">
+      <div class="account-bar" id="calendarAccount" aria-label="Family account" data-i18n-aria="auth.familyAccount">
       <span class="save-status" id="saveStatus" role="status" data-i18n="save.saved">Saved on this device</span>
       <span class="account-avatar" id="accountAvatar" aria-hidden="true"><span id="accountAvatarFallback">👤</span><img id="accountAvatarImage" alt="" hidden></span>
       <div class="account-identity">
@@ -9899,7 +10185,15 @@
         </aside>
       </div>
     </section>
-    <section class="toolbar" aria-label="Schedule controls" data-i18n-aria="aria.scheduleControls">
+    <nav class="workspace-visibility" id="workspaceVisibility" aria-label="Visible panels">
+      <button type="button" data-panel-toggle="header" aria-controls="calendarHeader"><span aria-hidden="true">−</span><span>Header</span></button>
+      <button type="button" data-panel-toggle="account" aria-controls="calendarAccount"><span aria-hidden="true">−</span><span>Account</span></button>
+      <button type="button" data-panel-toggle="controls" aria-controls="calendarControls"><span aria-hidden="true">−</span><span>Controls</span></button>
+      <button type="button" data-panel-toggle="side" aria-controls="calendarSide"><span aria-hidden="true">−</span><span>Side calendar</span></button>
+      <button type="button" id="toggleCalendarFocus"><span aria-hidden="true">⛶</span><span>Focus</span></button>
+      <button type="button" id="openLayoutEditor" aria-haspopup="dialog"><span aria-hidden="true">☷</span><span data-i18n="layout.customize">Customize</span></button>
+    </nav>
+    <section class="toolbar" id="calendarControls" aria-label="Schedule controls" data-i18n-aria="aria.scheduleControls">
       <div class="toolbar-leading">
         <div class="calendar-workspace">
           <label class="sr-only" for="calendarSelect" data-i18n="calendars.select">Calendar</label>
@@ -9942,6 +10236,7 @@
             <button class="ghost-btn" type="button" id="loadPreset" data-i18n="actions.loadExample">Load Example</button>
             <button class="ghost-btn" type="button" id="managePresets" data-i18n="actions.presets">Presets &amp; Rewind</button>
             <button class="ghost-btn feature-btn" type="button" id="openReminders"><span class="button-icon" aria-hidden="true">🔔</span><span data-i18n="reminders.open">Reminders</span><span class="reminder-badge" id="reminderBadge" hidden>0</span></button>
+            <button class="ghost-btn feature-btn" type="button" id="openWeeklySummary"><span class="button-icon" aria-hidden="true">▦</span><span data-i18n="weeklySummary.open">Weekly summary</span></button>
             <button class="ghost-btn" type="button" id="toggleWeekends" aria-pressed="false" data-i18n="actions.hideWeekends">Hide weekends</button>
             <button class="ghost-btn feature-btn share-btn" type="button" id="shareSchedule"><span class="button-icon" aria-hidden="true">↗</span><span data-i18n="sharing.share">Share</span></button>
             <button class="ghost-btn feature-btn" type="button" id="openVersionHistory"><span class="button-icon" aria-hidden="true">↶</span><span data-i18n="versions.open">Version history</span></button>
@@ -9990,7 +10285,8 @@
     </section>
 
     <section class="search-empty-state" id="searchEmptyState" aria-live="polite" hidden>
-      <div>
+      <span class="search-empty-icon" aria-hidden="true">⌕</span>
+      <div class="search-empty-copy">
         <h2 data-i18n="search.noResultsTitle">No matching events</h2>
         <p data-i18n="search.noResultsBody">Try another search or clear the active filters.</p>
       </div>
@@ -9998,7 +10294,7 @@
     </section>
 
     <div class="calendar-stage">
-      <aside class="mini-calendar" aria-label="Mini calendar" data-i18n-aria="miniCalendar.label">
+      <aside class="mini-calendar" id="calendarSide" aria-label="Mini calendar" data-i18n-aria="miniCalendar.label">
         <h2 class="calendar-sidebar-heading"><span aria-hidden="true">🗓️</span><span data-i18n="miniCalendar.sidebarTitle">Calendars</span></h2>
         <div class="mini-calendar-header">
           <h2 class="mini-calendar-title" id="miniCalendarTitle"></h2>
@@ -10589,6 +10885,29 @@
     </form>
   </dialog>
 
+  <dialog class="layout-dialog" id="layoutDialog" aria-labelledby="layoutDialogTitle">
+    <div class="modal-header">
+      <h2 id="layoutDialogTitle" data-i18n="layout.title">Your workspace</h2>
+      <button class="close-btn" type="button" id="closeLayoutEditor" aria-label="Close" data-i18n-aria="aria.close">×</button>
+    </div>
+    <div class="layout-editor-body">
+      <fieldset class="layout-fieldset">
+        <legend data-i18n="layout.spacing">Spacing</legend>
+        <div class="layout-segments" role="group" aria-label="Spacing" data-i18n-aria="layout.spacing">
+          <button type="button" data-layout-density="compact" data-i18n="layout.compact">Compact</button>
+          <button type="button" data-layout-density="comfortable" data-i18n="layout.comfortable">Comfortable</button>
+          <button type="button" data-layout-density="roomy" data-i18n="layout.roomy">Roomy</button>
+        </div>
+      </fieldset>
+      <label class="layout-slider-row" for="layoutTextSize"><span data-i18n="layout.textSize">Text size</span><output id="layoutTextValue" for="layoutTextSize"></output><input type="range" id="layoutTextSize" min="13" max="18" step="1"></label>
+      <label class="layout-setting-row"><span data-i18n="layout.sidePosition">Side calendar position</span><select id="layoutSidePosition"><option value="right" data-i18n="layout.right">Right</option><option value="left" data-i18n="layout.left">Left</option></select></label>
+      <label class="layout-slider-row" for="layoutSideWidth"><span data-i18n="layout.sideWidth">Side calendar width</span><output id="layoutSideValue" for="layoutSideWidth"></output><input type="range" id="layoutSideWidth" min="220" max="360" step="10"></label>
+      <label class="layout-setting-row"><span data-i18n="layout.weather">Day illustrations</span><input type="checkbox" id="layoutWeather"></label>
+      <label class="layout-setting-row"><span data-i18n="layout.details">Event details</span><input type="checkbox" id="layoutDetails"></label>
+      <div class="layout-editor-actions"><button class="ghost-btn" type="button" id="resetWorkspaceLayout" data-i18n="layout.reset">Reset layout</button><button class="primary-btn" type="button" id="doneLayoutEditor" data-i18n="actions.done">Done</button></div>
+    </div>
+  </dialog>
+
   <dialog class="settings-dialog" id="settingsDialog">
     <div class="modal-header">
       <h2 data-i18n="settings.title">Settings</h2>
@@ -10714,15 +11033,15 @@
       </div>
       <div class="appearance-choice-grid" role="radiogroup" aria-label="Appearance" data-i18n-aria="appearance.group">
         <button class="appearance-choice" type="button" data-appearance-choice="light" role="radio" aria-checked="false">
-          <span class="appearance-preview-card appearance-preview-light" aria-hidden="true"><span class="appearance-preview-date">31</span><span class="appearance-preview-control">＋ ───</span><span class="appearance-preview-lines"><i></i><i></i><i></i></span></span>
+          <span class="appearance-preview-card appearance-preview-light" aria-hidden="true"></span>
           <span class="appearance-choice-label" data-i18n="appearance.light">Light</span>
         </button>
         <button class="appearance-choice" type="button" data-appearance-choice="dark" role="radio" aria-checked="false">
-          <span class="appearance-preview-card appearance-preview-dark" aria-hidden="true"><span class="appearance-preview-date">31</span><span class="appearance-preview-control">＋ ───</span><span class="appearance-preview-lines"><i></i><i></i><i></i></span></span>
+          <span class="appearance-preview-card appearance-preview-dark" aria-hidden="true"></span>
           <span class="appearance-choice-label" data-i18n="appearance.dark">Dark</span>
         </button>
         <button class="appearance-choice" type="button" data-appearance-choice="device" role="radio" aria-checked="false">
-          <span class="appearance-preview-card appearance-preview-device" aria-hidden="true"><span class="appearance-preview-date">31</span><span class="appearance-preview-control">＋ ───</span><span class="appearance-preview-lines"><i></i><i></i><i></i></span></span>
+          <span class="appearance-preview-card appearance-preview-device" aria-hidden="true"></span>
           <span class="appearance-choice-label" data-i18n="appearance.device">Device default</span>
         </button>
       </div>
@@ -10809,6 +11128,25 @@
       <div class="welcome-back-actions">
         <button class="primary-btn" type="button" id="welcomeBackDone" data-i18n="actions.done">Done</button>
         <button class="ghost-btn" type="button" id="welcomeBackViewHistory" data-i18n="history.open">Activity history</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="insights-dialog weekly-summary-dialog" id="weeklySummaryDialog" aria-labelledby="weeklySummaryTitle">
+    <div class="modal-header">
+      <div><p class="eyebrow" data-i18n="weeklySummary.kicker">Your week ahead</p><h2 id="weeklySummaryTitle" data-i18n="weeklySummary.title">This week at a glance</h2></div>
+      <button class="close-btn" type="button" id="closeWeeklySummary" aria-label="Close" data-i18n-aria="aria.close">×</button>
+    </div>
+    <div class="weekly-summary-body">
+      <p class="weekly-summary-range" id="weeklySummaryRange"></p>
+      <div class="weekly-summary-stats" id="weeklySummaryStats" aria-label="Weekly schedule summary" data-i18n-aria="weeklySummary.statsLabel"></div>
+      <section class="weekly-summary-section" aria-labelledby="weeklySummaryUpcomingTitle">
+        <div class="weekly-summary-section-heading"><h3 id="weeklySummaryUpcomingTitle" data-i18n="weeklySummary.upcoming">Coming up this week</h3><span data-i18n="weeklySummary.upcomingNote">Your next five plans</span></div>
+        <div class="weekly-summary-events" id="weeklySummaryEvents"></div>
+      </section>
+      <div class="weekly-summary-actions">
+        <button class="ghost-btn" type="button" id="weeklySummaryDone" data-i18n="actions.done">Done</button>
+        <button class="primary-btn" type="button" id="weeklySummaryViewCalendar" data-i18n="weeklySummary.viewCalendar">View this week</button>
       </div>
     </div>
   </dialog>
@@ -11104,6 +11442,22 @@
         "settings.appearance": "Appearance",
         "settings.appearanceMode": "Appearance mode",
         "settings.darkMode": "Dark mode",
+        "layout.customize": "Customize",
+        "layout.title": "Your workspace",
+        "layout.spacing": "Spacing",
+        "layout.compact": "Compact",
+        "layout.comfortable": "Comfortable",
+        "layout.roomy": "Roomy",
+        "layout.textSize": "Text size",
+        "layout.sidePosition": "Side calendar position",
+        "layout.right": "Right",
+        "layout.left": "Left",
+        "layout.sideWidth": "Side calendar width",
+        "layout.weather": "Day illustrations",
+        "layout.details": "Event details",
+        "layout.reset": "Reset layout",
+        "layout.hideSection": "Hide {name}",
+        "layout.showSection": "Show {name}",
         "appearance.kicker": "Choose your appearance",
         "appearance.title": "How should KidsSync look?",
         "appearance.body": "Choose a preference to start. You can change it later in Settings.",
@@ -11455,6 +11809,14 @@
         "welcomeBack.intro": "Here’s what changed in your family calendar while you were away.",
         "welcomeBack.empty": "No new updates from other family members.",
         "welcomeBack.actorFallback": "A family member",
+        "weeklySummary.kicker": "Your week ahead",
+        "weeklySummary.open": "Weekly summary",
+        "weeklySummary.title": "This week at a glance",
+        "weeklySummary.statsLabel": "Weekly schedule summary",
+        "weeklySummary.upcoming": "Coming up this week",
+        "weeklySummary.upcomingNote": "Your next five plans",
+        "weeklySummary.noEvents": "Nothing else is scheduled for this week.",
+        "weeklySummary.viewCalendar": "View this week",
         "map.eyebrow": "Explore nearby",
         "map.title": "Family map",
         "map.intro": "Find restaurants, parks, activities, and useful places for your family.",
@@ -12025,6 +12387,22 @@
         "settings.appearance": "外观",
         "settings.appearanceMode": "外观模式",
         "settings.darkMode": "深色模式",
+        "layout.customize": "自定义",
+        "layout.title": "你的工作区",
+        "layout.spacing": "间距",
+        "layout.compact": "紧凑",
+        "layout.comfortable": "舒适",
+        "layout.roomy": "宽松",
+        "layout.textSize": "文字大小",
+        "layout.sidePosition": "侧边日历位置",
+        "layout.right": "右侧",
+        "layout.left": "左侧",
+        "layout.sideWidth": "侧边日历宽度",
+        "layout.weather": "日期插图",
+        "layout.details": "事件详情",
+        "layout.reset": "重置布局",
+        "layout.hideSection": "隐藏{name}",
+        "layout.showSection": "显示{name}",
         "appearance.kicker": "选择外观",
         "appearance.title": "你希望 KidsSync 使用哪种外观？",
         "appearance.body": "先选择一种偏好。之后可以在设置中更改。",
@@ -12362,6 +12740,14 @@
         "welcomeBack.intro": "这是你离开期间家庭日历的更新。",
         "welcomeBack.empty": "没有其他家庭成员的新更新。",
         "welcomeBack.actorFallback": "家庭成员",
+        "weeklySummary.kicker": "本周安排",
+        "weeklySummary.open": "每周摘要",
+        "weeklySummary.title": "本周概览",
+        "weeklySummary.statsLabel": "每周日程摘要",
+        "weeklySummary.upcoming": "本周即将开始",
+        "weeklySummary.upcomingNote": "接下来的五项安排",
+        "weeklySummary.noEvents": "本周没有其他安排。",
+        "weeklySummary.viewCalendar": "查看本周",
         "map.eyebrow": "探索附近",
         "map.title": "家庭地图",
         "map.intro": "查找适合家人的餐厅、公园、活动和实用地点。",
@@ -12908,11 +13294,11 @@
       state.activities = loadActivities();
       state.visibleKids = new Set(kidProfiles.map(kid => kid.name));
       state.showWeekends = userSettings.showWeekends;
-      currentView = userSettings.defaultView;
+      currentView = loadCalendarView();
       applySettings();
       populateFormOptions();
-      renderAll();
-      scheduleSmartCalendarFocus();
+      jumpToToday();
+      queueWeeklySummary(500);
     }
 
     if (localStorage.getItem(LANGUAGE_STORAGE_KEY) === null) {
@@ -13776,7 +14162,7 @@
       { key: "saturday", labelKey: "day.saturday", weather: "☀️", theme: "green" },
       { key: "sunday", labelKey: "day.sunday", weather: "🌤️", theme: "blue" }
     ];
-    const scheduleStartMinutes = 1 * 60;
+    const scheduleStartMinutes = 0;
     // Show the full day so early flights and midnight plans fit naturally.
     const scheduleEndMinutes = 24 * 60;
     const scheduleDurationMinutes = scheduleEndMinutes - scheduleStartMinutes;
@@ -13796,7 +14182,8 @@
       defaultEventDuration: 30,
       showWeekends: true,
       focusFirstEvent: true,
-      calendarZoom: 1
+      calendarZoom: 1,
+      weeklySummarySeenWeek: ""
     };
 
     const palettes = {
@@ -13902,7 +14289,8 @@
     let currentWeekStart = getMonday(selectedDate);
     let currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
     let miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-    let currentView = userSettings.defaultView;
+    let currentView = loadCalendarView();
+    let lastCalendarToday = dateKey(selectedDate);
 
     const state = {
       visibleKids: new Set(kidProfiles.map(kid => kid.name)),
@@ -13944,6 +14332,7 @@
     const listsDialog = document.getElementById("listsDialog");
     const activityHistoryDialog = document.getElementById("activityHistoryDialog");
     const welcomeBackDialog = document.getElementById("welcomeBackDialog");
+    const weeklySummaryDialog = document.getElementById("weeklySummaryDialog");
     const versionHistoryDialog = document.getElementById("versionHistoryDialog");
     const sidebarHelpDialog = document.getElementById("sidebarHelpDialog");
     const form = document.getElementById("activityForm");
@@ -14058,6 +14447,7 @@
       localStorage.setItem(LANGUAGE_STORAGE_KEY, currentLanguage);
       trackProductEvent("Language Changed", { language: currentLanguage });
       applyStaticTranslations();
+      renderWorkspaceVisibility();
       renderSaveStatus();
       updateCloudAvailability();
       renderCloudSettings();
@@ -14233,6 +14623,24 @@
       });
     }
 
+    function positionSidebarNav() {
+      const menu = document.getElementById("sidebarMenu");
+      if (!menu.open) return;
+      const nav = menu.querySelector(".sidebar-nav");
+      const anchor = menu.querySelector("summary").getBoundingClientRect();
+      const viewport = window.visualViewport;
+      const viewportTop = viewport?.offsetTop || 0;
+      const viewportLeft = viewport?.offsetLeft || 0;
+      const viewportHeight = viewport?.height || window.innerHeight;
+      const viewportWidth = viewport?.width || window.innerWidth;
+      // Keep the menu reachable even when its trigger scrolls out of view.
+      const top = Math.max(viewportTop + 8, Math.min(anchor.bottom + 8, viewportTop + viewportHeight - 152));
+      const left = Math.max(viewportLeft + 8, Math.min(anchor.left, viewportLeft + viewportWidth - nav.offsetWidth - 8));
+      nav.style.setProperty("--sidebar-nav-top", `${top}px`);
+      nav.style.setProperty("--sidebar-nav-left", `${left}px`);
+      nav.style.setProperty("--sidebar-nav-max-height", `${Math.max(0, viewportTop + viewportHeight - top - 8)}px`);
+    }
+
     function showDashboardPage({ scroll = true } = {}) {
       const appShell = document.getElementById("appShell");
       appShell.classList.add("is-dashboard-view");
@@ -14277,23 +14685,32 @@
       if (action === "calendar") {
         showCalendarPage();
         state.eventFilter = "all";
+        state.searchQuery = "";
+        scheduleSearch.value = "";
         setSidebarActive(action);
-        activateCalendarView("week", true);
-        weekSchedule.scrollIntoView({ behavior: userSettings.reduceMotion ? "auto" : "smooth", block: "start" });
+        currentView = loadCalendarView();
+        jumpToToday();
+        const view = currentView === "month" ? monthView : currentView === "today" ? todayView
+          : window.matchMedia("(max-width: 740px)").matches ? mobileAgenda : weekSchedule;
+        view.scrollIntoView({ behavior: "auto", block: "start" });
         return;
       }
       if (action === "holidays") {
         showCalendarPage();
         state.eventFilter = "holidays";
+        state.searchQuery = "";
+        scheduleSearch.value = "";
         setSidebarActive(action);
-        activateCalendarView("month", true);
+        activateCalendarView("month", true, { remember: false });
         return;
       }
       if (action === "special-days") {
         showCalendarPage();
         state.eventFilter = "important";
+        state.searchQuery = "";
+        scheduleSearch.value = "";
         setSidebarActive(action);
-        activateCalendarView("month", true);
+        activateCalendarView("month", true, { remember: false });
         return;
       }
       if (action === "help") {
@@ -14547,6 +14964,113 @@
       welcomeBackDialog.showModal();
     }
 
+    function weeklySummaryWeekKey() {
+      return dateKey(getMonday(new Date()));
+    }
+
+    function hasSeenWeeklySummary() {
+      return Boolean(activeAccount && userSettings.weeklySummarySeenWeek === weeklySummaryWeekKey());
+    }
+
+    function markWeeklySummarySeen() {
+      if (!activeAccount || userSettings.weeklySummarySeenWeek === weeklySummaryWeekKey()) return;
+      userSettings.weeklySummarySeenWeek = weeklySummaryWeekKey();
+      saveSettings();
+    }
+
+    function weeklySummaryData() {
+      const now = new Date();
+      const monday = getMonday(now);
+      const dayLoads = days.map((day, index) => {
+        const date = addDays(monday, index);
+        const key = dateKey(date);
+        const saved = state.activities
+          .filter(activity => activityOccursOn(activity, date))
+          .map(activity => ({ ...activity, day: day.key, occurrenceDate: key }));
+        const events = [...saved, ...builtInHolidayActivities(date)]
+          .filter(activity => activityStatus(activity) !== "cancelled");
+        return {
+          date,
+          events,
+          count: events.length,
+          duration: events.reduce((total, activity) => total + eventDurationMinutes(activity), 0)
+        };
+      });
+      const events = dayLoads.flatMap(item => item.events);
+      const busiest = dayLoads.reduce((current, item) => item.count > current.count
+        || (item.count === current.count && item.duration > current.duration) ? item : current, dayLoads[0]);
+      const upcoming = events
+        .filter(activity => occurrenceEndDateTime(activity)?.getTime() >= now.getTime())
+        .sort((first, second) => occurrenceDateTime(first) - occurrenceDateTime(second));
+      return {
+        monday,
+        sunday: addDays(monday, 6),
+        events,
+        upcoming,
+        busiest,
+        deadlines: events.filter(activity => activity.eventType === "deadline").length,
+        conflicts: findConflictPairs(events).length
+      };
+    }
+
+    function renderWeeklySummary() {
+      const summary = weeklySummaryData();
+      const locale = currentLanguage === "zh" ? "zh-CN" : "en-US";
+      const rangeStart = summary.monday.toLocaleDateString(locale, { month: "short", day: "numeric" });
+      const rangeEnd = summary.sunday.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" });
+      document.getElementById("weeklySummaryRange").textContent = `${rangeStart} – ${rangeEnd}`;
+      const busiestLabel = summary.busiest?.count
+        ? summary.busiest.date.toLocaleDateString(locale, { weekday: "short" })
+        : t("dashboard.none");
+      const stats = [
+        { key: "dashboard.thisWeek", value: summary.events.length },
+        { key: "dashboard.busiest", value: busiestLabel },
+        { key: "dashboard.deadlineCount", value: summary.deadlines, alert: summary.deadlines > 0 },
+        { key: "dashboard.conflicts", value: summary.conflicts, alert: summary.conflicts > 0 }
+      ];
+      document.getElementById("weeklySummaryStats").innerHTML = stats.map(item => `
+        <div class="weekly-summary-stat${item.alert ? " is-alert" : ""}"><span>${escapeHtml(t(item.key))}</span><strong>${escapeHtml(item.value)}</strong></div>
+      `).join("");
+
+      const list = document.getElementById("weeklySummaryEvents");
+      if (!summary.upcoming.length) {
+        list.innerHTML = `<p class="weekly-summary-empty">${escapeHtml(t("weeklySummary.noEvents"))}</p>`;
+        return;
+      }
+      list.innerHTML = summary.upcoming.slice(0, 5).map(activity => {
+        const date = parseDateKey(activity.occurrenceDate || activity.startDate);
+        const month = date.toLocaleDateString(locale, { month: "short" });
+        const day = date.toLocaleDateString(locale, { day: "numeric" });
+        const time = activity.allDay ? t("calendar.allDay") : `${formatTimeLabel(minutes(activity.start))} – ${formatTimeLabel(minutes(activity.end || activity.start))}`;
+        const details = [displayChild(activity), activity.location].filter(Boolean).join(" · ");
+        return `<article class="weekly-summary-event"><span class="weekly-summary-event-date">${escapeHtml(month)}<strong>${escapeHtml(day)}</strong></span><span class="weekly-summary-event-icon" aria-hidden="true">${escapeHtml(displayIcon(activity))}</span><span class="weekly-summary-event-copy"><strong>${escapeHtml(activityCompactTitle(activity))}</strong><span>${escapeHtml(details)}</span></span><span class="weekly-summary-event-time">${escapeHtml(time)}</span></article>`;
+      }).join("");
+    }
+
+    function openWeeklySummary() {
+      renderWeeklySummary();
+      if (!weeklySummaryDialog.open) weeklySummaryDialog.showModal();
+    }
+
+    function openWeeklySummaryIfNeeded() {
+      if (!activeAccount || !weeklySummaryDialog || weeklySummaryDialog.open || hasSeenWeeklySummary()) return;
+      if (document.getElementById("appShell").hidden || document.querySelector("dialog[open]")) {
+        queueWeeklySummary(900);
+        return;
+      }
+      openWeeklySummary();
+    }
+
+    let weeklySummaryTimer = null;
+    function queueWeeklySummary(delay = 600) {
+      window.clearTimeout(weeklySummaryTimer);
+      if (!activeAccount || hasSeenWeeklySummary()) return;
+      weeklySummaryTimer = window.setTimeout(() => {
+        weeklySummaryTimer = null;
+        openWeeklySummaryIfNeeded();
+      }, delay);
+    }
+
     function hasPendingCloudSave() {
       const key = cloudPendingKey();
       return Boolean(key && localStorage.getItem(key));
@@ -14562,7 +15086,8 @@
       const calendarData = {};
       calendars.forEach(calendar => {
         const read = name => {
-          try { return JSON.parse(localStorage.getItem(calendarStorageKey(name, calendar.id))); } catch { return null; }
+          const stored = localStorage.getItem(calendarStorageKey(name, calendar.id));
+          try { return JSON.parse(stored); } catch { return name === "view" ? stored : null; }
         };
         calendarData[calendar.id] = {
           kids: calendar.id === currentCalendarId ? kidProfiles.map(kid => ({ ...kid })) : (read("kids") || []),
@@ -14571,7 +15096,7 @@
           history: calendar.id === currentCalendarId ? scheduleHistory.slice(0, 20).map(entry => ({ ...entry })) : (read("history") || []),
           audit: calendar.id === currentCalendarId ? activityAudit.slice(0, 100).map(entry => ({ ...entry })) : (read("audit") || []),
           settings: calendar.id === currentCalendarId ? { ...userSettings } : (read("settings") || {}),
-          view: calendar.id === currentCalendarId ? currentView : (read("view") || "week")
+          view: calendar.id === currentCalendarId ? loadCalendarView() : (read("view") || read("settings")?.defaultView || "week")
         };
       });
       return {
@@ -14586,7 +15111,7 @@
         history: scheduleHistory.slice(0, 20).map(entry => ({ ...entry })),
         audit: activityAudit.slice(0, 100).map(entry => ({ ...entry })),
         settings: { ...userSettings },
-        view: currentView
+        view: loadCalendarView()
       };
     }
 
@@ -14705,9 +15230,11 @@
           userSettings = loadSettings();
           state.showWeekends = userSettings.showWeekends;
         }
-        if (["today", "week", "month"].includes(snapshot.view)) {
+        if (["today", "week", "four", "month"].includes(snapshot.view)) {
           currentView = snapshot.view;
           localStorage.setItem(scheduleStorageKey("view"), currentView);
+        } else {
+          currentView = loadCalendarView();
         }
 
         state.stackFront.clear();
@@ -14715,6 +15242,7 @@
         updateAccountIdentity();
         populateFormOptions();
         renderAll();
+        scheduleSmartCalendarFocus({ currentTime: true });
         startNotificationChecks();
       } finally {
         cloudHydrating = false;
@@ -14764,6 +15292,7 @@
       renderCloudSettings();
       if (!cloudClient) {
         setCloudSaveState(activeAccount?.provider === "supabase" ? "syncFailed" : "device");
+        if (activeAccount) queueWeeklySummary(700);
         return;
       }
 
@@ -14805,9 +15334,11 @@
         updateAccountIdentity();
         await hydrateCloudSchedule();
         await refreshInvitations();
+        queueWeeklySummary(500);
       } catch (syncError) {
         reportClientError(syncError, "cloud-initialization");
         setCloudSaveState(navigator.onLine ? "syncFailed" : "offline");
+        queueWeeklySummary(700);
       }
     }
 
@@ -14983,10 +15514,23 @@
         settings.calendarZoom = CALENDAR_ZOOM_LEVELS.includes(Number(settings.calendarZoom))
           ? Number(settings.calendarZoom)
           : DEFAULT_SETTINGS.calendarZoom;
+        settings.weeklySummarySeenWeek = typeof settings.weeklySummarySeenWeek === "string"
+          ? settings.weeklySummarySeenWeek
+          : "";
         return settings;
       } catch {
         return { ...DEFAULT_SETTINGS };
       }
+    }
+
+    function loadCalendarView() {
+      try {
+        const stored = localStorage.getItem(scheduleStorageKey("view"));
+        let view = stored;
+        try { view = JSON.parse(stored); } catch {}
+        if (["today", "week", "four", "month"].includes(view)) return view;
+      } catch {}
+      return userSettings.defaultView;
     }
 
     function saveSettings() {
@@ -15109,6 +15653,8 @@
         .filter(holiday => dateKey(holiday.date) === key)
         .map(holiday => ({
           id: `builtin-holiday-${key}`,
+          day: days[(date.getDay() + 6) % 7].key,
+          occurrenceDate: key,
           child: FAMILY_CHILD,
           startDate: key,
           eventType: "holiday",
@@ -15847,6 +16393,14 @@
 
     function updateCurrentTimeMarkers() {
       const now = new Date();
+      const today = dateKey(now);
+      if (today !== lastCalendarToday) {
+        const wasFollowingToday = dateKey(selectedDate) === lastCalendarToday;
+        lastCalendarToday = today;
+        if (wasFollowingToday) jumpToToday();
+        else renderAll();
+        return;
+      }
       const currentMinute = now.getHours() * 60 + now.getMinutes();
       const isVisible = currentMinute >= scheduleStartMinutes && currentMinute <= scheduleEndMinutes;
       document.querySelectorAll("[data-current-time-marker]").forEach(marker => {
@@ -15889,6 +16443,7 @@
           item.style.setProperty("--event-line", conflicts.has(occurrenceKey(activity)) ? "#b44352" : colors.line);
           item.style.setProperty("--event-ink", colors.ink);
           item.dataset.occurrenceKey = occurrenceKey(activity);
+          if (!activity.allDay && activity.end) item.dataset.endMinute = String(minutes(activity.end));
           item.innerHTML = eventCardMarkup(activity, {
             badge: conflicts.has(occurrenceKey(activity)) ? t("calendar.conflict") : "",
             badgeClass: "is-conflict",
@@ -15999,6 +16554,7 @@
           const event = document.createElement("button");
           event.type = "button";
           event.className = `today-event${isNext ? " is-next" : ""}${isConflict ? " conflict" : ""}`;
+          if (!activity.allDay && activity.end) event.dataset.endMinute = String(minutes(activity.end));
           event.style.setProperty("--event-bg", colors.soft);
           event.style.setProperty("--event-line", colors.line);
           event.style.setProperty("--event-ink", colors.ink);
@@ -16289,7 +16845,8 @@
           currentWeekStart = getMonday(selectedDate);
           currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
           miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-          activateCalendarView("week", true);
+          const isFilteredCalendar = state.eventFilter === "holidays" || state.eventFilter === "important";
+          activateCalendarView(isFilteredCalendar ? "today" : "week", true);
         });
         miniGrid.appendChild(button);
       });
@@ -16309,13 +16866,13 @@
       });
     }
 
-    function activateCalendarView(view, preserveDate = false) {
+    function activateCalendarView(view, preserveDate = false, { remember = true } = {}) {
       currentView = ["today", "week", "four", "month"].includes(view) ? view : "week";
       if (currentView === "today" && !preserveDate) selectedDate = new Date();
       if (currentView === "week" || currentView === "four") currentWeekStart = getMonday(selectedDate);
       if (currentView === "month") currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-      persistScheduleData("view", currentView);
+      if (remember) persistScheduleData("view", currentView);
       renderAll();
       scheduleSmartCalendarFocus();
     }
@@ -18911,10 +19468,25 @@
       return { minute: bestMinute, activity };
     }
 
-    function scrollWeekToSmartTime() {
+    function scrollWeekToSmartTime({ currentTime = false } = {}) {
+      const now = new Date();
+      const currentMinute = now.getHours() * 60 + now.getMinutes();
+      if (currentTime && currentView === "today") {
+        const upcoming = [...todayList.querySelectorAll("[data-end-minute]")]
+          .find(item => Number(item.dataset.endMinute) > currentMinute);
+        upcoming?.scrollIntoView({ behavior: "auto", block: "center" });
+        return;
+      }
       if (!["week", "four"].includes(currentView)) return;
-      const focus = smartCalendarFocusTarget();
+      const focus = currentTime ? { minute: currentMinute, activity: null } : smartCalendarFocusTarget();
       if (window.matchMedia("(max-width: 740px)").matches) {
+        if (currentTime) {
+          const today = mobileAgenda.querySelector(".day-card.is-today");
+          const upcoming = [...(today?.querySelectorAll("[data-end-minute]") || [])]
+            .find(item => Number(item.dataset.endMinute) > currentMinute);
+          (upcoming || today)?.scrollIntoView({ behavior: "auto", block: "start" });
+          return;
+        }
         if (!focus.activity) return;
         const key = occurrenceKey(focus.activity);
         const target = [...mobileAgenda.querySelectorAll("[data-occurrence-key]")]
@@ -18927,29 +19499,37 @@
       }
 
       const timeline = grid.querySelector(".time-column");
+      const currentMarker = grid.querySelector("[data-current-time-marker]");
+      if (currentTime && !currentMarker) return;
       const headerHeight = (grid.querySelector(".time-head")?.offsetHeight || 70)
         + (grid.querySelector(".all-day-head")?.offsetHeight || 52);
       const timelineHeight = timeline?.offsetHeight || scheduleDurationMinutes * 2 * userSettings.calendarZoom;
       const focusTop = headerHeight + ((focus.minute - scheduleStartMinutes) / scheduleDurationMinutes) * timelineHeight;
-      const context = Math.min(180, Math.max(80, weekSchedule.clientHeight * .24));
+      const context = currentTime ? headerHeight + Math.max(24, (weekSchedule.clientHeight - headerHeight) * .3)
+        : Math.min(180, Math.max(80, weekSchedule.clientHeight * .24));
       const maxScroll = Math.max(0, weekSchedule.scrollHeight - weekSchedule.clientHeight);
+      const column = currentTime ? currentMarker?.parentElement.getBoundingClientRect() : null;
+      const bounds = weekSchedule.getBoundingClientRect();
+      const left = column && (column.left < bounds.left || column.right > bounds.right)
+        ? weekSchedule.scrollLeft + column.left - bounds.left - Math.max(0, (weekSchedule.clientWidth - column.width) / 2)
+        : weekSchedule.scrollLeft;
       weekSchedule.scrollTo({
         top: Math.min(maxScroll, Math.max(0, focusTop - context)),
-        left: weekSchedule.scrollLeft,
-        behavior: userSettings.reduceMotion ? "auto" : "smooth"
+        left,
+        behavior: currentTime || userSettings.reduceMotion ? "auto" : "smooth"
       });
     }
 
     let smartCalendarFocusFrame = 0;
-    function scheduleSmartCalendarFocus() {
+    function scheduleSmartCalendarFocus({ currentTime = false } = {}) {
       const appShell = document.getElementById("appShell");
-      if (!userSettings.focusFirstEvent || !["week", "four"].includes(currentView)
+      if ((!currentTime && !userSettings.focusFirstEvent) || !["week", "four", ...(currentTime ? ["today"] : [])].includes(currentView)
         || appShell.hidden || appShell.classList.contains("is-dashboard-view")) return;
       window.cancelAnimationFrame(smartCalendarFocusFrame);
       smartCalendarFocusFrame = window.requestAnimationFrame(() => {
         smartCalendarFocusFrame = window.requestAnimationFrame(() => {
           smartCalendarFocusFrame = 0;
-          scrollWeekToSmartTime();
+          scrollWeekToSmartTime({ currentTime });
         });
       });
     }
@@ -18971,11 +19551,17 @@
 
     function jumpToToday() {
       selectedDate = new Date();
+      lastCalendarToday = dateKey(selectedDate);
       currentWeekStart = getMonday(selectedDate);
       currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      // Keep the saved view preference, but show today when its column is hidden.
+      if (["week", "four"].includes(currentView) && !visibleWeekDays().some(day =>
+        isSameDate(addDays(currentWeekStart, days.findIndex(item => item.key === day.key)), selectedDate))) {
+        currentView = "today";
+      }
       renderAll();
-      scheduleSmartCalendarFocus();
+      scheduleSmartCalendarFocus({ currentTime: true });
     }
 
     document.querySelectorAll("[data-auth-view]").forEach(button => {
@@ -19035,6 +19621,15 @@
     document.querySelectorAll("[data-sidebar-action]").forEach(button => {
       button.addEventListener("click", () => handleSidebarAction(button.dataset.sidebarAction));
     });
+    document.getElementById("sidebarMenu").addEventListener("toggle", event => {
+      if (!event.currentTarget.open) return;
+      event.currentTarget.querySelector(".sidebar-nav").scrollTop = 0;
+      positionSidebarNav();
+    });
+    window.addEventListener("resize", positionSidebarNav);
+    window.addEventListener("scroll", positionSidebarNav, { passive: true });
+    window.visualViewport?.addEventListener("resize", positionSidebarNav);
+    window.visualViewport?.addEventListener("scroll", positionSidebarNav);
     document.getElementById("focusScheduleSearch").addEventListener("click", () => {
       showCalendarPage();
       setSidebarActive("calendar");
@@ -19263,6 +19858,10 @@
       renderMapResults(button.dataset.mapCategory);
     }));
     document.getElementById("openReminders").addEventListener("click", openRemindersDialog);
+    document.getElementById("openWeeklySummary").addEventListener("click", () => {
+      document.getElementById("moreActions").open = false;
+      openWeeklySummary();
+    });
     document.getElementById("closeReminders").addEventListener("click", () => remindersDialog.close());
     document.getElementById("closeLists").addEventListener("click", () => listsDialog.close());
     listsDialog.addEventListener("close", () => setSidebarActive(dashboardPage.hidden ? "calendar" : "dashboard"));
@@ -19285,6 +19884,22 @@
       welcomeBackDialog.close();
       renderActivityHistory();
       activityHistoryDialog.showModal();
+    });
+    const closeWeeklySummary = () => {
+      markWeeklySummarySeen();
+      weeklySummaryDialog.close();
+    };
+    document.getElementById("closeWeeklySummary").addEventListener("click", closeWeeklySummary);
+    document.getElementById("weeklySummaryDone").addEventListener("click", closeWeeklySummary);
+    weeklySummaryDialog.addEventListener("close", markWeeklySummarySeen);
+    document.getElementById("weeklySummaryViewCalendar").addEventListener("click", () => {
+      markWeeklySummarySeen();
+      weeklySummaryDialog.close();
+      selectedDate = new Date();
+      showCalendarPage();
+      setSidebarActive("calendar");
+      activateCalendarView("week", true);
+      weekSchedule.scrollIntoView({ behavior: userSettings.reduceMotion ? "auto" : "smooth", block: "start" });
     });
     document.getElementById("openVersionHistory").addEventListener("click", () => {
       document.getElementById("moreActions").open = false;
@@ -19340,6 +19955,7 @@
     });
     document.getElementById("defaultView").addEventListener("change", event => {
       saveSetting("defaultView", event.currentTarget.value);
+      activateCalendarView(event.currentTarget.value, true);
     });
     document.getElementById("defaultEventDuration").addEventListener("change", event => {
       saveSetting("defaultEventDuration", Number(event.currentTarget.value));
@@ -19376,7 +19992,7 @@
     });
     document.querySelectorAll("[data-view]").forEach(button => {
       button.addEventListener("click", () => {
-        setSidebarActive("calendar");
+        setSidebarActive(state.eventFilter === "holidays" ? "holidays" : state.eventFilter === "important" ? "special-days" : "calendar");
         document.getElementById("calendarViewMenu").open = false;
         activateCalendarView(button.dataset.view);
       });
@@ -19488,21 +20104,115 @@
       });
       renderKidEditor();
     });
+    const workspacePanels = {
+      header: document.getElementById("calendarHeader"),
+      account: document.getElementById("calendarAccount"),
+      controls: document.getElementById("calendarControls"),
+      side: document.getElementById("calendarSide")
+    };
+    const hiddenWorkspacePanels = new Set();
+    let workspaceFocusSnapshot = null;
+    const workspacePanelLabels = {
+      en: { header: "Header", account: "Account", controls: "Controls", side: "Side calendar", focus: "Focus", restore: "Restore panels", hide: "Hide", show: "Show", group: "Visible panels" },
+      zh: { header: "顶部栏", account: "账户", controls: "工具栏", side: "侧边日历", focus: "专注", restore: "恢复面板", hide: "隐藏", show: "显示", group: "可见面板" }
+    };
+
+    function resizeCalendarWorkspace() {
+      const calendarMain = document.querySelector(".calendar-stage-main");
+      const available = Math.max(240, window.innerHeight - calendarMain.getBoundingClientRect().top - 12);
+      document.getElementById("appShell").style.setProperty("--calendar-available-height", `${available}px`);
+    }
+
+    function renderWorkspaceVisibility() {
+      const labels = workspacePanelLabels[currentLanguage] || workspacePanelLabels.en;
+      document.getElementById("workspaceVisibility").setAttribute("aria-label", labels.group);
+      document.querySelectorAll("[data-panel-toggle]").forEach(button => {
+        const name = button.dataset.panelToggle;
+        const visible = !hiddenWorkspacePanels.has(name) && !(name === "account" && hiddenWorkspacePanels.has("header"));
+        button.setAttribute("aria-expanded", String(visible));
+        button.setAttribute("aria-label", `${visible ? labels.hide : labels.show} ${labels[name]}`);
+        button.title = `${visible ? labels.hide : labels.show} ${labels[name]}`;
+        button.children[0].textContent = visible ? "−" : "+";
+        button.children[1].textContent = labels[name];
+      });
+      const focusButton = document.getElementById("toggleCalendarFocus");
+      const focused = hiddenWorkspacePanels.size === Object.keys(workspacePanels).length;
+      focusButton.setAttribute("aria-pressed", String(focused));
+      focusButton.children[1].textContent = focused ? labels.restore : labels.focus;
+    }
+
+    function applyWorkspaceVisibility() {
+      const shell = document.getElementById("appShell");
+      const main = document.querySelector(".calendar-stage-main");
+      const before = main.getBoundingClientRect();
+      const newlyVisible = Object.entries(workspacePanels).filter(([name]) => shell.classList.contains(`panels-hide-${name}`) && !hiddenWorkspacePanels.has(name));
+      main.getAnimations().forEach(animation => animation.cancel());
+      Object.keys(workspacePanels).forEach(name => shell.classList.toggle(`panels-hide-${name}`, hiddenWorkspacePanels.has(name)));
+      shell.classList.toggle("has-minimized-panels", hiddenWorkspacePanels.size > 0);
+      renderWorkspaceVisibility();
+      resizeCalendarWorkspace();
+      const after = main.getBoundingClientRect();
+      if (!userSettings.reduceMotion && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        // Animate the reflow itself so the calendar immediately owns the freed space.
+        if (before.width && after.width) main.animate([
+          { transformOrigin: "top left", transform: `translate(${before.x - after.x}px, ${before.y - after.y}px) scale(${before.width / after.width}, ${before.height / after.height || 1})` },
+          { transformOrigin: "top left", transform: "none" }
+        ], { duration: 240, easing: "cubic-bezier(.2,.7,.2,1)" });
+        newlyVisible.forEach(([, panel]) => panel.animate([{ opacity: 0, transform: "translateY(-6px)" }, { opacity: 1, transform: "none" }], { duration: 200, easing: "ease-out" }));
+      }
+    }
+
+    document.querySelectorAll("[data-panel-toggle]").forEach(button => button.addEventListener("click", () => {
+      const name = button.dataset.panelToggle;
+      if (name === "account" && hiddenWorkspacePanels.has("header")) {
+        hiddenWorkspacePanels.delete("account");
+        hiddenWorkspacePanels.delete("header");
+      } else if (hiddenWorkspacePanels.has(name)) {
+        hiddenWorkspacePanels.delete(name);
+        if (name === "account") hiddenWorkspacePanels.delete("header");
+      }
+      else hiddenWorkspacePanels.add(name);
+      applyWorkspaceVisibility();
+    }));
+    document.getElementById("toggleCalendarFocus").addEventListener("click", () => {
+      if (hiddenWorkspacePanels.size === Object.keys(workspacePanels).length) {
+        hiddenWorkspacePanels.clear();
+        (workspaceFocusSnapshot || []).forEach(name => hiddenWorkspacePanels.add(name));
+        workspaceFocusSnapshot = null;
+      } else {
+        workspaceFocusSnapshot = [...hiddenWorkspacePanels];
+        Object.keys(workspacePanels).forEach(name => hiddenWorkspacePanels.add(name));
+      }
+      applyWorkspaceVisibility();
+    });
+    window.addEventListener("resize", resizeCalendarWorkspace);
+    renderWorkspaceVisibility();
+
     document.getElementById("prevWeek").addEventListener("click", () => {
       navigateCalendar(-1);
     });
     document.getElementById("nextWeek").addEventListener("click", () => {
       navigateCalendar(1);
     });
-    document.getElementById("jumpToday").addEventListener("click", jumpToToday);
-    document.getElementById("miniCalendarPrevious").addEventListener("click", () => {
-      miniCalendarMonth = new Date(miniCalendarMonth.getFullYear(), miniCalendarMonth.getMonth() - 1, 1);
-      renderMiniCalendar();
+    document.getElementById("jumpToday").addEventListener("click", () => {
+      if (document.getElementById("appShell").classList.contains("is-dashboard-view")) currentView = loadCalendarView();
+      showCalendarPage();
+      setSidebarActive("calendar");
+      jumpToToday();
     });
-    document.getElementById("miniCalendarNext").addEventListener("click", () => {
-      miniCalendarMonth = new Date(miniCalendarMonth.getFullYear(), miniCalendarMonth.getMonth() + 1, 1);
-      renderMiniCalendar();
-    });
+    function navigateMiniCalendar(direction) {
+      miniCalendarMonth = new Date(miniCalendarMonth.getFullYear(), miniCalendarMonth.getMonth() + direction, 1);
+      if (currentView === "month") {
+        selectedDate = new Date(miniCalendarMonth);
+        currentMonthStart = new Date(miniCalendarMonth);
+        currentWeekStart = getMonday(selectedDate);
+        renderAll();
+      } else {
+        renderMiniCalendar();
+      }
+    }
+    document.getElementById("miniCalendarPrevious").addEventListener("click", () => navigateMiniCalendar(-1));
+    document.getElementById("miniCalendarNext").addEventListener("click", () => navigateMiniCalendar(1));
     document.getElementById("miniAddActivity").addEventListener("click", () => document.getElementById("addActivity").click());
     document.getElementById("miniOpenDashboard").addEventListener("click", () => document.getElementById("openDashboard").click());
     document.getElementById("miniOpenReminders").addEventListener("click", () => document.getElementById("openReminders").click());
@@ -19645,6 +20355,7 @@
       if (activeAccount?.provider === "supabase") setCloudSaveState("offline");
     });
     document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) updateCurrentTimeMarkers();
       if (!activeAccount && guestPreviewTimer) guestPreviewLastTick = Date.now();
       if (activeAccount?.provider !== "supabase" || !cloudSession) return;
       if (hasPendingCloudSave()) flushCloudSave();
@@ -19674,6 +20385,7 @@
     renderAll();
     startNotificationChecks();
     initializeCloudSync();
+    if (activeAccount?.provider !== "supabase") queueWeeklySummary(800);
 
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("./sw.js").catch(error => {
