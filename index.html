@@ -9548,14 +9548,28 @@
     }
   </style>
   <style>
-    #appShell .workspace-visibility { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:0 0 10px; padding:0; }
-    #appShell.is-dashboard-view .workspace-visibility [data-panel-toggle="controls"],
-    #appShell.is-dashboard-view .workspace-visibility [data-panel-toggle="side"],
+    #appShell .workspace-visibility { position:relative; z-index:95; display:flex; align-items:center; justify-content:flex-end; gap:6px; min-height:38px; margin:0 0 10px; padding:0; }
+    #appShell.is-dashboard-view .workspace-panel-menu,
     #appShell.is-dashboard-view #toggleCalendarFocus { display:none; }
-    .workspace-visibility button { display:inline-flex; align-items:center; gap:6px; min-height:40px; padding:6px 10px; border:1px solid var(--line); border-radius:6px; color:var(--ink); background:var(--panel); font-size:12px; font-weight:750; }
+    .workspace-visibility button,
+    .workspace-panel-menu > summary { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:36px; padding:6px 10px; border:1px solid var(--line); border-radius:6px; color:var(--ink); background:var(--panel); font-size:12px; font-weight:750; cursor:pointer; list-style:none; }
+    .workspace-panel-menu > summary::-webkit-details-marker { display:none; }
     .workspace-visibility button > span:first-child { width:16px; text-align:center; font-size:18px; }
-    .workspace-visibility button:hover, .workspace-visibility button:focus-visible { border-color:var(--blue); background:var(--blue-soft); }
-    .workspace-visibility button[aria-expanded="false"] { border-style:dashed; }
+    .workspace-visibility button:hover,
+    .workspace-visibility button:focus-visible,
+    .workspace-panel-menu > summary:hover,
+    .workspace-panel-menu > summary:focus-visible,
+    .workspace-panel-menu[open] > summary { border-color:var(--blue); background:var(--blue-soft); color:var(--ink); }
+    .workspace-panel-menu { position:relative; }
+    .workspace-panel-menu-chevron { margin-left:2px; color:var(--muted); font-size:10px; transition:transform .16s ease; }
+    .workspace-panel-menu[open] .workspace-panel-menu-chevron { transform:rotate(180deg); }
+    .workspace-panel-popover { position:absolute; top:calc(100% + 7px); right:0; z-index:110; width:224px; padding:8px; border:1px solid var(--line); border-radius:8px; background:var(--panel); box-shadow:0 14px 34px rgba(26,55,75,.18); }
+    .workspace-panel-popover-title { margin:2px 4px 7px; color:var(--muted); font-size:11px; font-weight:850; letter-spacing:.05em; text-transform:uppercase; }
+    .workspace-panel-popover button { width:100%; min-height:38px; justify-content:flex-start; border-color:transparent; background:transparent; color:var(--ink); }
+    .workspace-panel-popover button:hover,
+    .workspace-panel-popover button:focus-visible { border-color:transparent; background:var(--blue-soft); }
+    .workspace-panel-popover button > span:first-child { display:grid; place-items:center; width:20px; height:20px; border:1px solid var(--line); border-radius:4px; color:var(--panel); background:var(--green); font-size:13px; }
+    .workspace-panel-popover button[aria-expanded="false"] > span:first-child { color:transparent; background:transparent; }
     #appShell.panels-hide-header #calendarHeader,
     #appShell.panels-hide-account #calendarAccount,
     #appShell.panels-hide-controls #calendarControls,
@@ -9569,7 +9583,9 @@
       #appShell.has-minimized-panels #todayView:not([hidden]) { min-height:var(--calendar-available-height,60dvh); }
     }
     @media (max-width:560px) {
-      .workspace-visibility button { min-height:44px; flex:1 1 auto; justify-content:center; }
+      .workspace-visibility button,
+      .workspace-panel-menu > summary { min-height:40px; }
+      .workspace-panel-popover { position:fixed; top:auto; right:12px; bottom:12px; left:12px; width:auto; padding:10px; }
     }
   </style>
   <style>
@@ -9577,11 +9593,13 @@
     #appShell { --workspace-gap:14px; --surface-padding:14px; --workspace-side-width:260px; }
     #appShell > .app-sidebar { border:0; border-bottom:1px solid var(--line); border-radius:0; padding:10px 0; }
     #appShell .sidebar-brand-copy strong { font-size:24px; }
-    #appShell .workspace-visibility { gap:4px; padding-bottom:8px; border-bottom:1px solid var(--line); }
-    #appShell .workspace-visibility button { border-color:transparent; background:transparent; color:var(--muted); font-size:calc(var(--workspace-text-size) - 2px); }
+    #appShell .workspace-visibility { gap:4px; padding-bottom:7px; border-bottom:1px solid var(--line); }
+    #appShell .workspace-visibility button,
+    #appShell .workspace-panel-menu > summary { color:var(--muted); font-size:calc(var(--workspace-text-size) - 2px); }
     #appShell .workspace-visibility button:hover,
-    #appShell .workspace-visibility button[aria-expanded="false"] { color:var(--ink); background:var(--panel); border-color:var(--line); }
-    #appShell #openLayoutEditor { margin-left:auto; color:var(--green); border:1px solid var(--line); background:var(--panel); }
+    #appShell .workspace-panel-menu > summary:hover,
+    #appShell .workspace-panel-menu[open] > summary { color:var(--ink); }
+    #appShell #openLayoutEditor { color:var(--green); border:1px solid var(--line); background:var(--panel); }
     #appShell .calendar-stage { gap:var(--workspace-gap); }
     #appShell > .toolbar { padding:var(--surface-padding); margin-bottom:var(--workspace-gap); }
     #appShell .mini-calendar { padding:var(--surface-padding); border:0; border-left:1px solid var(--line); border-radius:0; background:transparent; }
@@ -9613,6 +9631,9 @@
     #appShell .today-event-meta, #appShell .agenda-meta { font-size:calc(var(--workspace-text-size) - 2px); }
     #appShell .day-head-label-row, #appShell .day-head-label > span { font-size:var(--workspace-text-size); }
     #appShell .view-option, #appShell .language-option, #appShell .feature-btn { font-size:var(--workspace-text-size); }
+    #appShell .language-option { white-space:nowrap; flex-shrink:0; min-width:48px; }
+    #appShell .language-switch { flex-shrink:0; }
+    #appShell .day-column > .event:not(.compact-duration) .event-title { font-size:var(--workspace-text-size); }
     #appShell .month-event { border-radius:4px; font-size:calc(var(--workspace-text-size) - 2px); }
     #appShell .month-cell { min-width:0; }
     #appShell.workspace-no-weather .weather { display:none; }
@@ -9636,6 +9657,9 @@
     html.dark-mode #appShell .dashboard-panel { background:transparent; }
     @media (min-width:901px) {
       #appShell .calendar-stage { grid-template-columns:minmax(0,1fr) var(--workspace-side-width); }
+      #appShell .calendar-stage-main { height:auto; min-height:0; }
+      #appShell #weekSchedule:not([hidden]) { height:var(--calendar-available-height,60dvh); min-height:0; max-height:none; }
+      #appShell #calendarSide { max-height:var(--calendar-available-height,60dvh); overflow:auto; box-sizing:border-box; }
       #appShell.workspace-side-left .calendar-stage { grid-template-columns:var(--workspace-side-width) minmax(0,1fr); }
       #appShell.workspace-side-left .mini-calendar { grid-column:1; border-left:0; border-right:1px solid var(--line); }
       #appShell.workspace-side-left .calendar-stage-main { grid-column:2; }
@@ -9648,7 +9672,15 @@
     }
     @media (max-width:560px) {
       #appShell .workspace-visibility { gap:4px; }
-      #appShell .workspace-visibility button { padding:6px; font-size:12px; }
+      #appShell .calendar-workspace::before { display:none; }
+      #appShell .calendar-workspace { display:flex; gap:4px; min-width:0; padding:4px; }
+      #appShell .calendar-workspace label { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+      #appShell .calendar-workspace select { width:auto; min-width:0; flex:1 1 auto; padding-inline:6px; }
+      #appShell .calendar-workspace .manage-calendars-btn { flex:0 0 32px; width:32px; min-width:32px; }
+      #appShell .app-sidebar .account-avatar { display:none; }
+      #appShell .app-sidebar > .account-bar { display:flex; flex-direction:row; align-items:center; }
+      #appShell .workspace-visibility button,
+      #appShell .workspace-panel-menu > summary { padding:6px 9px; font-size:12px; }
       #appShell .mini-calendar-tools { grid-template-columns:repeat(3,minmax(0,1fr)); }
       #appShell .mini-calendar-tool { min-height:44px; justify-content:center; }
       #appShell .mini-calendar-tool > span:nth-child(2) { display:block; font-size:11px; }
@@ -9658,6 +9690,65 @@
       .layout-editor-body { gap:16px; padding:16px; }
     }
   </style>
+  <style>
+    #appShell .workspace-visibility { flex-wrap:wrap; }
+    #appShell #workspaceSearch, #appShell #workspaceQuickAdd { display:none; width:40px; min-width:40px; padding:0; justify-content:center; }
+    #appShell.panels-hide-header:not(.is-dashboard-view) #workspaceSearch,
+    #appShell.panels-hide-controls:not(.is-dashboard-view) #workspaceQuickAdd { display:inline-flex; }
+    #appShell .workspace-date-shortcuts { display:none; flex-wrap:wrap; align-items:center; gap:6px; width:100%; }
+    #appShell.panels-hide-header:not(.is-dashboard-view) .workspace-date-shortcuts { display:flex; }
+    #appShell .workspace-date-shortcuts button { border:1px solid var(--line); color:var(--ink); background:var(--panel); }
+    #appShell #workspacePrevious, #appShell #workspaceNext { flex:0 0 40px; width:40px; font-size:22px; }
+    #compactPeriodLabel { flex:1; min-width:100px; font-size:var(--workspace-text-size); color:var(--ink); font-weight:750; }
+    #appShell .calendar-context-bar { display:flex; align-items:center; gap:12px; flex:0 0 100%; width:100%; min-width:0; box-sizing:border-box; padding-top:8px; border-top:1px solid var(--line); }
+    #appShell .calendar-context-bar[hidden], #appShell.is-dashboard-view .calendar-context-bar { display:none; }
+    #calendarContextLabel { min-width:0; overflow-wrap:anywhere; color:var(--green); font-size:13px; font-weight:750; }
+    #appShell #clearCalendarContext { margin-left:auto; flex:0 0 auto; color:var(--blue); }
+    @media (max-width:560px) {
+      #appShell #workspaceSearch, #appShell #workspaceQuickAdd { flex:0 0 44px; }
+      #appShell .workspace-date-shortcuts button { flex:0 0 auto; }
+    }
+    @media (hover:none), (pointer:coarse) { #eventPeek { display:none !important; } }
+    .month-weekday-short { display:none; }
+    button.month-more { display:block; min-height:30px; border:0; background:transparent; color:var(--blue); text-align:left; font:inherit; cursor:pointer; }
+    @media (max-width:740px) {
+      #appShell .month-grid, #appShell .month-weekdays { min-width:0; width:100%; grid-template-columns:repeat(7,minmax(0,1fr)); }
+      .month-weekday-full { display:none; }
+      .month-weekday-short { display:inline; }
+      #appShell .month-weekday { min-width:0; padding:10px 0; font-size:11px; }
+      #appShell .month-day { min-width:0; min-height:88px; padding:3px; }
+      #appShell .month-date { width:100%; min-height:44px; height:44px; margin-bottom:0; border-radius:6px; }
+      #appShell .month-event { min-height:36px; padding:4px 2px; border-left-width:2px; font-size:10px; }
+      #appShell button.month-more { width:100%; min-height:36px; padding:4px 0; font-size:10px; }
+    }
+  </style>
+  <style>
+    /* Preserve date and time context while the timeline scrolls. */
+    #weekSchedule .time-head,
+    #weekSchedule .day-head { position:sticky; top:0; z-index:60; height:78px; min-height:78px; }
+    #weekSchedule .time-head { left:0; z-index:64; background:var(--panel); font-size:12px; }
+    #weekSchedule .all-day-cell { position:relative; background:var(--panel); }
+    #weekSchedule .all-day-head { position:sticky; left:0; z-index:57; background:var(--panel); }
+    #weekSchedule .time-column { position:sticky; left:0; z-index:56; background:var(--panel); }
+    #weekSchedule .time-label { color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
+    #weekSchedule .day-head { box-shadow:0 1px 0 var(--line); }
+    #weekSchedule .day-head small { color:var(--muted); font-weight:650; }
+    #weekSchedule .day-head.is-today { color:var(--blue); }
+    #appShell .view-option:focus-visible { outline-offset:-3px; }
+    #appShell .calendar-empty-state { border-radius:8px; box-shadow:none; }
+    #appShell .calendar-empty-state p { color:var(--muted); line-height:1.5; }
+    #appShell .layout-storage-note { margin:0; color:var(--muted); font-size:12px; line-height:1.5; }
+    @media (min-width:1100px), (max-width:560px) {
+      #appShell #addActivity { width:auto; min-width:100px; padding-inline:12px; gap:6px; }
+      #appShell #addActivity .compact-toolbar-label { position:static; width:auto; height:auto; overflow:visible; clip:auto; clip-path:none; white-space:nowrap; font-size:13px; }
+    }
+    @media (max-width:560px) {
+      #appShell #addActivity { width:100%; min-width:0; padding-inline:4px; gap:3px; }
+      #appShell #addActivity .compact-toolbar-label { font-size:11px; }
+      #appShell #addActivity .compact-toolbar-symbol { font-size:19px; }
+    }
+  </style>
+  <link rel="stylesheet" href="./assets/ui-polish.css">
 </head>
 <body>
   <section class="welcome-screen" id="welcomeScreen" aria-labelledby="welcomeBrand" hidden>
@@ -10186,12 +10277,30 @@
       </div>
     </section>
     <nav class="workspace-visibility" id="workspaceVisibility" aria-label="Visible panels">
-      <button type="button" data-panel-toggle="header" aria-controls="calendarHeader"><span aria-hidden="true">−</span><span>Header</span></button>
-      <button type="button" data-panel-toggle="account" aria-controls="calendarAccount"><span aria-hidden="true">−</span><span>Account</span></button>
-      <button type="button" data-panel-toggle="controls" aria-controls="calendarControls"><span aria-hidden="true">−</span><span>Controls</span></button>
-      <button type="button" data-panel-toggle="side" aria-controls="calendarSide"><span aria-hidden="true">−</span><span>Side calendar</span></button>
+      <details class="workspace-panel-menu" id="workspacePanelMenu">
+        <summary><span aria-hidden="true">▦</span><span data-i18n="layout.panels">Panels</span><span class="workspace-panel-menu-chevron" aria-hidden="true">⌄</span></summary>
+        <div class="workspace-panel-popover" role="group" aria-label="Visible panels">
+          <p class="workspace-panel-popover-title" data-i18n="layout.visiblePanels">Visible panels</p>
+          <button type="button" data-panel-toggle="header" aria-controls="calendarHeader"><span aria-hidden="true">✓</span><span>Header</span></button>
+          <button type="button" data-panel-toggle="account" aria-controls="calendarAccount"><span aria-hidden="true">✓</span><span>Account</span></button>
+          <button type="button" data-panel-toggle="controls" aria-controls="calendarControls"><span aria-hidden="true">✓</span><span>Controls</span></button>
+          <button type="button" data-panel-toggle="side" aria-controls="calendarSide"><span aria-hidden="true">✓</span><span>Side calendar</span></button>
+        </div>
+      </details>
       <button type="button" id="toggleCalendarFocus"><span aria-hidden="true">⛶</span><span>Focus</span></button>
       <button type="button" id="openLayoutEditor" aria-haspopup="dialog"><span aria-hidden="true">☷</span><span data-i18n="layout.customize">Customize</span></button>
+      <button type="button" id="workspaceSearch" aria-label="Search activities" title="Search activities" data-i18n-aria="search.label" data-i18n-title="search.label"><span class="sidebar-search-glyph" aria-hidden="true"></span></button>
+      <button type="button" id="workspaceQuickAdd" aria-label="Add event" title="Add event" data-i18n-aria="miniCalendar.addEvent" data-i18n-title="miniCalendar.addEvent"><span aria-hidden="true">+</span></button>
+      <div class="workspace-date-shortcuts">
+        <button type="button" id="workspacePrevious" aria-label="Previous period" title="Previous period" data-i18n-aria="aria.previousPeriod" data-i18n-title="aria.previousPeriod">‹</button>
+        <button type="button" id="workspaceToday" data-i18n="actions.today">Today</button>
+        <button type="button" id="workspaceNext" aria-label="Next period" title="Next period" data-i18n-aria="aria.nextPeriod" data-i18n-title="aria.nextPeriod">›</button>
+        <span id="compactPeriodLabel"></span>
+      </div>
+      <div class="calendar-context-bar" id="calendarContextBar" hidden>
+        <span id="calendarContextLabel" role="status"></span>
+        <button type="button" id="clearCalendarContext" data-i18n="ux.clearFilters">Clear filters</button>
+      </div>
     </nav>
     <section class="toolbar" id="calendarControls" aria-label="Schedule controls" data-i18n-aria="aria.scheduleControls">
       <div class="toolbar-leading">
@@ -10213,7 +10322,7 @@
           <button class="view-option" type="button" data-view="month" role="tab" aria-selected="false" data-i18n="view.month">Month</button>
         </div>
         <details class="calendar-view-menu" id="calendarViewMenu">
-          <summary><span data-i18n="view.menu">View</span><span aria-hidden="true">⌄</span></summary>
+          <summary><span id="calendarViewLabel" data-i18n="view.week">Week</span><span aria-hidden="true">⌄</span></summary>
           <div class="calendar-view-menu-panel">
             <button type="button" data-view="today"><span data-i18n="view.today">Day</span><kbd>D</kbd></button>
             <button type="button" data-view="week"><span data-i18n="view.week">Week</span><kbd>W</kbd></button>
@@ -10229,7 +10338,7 @@
           <button class="calendar-zoom-button" type="button" id="zoomIn" aria-label="Zoom in calendar" title="Zoom in calendar" data-i18n-aria="aria.zoomIn" data-i18n-title="aria.zoomIn"><span aria-hidden="true">+</span></button>
         </div>
         <button class="ghost-btn feature-btn compact-toolbar-action sidebar-tooltip" type="button" id="openDashboard" aria-label="Dashboard" title="Dashboard" data-tooltip="Dashboard" data-i18n-aria="dashboard.open" data-i18n-title="dashboard.open" data-i18n-tooltip="dashboard.open"><span class="button-icon" aria-hidden="true">▦</span><span class="compact-toolbar-label" data-i18n="dashboard.open">Dashboard</span></button>
-        <button class="primary-btn compact-toolbar-action sidebar-tooltip" type="button" id="addActivity" aria-label="Add Event" title="Add Event" data-tooltip="Add Event" data-i18n-aria="actions.addActivity" data-i18n-title="actions.addActivity" data-i18n-tooltip="actions.addActivity"><span class="compact-toolbar-symbol" aria-hidden="true">+</span><span class="compact-toolbar-label" data-i18n="actions.addActivity">Add Event</span></button>
+        <button class="primary-btn compact-toolbar-action sidebar-tooltip" type="button" id="addActivity" aria-label="Add Event" title="Add Event" data-tooltip="Add Event" data-i18n-aria="actions.addActivity" data-i18n-title="actions.addActivity" data-i18n-tooltip="actions.addActivity"><span class="compact-toolbar-symbol" aria-hidden="true">+</span><span class="compact-toolbar-label" data-i18n="dashboard.addEvent">Add event</span></button>
         <details class="more-actions" id="moreActions">
           <summary class="compact-toolbar-action sidebar-tooltip sidebar-tooltip-right" aria-label="More" title="More" data-tooltip="More" data-i18n-aria="actions.more" data-i18n-title="actions.more" data-i18n-tooltip="actions.more"><span class="compact-toolbar-symbol compact-toolbar-more" aria-hidden="true">•••</span><span class="compact-toolbar-label" data-i18n="actions.more">More</span></summary>
           <div class="more-actions-menu">
@@ -10891,6 +11000,7 @@
       <button class="close-btn" type="button" id="closeLayoutEditor" aria-label="Close" data-i18n-aria="aria.close">×</button>
     </div>
     <div class="layout-editor-body">
+      <p class="layout-storage-note" data-i18n="layout.savedLocally">Your layout is saved in this browser.</p>
       <fieldset class="layout-fieldset">
         <legend data-i18n="layout.spacing">Spacing</legend>
         <div class="layout-segments" role="group" aria-label="Spacing" data-i18n-aria="layout.spacing">
@@ -11442,7 +11552,12 @@
         "settings.appearance": "Appearance",
         "settings.appearanceMode": "Appearance mode",
         "settings.darkMode": "Dark mode",
+        "ux.clearFilters": "Clear filters",
+        "ux.searchFor": "Search: {query}",
         "layout.customize": "Customize",
+        "layout.savedLocally": "Your layout is saved in this browser.",
+        "layout.panels": "Panels",
+        "layout.visiblePanels": "Visible panels",
         "layout.title": "Your workspace",
         "layout.spacing": "Spacing",
         "layout.compact": "Compact",
@@ -12387,7 +12502,12 @@
         "settings.appearance": "外观",
         "settings.appearanceMode": "外观模式",
         "settings.darkMode": "深色模式",
+        "ux.clearFilters": "清除筛选",
+        "ux.searchFor": "搜索：{query}",
         "layout.customize": "自定义",
+        "layout.savedLocally": "布局会保存在此浏览器中。",
+        "layout.panels": "面板",
+        "layout.visiblePanels": "可见面板",
         "layout.title": "你的工作区",
         "layout.spacing": "间距",
         "layout.compact": "紧凑",
@@ -14690,9 +14810,7 @@
         setSidebarActive(action);
         currentView = loadCalendarView();
         jumpToToday();
-        const view = currentView === "month" ? monthView : currentView === "today" ? todayView
-          : window.matchMedia("(max-width: 740px)").matches ? mobileAgenda : weekSchedule;
-        view.scrollIntoView({ behavior: "auto", block: "start" });
+        window.scrollTo({ top: 0, behavior: "auto" });
         return;
       }
       if (action === "holidays") {
@@ -15686,6 +15804,21 @@
       return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000;
     }
 
+    // The four-day view follows the selected date; weekly views stay Monday-based.
+    function calendarPeriodStart() {
+      if (currentView !== "four") return currentWeekStart;
+      const start = new Date(selectedDate);
+      start.setHours(0, 0, 0, 0);
+      return start;
+    }
+
+    function calendarDateForDay(day) {
+      const start = calendarPeriodStart();
+      const startIndex = (start.getDay() + 6) % 7;
+      const dayIndex = days.findIndex(item => item.key === day.key);
+      return addDays(start, (dayIndex - startIndex + 7) % 7);
+    }
+
     function defaultEventDate() {
       if (currentView === "today") return dateKey(selectedDate);
       if (currentView === "month") {
@@ -15694,9 +15827,10 @@
         return dateKey(sameMonth ? selectedDate : currentMonthStart);
       }
       const today = new Date();
-      const weekEnd = addDays(currentWeekStart, 6);
-      if (dateSerial(today) >= dateSerial(currentWeekStart) && dateSerial(today) <= dateSerial(weekEnd)) return dateKey(today);
-      return dateKey(currentWeekStart);
+      const periodStart = calendarPeriodStart();
+      const periodEnd = addDays(periodStart, currentView === "four" ? 3 : 6);
+      if (dateSerial(today) >= dateSerial(periodStart) && dateSerial(today) <= dateSerial(periodEnd)) return dateKey(today);
+      return dateKey(periodStart);
     }
 
     function activityOccursOn(activity, date) {
@@ -15780,7 +15914,8 @@
     }
 
     function fourDayOccurrences(options = {}) {
-      return days.slice(0, 4).flatMap((day, index) => occurrencesOnDate(addDays(currentWeekStart, index), options));
+      const start = calendarPeriodStart();
+      return Array.from({ length: 4 }, (_, index) => occurrencesOnDate(addDays(start, index), options)).flat();
     }
 
     function monthOccurrences(options = {}) {
@@ -15822,17 +15957,18 @@
         );
         return;
       }
-      const periodEnd = addDays(currentWeekStart, currentView === "four" ? 3 : 6);
-      const sameMonth = currentWeekStart.getMonth() === periodEnd.getMonth();
+      const periodStart = calendarPeriodStart();
+      const periodEnd = addDays(periodStart, currentView === "four" ? 3 : 6);
+      const sameMonth = periodStart.getFullYear() === periodEnd.getFullYear() && periodStart.getMonth() === periodEnd.getMonth();
       if (currentLanguage === "zh") {
         document.getElementById("weekLabel").textContent = sameMonth
-          ? `${currentWeekStart.getMonth() + 1}月${currentWeekStart.getDate()}日 - ${periodEnd.getDate()}日`
-          : `${formatShortDate(currentWeekStart)} - ${formatShortDate(periodEnd)}`;
+          ? `${periodStart.getMonth() + 1}月${periodStart.getDate()}日 - ${periodEnd.getDate()}日`
+          : `${formatShortDate(periodStart)} - ${formatShortDate(periodEnd)}`;
         return;
       }
       document.getElementById("weekLabel").textContent = sameMonth
-        ? `${currentWeekStart.toLocaleDateString("en-US", { month: "short" })} ${currentWeekStart.getDate()} - ${periodEnd.getDate()}`
-        : `${formatShortDate(currentWeekStart)} - ${formatShortDate(periodEnd)}`;
+        ? `${periodStart.toLocaleDateString("en-US", { month: "short" })} ${periodStart.getDate()} - ${periodEnd.getDate()}`
+        : `${formatShortDate(periodStart)} - ${formatShortDate(periodEnd)}`;
     }
 
     function escapeHtml(value) {
@@ -15898,12 +16034,13 @@
       if (userSettings.use24Hour) {
         return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
       }
+      const clockHour = hour % 24;
       if (currentLanguage === "zh") {
-        const period = hour < 12 ? "上午" : "下午";
+        const period = clockHour < 12 ? "上午" : "下午";
         return `${period} ${hour % 12 || 12}:${String(minute).padStart(2, "0")}`;
       }
       const displayHour = hour % 12 || 12;
-      const suffix = hour < 12 ? "AM" : "PM";
+      const suffix = clockHour < 12 ? "AM" : "PM";
       return `${displayHour}:${String(minute).padStart(2, "0")} ${suffix}`;
     }
 
@@ -15934,7 +16071,10 @@
     }
 
     function visibleWeekDays() {
-      if (currentView === "four") return days.slice(0, 4);
+      if (currentView === "four") {
+        const startIndex = (calendarPeriodStart().getDay() + 6) % 7;
+        return Array.from({ length: 4 }, (_, index) => days[(startIndex + index) % 7]);
+      }
       return state.showWeekends ? days : days.slice(0, 5);
     }
 
@@ -16272,7 +16412,7 @@
       grid.appendChild(timeHead);
 
       displayDays.forEach(day => {
-        const date = addDays(currentWeekStart, days.findIndex(item => item.key === day.key));
+        const date = calendarDateForDay(day);
         const dayActivities = activities.filter(activity => activity.day === day.key);
         const isToday = isSameDate(date, new Date());
         const countLabel = t(dayActivities.length === 1 ? "overview.eventOne" : "overview.events", { count: dayActivities.length });
@@ -16299,7 +16439,7 @@
       grid.appendChild(allDayHead);
 
       displayDays.forEach(day => {
-        const targetDate = addDays(currentWeekStart, days.findIndex(item => item.key === day.key));
+        const targetDate = calendarDateForDay(day);
         const cell = document.createElement("div");
         cell.className = "all-day-cell";
         setupDropTarget(cell, targetDate, true);
@@ -16334,7 +16474,7 @@
       grid.appendChild(timeColumn);
 
       displayDays.forEach(day => {
-        const targetDate = addDays(currentWeekStart, days.findIndex(item => item.key === day.key));
+        const targetDate = calendarDateForDay(day);
         const column = document.createElement("div");
         column.className = "day-column";
         setupDropTarget(column, targetDate);
@@ -16417,7 +16557,7 @@
       const conflicts = findConflicts(activities);
       mobileAgenda.innerHTML = "";
       visibleWeekDays().forEach(day => {
-        const date = addDays(currentWeekStart, days.findIndex(item => item.key === day.key));
+        const date = calendarDateForDay(day);
         const items = activities
           .filter(activity => activity.day === day.key)
           .sort((a, b) => Number(b.allDay) - Number(a.allDay) || minutes(a.start) - minutes(b.start));
@@ -16595,9 +16735,11 @@
       scheduleSearch.value = "";
       conflictCursor = 0;
       travelCursor = 0;
+      setSidebarActive("calendar");
       renderAll();
       scheduleSmartCalendarFocus();
-      scheduleSearch.focus();
+      if (document.getElementById("plannerOptions").open && !hiddenWorkspacePanels.has("controls")) scheduleSearch.focus();
+      else document.getElementById("openLayoutEditor").focus();
     }
 
     function occurrenceDateTime(activity) {
@@ -16674,7 +16816,7 @@
         ? isSameDate(selectedDate, now)
         : currentView === "month"
           ? currentMonthStart.getFullYear() === now.getFullYear() && currentMonthStart.getMonth() === now.getMonth()
-          : dateSerial(now) >= dateSerial(currentWeekStart) && dateSerial(now) <= dateSerial(addDays(currentWeekStart, currentView === "four" ? 3 : 6));
+          : dateSerial(now) >= dateSerial(calendarPeriodStart()) && dateSerial(now) <= dateSerial(addDays(calendarPeriodStart(), currentView === "four" ? 3 : 6));
       const todayButton = document.getElementById("jumpToday");
       todayButton.classList.toggle("is-current", isCurrentPeriod);
       if (isCurrentPeriod) todayButton.setAttribute("aria-current", "date");
@@ -16758,7 +16900,7 @@
 
     function renderMonth() {
       monthWeekdays.innerHTML = days
-        .map(day => `<div class="month-weekday">${dayLabel(day)}</div>`)
+        .map((day, index) => `<div class="month-weekday"><span class="month-weekday-full">${escapeHtml(dayLabel(day))}</span><span class="month-weekday-short">${escapeHtml(addDays(new Date(2026, 0, 5), index).toLocaleDateString(currentLanguage === "zh" ? "zh-CN" : "en-US", { weekday: "short" }))}</span></div>`)
         .join("");
       monthGrid.innerHTML = "";
 
@@ -16781,7 +16923,17 @@
         dateButton.className = "month-date";
         dateButton.textContent = date.getDate();
         dateButton.setAttribute("aria-label", formatFullDate(date));
-        dateButton.addEventListener("click", () => openNewEventForDate(date, preferredNewEventChild()));
+        const showSelectedDay = () => {
+          selectedDate = new Date(date);
+          currentWeekStart = getMonday(selectedDate);
+          activateCalendarView("today", true, { remember: false });
+          todayHeading.tabIndex = -1;
+          todayHeading.focus({ preventScroll: true });
+        };
+        dateButton.addEventListener("click", () => {
+          if (matchMedia("(max-width: 740px)").matches) showSelectedDay();
+          else openNewEventForDate(date, preferredNewEventChild());
+        });
         cell.appendChild(dateButton);
 
         activities.slice(0, 3).forEach(activity => {
@@ -16799,9 +16951,11 @@
         });
 
         if (activities.length > 3) {
-          const more = document.createElement("p");
+          const more = document.createElement("button");
+          more.type = "button";
           more.className = "month-more";
           more.textContent = t("month.more", { count: activities.length - 3 });
+          more.addEventListener("click", showSelectedDay);
           cell.appendChild(more);
         }
 
@@ -16853,6 +17007,9 @@
     }
 
     function updateCalendarView() {
+      const viewLabel = document.getElementById("calendarViewLabel");
+      viewLabel.dataset.i18n = `view.${currentView}`;
+      viewLabel.textContent = t(`view.${currentView}`);
       const showWeek = currentView === "week" || currentView === "four";
       calendarEmptyState.classList.toggle("is-week", showWeek);
       weekSchedule.hidden = !showWeek;
@@ -16863,6 +17020,7 @@
         const active = button.dataset.view === currentView;
         button.classList.toggle("is-active", active);
         button.setAttribute("aria-selected", active);
+        if (button.getAttribute("role") === "tab") button.tabIndex = active ? 0 : -1;
       });
     }
 
@@ -17577,14 +17735,17 @@
     let eventPeekActivity = null;
     let eventDetailsActivity = null;
     let eventPeekHideTimer = 0;
+    let eventPeekShowTimer = 0;
 
     function hideEventPeek() {
       clearTimeout(eventPeekHideTimer);
+      clearTimeout(eventPeekShowTimer);
       eventPeek.hidden = true;
       eventPeekActivity = null;
     }
 
     function scheduleEventPeekHide() {
+      clearTimeout(eventPeekShowTimer);
       clearTimeout(eventPeekHideTimer);
       eventPeekHideTimer = setTimeout(() => {
         if (!eventPeek.contains(document.activeElement)) hideEventPeek();
@@ -17592,6 +17753,7 @@
     }
 
     function showEventPeek(anchor, activity) {
+      if (!anchor.isConnected || document.querySelector("dialog[open]")) return;
       clearTimeout(eventPeekHideTimer);
       eventPeekActivity = activity;
       const date = parseDateKey(activity.occurrenceDate || activity.startDate || dateKey(selectedDate));
@@ -17627,10 +17789,12 @@
 
     function bindCalendarEventActions(element, activity, suppressDraggedClick = false) {
       element.addEventListener("pointerenter", event => {
-        if (event.pointerType === "mouse") showEventPeek(element, activity);
+        if (event.pointerType === "mouse" && matchMedia("(hover: hover) and (pointer: fine)").matches) {
+          clearTimeout(eventPeekShowTimer);
+          eventPeekShowTimer = setTimeout(() => showEventPeek(element, activity), 300);
+        }
       });
       element.addEventListener("pointerleave", scheduleEventPeekHide);
-      element.addEventListener("focus", () => showEventPeek(element, activity));
       element.addEventListener("blur", scheduleEventPeekHide);
       element.addEventListener("click", () => {
         if (!suppressDraggedClick || Date.now() > suppressEventClickUntil) showEventDetails(activity);
@@ -19388,6 +19552,7 @@
     }
 
     function renderAll() {
+      hideEventPeek();
       renderCalendarSelector();
       renderKidFilters();
       updateCalendarControls();
@@ -19403,6 +19568,8 @@
       renderReminders();
       updateCalendarView();
       if (!dashboardPage.hidden) renderDashboard();
+      renderActiveCalendarContext();
+      requestAnimationFrame(resizeCalendarWorkspace);
     }
 
     function calendarFocusTimestamp(activity) {
@@ -19540,8 +19707,11 @@
       } else if (currentView === "month") {
         currentMonthStart = new Date(currentMonthStart.getFullYear(), currentMonthStart.getMonth() + direction, 1);
         selectedDate = new Date(currentMonthStart);
+      } else if (currentView === "four") {
+        selectedDate = addDays(calendarPeriodStart(), direction * 4);
+        currentWeekStart = getMonday(selectedDate);
       } else {
-        currentWeekStart = addDays(currentWeekStart, direction * (currentView === "four" ? 4 : 7));
+        currentWeekStart = addDays(currentWeekStart, direction * 7);
         selectedDate = new Date(currentWeekStart);
       }
       miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
@@ -19557,7 +19727,7 @@
       miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       // Keep the saved view preference, but show today when its column is hidden.
       if (["week", "four"].includes(currentView) && !visibleWeekDays().some(day =>
-        isSameDate(addDays(currentWeekStart, days.findIndex(item => item.key === day.key)), selectedDate))) {
+        isSameDate(calendarDateForDay(day), selectedDate))) {
         currentView = "today";
       }
       renderAll();
@@ -19630,12 +19800,29 @@
     window.addEventListener("scroll", positionSidebarNav, { passive: true });
     window.visualViewport?.addEventListener("resize", positionSidebarNav);
     window.visualViewport?.addEventListener("scroll", positionSidebarNav);
-    document.getElementById("focusScheduleSearch").addEventListener("click", () => {
+    function openScheduleSearch() {
+      hideEventPeek();
       showCalendarPage();
-      setSidebarActive("calendar");
+      setSidebarActive(state.eventFilter === "holidays" ? "holidays" : state.eventFilter === "important" ? "special-days" : "calendar");
+      if (hiddenWorkspacePanels.has("controls")) {
+        hiddenWorkspacePanels.delete("controls");
+        applyWorkspaceVisibility();
+      }
+      document.getElementById("sidebarMenu").open = false;
+      document.getElementById("moreActions").open = false;
+      document.getElementById("workspacePanelMenu").open = false;
+      document.getElementById("calendarViewMenu").open = false;
       document.getElementById("plannerOptions").open = true;
       scheduleSearch.focus();
-    });
+      scheduleSearch.select();
+    }
+    document.getElementById("focusScheduleSearch").addEventListener("click", openScheduleSearch);
+    document.getElementById("workspaceSearch").addEventListener("click", openScheduleSearch);
+    document.getElementById("workspaceQuickAdd").addEventListener("click", () => openNewEventForDate(selectedDate, preferredNewEventChild()));
+    document.getElementById("workspacePrevious").addEventListener("click", () => navigateCalendar(-1));
+    document.getElementById("workspaceNext").addEventListener("click", () => navigateCalendar(1));
+    document.getElementById("workspaceToday").addEventListener("click", jumpToToday);
+    document.getElementById("clearCalendarContext").addEventListener("click", resetScheduleFilters);
     const periodDatePicker = document.getElementById("periodDatePicker");
     document.getElementById("openPeriodPicker").addEventListener("click", () => {
       periodDatePicker.value = dateKey(selectedDate);
@@ -19997,6 +20184,34 @@
         activateCalendarView(button.dataset.view);
       });
     });
+    document.querySelector(".view-switch").addEventListener("keydown", event => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      const tabs = [...event.currentTarget.querySelectorAll('[role="tab"]')];
+      const index = tabs.indexOf(event.target);
+      if (index < 0) return;
+      const next = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1
+        : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+      event.preventDefault();
+      tabs[next].click();
+      tabs[next].focus({ preventScroll: true });
+    });
+    const keyboardSidebarMenu = document.getElementById("sidebarMenu");
+    keyboardSidebarMenu.querySelector("summary").addEventListener("keydown", event => {
+      if (event.key !== "ArrowDown") return;
+      event.preventDefault();
+      keyboardSidebarMenu.open = true;
+      requestAnimationFrame(() => keyboardSidebarMenu.querySelector(".sidebar-nav button")?.focus());
+    });
+    keyboardSidebarMenu.querySelector(".sidebar-nav").addEventListener("keydown", event => {
+      if (!["ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
+      const buttons = [...event.currentTarget.querySelectorAll("button:not(:disabled)")];
+      const index = buttons.indexOf(event.target);
+      if (index < 0) return;
+      const next = event.key === "Home" ? 0 : event.key === "End" ? buttons.length - 1
+        : (index + (event.key === "ArrowDown" ? 1 : -1) + buttons.length) % buttons.length;
+      event.preventDefault();
+      buttons[next].focus();
+    });
     document.getElementById("toggleWeekendsMenu").addEventListener("click", () => toggleWeekendsButton.click());
     scheduleSearch.addEventListener("input", event => {
       state.searchQuery = event.currentTarget.value;
@@ -20015,11 +20230,16 @@
     document.addEventListener("keydown", event => {
       const target = event.target;
       const isTyping = target instanceof HTMLElement && target.matches("input, textarea, select, [contenteditable='true']");
-      if (event.key === "/" && !isTyping && !document.querySelector("dialog[open]")) {
+      const shell = document.getElementById("appShell");
+      const shortcutView = { d: "today", w: "week", x: "four", m: "month" }[event.key.toLowerCase()];
+      if (shortcutView && !isTyping && !event.ctrlKey && !event.metaKey && !event.altKey
+        && !shell.hidden && !shell.classList.contains("is-dashboard-view") && !document.querySelector("dialog[open]")) {
         event.preventDefault();
-        document.getElementById("plannerOptions").open = true;
-        scheduleSearch.focus();
-        scheduleSearch.select();
+        document.querySelector(`.view-switch [data-view="${shortcutView}"]`).click();
+      }
+      if (event.key === "/" && !isTyping && !shell.hidden && !document.querySelector("dialog[open]")) {
+        event.preventDefault();
+        openScheduleSearch();
       }
       if (event.key === "Escape" && document.activeElement === scheduleSearch && state.searchQuery) {
         event.preventDefault();
@@ -20080,14 +20300,26 @@
     document.getElementById("toggleEventDetails").addEventListener("click", () => {
       setEventDetailsExpanded(form.classList.contains("is-compact"));
     });
+    const moreActionsMenu = document.getElementById("moreActions");
+    const plannerOptionsMenu = document.getElementById("plannerOptions");
+    moreActionsMenu.addEventListener("toggle", () => {
+      if (moreActionsMenu.open) plannerOptionsMenu.open = false;
+    });
+    plannerOptionsMenu.addEventListener("toggle", () => {
+      if (plannerOptionsMenu.open) moreActionsMenu.open = false;
+    });
     document.querySelectorAll("#moreActions button").forEach(button => button.addEventListener("click", () => {
-      document.getElementById("moreActions").open = false;
+      moreActionsMenu.open = false;
     }));
     document.addEventListener("click", event => {
       const menu = document.getElementById("moreActions");
       if (menu.open && !menu.contains(event.target)) menu.open = false;
       const sidebarMenu = document.getElementById("sidebarMenu");
       if (sidebarMenu.open && !sidebarMenu.contains(event.target)) sidebarMenu.open = false;
+      ["plannerOptions", "calendarViewMenu", "workspacePanelMenu"].forEach(id => {
+        const disclosure = document.getElementById(id);
+        if (disclosure.open && !disclosure.contains(event.target) && !event.target.closest("#focusScheduleSearch, #workspaceSearch")) disclosure.open = false;
+      });
     });
     presetForm.addEventListener("submit", event => event.preventDefault());
     settingsForm.addEventListener("submit", event => event.preventDefault());
@@ -20110,7 +20342,113 @@
       controls: document.getElementById("calendarControls"),
       side: document.getElementById("calendarSide")
     };
-    const hiddenWorkspacePanels = new Set();
+    const WORKSPACE_LAYOUT_KEY = "kidssync.workspace-layout.v1";
+    const DEFAULT_WORKSPACE_LAYOUT = { density: "comfortable", textSize: 14, sideWidth: 260, sidePosition: "right", weather: true, details: true, hiddenPanels: [], collapsedDashboard: [] };
+    function loadWorkspaceLayout() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(WORKSPACE_LAYOUT_KEY) || "{}");
+        return {
+          density: ["compact", "comfortable", "roomy"].includes(saved.density) ? saved.density : "comfortable",
+          textSize: Number.isFinite(saved.textSize) ? Math.max(13, Math.min(18, saved.textSize)) : 14,
+          sideWidth: Number.isFinite(saved.sideWidth) ? Math.max(220, Math.min(360, saved.sideWidth)) : 260,
+          sidePosition: saved.sidePosition === "left" ? "left" : "right",
+          weather: saved.weather !== false,
+          details: saved.details !== false,
+          hiddenPanels: Array.isArray(saved.hiddenPanels) ? saved.hiddenPanels.filter(name => Object.hasOwn(workspacePanels, name)) : [],
+          collapsedDashboard: Array.isArray(saved.collapsedDashboard) ? saved.collapsedDashboard.filter(name => typeof name === "string") : []
+        };
+      } catch { return { ...DEFAULT_WORKSPACE_LAYOUT }; }
+    }
+    let workspaceLayout = loadWorkspaceLayout();
+    const hiddenWorkspacePanels = new Set(workspaceLayout.hiddenPanels);
+    const dashboardPanelNames = ["week", "updates", "upcoming", "past"];
+    const layoutDialog = document.getElementById("layoutDialog");
+    document.getElementById("dashboardPage").before(document.getElementById("workspaceVisibility"));
+
+    function saveWorkspaceLayout() {
+      workspaceLayout.hiddenPanels = [...hiddenWorkspacePanels];
+      try { localStorage.setItem(WORKSPACE_LAYOUT_KEY, JSON.stringify(workspaceLayout)); } catch { /* Layout remains usable when device storage is unavailable. */ }
+    }
+
+    function renderLayoutEditor() {
+      document.querySelectorAll("[data-layout-density]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.layoutDensity === workspaceLayout.density)));
+      document.getElementById("layoutTextSize").value = workspaceLayout.textSize;
+      document.getElementById("layoutTextValue").value = `${workspaceLayout.textSize}px`;
+      document.getElementById("layoutSideWidth").value = workspaceLayout.sideWidth;
+      document.getElementById("layoutSideValue").value = `${workspaceLayout.sideWidth}px`;
+      document.getElementById("layoutSidePosition").value = workspaceLayout.sidePosition;
+      document.getElementById("layoutWeather").checked = workspaceLayout.weather;
+      document.getElementById("layoutDetails").checked = workspaceLayout.details;
+    }
+
+    function applyWorkspaceLayout() {
+      const shell = document.getElementById("appShell");
+      const spacing = { compact: 10, comfortable: 14, roomy: 20 }[workspaceLayout.density];
+      shell.style.setProperty("--workspace-gap", `${spacing}px`);
+      shell.style.setProperty("--surface-padding", `${spacing}px`);
+      shell.style.setProperty("--workspace-side-width", `${workspaceLayout.sideWidth}px`);
+      document.documentElement.style.setProperty("--workspace-text-size", `${workspaceLayout.textSize}px`);
+      shell.classList.toggle("workspace-side-left", workspaceLayout.sidePosition === "left");
+      shell.classList.toggle("workspace-no-weather", !workspaceLayout.weather);
+      shell.classList.toggle("workspace-simple-events", !workspaceLayout.details);
+      renderLayoutEditor();
+      renderDashboardCollapses();
+      requestAnimationFrame(resizeCalendarWorkspace);
+    }
+
+    function renderDashboardCollapses() {
+      document.querySelectorAll("#dashboardPage .dashboard-panel").forEach((panel, index) => {
+        const name = dashboardPanelNames[index];
+        const collapsed = workspaceLayout.collapsedDashboard.includes(name);
+        const heading = panel.querySelector(".dashboard-panel-heading");
+        let toggle = heading.querySelector(".dashboard-collapse");
+        if (!toggle) {
+          toggle = document.createElement("button");
+          toggle.type = "button";
+          toggle.className = "dashboard-collapse";
+          Array.from(panel.children).filter(child => child !== heading).forEach((child, childIndex) => { if (!child.id) child.id = `dashboard-${name}-body-${childIndex}`; });
+          toggle.setAttribute("aria-controls", Array.from(panel.children).filter(child => child !== heading).map(child => child.id).join(" "));
+          toggle.addEventListener("click", () => {
+            workspaceLayout.collapsedDashboard = workspaceLayout.collapsedDashboard.includes(name)
+              ? workspaceLayout.collapsedDashboard.filter(item => item !== name)
+              : [...workspaceLayout.collapsedDashboard, name];
+            renderDashboardCollapses();
+            saveWorkspaceLayout();
+            if (!panel.classList.contains("is-collapsed") && !userSettings.reduceMotion && !matchMedia("(prefers-reduced-motion: reduce)").matches) panel.animate([{ opacity: .4 }, { opacity: 1 }], { duration: 180 });
+          });
+          heading.appendChild(toggle);
+        }
+        panel.classList.toggle("is-collapsed", collapsed);
+        toggle.textContent = collapsed ? "+" : "−";
+        toggle.setAttribute("aria-expanded", String(!collapsed));
+        const label = t(collapsed ? "layout.showSection" : "layout.hideSection", { name: heading.querySelector("h2").textContent });
+        toggle.setAttribute("aria-label", label);
+        toggle.title = label;
+      });
+    }
+
+    document.getElementById("openLayoutEditor").addEventListener("click", () => { renderLayoutEditor(); layoutDialog.showModal(); });
+    ["closeLayoutEditor", "doneLayoutEditor"].forEach(id => document.getElementById(id).addEventListener("click", () => layoutDialog.close()));
+    document.querySelectorAll("[data-layout-density]").forEach(button => button.addEventListener("click", () => {
+      workspaceLayout.density = button.dataset.layoutDensity;
+      applyWorkspaceLayout();
+      saveWorkspaceLayout();
+    }));
+    [["layoutTextSize", "textSize", "input"], ["layoutSideWidth", "sideWidth", "input"], ["layoutSidePosition", "sidePosition", "change"], ["layoutWeather", "weather", "change"], ["layoutDetails", "details", "change"]].forEach(([id, key, eventName]) => {
+      document.getElementById(id).addEventListener(eventName, event => {
+        const control = event.currentTarget;
+        workspaceLayout[key] = control.type === "checkbox" ? control.checked : control.type === "range" ? Number(control.value) : control.value;
+        applyWorkspaceLayout();
+        saveWorkspaceLayout();
+      });
+    });
+    document.getElementById("resetWorkspaceLayout").addEventListener("click", () => {
+      workspaceLayout = { ...DEFAULT_WORKSPACE_LAYOUT, hiddenPanels: [], collapsedDashboard: [] };
+      hiddenWorkspacePanels.clear();
+      workspaceFocusSnapshot = null;
+      applyWorkspaceLayout();
+      applyWorkspaceVisibility();
+    });
     let workspaceFocusSnapshot = null;
     const workspacePanelLabels = {
       en: { header: "Header", account: "Account", controls: "Controls", side: "Side calendar", focus: "Focus", restore: "Restore panels", hide: "Hide", show: "Show", group: "Visible panels" },
@@ -20119,29 +20457,45 @@
 
     function resizeCalendarWorkspace() {
       const calendarMain = document.querySelector(".calendar-stage-main");
-      const available = Math.max(240, window.innerHeight - calendarMain.getBoundingClientRect().top - 12);
+      const available = Math.max(240, window.innerHeight - (calendarMain.getBoundingClientRect().top + window.scrollY) - 12);
       document.getElementById("appShell").style.setProperty("--calendar-available-height", `${available}px`);
+    }
+
+    function renderActiveCalendarContext() {
+      const categoryKey = { holidays: "sidebar.holidays", important: "sidebar.specialDays", activity: "filters.activities" }[state.eventFilter];
+      const query = state.searchQuery.trim();
+      const labels = [categoryKey ? t(categoryKey) : "", query ? t("ux.searchFor", { query }) : ""].filter(Boolean);
+      document.getElementById("calendarContextBar").hidden = labels.length === 0;
+      document.getElementById("calendarContextLabel").textContent = labels.join(" · ");
+      document.getElementById("compactPeriodLabel").textContent = weekLabel.textContent;
     }
 
     function renderWorkspaceVisibility() {
       const labels = workspacePanelLabels[currentLanguage] || workspacePanelLabels.en;
       document.getElementById("workspaceVisibility").setAttribute("aria-label", labels.group);
+      const panelMenu = document.getElementById("workspacePanelMenu");
+      panelMenu.querySelector("summary").setAttribute("aria-label", labels.group);
+      panelMenu.querySelector(".workspace-panel-popover").setAttribute("aria-label", labels.group);
       document.querySelectorAll("[data-panel-toggle]").forEach(button => {
         const name = button.dataset.panelToggle;
         const visible = !hiddenWorkspacePanels.has(name) && !(name === "account" && hiddenWorkspacePanels.has("header"));
         button.setAttribute("aria-expanded", String(visible));
         button.setAttribute("aria-label", `${visible ? labels.hide : labels.show} ${labels[name]}`);
         button.title = `${visible ? labels.hide : labels.show} ${labels[name]}`;
-        button.children[0].textContent = visible ? "−" : "+";
+        button.children[0].textContent = visible ? "✓" : "";
         button.children[1].textContent = labels[name];
       });
       const focusButton = document.getElementById("toggleCalendarFocus");
       const focused = hiddenWorkspacePanels.size === Object.keys(workspacePanels).length;
       focusButton.setAttribute("aria-pressed", String(focused));
       focusButton.children[1].textContent = focused ? labels.restore : labels.focus;
+      focusButton.setAttribute("aria-label", focused ? labels.restore : labels.focus);
+      focusButton.title = focused ? labels.restore : labels.focus;
+      renderDashboardCollapses();
+      renderActiveCalendarContext();
     }
 
-    function applyWorkspaceVisibility() {
+    function applyWorkspaceVisibility(animate = true) {
       const shell = document.getElementById("appShell");
       const main = document.querySelector(".calendar-stage-main");
       const before = main.getBoundingClientRect();
@@ -20152,7 +20506,8 @@
       renderWorkspaceVisibility();
       resizeCalendarWorkspace();
       const after = main.getBoundingClientRect();
-      if (!userSettings.reduceMotion && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      saveWorkspaceLayout();
+      if (animate && !userSettings.reduceMotion && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         // Animate the reflow itself so the calendar immediately owns the freed space.
         if (before.width && after.width) main.animate([
           { transformOrigin: "top left", transform: `translate(${before.x - after.x}px, ${before.y - after.y}px) scale(${before.width / after.width}, ${before.height / after.height || 1})` },
@@ -20186,7 +20541,21 @@
       applyWorkspaceVisibility();
     });
     window.addEventListener("resize", resizeCalendarWorkspace);
-    renderWorkspaceVisibility();
+    document.addEventListener("keydown", event => {
+      if (event.key !== "Escape" || event.defaultPrevented || document.querySelector("dialog[open]")) return;
+      for (const id of ["workspacePanelMenu", "plannerOptions", "calendarViewMenu", "moreActions", "sidebarMenu"]) {
+        const disclosure = document.getElementById(id);
+        if (!disclosure.open) continue;
+        disclosure.open = false;
+        const summary = disclosure.querySelector("summary");
+        if (summary.getClientRects().length) summary.focus();
+        else document.getElementById("openLayoutEditor").focus();
+        event.preventDefault();
+        break;
+      }
+    });
+    applyWorkspaceLayout();
+    applyWorkspaceVisibility(false);
 
     document.getElementById("prevWeek").addEventListener("click", () => {
       navigateCalendar(-1);
@@ -20197,7 +20566,7 @@
     document.getElementById("jumpToday").addEventListener("click", () => {
       if (document.getElementById("appShell").classList.contains("is-dashboard-view")) currentView = loadCalendarView();
       showCalendarPage();
-      setSidebarActive("calendar");
+      setSidebarActive(state.eventFilter === "holidays" ? "holidays" : state.eventFilter === "important" ? "special-days" : "calendar");
       jumpToToday();
     });
     function navigateMiniCalendar(direction) {
@@ -20379,6 +20748,7 @@
 
     applySettings();
     applyStaticTranslations();
+    renderWorkspaceVisibility();
     initializeAuthUI();
     window.setTimeout(maybeShowAppearancePrompt, 650);
     populateFormOptions();
