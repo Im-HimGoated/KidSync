@@ -36,6 +36,10 @@
 
 /* A quieter weekly timeline: color identifies the event, space explains its time. */
 #appShell #weekSchedule {
+  --week-header-height: 76px;
+  --week-holiday-height: 0px;
+  --week-all-day-height: 50px;
+  scroll-padding-top: calc(var(--week-header-height) + var(--week-holiday-height) + var(--week-all-day-height) + 8px);
   --week-hour-line: color-mix(in srgb, var(--line) 88%, var(--panel));
   --week-half-hour-line: color-mix(in srgb, var(--line) 46%, var(--panel));
   border: 1px solid var(--line);
@@ -57,6 +61,7 @@
 /* Date headers and the time gutter retain their context during either scroll. */
 #appShell #weekSchedule .time-head,
 #appShell #weekSchedule .day-head {
+  z-index: 64;
   height: 76px;
   min-height: 76px;
   border-bottom: 1px solid var(--line);
@@ -137,6 +142,7 @@
 }
 
 #appShell #weekSchedule .time-head {
+  z-index: 65;
   padding: 8px 4px;
   font-size: 11px;
 }
@@ -166,12 +172,17 @@
 
 #appShell #weekSchedule .all-day-head,
 #appShell #weekSchedule .all-day-cell {
+  position: sticky;
+  top: calc(var(--week-header-height) + var(--week-holiday-height));
+  z-index: 58;
   min-height: 50px;
+  max-height: 144px;
   border-bottom: 1px solid var(--line);
   background: color-mix(in srgb, var(--soft-line) 40%, var(--panel));
 }
 
 #appShell #weekSchedule .all-day-head {
+  z-index: 59;
   padding: 8px 3px;
   color: var(--muted);
   font-size: 9px;
@@ -184,10 +195,92 @@
   gap: 4px;
   padding: 5px 4px;
   border-left: 1px solid var(--line);
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-padding-block: 5px;
+  scrollbar-width: thin;
 }
 
 #appShell #weekSchedule .all-day-cell.is-today {
   background: color-mix(in srgb, var(--blue-soft) 40%, var(--panel));
+}
+
+/* Holidays sit next to their dates instead of becoming timed appointments. */
+#appShell #weekSchedule .holiday-head,
+#appShell #weekSchedule .holiday-cell {
+  position: sticky;
+  top: var(--week-header-height);
+  z-index: 62;
+  min-height: 44px;
+  max-height: 144px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--blue-soft) 44%, var(--panel));
+}
+
+#appShell #weekSchedule .holiday-head {
+  left: 0;
+  z-index: 63;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 3px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: .02em;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+#appShell #weekSchedule .holiday-cell {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  gap: 4px;
+  padding: 5px 4px;
+  border-left: 1px solid var(--line);
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-padding-block: 5px;
+  scrollbar-width: thin;
+}
+
+#appShell #weekSchedule .holiday-cell.is-today {
+  background: color-mix(in srgb, var(--blue-soft) 68%, var(--panel));
+}
+
+#appShell #weekSchedule .holiday-event {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  min-width: 0;
+  min-height: 32px;
+  padding: 5px 6px;
+  border: 1px solid var(--event-line);
+  border-left-width: 3px;
+  border-radius: 6px;
+  color: var(--event-ink);
+  background: var(--event-bg);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: left;
+  box-shadow: none;
+  transform: none;
+}
+
+#appShell #weekSchedule .holiday-event:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+
+#appShell #weekSchedule .holiday-event:hover {
+  border-color: var(--event-ink);
+  box-shadow: 0 2px 5px rgb(23 42 58 / 12%);
+  transform: none;
 }
 
 #appShell #weekSchedule .all-day-event {
@@ -240,6 +333,32 @@
   font-size: 9px;
   line-height: 1.2;
 }
+
+/* Multi-day trips join across adjacent date cells as one continuous calendar band. */
+#appShell #weekSchedule .all-day-event.trip-span {
+  z-index: 4;
+  border-radius: 0;
+}
+#appShell #weekSchedule .all-day-event.trip-span.is-span-start {
+  margin-right: -5px;
+  border-right-width: 0;
+  border-radius: 6px 0 0 6px;
+}
+#appShell #weekSchedule .all-day-event.trip-span.is-span-middle {
+  margin-inline: -5px;
+  border-right-width: 0;
+  border-left-width: 0;
+}
+#appShell #weekSchedule .all-day-event.trip-span.is-span-end {
+  margin-left: -5px;
+  border-left-width: 0;
+  border-radius: 0 6px 6px 0;
+}
+
+#appShell .month-event.trip-span { border-radius: 0; }
+#appShell .month-event.trip-span.is-span-start { margin-right: -4px; border-radius: 4px 0 0 4px; }
+#appShell .month-event.trip-span.is-span-middle { margin-inline: -4px; border-left-width: 0; }
+#appShell .month-event.trip-span.is-span-end { margin-left: -4px; border-left-width: 0; border-radius: 0 4px 4px 0; }
 
 /* Hours are stronger than half hours; today has a barely tinted empty canvas. */
 #appShell #weekSchedule .day-column {

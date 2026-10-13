@@ -44,12 +44,14 @@ test("fits existing field limits", () => {
 });
 
 test("applies extracted fields but preserves manual values when absent", () => {
-  const fields = Object.fromEntries(["title", "date", "start", "end", "allDay", "location", "responsible", "items", "eventType", "recurrence", "repeatInterval", "repeatUntil", "notes"].map(key => [key, { value: "manual" }]));
+  const fields = Object.fromEntries(["title", "date", "endDate", "start", "end", "allDay", "location", "responsible", "items", "eventType", "recurrence", "repeatInterval", "repeatUntil", "notes", "importance", "child", "travelMinutes", "status"].map(key => [key, { value: "manual" }]));
   let details = { text: "Game", title: "Game", ...parse("Responsible adult: Coach Chen\nBring: Water") };
   const noop = () => {};
+  const weekdays = Array.from({ length: 7 }, (_, day) => ({ value: String(day), checked: false }));
   const applyContext = vm.createContext({ fields, parseScannedGameDetails: () => details,
+    document: { querySelectorAll: () => weekdays },
     inferredEventDefaults: () => null, normalizedEventTitle: value => value, setIconField: noop,
-    updateAllDayFields: noop, updateRecurrenceFields: noop, updateConflictSuggestions: noop,
+    updateAllDayFields: noop, updateTripDateFields: noop, updateRecurrenceFields: noop, updateConflictSuggestions: noop,
     gameScanText: {}, renderScannedGameSummary: noop,
     gameScanProgress: { classList: { add: noop, remove: noop } }, gameScanProgressText: {},
     t: value => value, scheduleNewEventDraftSave: noop });
@@ -57,8 +59,18 @@ test("applies extracted fields but preserves manual values when absent", () => {
   assert.equal(applyContext.applyScannedGameDetails("Game"), true);
   assert.equal(fields.responsible.value, "Coach Chen");
   assert.equal(fields.items.value, "Water");
+  details = { text: "Weekly coding", title: "Coding", allDay: true, child: "Charlie", status: "tentative", importance: "high", recurrence: "weekly", repeatInterval: 2, repeatDays: [1, 3], repeatUntil: "2026-12-31" };
+  applyContext.applyScannedGameDetails(details.text);
+  assert.equal(fields.child.value, "Charlie");
+  assert.equal(fields.allDay.checked, true);
+  assert.equal(fields.importance.value, "high");
+  assert.equal(fields.status.value, "tentative");
+  assert.equal(fields.repeatInterval.value, "2");
+  assert.equal(fields.repeatUntil.value, "2026-12-31");
+  assert.deepEqual(weekdays.filter(day => day.checked).map(day => Number(day.value)), [1, 3]);
   details = { text: "Other game", title: "Other game", ...parse("Other game") };
   applyContext.applyScannedGameDetails("Other game");
   assert.equal(fields.responsible.value, "Coach Chen");
   assert.equal(fields.items.value, "Water");
+  assert.equal(fields.recurrence.value, "weekly");
 });

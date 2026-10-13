@@ -189,8 +189,8 @@ function renderHarness() {
     updateCurrentTimeMarkers: () => hooks.now++, suppressEventClickUntil: 0,
     preferredNewEventChild: () => 'Family', openNewEventForDate: () => {}, openNewEventAtTime: () => {}
   });
-  vm.runInContext(['eventImportanceLabel', 'eventImportanceBadge', 'renderGrid'].map(productionFunction).join('\n'), c);
-  return { c, grid, hooks, timed };
+  vm.runInContext(['eventImportanceLabel', 'eventImportanceBadge', 'isHolidayActivity', 'renderGrid'].map(productionFunction).join('\n'), c);
+  return { c, grid, hooks, timed, activities, days };
 }
 
 test('renderGrid preserves time geometry, action hooks, metadata, all-day priority, and compact day widths', () => {
@@ -239,4 +239,85 @@ test('renderGrid restores both scroll axes after grid clearing temporarily colla
   assert.equal(cleared, 1);
   assert.equal(scroller.scrollTop, 1136);
   assert.equal(scroller.scrollLeft, 144);
+});
+
+test('holiday classification includes built-ins and legacy timed holidays without reclassifying birthdays', () => {
+  const { c } = renderHarness();
+  assert.equal(c.isHolidayActivity({ isBuiltInHoliday: true }), true);
+  assert.equal(c.isHolidayActivity({ eventType: 'holiday', allDay: false }), true);
+  assert.equal(c.isHolidayActivity({ eventType: 'holiday', allDay: true }), true);
+  assert.equal(c.isHolidayActivity({ eventType: 'birthday', allDay: true }), false);
+  assert.equal(c.isHolidayActivity({ eventType: 'activity', allDay: true }), false);
+  assert.equal(c.isHolidayActivity(null), false);
+});
+
+test('holiday band follows dates, precedes all-day/hour rows, and renders each holiday only once', () => {
+  const { c, grid, hooks, activities } = renderHarness();
+  const holidays = [
+    { id: 'built-in', title: 'Zulu Day', isBuiltInHoliday: true, allDay: true, day: 'tuesday' },
+    { ...event('legacy-timed', '01:00', '02:00', 'high'), title: 'Beta Day', eventType: 'holiday', allDay: false, day: 'tuesday' },
+    { id: 'alpha', title: 'Alpha Day', eventType: 'holiday', importance: 'high', allDay: true, day: 'tuesday' },
+    { id: 'gamma', title: 'Gamma Day', eventType: 'holiday', allDay: true, day: 'tuesday' },
+    { id: 'low-holiday', title: 'Aardvark Day', eventType: 'holiday', importance: 'low', allDay: true, day: 'tuesday' }
+  ].map(Object.freeze);
+  const input = Object.freeze([...activities, ...holidays]);
+  const before = JSON.stringify(input);
+  c.visibleActivities = () => input;
+  c.bindCalendarEventActions = (element, activity, suppressDraggedClick) => {
+    element.setAttribute('aria-label', `Bound event ${activity.start || 'All day'}`);
+    hooks.bind.push({ element, activity, suppressDraggedClick });
+  };
+  c.renderGrid();
+  const holidayHeadIndex = grid.children.findIndex(element => element.className === 'holiday-head');
+  const allDayHeadIndex = grid.children.findIndex(element => element.className === 'all-day-head');
+  const timeColumnIndex = grid.children.findIndex(element => element.className === 'time-column');
+  assert.equal(holidayHeadIndex, 3, 'One gutter and two date headers come first');
+  assert.ok(holidayHeadIndex < allDayHeadIndex && allDayHeadIndex < timeColumnIndex);
+  const cells = grid.children.filter(element => element.className.split(' ').includes('holiday-cell'));
+  assert.equal(cells.length, 2, 'Empty date cells retain column alignment');
+  assert.equal(cells[0].children.length, 0);
+  assert.deepEqual(cells[1].children.map(element => element.dataset.occurrenceKey), ['alpha', 'legacy-timed', 'gamma', 'built-in', 'low-holiday']);
+  assert.ok(cells.every(element => element.dataset.holidayDrop === 'true'));
+  const cards = grid.children.flatMap(element => element.children).filter(element => element.dataset.occurrenceKey);
+  for (const holiday of holidays) {
+    const found = cards.filter(element => element.dataset.occurrenceKey === holiday.id);
+    assert.equal(found.length, 1, holiday.id);
+    assert.ok(found[0].className.split(' ').includes('holiday-event'));
+    assert.ok(found[0].className.split(' ').includes('all-day-event'));
+    assert.ok(found[0].attributes['aria-label'].includes('sidebar.holidays'));
+    assert.ok(!found[0].attributes['aria-label'].includes('01:00'), 'The top band does not invent an hourly label');
+  }
+  const timelineCards = cards.filter(element => element.className.split(' ').includes('event'));
+  assert.equal(timelineCards.length, 3, 'Existing non-holiday timed events are unchanged');
+  const allDayCards = grid.children.filter(element => element.className.startsWith('all-day-cell')).flatMap(element => element.children);
+  assert.equal(allDayCards.length, 3, 'Existing non-holiday all-day events are unchanged');
+  assert.ok(!hooks.draggable.some(hook => hook.activity.id === 'built-in'));
+  assert.ok(hooks.draggable.some(hook => hook.activity.id === 'legacy-timed'));
+  assert.equal(hooks.bind.find(hook => hook.activity.id === 'legacy-timed').activity, holidays[1], 'Peek/details receive the original timed object');
+  assert.equal(holidays[1].start, '01:00');
+  assert.equal(holidays[1].allDay, false);
+  assert.equal(JSON.stringify(input), before);
+});
+
+test('no holiday band is added to periods without visible holidays, including hidden weekdays', () => {
+  const { c, grid, activities } = renderHarness();
+  c.renderGrid();
+  assert.ok(!grid.children.some(element => element.className === 'holiday-head'));
+  c.visibleActivities = () => [...activities, { id: 'hidden-sunday', title: 'Sunday holiday', eventType: 'holiday', allDay: true, day: 'sunday' }];
+  c.renderGrid();
+  assert.ok(!grid.children.some(element => element.className === 'holiday-head'));
+});
+
+test('holiday band respects upstream filters instead of pulling hidden stored holidays', () => {
+  const { c, grid, activities } = renderHarness();
+  const first = { id: 'selected-holiday', title: 'Selected', eventType: 'holiday', allDay: true, day: 'tuesday' };
+  const filteredOut = { id: 'filtered-holiday', title: 'Hidden', eventType: 'holiday', allDay: true, day: 'tuesday' };
+  c.state.activities = [...activities, first, filteredOut];
+  c.visibleActivities = () => [first];
+  c.renderGrid();
+  const cards = grid.children.flatMap(element => element.children).filter(element => element.dataset.occurrenceKey);
+  assert.deepEqual(cards.map(element => element.dataset.occurrenceKey), ['selected-holiday']);
+  c.visibleActivities = () => [];
+  c.renderGrid();
+  assert.ok(!grid.children.some(element => element.className === 'holiday-head'));
 });

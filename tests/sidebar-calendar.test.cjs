@@ -8,7 +8,7 @@ const vm = require('node:vm');
 const html = readFileSync(resolve(__dirname, '../index.html'), 'utf8');
 const functionNames = [
   'getMonday', 'addDays', 'dateKey', 'nthWeekdayOfMonth', 'lastWeekdayOfMonth',
-  'builtInHolidayActivities', 'parseDateKey', 'dateSerial', 'activityOccursOn',
+  'builtInHolidayActivities', 'parseDateKey', 'dateSerial', 'activitySpanDays', 'activityStartsOn', 'activityOccursOn', 'activitySpanPosition',
   'eventImportance', 'eventImportanceLabel', 'activityMatchesSearch', 'activityMatchesEventFilter', 'occurrencesOnDate',
   'monthOccurrences', 'formatFullDate', 'escapeHtml', 'isSameDate',
   'activityStatus', 'renderMiniCalendar', 'activateCalendarView', 'navigateMiniCalendar'
@@ -38,7 +38,7 @@ function setup() {
     'miniCalendar.eventLegend': 'Dots mark dates with events',
     'miniCalendar.filteredLegend': 'Showing {filter} · dots mark matching dates',
     'miniCalendar.searchLegend': 'Dots mark dates matching your filters',
-    'sidebar.holidays': 'Holidays', 'sidebar.specialDays': 'Special days', 'filters.activities': 'Activities',
+    'sidebar.holidays': 'Holidays', 'sidebar.specialDays': 'Special days', 'filters.activities': 'Activities', 'filters.trips': 'Trips',
     'holiday.stPatricks': "St. Patrick's Day"
   };
   const context = vm.createContext({
@@ -62,6 +62,7 @@ function setup() {
   add('Family holiday', 'holiday', '2026-03-17', '__family__');
   add('Birthday', 'birthday', '2026-03-18', 'Mark');
   add('Music', 'activity', '2026-03-19', 'Mark');
+  add('Family trip', 'trip', '2026-03-21', '__family__', { endDate: '2026-03-23', allDay: true });
   add('Cancelled holiday', 'holiday', '2026-03-20', '__family__', { status: 'cancelled' });
   add('April activity', 'activity', '2026-04-03');
   add('April holiday', 'holiday', '2026-04-04', '__family__');
@@ -96,6 +97,14 @@ test('sidebar respects activity/special-day, child and search filters', () => {
   context.renderMiniCalendar();
   assert.equal(count('2026-03-17'), 1);
   assert.equal(count('2026-03-18'), 0);
+  state.eventFilter = 'trip';
+  context.renderMiniCalendar();
+  assert.equal(count('2026-03-21'), 1);
+  assert.equal(count('2026-03-22'), 1);
+  assert.equal(count('2026-03-23'), 1);
+  assert.equal(count('2026-03-24'), 0);
+  assert.match(elements.miniCalendarLegend.textContent, /Showing Trips/);
+  assert.ok(context.monthOccurrences().every(event => event.eventType === 'trip'));
   state.visibleKids.delete('Mark');
   context.renderMiniCalendar();
   assert.equal(count('2026-03-19'), 0);

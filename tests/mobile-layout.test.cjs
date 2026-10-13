@@ -77,8 +77,14 @@ test('mobile layout keeps browser zoom, large inputs, and touch targets', () => 
   assert.match(css, /min-height: 44px/);
   assert.match(css, /max-height: min\(70dvh, 560px\)/);
   assert.match(css, /overscroll-behavior: contain/);
+  assert.match(css, /backdrop-filter: none/); // A filtered toolbar would trap fixed menus outside the viewport.
+  assert.match(css, /#appShell #calendarSide \{ grid-column: 1; grid-row: 1/);
+  assert.match(css, /#appShell \.calendar-stage-main \{ grid-column: 1; grid-row: 2/);
+  assert.match(css, /\.event-attendee-option > input \{[^}]*width: 1px; height: 1px/);
   assert.match(html, /<dialog id="activityDialog" aria-labelledby="dialogTitle">/);
   assert.match(html, /data-sidebar-action="dashboard" data-i18n="dashboard.open"/);
+  assert.match(html, /mobile-menu-item[^>]*data-sidebar-action="help"/);
+  assert.match(html, /mobile-menu-item[^>]*data-sidebar-action="settings"/);
 });
 
 test('toolbar minimum columns leave room at 320–740px, including a scrollbar', () => {

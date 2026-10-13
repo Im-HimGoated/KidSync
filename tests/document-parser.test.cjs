@@ -25,6 +25,15 @@ test("reads Chinese dates, clocks, logistics, and recurrence", () => {
   assert.deepEqual(result.repeatDays, [6]);
 });
 
+test("recognizes trip details in English and Chinese", () => {
+  const english = parse("Title: Family trip\nDate: 2026-10-17\nEnd date: 2026-10-20\nTime: 9:00-17:00");
+  assert.equal(english.eventType, "trip");
+  assert.equal(english.endDate, "2026-10-20");
+  const chinese = parse("活动：北京旅行\n日期：2026年10月17日\n返程日期：2026年10月20日\n时间：上午9点至下午5点");
+  assert.equal(chinese.eventType, "trip");
+  assert.equal(chinese.endDate, "2026-10-20");
+});
+
 test("keeps arrival separate from match times", () => {
   const result = parse("Title: Soccer\nDate: October 17, 2026\nArrival: 9:30 AM\nTime: 10:00-11:15 AM\nCoach Alex will supervise.\nPlayers should bring cleats and water.");
   assert.equal(result.start, "10:00");
@@ -59,4 +68,19 @@ test("recognizes generic headings and preserves unstructured instructions", () =
   assert.equal(result.title, "Dentist appointment");
   assert.equal(result.start, "15:00");
   assert.match(result.text, /consent form/);
+});
+
+test("flags multiple dates, numeric formats, and invalid repeat boundaries", () => {
+  assert(parse("Title: Schedule\nDate: 2026-10-17\nDate: 2026-10-18").warnings.includes("multipleEvents"));
+  assert(parse("Title: Event\nDate: 10/17/2026").warnings.includes("numericDateReview"));
+  const boundary = parse("Title: Lessons\nDate: 2026-10-17\nRepeat: Weekly\nUntil: 2026-10-01");
+  assert.equal(boundary.repeatUntil, "");
+  assert(boundary.warnings.includes("repeatReview"));
+});
+
+test("ignores all-day equipment and invalid dates", () => {
+  const result = parse("Title: School trip\nDate: February 30, 2026\nBring: all-day pass\nTime: 10:00-12:00");
+  assert.equal(result.date, "");
+  assert.equal(result.allDay, undefined);
+  assert.equal(result.start, "10:00");
 });

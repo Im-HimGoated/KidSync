@@ -10406,6 +10406,8 @@
             <button class="ghost-btn feature-btn share-btn" type="button" id="shareSchedule"><span class="button-icon" aria-hidden="true">↗</span><span data-i18n="sharing.share">Share</span></button>
             <button class="ghost-btn feature-btn" type="button" id="openVersionHistory"><span class="button-icon" aria-hidden="true">↶</span><span data-i18n="versions.open">Version history</span></button>
             <button class="ghost-btn" type="button" id="openActivityHistory" data-i18n="history.open">Activity history</button>
+            <button class="ghost-btn mobile-menu-item" type="button" data-sidebar-action="help" data-i18n="sidebar.help">Help</button>
+            <button class="ghost-btn mobile-menu-item" type="button" data-sidebar-action="settings" data-i18n="settings.open">Settings</button>
           </div>
         </details>
         <details class="planner-options" id="plannerOptions">
@@ -10429,6 +10431,7 @@
             <div class="event-filter" role="group" aria-label="Filter events" data-i18n-aria="filters.label">
               <button class="event-filter-option is-active" type="button" data-event-filter="all" aria-pressed="true" data-i18n="filters.all">All</button>
               <button class="event-filter-option" type="button" data-event-filter="activity" aria-pressed="false" data-i18n="filters.activities">Activities</button>
+              <button class="event-filter-option" type="button" data-event-filter="trip" aria-pressed="false" data-i18n="filters.trips">Trips</button>
               <button class="event-filter-option" type="button" data-event-filter="important" aria-pressed="false" data-i18n="filters.important">Important</button>
             </div>
           </section>
@@ -10605,13 +10608,14 @@
         <div class="event-template-options">
           <button class="event-template" type="button" data-template="school"><span aria-hidden="true">🏫</span> <span data-i18n="templates.school">School</span></button>
           <button class="event-template" type="button" data-template="sports"><span aria-hidden="true">⚽</span> <span data-i18n="templates.sports">Sports</span></button>
+          <button class="event-template" type="button" data-template="trip"><span aria-hidden="true">✈️</span> <span data-i18n="templates.trip">Trip</span></button>
           <button class="event-template" type="button" data-template="bedtime"><span aria-hidden="true">😴</span> <span data-i18n="templates.bedtime">Bedtime</span></button>
           <button class="event-template" type="button" data-template="chores"><span aria-hidden="true">✅</span> <span data-i18n="templates.chores">Chores</span></button>
         </div>
       </details>
       <label class="event-title-field" data-event-step="1">
         <span data-i18n="form.eventName">Event name</span>
-        <input id="title" type="text" required list="eventTitleSuggestions" placeholder="Soccer, birthday, holiday" data-i18n-placeholder="form.eventPlaceholder">
+        <input id="title" type="text" required list="eventTitleSuggestions" placeholder="Soccer, trip, birthday" data-i18n-placeholder="form.eventPlaceholder">
         <datalist id="eventTitleSuggestions"></datalist>
       </label>
       <div class="field-grid">
@@ -10629,13 +10633,19 @@
           <small id="eventImportanceHelp" data-i18n="importance.help">Higher importance appears first in lists and overlapping events.</small>
         </label>
         <label data-event-step="2">
-          <span data-i18n="form.date">Date</span>
+          <span id="eventDateLabel" data-i18n="form.date">Date</span>
           <input id="startDate" type="date" required>
         </label>
-        <label class="advanced-event-field" data-event-step="3">
+        <label id="tripEndDateField" data-event-step="2" hidden>
+          <span data-i18n="form.endDate">End date</span>
+          <input id="endDate" type="date">
+          <small class="field-help" data-i18n="form.tripEndDateHelp">The trip appears on every day through this date.</small>
+        </label>
+        <label data-event-step="1">
           <span data-i18n="form.eventType">Event type</span>
           <select id="eventType" required>
             <option value="activity" data-i18n="eventType.activity">Activity</option>
+            <option value="trip" data-i18n="eventType.trip">Trip</option>
             <option value="deadline" data-i18n="eventType.deadline">Deadline</option>
             <option value="birthday" data-i18n="eventType.birthday">Birthday</option>
             <option value="holiday" data-i18n="eventType.holiday">Holiday</option>
@@ -11092,7 +11102,8 @@
         <label><span data-i18n="form.eventName">Event name</span><input id="sharedEventTitle" type="text" maxlength="80" required></label>
         <label><span data-i18n="form.child">Child</span><select id="sharedEventChild" required></select></label>
         <label><span data-i18n="form.date">Date</span><input id="sharedEventDate" type="date" required></label>
-        <label><span data-i18n="form.eventType">Event type</span><select id="sharedEventType"><option value="activity" data-i18n="eventType.activity">Activity</option><option value="deadline" data-i18n="eventType.deadline">Deadline</option><option value="birthday" data-i18n="eventType.birthday">Birthday</option><option value="holiday" data-i18n="eventType.holiday">Holiday</option></select></label>
+        <label id="sharedEventEndDateField" hidden><span data-i18n="form.endDate">End date</span><input id="sharedEventEndDate" type="date"></label>
+        <label><span data-i18n="form.eventType">Event type</span><select id="sharedEventType"><option value="activity" data-i18n="eventType.activity">Activity</option><option value="trip" data-i18n="eventType.trip">Trip</option><option value="deadline" data-i18n="eventType.deadline">Deadline</option><option value="birthday" data-i18n="eventType.birthday">Birthday</option><option value="holiday" data-i18n="eventType.holiday">Holiday</option></select></label>
         <label><span data-i18n="importance.label">Importance</span><select id="sharedEventImportance"><option value="high" data-i18n="importance.high">High importance</option><option value="normal" selected data-i18n="importance.normal">Normal importance</option><option value="low" data-i18n="importance.low">Low importance</option></select></label>
         <label><span data-i18n="form.start">Start time</span><input id="sharedEventStart" type="time" required></label>
         <label><span data-i18n="form.end">End time</span><input id="sharedEventEnd" type="time" required></label>
@@ -11911,6 +11922,7 @@
         "templates.title": "Event shortcuts",
         "templates.school": "School",
         "templates.sports": "Sports",
+        "templates.trip": "Trip",
         "templates.bedtime": "Bedtime",
         "templates.chores": "Chores",
         "templates.applied": "{name} template applied",
@@ -11945,6 +11957,7 @@
         "gameScan.timezoneReview": "Review: time zone is written in Notes; times have not been converted",
         "gameScan.repeatReview": "Review: repeat end date precedes the event date",
         "gameScan.dateInferred": "Review: start date is the next matching weekday",
+        "gameScan.numericDateReview": "Review: numeric dates are read as month/day/year",
         "gameScan.multipleEvents": "Review: more than one event/date detected; scan one event at a time",
         "gameScan.oneTime": "One-time game",
         "gameScan.fieldTitle": "Title: {value}",
@@ -12214,6 +12227,9 @@
         "form.child": "Child",
         "form.day": "Day",
         "form.date": "Date",
+        "form.startDate": "Start date",
+        "form.endDate": "End date",
+        "form.tripEndDateHelp": "The trip appears on every day through this date.",
         "form.eventType": "Event type",
         "form.repeat": "Repeat",
         "form.moreOptions": "More options",
@@ -12224,7 +12240,7 @@
         "form.activity": "Activity",
         "form.activityPlaceholder": "Soccer, Kumon, Robotics",
         "form.eventName": "Event name",
-        "form.eventPlaceholder": "Soccer, birthday, holiday",
+        "form.eventPlaceholder": "Soccer, trip, birthday",
         "form.icon": "Icon",
         "form.colorStyle": "Color style",
         "form.childColor": "Child color",
@@ -12312,6 +12328,7 @@
         "icons.misc": "✨ Misc.",
         "icons.custom": "＋ Custom icon...",
         "eventType.activity": "Activity",
+        "eventType.trip": "Trip",
         "importance.label": "Importance",
         "importance.high": "High importance",
         "importance.highShort": "High",
@@ -12396,6 +12413,7 @@
         "empty.loadExample": "Load example",
         "today.nextUp": "Next up",
         "today.allDay": "All day",
+        "today.holidays": "Holidays",
         "today.morning": "Morning",
         "today.afternoon": "Afternoon",
         "today.evening": "Evening",
@@ -12429,6 +12447,7 @@
         "filters.searchMenu": "Filters & search",
         "filters.all": "All",
         "filters.activities": "Activities",
+        "filters.trips": "Trips",
         "filters.important": "Important",
         "month.more": "+{count} more",
         "holiday.newYear": "New Year’s Day",
@@ -12444,6 +12463,7 @@
         "stack.next": "Show next overlapping activity. {child} {title} is in front.",
         "stack.tooltip": "Show next activity ({child}: {title})",
         "validation.endAfter": "End time must be after start time.",
+        "validation.endDateAfter": "End date must be on or after the start date.",
         "day.monday": "Monday",
         "day.tuesday": "Tuesday",
         "day.wednesday": "Wednesday",
@@ -12947,6 +12967,7 @@
         "templates.title": "活动快捷模板",
         "templates.school": "上学",
         "templates.sports": "运动",
+        "templates.trip": "旅行",
         "templates.bedtime": "睡觉",
         "templates.chores": "家务",
         "templates.applied": "已应用{name}模板",
@@ -12980,6 +13001,7 @@
         "gameScan.timezoneReview": "请检查：时区保留在备注中，时间未转换",
         "gameScan.repeatReview": "请检查：重复结束日期早于活动日期",
         "gameScan.dateInferred": "请检查：开始日期为下一个匹配的星期日期",
+        "gameScan.numericDateReview": "请检查：数字日期按月/日/年读取",
         "gameScan.multipleEvents": "请检查：检测到多个活动或日期，请每次扫描一个活动",
         "gameScan.partial": "已添加信息，请检查下方提示。目前尚未保存。",
         "gameScan.oneTime": "单次比赛",
@@ -13236,6 +13258,9 @@
         "form.child": "孩子",
         "form.day": "星期",
         "form.date": "日期",
+        "form.startDate": "开始日期",
+        "form.endDate": "结束日期",
+        "form.tripEndDateHelp": "旅行会显示在开始到结束日期之间的每一天。",
         "form.eventType": "事件类型",
         "form.repeat": "重复",
         "form.moreOptions": "更多选项",
@@ -13246,7 +13271,7 @@
         "form.activity": "活动",
         "form.activityPlaceholder": "足球、公文数学、机器人",
         "form.eventName": "事件名称",
-        "form.eventPlaceholder": "足球、生日、节日",
+        "form.eventPlaceholder": "足球、旅行、生日",
         "form.icon": "图标",
         "form.colorStyle": "颜色样式",
         "form.childColor": "孩子的颜色",
@@ -13334,6 +13359,7 @@
         "icons.misc": "✨ 其他",
         "icons.custom": "＋ 自定义图标...",
         "eventType.activity": "活动",
+        "eventType.trip": "旅行",
         "importance.label": "重要程度",
         "importance.high": "高重要程度",
         "importance.highShort": "高",
@@ -13432,6 +13458,7 @@
         "empty.loadExample": "载入示例",
         "today.nextUp": "下一项",
         "today.allDay": "全天",
+        "today.holidays": "节日",
         "today.morning": "上午",
         "today.afternoon": "下午",
         "today.evening": "晚上",
@@ -13465,6 +13492,7 @@
         "filters.searchMenu": "筛选与搜索",
         "filters.all": "全部",
         "filters.activities": "活动",
+        "filters.trips": "旅行",
         "filters.important": "重要日程",
         "month.more": "还有 {count} 项",
         "holiday.newYear": "元旦",
@@ -13480,6 +13508,7 @@
         "stack.next": "显示下一个重叠活动。当前显示 {child} 的{title}。",
         "stack.tooltip": "显示下一个活动（{child}：{title}）",
         "validation.endAfter": "结束时间必须晚于开始时间。",
+        "validation.endDateAfter": "结束日期不能早于开始日期。",
         "day.monday": "星期一",
         "day.tuesday": "星期二",
         "day.wednesday": "星期三",
@@ -14803,6 +14832,7 @@
       id: document.getElementById("activityId"),
       child: document.getElementById("child"),
       date: document.getElementById("startDate"),
+      endDate: document.getElementById("endDate"),
       eventType: document.getElementById("eventType"),
       importance: document.getElementById("importance"),
       recurrence: document.getElementById("recurrence"),
@@ -14826,6 +14856,7 @@
     const EVENT_TEMPLATES = {
       school: { titleKey: "templates.school", icon: "🏫", recurrence: "weekly", repeatDays: [1, 2, 3, 4, 5], start: "08:00", end: "15:00", items: "" },
       sports: { titleKey: "templates.sports", icon: "⚽", recurrence: "weekly", start: "16:00", end: "17:30", items: "" },
+      trip: { titleKey: "templates.trip", icon: "✈️", eventType: "trip", recurrence: "none", allDay: true, start: "09:00", end: "17:00", items: "" },
       bedtime: { titleKey: "templates.bedtime", icon: "😴", recurrence: "daily", start: "19:30", end: "20:00", items: "" },
       chores: { titleKey: "templates.chores", icon: "✅", recurrence: "weekly", repeatDays: [6], start: "10:00", end: "10:30", items: "" }
     };
@@ -14840,7 +14871,7 @@
     let smartDefaultsAppliedTitle = "";
     let eventDraftSession = null;
     let eventDraftSaveTimer = 0;
-    const EVENT_DRAFT_FIELDS = ["child", "date", "eventType", "importance", "recurrence", "repeatInterval", "repeatUntil", "start", "end", "title", "icon", "customIcon", "style", "color", "status", "travelMinutes", "notes", "location", "responsible", "items"];
+    const EVENT_DRAFT_FIELDS = ["child", "date", "endDate", "eventType", "importance", "recurrence", "repeatInterval", "repeatUntil", "start", "end", "title", "icon", "customIcon", "style", "color", "status", "travelMinutes", "notes", "location", "responsible", "items"];
 
     function applyStaticTranslations() {
       document.documentElement.lang = currentLanguage === "zh" ? "zh-CN" : "en";
@@ -15284,6 +15315,11 @@
         || String(first.start || "").localeCompare(String(second.start || ""))
         || String(first.title || "").localeCompare(String(second.title || ""))
         || String(first.id || "").localeCompare(String(second.id || ""));
+    }
+
+    function compareCalendarEntries(first, second) {
+      return Number(isHolidayActivity(second)) - Number(isHolidayActivity(first))
+        || compareEventImportance(first, second);
     }
 
     function eventImportanceLabel(activity) {
@@ -16168,7 +16204,15 @@
       return dateKey(periodStart);
     }
 
-    function activityOccursOn(activity, date) {
+    function activitySpanDays(activity) {
+      if (!activity?.startDate || !activity?.endDate) return 0;
+      const start = parseDateKey(activity.startDate);
+      const end = parseDateKey(activity.endDate);
+      const span = dateSerial(end) - dateSerial(start);
+      return Number.isFinite(span) && span > 0 ? Math.min(span, 366) : 0;
+    }
+
+    function activityStartsOn(activity, date) {
       if (!activity.startDate) {
         const day = days.find(item => item.key === activity.day);
         return day ? days[date.getDay() === 0 ? 6 : date.getDay() - 1]?.key === day.key : false;
@@ -16202,6 +16246,26 @@
       }
     }
 
+    function activityOccursOn(activity, date) {
+      const spanDays = activitySpanDays(activity);
+      for (let offset = 0; offset <= spanDays; offset += 1) {
+        if (activityStartsOn(activity, addDays(date, -offset))) return true;
+      }
+      return false;
+    }
+
+    function activitySpanPosition(activity, date) {
+      const spanDays = activitySpanDays(activity);
+      if (!spanDays) return "";
+      for (let offset = 0; offset <= spanDays; offset += 1) {
+        if (!activityStartsOn(activity, addDays(date, -offset))) continue;
+        if (offset === 0) return "start";
+        if (offset === spanDays) return "end";
+        return "middle";
+      }
+      return "";
+    }
+
     function occurrenceKey(activity) {
       return `${activity.id}:${activity.occurrenceDate || activity.day || "event"}`;
     }
@@ -16227,8 +16291,9 @@
       if (state.eventFilter === "all") return true;
       const eventType = activity.eventType || "activity";
       if (state.eventFilter === "activity") return eventType === "activity";
+      if (state.eventFilter === "trip") return eventType === "trip";
       if (state.eventFilter === "holidays") return eventType === "holiday";
-      return eventImportance(activity) === "high" || eventType !== "activity";
+      return eventImportance(activity) === "high" || ["deadline", "birthday", "holiday"].includes(eventType);
     }
 
     function occurrencesOnDate(date, { ignoreSearch = false, ignoreFilter = false } = {}) {
@@ -16238,7 +16303,7 @@
         .filter(activity => ignoreSearch || activityMatchesSearch(activity))
         .filter(activity => ignoreFilter || activityMatchesEventFilter(activity))
         .filter(activity => activityOccursOn(activity, date))
-        .map(activity => ({ ...activity, day: day.key, occurrenceDate: dateKey(date) }));
+        .map(activity => ({ ...activity, day: day.key, occurrenceDate: dateKey(date), spanPosition: activitySpanPosition(activity, date) }));
       const holidays = activityMatchesEventFilter({ eventType: "holiday" })
         ? builtInHolidayActivities(date).filter(activity => ignoreSearch || activityMatchesSearch(activity))
         : [];
@@ -16549,7 +16614,9 @@
     function setupDraggableEvent(element, activity) {
       element.classList.add("is-draggable");
       element.title = t("drag.hint");
-      element.setAttribute("aria-keyshortcuts", "Alt+ArrowLeft Alt+ArrowRight Alt+ArrowUp Alt+ArrowDown");
+      element.setAttribute("aria-keyshortcuts", isHolidayActivity(activity)
+        ? "Alt+ArrowLeft Alt+ArrowRight"
+        : "Alt+ArrowLeft Alt+ArrowRight Alt+ArrowUp Alt+ArrowDown");
       let pointerStart = null;
       let pointerDragging = false;
       element.addEventListener("pointerdown", event => {
@@ -16570,7 +16637,7 @@
         event.preventDefault();
         document.querySelectorAll(".is-drop-target").forEach(target => target.classList.remove("is-drop-target"));
         const target = document.elementFromPoint(event.clientX, event.clientY)?.closest(".day-column, .all-day-cell");
-        if (target) target.classList.add("is-drop-target");
+        if (target && calendarDropAllowed(target)) target.classList.add("is-drop-target");
       });
       element.addEventListener("pointerup", event => {
         if (!pointerDragging || !draggedOccurrence) {
@@ -16584,11 +16651,11 @@
         if (target?.dataset.dropDate) {
           const targetDate = parseDateKey(target.dataset.dropDate);
           if (target.dataset.allDayDrop === "true") {
-            rescheduleDraggedEvent(targetDate, null, true);
+            rescheduleCalendarDrop(targetDate, null, true, target.dataset.holidayDrop === "true");
           } else {
             const bounds = target.getBoundingClientRect();
             const rawMinute = scheduleStartMinutes + ((event.clientY - bounds.top) / bounds.height) * scheduleDurationMinutes;
-            rescheduleDraggedEvent(targetDate, Math.round(rawMinute / 15) * 15, false);
+            rescheduleCalendarDrop(targetDate, Math.round(rawMinute / 15) * 15, false);
           }
         }
         pointerStart = null;
@@ -16604,11 +16671,12 @@
       element.addEventListener("keydown", event => {
         if (!event.altKey || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
         event.preventDefault();
+        if (isHolidayActivity(activity) && ["ArrowUp", "ArrowDown"].includes(event.key)) return;
         const sourceDate = parseDateKey(activity.occurrenceDate || activity.startDate);
         const dayOffset = event.key === "ArrowLeft" ? -1 : event.key === "ArrowRight" ? 1 : 0;
         const minuteOffset = event.key === "ArrowUp" ? -15 : event.key === "ArrowDown" ? 15 : 0;
         draggedOccurrence = { id: activity.id, occurrenceDate: activity.occurrenceDate || activity.startDate, allDay: Boolean(activity.allDay) };
-        rescheduleDraggedEvent(addDays(sourceDate, dayOffset), activity.allDay ? null : minutes(activity.start) + minuteOffset, activity.allDay);
+        rescheduleCalendarDrop(addDays(sourceDate, dayOffset), activity.allDay ? null : minutes(activity.start) + minuteOffset, activity.allDay);
       });
       element.addEventListener("dragstart", event => {
         hideEventPeek();
@@ -16636,13 +16704,14 @@
       const beforeMove = { ...activity };
       rememberCurrentSchedule(t("drag.rewindLabel"));
       const sourceDate = parseDateKey(draggedOccurrence.occurrenceDate || activity.startDate);
-      const targetKey = dateKey(targetDate);
       const offsetDays = dateSerial(targetDate) - dateSerial(sourceDate);
 
       if (recurrenceValue(activity) === "none") {
-        activity.startDate = targetKey;
+        activity.startDate = dateKey(addDays(parseDateKey(activity.startDate), offsetDays));
+        if (activity.endDate) activity.endDate = dateKey(addDays(parseDateKey(activity.endDate), offsetDays));
       } else {
         activity.startDate = dateKey(addDays(parseDateKey(activity.startDate), offsetDays));
+        if (activity.endDate) activity.endDate = dateKey(addDays(parseDateKey(activity.endDate), offsetDays));
         if (activity.repeatUntil) activity.repeatUntil = dateKey(addDays(parseDateKey(activity.repeatUntil), offsetDays));
         if (activity.recurrence === "weekly") {
           const sourceDay = sourceDate.getDay();
@@ -16670,11 +16739,26 @@
       scheduleSmartCalendarFocus();
     }
 
+    function calendarDropAllowed(element) {
+      if (!draggedOccurrence) return false;
+      const activity = state.activities.find(item => item.id === draggedOccurrence.id);
+      return Boolean(activity) && (element.dataset.holidayDrop !== "true" || isHolidayActivity(activity));
+    }
+
+    function rescheduleCalendarDrop(targetDate, startMinute, allDay, holidayBand = false) {
+      if (!draggedOccurrence) return;
+      const activity = state.activities.find(item => item.id === draggedOccurrence.id);
+      if (!activity || (holidayBand && !isHolidayActivity(activity))) return;
+      // Moving a holiday changes its date, without rewriting its stored time or type.
+      const holiday = isHolidayActivity(activity);
+      rescheduleDraggedEvent(targetDate, holiday ? null : startMinute, holiday ? Boolean(activity.allDay) : allDay);
+    }
+
     function setupDropTarget(element, targetDate, allDay = false) {
       element.dataset.dropDate = dateKey(targetDate);
       element.dataset.allDayDrop = String(allDay);
       element.addEventListener("dragover", event => {
-        if (!draggedOccurrence) return;
+        if (!calendarDropAllowed(element)) return;
         event.preventDefault();
         event.dataTransfer.dropEffect = "move";
         element.classList.add("is-drop-target");
@@ -16683,17 +16767,17 @@
         if (!element.contains(event.relatedTarget)) element.classList.remove("is-drop-target");
       });
       element.addEventListener("drop", event => {
-        if (!draggedOccurrence) return;
+        if (!calendarDropAllowed(element)) return;
         event.preventDefault();
         element.classList.remove("is-drop-target");
         if (allDay) {
-          rescheduleDraggedEvent(targetDate, null, true);
+          rescheduleCalendarDrop(targetDate, null, true, element.dataset.holidayDrop === "true");
           return;
         }
         const bounds = element.getBoundingClientRect();
         const rawMinute = scheduleStartMinutes + ((event.clientY - bounds.top) / bounds.height) * scheduleDurationMinutes;
         const snappedMinute = Math.round(rawMinute / 15) * 15;
-        rescheduleDraggedEvent(targetDate, snappedMinute, false);
+        rescheduleCalendarDrop(targetDate, snappedMinute, false);
       });
     }
 
@@ -16735,16 +16819,22 @@
       kidFilters.appendChild(list);
     }
 
+    function isHolidayActivity(activity) {
+      return activity?.eventType === "holiday" || Boolean(activity?.isBuiltInHoliday);
+    }
+
     function renderGrid() {
       const scrollContainer = grid.closest?.(".schedule-shell");
       const previousScroll = scrollContainer ? { top: scrollContainer.scrollTop, left: scrollContainer.scrollLeft } : null;
       const activities = visibleActivities();
       const conflicts = findConflicts(activities);
       const displayDays = visibleWeekDays();
+      const displayDayKeys = new Set(displayDays.map(day => day.key));
+      const holidays = activities.filter(activity => isHolidayActivity(activity) && displayDayKeys.has(activity.day));
       const pixelsPerMinute = 2 * userSettings.calendarZoom;
       const dayLayouts = new Map(displayDays.map(day => {
         const timed = activities
-          .filter(activity => activity.day === day.key && !activity.allDay)
+          .filter(activity => activity.day === day.key && !activity.allDay && !isHolidayActivity(activity))
           .sort((first, second) => minutes(first.start) - minutes(second.start));
         return [day.key, buildOverlapGroups(timed).map(layoutOverlapGroup)];
       }));
@@ -16782,6 +16872,46 @@
         grid.appendChild(head);
       });
 
+      if (holidays.length) {
+        const holidayHead = document.createElement("div");
+        holidayHead.className = "holiday-head";
+        holidayHead.textContent = t("sidebar.holidays");
+        grid.appendChild(holidayHead);
+        displayDays.forEach(day => {
+          const targetDate = calendarDateForDay(day);
+          const cell = document.createElement("div");
+          // Reuse the existing drop surface while keeping holiday presentation separate.
+          cell.className = `holiday-cell all-day-cell${isSameDate(targetDate, new Date()) ? " is-today" : ""}`;
+          setupDropTarget(cell, targetDate, true);
+          cell.dataset.holidayDrop = "true";
+          cell.setAttribute("aria-label", `${t("sidebar.holidays")} · ${formatFullDate(targetDate)}`);
+          holidays.filter(activity => activity.day === day.key)
+            .sort((first, second) => importanceRank(second) - importanceRank(first)
+              || activityTitle(first).localeCompare(activityTitle(second)) || compareEventImportance(first, second))
+            .forEach(activity => {
+              const colors = eventColors(activity);
+              const importance = eventImportance(activity);
+              const event = document.createElement("button");
+              event.type = "button";
+              event.className = `holiday-event all-day-event importance-${importance}${activity.isBuiltInHoliday ? " is-built-in-holiday" : ""}`;
+              event.style.setProperty("--event-bg", colors.soft);
+              event.style.setProperty("--event-line", colors.line);
+              event.style.setProperty("--event-ink", colors.ink);
+              event.style.setProperty("--event-z", String(10 + importanceRank(activity) * 10));
+              event.dataset.occurrenceKey = occurrenceKey(activity);
+              event.dataset.importance = importance;
+              event.innerHTML = `<span class="all-day-event-icon" aria-hidden="true">${escapeHtml(displayIcon(activity))}</span><span class="all-day-event-copy"><span class="all-day-event-title">${escapeHtml(activityCompactTitle(activity))}</span><span class="all-day-event-child">${escapeHtml(displayChild(activity))}</span>${eventImportanceBadge(activity)}</span>`;
+              if (!activity.isBuiltInHoliday) setupDraggableEvent(event, activity);
+              bindCalendarEventActions(event, activity, true);
+              // This band describes a date, not an invented hourly appointment.
+              // Details/hover still receive the unchanged activity and its genuine time.
+              event.setAttribute("aria-label", [activityCompactTitle(activity), t("sidebar.holidays"), formatFullDate(targetDate), displayChild(activity), eventImportanceLabel(activity)].filter(Boolean).join(" · "));
+              cell.appendChild(event);
+            });
+          grid.appendChild(cell);
+        });
+      }
+
       const allDayHead = document.createElement("div");
       allDayHead.className = "all-day-head";
       allDayHead.textContent = t("calendar.allDay");
@@ -16793,14 +16923,15 @@
         cell.className = `all-day-cell${isSameDate(targetDate, new Date()) ? " is-today" : ""}`;
         setupDropTarget(cell, targetDate, true);
         activities
-          .filter(activity => activity.day === day.key && activity.allDay)
+          .filter(activity => activity.day === day.key && activity.allDay && !isHolidayActivity(activity))
           .sort(compareEventImportance)
           .forEach(activity => {
             const colors = eventColors(activity);
             const importance = eventImportance(activity);
             const event = document.createElement("button");
             event.type = "button";
-            event.className = `all-day-event importance-${importance}${activity.isBuiltInHoliday ? " is-built-in-holiday" : ""}`;
+            const spanClass = activity.spanPosition ? ` trip-span is-span-${activity.spanPosition}` : "";
+            event.className = `all-day-event importance-${importance}${activity.isBuiltInHoliday ? " is-built-in-holiday" : ""}${spanClass}`;
             event.style.setProperty("--event-bg", colors.soft);
             event.style.setProperty("--event-line", colors.line);
             event.style.setProperty("--event-ink", colors.ink);
@@ -16924,7 +17055,7 @@
         const date = calendarDateForDay(day);
         const items = activities
           .filter(activity => activity.day === day.key)
-          .sort(compareEventImportance);
+          .sort(compareCalendarEntries);
         const isToday = isSameDate(date, new Date());
         const countLabel = t(items.length === 1 ? "overview.eventOne" : "overview.events", { count: items.length });
         const card = document.createElement("article");
@@ -16947,7 +17078,10 @@
           item.style.setProperty("--event-line", conflicts.has(occurrenceKey(activity)) ? "#b44352" : colors.line);
           item.style.setProperty("--event-ink", colors.ink);
           item.dataset.occurrenceKey = occurrenceKey(activity);
-          if (!activity.allDay && activity.end) item.dataset.endMinute = String(minutes(activity.end));
+          if (!activity.allDay && !isHolidayActivity(activity) && activity.end) {
+            item.dataset.startMinute = String(minutes(activity.start));
+            item.dataset.endMinute = String(minutes(activity.end));
+          }
           item.innerHTML = eventCardMarkup(activity, {
             badge: conflicts.has(occurrenceKey(activity)) ? t("calendar.conflict") : "",
             badgeClass: "is-conflict",
@@ -16961,7 +17095,16 @@
       });
     }
 
+    function activityDateRangeText(activity) {
+      if (!activity?.startDate || !activity?.endDate || activitySpanDays(activity) === 0) return "";
+      const locale = currentLanguage === "zh" ? "zh-CN" : "en-US";
+      const options = { month: "short", day: "numeric" };
+      return `${parseDateKey(activity.startDate).toLocaleDateString(locale, options)} – ${parseDateKey(activity.endDate).toLocaleDateString(locale, options)}`;
+    }
+
     function eventTimeText(activity) {
+      const dateRange = activityDateRangeText(activity);
+      if (dateRange) return dateRange;
       return activity.allDay ? t("calendar.allDay") : `${timeLabel(activity.start)}–${timeLabel(activity.end)}`;
     }
 
@@ -16997,6 +17140,7 @@
     }
 
     function todaySectionKey(activity) {
+      if (isHolidayActivity(activity)) return "holidays";
       if (activity.allDay) return "allDay";
       const start = minutes(activity.start);
       if (start < 12 * 60) return "morning";
@@ -17010,7 +17154,7 @@
 
     function nextUpActivity(activities) {
       // List order follows importance; next-up must still follow the clock.
-      const timed = activities.filter(activity => activityStatus(activity) !== "cancelled" && !activity.allDay)
+      const timed = activities.filter(activity => activityStatus(activity) !== "cancelled" && !activity.allDay && !isHolidayActivity(activity))
         .sort((first, second) => minutes(first.start) - minutes(second.start) || compareEventImportance(first, second));
       if (!timed.length) return null;
       const now = new Date();
@@ -17025,7 +17169,7 @@
       todayHeading.textContent = formatFullDate(selectedDate);
       todayList.innerHTML = "";
       const activities = occurrencesOnDate(selectedDate)
-        .sort(compareEventImportance);
+        .sort(compareCalendarEntries);
       const conflicts = findConflicts(activities);
 
       if (!activities.length) {
@@ -17046,7 +17190,7 @@
       }
 
       const next = nextUpActivity(activities);
-      ["allDay", "morning", "afternoon", "evening"].forEach(sectionKey => {
+      ["holidays", "allDay", "morning", "afternoon", "evening"].forEach(sectionKey => {
         const sectionItems = activities.filter(activity => todaySectionKey(activity) === sectionKey);
         if (!sectionItems.length) return;
 
@@ -17061,7 +17205,10 @@
           const event = document.createElement("button");
           event.type = "button";
           event.className = `today-event${isNext ? " is-next" : ""}${isConflict ? " conflict" : ""}`;
-          if (!activity.allDay && activity.end) event.dataset.endMinute = String(minutes(activity.end));
+          if (!activity.allDay && !isHolidayActivity(activity) && activity.end) {
+            event.dataset.startMinute = String(minutes(activity.start));
+            event.dataset.endMinute = String(minutes(activity.end));
+          }
           event.style.setProperty("--event-bg", colors.soft);
           event.style.setProperty("--event-line", colors.line);
           event.style.setProperty("--event-ink", colors.ink);
@@ -17345,7 +17492,7 @@
       for (let index = 0; index < 42; index += 1) {
         const date = addDays(gridStart, index);
         const activities = occurrencesOnDate(date)
-          .sort(compareEventImportance);
+          .sort(compareCalendarEntries);
         const conflicts = findConflicts(activities);
         const cell = document.createElement("div");
         const outside = date.getMonth() !== currentMonthStart.getMonth();
@@ -17373,7 +17520,8 @@
           const colors = eventColors(activity);
           const event = document.createElement("button");
           event.type = "button";
-          event.className = `month-event${conflicts.has(occurrenceKey(activity)) ? " conflict" : ""}${activity.isBuiltInHoliday ? " is-built-in-holiday" : ""}`;
+          const spanClass = activity.spanPosition ? ` trip-span is-span-${activity.spanPosition}` : "";
+          event.className = `month-event${conflicts.has(occurrenceKey(activity)) ? " conflict" : ""}${activity.isBuiltInHoliday ? " is-built-in-holiday" : ""}${spanClass}`;
           event.style.setProperty("--event-bg", colors.soft);
           event.style.setProperty("--event-line", colors.line);
           event.style.setProperty("--event-ink", colors.ink);
@@ -17404,7 +17552,7 @@
       if (!title || !weekdayRow || !miniGrid) return;
 
       title.textContent = miniCalendarMonth.toLocaleDateString(locale, { year: "numeric", month: "long" });
-      const filterKey = { holidays: "sidebar.holidays", important: "sidebar.specialDays", activity: "filters.activities" }[state.eventFilter];
+      const filterKey = { holidays: "sidebar.holidays", important: "sidebar.specialDays", activity: "filters.activities", trip: "filters.trips" }[state.eventFilter];
       const hasOtherFilters = Boolean(state.searchQuery.trim()) || Object.keys(kids).some(name => !state.visibleKids.has(name));
       document.getElementById("miniCalendarLegend").textContent = filterKey
         ? t("miniCalendar.filteredLegend", { filter: t(filterKey) })
@@ -17596,6 +17744,7 @@
       const rules = [
         { terms: ["birthday", "生日"], icon: "🎂", eventType: "birthday", allDay: true },
         { terms: ["holiday", "festival", "节日", "假期"], icon: "🎉", eventType: "holiday", allDay: true },
+        { terms: ["trip", "travel", "flight", "vacation", "旅行", "出行", "航班", "度假"], icon: "✈️", eventType: "trip", allDay: true },
         { terms: ["coding", "code", "programming", "编程", "代码"], icon: "💻" },
         { terms: ["robot", "robotics", "机器人"], icon: "🤖" },
         { terms: ["soccer", "football", "足球"], icon: "⚽" },
@@ -17634,6 +17783,7 @@
       if (previous) {
         fields.eventType.value = previous.eventType || "activity";
         fields.allDay.checked = Boolean(previous.allDay);
+        fields.endDate.value = previous.eventType === "trip" ? (previous.endDate || fields.date.value) : "";
         setIconField(previous.icon || MISC_ICON);
         fields.style.value = previous.style || "child";
         fields.location.value = previous.location || "";
@@ -17658,6 +17808,7 @@
       }
 
       updateAllDayFields();
+      updateTripDateFields();
       updateRecurrenceFields({ resetDays: true });
       chooseInitialOpenTime();
       updateConflictSuggestions();
@@ -17708,6 +17859,20 @@
       updatePopularTimeSelection();
     }
 
+    function updateTripDateFields({ reset = false } = {}) {
+      const isTrip = fields.eventType.value === "trip";
+      const field = document.getElementById("tripEndDateField");
+      document.getElementById("eventDateLabel").textContent = t(isTrip ? "form.startDate" : "form.date");
+      field.hidden = eventFormStep !== 2 || !isTrip;
+      fields.endDate.disabled = !isTrip;
+      fields.endDate.required = isTrip;
+      fields.endDate.min = fields.date.value;
+      if (isTrip && fields.date.value && (reset || !fields.endDate.value || fields.endDate.value < fields.date.value)) {
+        fields.endDate.value = fields.date.value;
+      }
+      fields.endDate.setCustomValidity("");
+    }
+
     function setEventFormStep(step, { focus = true } = {}) {
       eventFormStep = Math.max(1, Math.min(EVENT_FORM_STEPS.length, Number(step) || 1));
       form.dataset.currentStep = String(eventFormStep);
@@ -17726,6 +17891,7 @@
       const editActions = deleteButton.closest(".left-actions");
       editActions.hidden = deleteButton.hidden && duplicateButton.hidden;
 
+      updateTripDateFields();
       updateRecurrenceFields();
       updateConflictSuggestions();
       updatePopularTimeSelection();
@@ -17740,6 +17906,9 @@
     function validateEventFormStep(step = eventFormStep) {
       if (step === 2 && !fields.allDay.checked) {
         fields.end.setCustomValidity(minutes(fields.end.value) <= minutes(fields.start.value) ? t("validation.endAfter") : "");
+      }
+      if (step === 2 && fields.eventType.value === "trip") {
+        fields.endDate.setCustomValidity(!fields.endDate.value || fields.endDate.value < fields.date.value ? t("validation.endDateAfter") : "");
       }
       const controls = [...form.querySelectorAll(`[data-event-step="${step}"] input, [data-event-step="${step}"] select, [data-event-step="${step}"] textarea`)]
         .filter(control => !control.disabled && !control.closest("[hidden]"));
@@ -17779,15 +17948,16 @@
       const template = EVENT_TEMPLATES[templateId];
       if (!template) return;
       fields.title.value = t(template.titleKey);
-      fields.eventType.value = "activity";
+      fields.eventType.value = template.eventType || "activity";
       fields.recurrence.value = template.recurrence;
       fields.repeatInterval.value = "1";
       fields.repeatUntil.value = "";
-      fields.allDay.checked = false;
+      fields.allDay.checked = Boolean(template.allDay);
       fields.start.value = template.start;
       fields.end.value = template.end;
       fields.items.value = template.items;
       setIconField(template.icon);
+      updateTripDateFields({ reset: template.eventType === "trip" });
       const selectedDays = template.repeatDays || [parseDateKey(fields.date.value || defaultEventDate()).getDay()];
       document.querySelectorAll("#repeatWeekdays input").forEach(input => {
         input.checked = selectedDays.includes(Number(input.value));
@@ -18074,6 +18244,7 @@
       if (address && !location.includes(address)) location = [location, address].filter(Boolean).join(", ");
       if (!location) {
         location = lines.find(line => /\b(field|stadium|park|gym|complex|school|center|centre|arena)\b/i.test(line)
+          && !/^[^:：]{1,40}[:：]/.test(line) && line !== title
           && !/^(location|venue|field)\s*:?$/i.test(line)) || "";
       }
       const extras = parseScannedEventExtras(lines, title);
@@ -18121,6 +18292,13 @@
       if (/birthday|生日/i.test(type)) result.eventType = "birthday";
       else if (/holiday|节假日|假期|节日/i.test(type)) result.eventType = "holiday";
       else if (/deadline|due date|截止/i.test(type)) result.eventType = "deadline";
+      else if (/trip|travel|flight|vacation|旅行|出行|航班|度假/i.test(type)) result.eventType = "trip";
+      if (result.eventType === "trip") {
+        const tripEnd = scannedLineValue(lines, ["trip end", "trip ends", "return date", "end date", "旅行结束", "返程日期", "结束日期"]);
+        const parsedTripEnd = parseScannedDate(tripEnd);
+        if (parsedTripEnd) result.endDate = parsedTripEnd;
+        if (!result.recurrence) delete result.repeatUntil;
+      }
       const status = scannedLineValue(lines, ["status", "状态"]);
       if (/cancelled|canceled|取消/i.test(status)) result.status = "cancelled";
       else if (/tentative|pending|暂定|待定/i.test(status)) result.status = "tentative";
@@ -18188,7 +18366,7 @@
     function renderScannedGameSummary(details) {
       const values = [
         details.title ? t("gameScan.fieldTitle", { value: details.title }) : "",
-        details.date ? t("gameScan.fieldDate", { value: formatShortDate(parseDateKey(details.date)) }) : "",
+        details.date ? t("gameScan.fieldDate", { value: details.endDate && details.endDate !== details.date ? `${formatShortDate(parseDateKey(details.date))} – ${formatShortDate(parseDateKey(details.endDate))}` : formatShortDate(parseDateKey(details.date)) }) : "",
         details.start ? t("gameScan.fieldTime", { value: `${formatTimeLabel(minutes(details.start))} - ${formatTimeLabel(minutes(details.end))}` }) : "",
         details.location ? t("gameScan.fieldLocation", { value: details.location }) : "",
         details.responsible ? `${t("form.responsible")}: ${details.responsible}` : "",
@@ -18216,6 +18394,7 @@
       }
       if (details.title) fields.title.value = details.title;
       if (details.date) fields.date.value = details.date;
+      if (details.endDate) fields.endDate.value = details.endDate;
       if (details.start) {
         fields.start.value = details.start;
         fields.end.value = details.end;
@@ -18237,6 +18416,7 @@
       const inferred = inferredEventDefaults(normalizedEventTitle(details.title));
       if (details.title) setIconField(inferred?.icon || "✨");
       smartDefaultsAppliedTitle = normalizedEventTitle(fields.title.value);
+      updateTripDateFields();
       updateAllDayFields();
       updateRecurrenceFields({ resetDays: Boolean(details.recurrence) });
       if (details.repeatDays?.length) document.querySelectorAll("#repeatWeekdays input").forEach(input => { input.checked = details.repeatDays.includes(Number(input.value)); });
@@ -18307,7 +18487,12 @@
         fields.recurrence.value = "yearly";
         fields.allDay.checked = true;
         setIconField("🎉");
+      } else if (fields.eventType.value === "trip") {
+        fields.recurrence.value = "none";
+        fields.allDay.checked = true;
+        setIconField("✈️");
       }
+      updateTripDateFields({ reset: fields.eventType.value === "trip" });
       updateAllDayFields();
       updateRecurrenceFields({ resetDays: true });
     }
@@ -18413,7 +18598,7 @@
         const value = values[name];
         if (typeof value !== "string") return;
         if (field.options && ![...field.options].some(option => option.value === value)) return;
-        if (name === "date" && (!/^\d{4}-\d{2}-\d{2}$/.test(value) || dateKey(parseDateKey(value)) !== value)) return;
+        if (["date", "endDate"].includes(name) && (!/^\d{4}-\d{2}-\d{2}$/.test(value) || dateKey(parseDateKey(value)) !== value)) return;
         if (["start", "end"].includes(name) && !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)) return;
         field.value = value;
       });
@@ -18425,6 +18610,7 @@
       renderAttendeeOptions(attendees.includes("all") || !attendees.length ? ["all"] : attendees);
       renderEventColorOptions(fields.color.value);
       updateCustomIconField();
+      updateTripDateFields();
       updateAllDayFields();
       updateRecurrenceFields();
       fields.end.setCustomValidity("");
@@ -18489,6 +18675,7 @@
       fields.child.value = activity?.child || preferredNewEventChild();
       const legacyDayIndex = days.findIndex(day => day.key === activity?.day);
       fields.date.value = activity?.startDate || activity?.occurrenceDate || (legacyDayIndex >= 0 ? dateKey(addDays(currentWeekStart, legacyDayIndex)) : defaultEventDate());
+      fields.endDate.value = activity?.eventType === "trip" ? (activity?.endDate || fields.date.value) : "";
       fields.eventType.value = activity?.eventType || "activity";
       fields.importance.value = eventImportance(activity);
       fields.recurrence.value = activity ? recurrenceValue(activity) : "none";
@@ -18515,6 +18702,7 @@
         input.checked = selectedRepeatDays.includes(Number(input.value));
       });
       if (!activity) chooseInitialOpenTime();
+      updateTripDateFields();
       updateAllDayFields();
       updateRecurrenceFields();
       updateConflictSuggestions();
@@ -18542,6 +18730,7 @@
     function openNewEventForDate(date, child = FAMILY_CHILD) {
       openDialog();
       fields.date.value = dateKey(date);
+      updateTripDateFields();
       fields.child.value = child;
       chooseInitialOpenTime();
       updateConflictSuggestions();
@@ -18889,9 +19078,16 @@
     function upcomingOccurrences(dayCount = 7) {
       const now = new Date();
       const todaySerial = dateSerial(now);
+      const seenSpans = new Set();
       return Array.from({ length: dayCount }, (_, index) => occurrencesOnDate(addDays(now, index), { ignoreSearch: true }))
         .flat()
         .filter(activity => activityStatus(activity) !== "cancelled")
+        .filter(activity => {
+          if (!activitySpanDays(activity)) return true;
+          if (seenSpans.has(activity.id)) return false;
+          seenSpans.add(activity.id);
+          return true;
+        })
         .filter(activity => {
           const date = occurrenceDateTime(activity);
           if (!date) return false;
@@ -18908,7 +19104,7 @@
       event.innerHTML = `
         <span class="${className}-icon" aria-hidden="true">${escapeHtml(displayIcon(activity))}</span>
         <span class="${className}-copy"><strong>${escapeHtml(activityCompactTitle(activity))}</strong><span>${escapeHtml(displayChild(activity))} · ${escapeHtml(formatShortDate(date))}${activity.location ? ` · ${escapeHtml(activity.location)}` : ""}</span></span>
-        <span class="${className}-time">${escapeHtml(activity.allDay ? t("calendar.allDay") : formatTimeLabel(minutes(activity.start)))}</span>
+        <span class="${className}-time">${escapeHtml(activityDateRangeText(activity) || (activity.allDay ? t("calendar.allDay") : formatTimeLabel(minutes(activity.start))))}</span>
       `;
       event.addEventListener("click", () => {
         if (!dashboardPage.hidden) {
@@ -18931,7 +19127,7 @@
       const locale = currentLanguage === "zh" ? "zh-CN" : "en-US";
       const month = date.toLocaleDateString(locale, { month: "short" });
       const day = date.toLocaleDateString(locale, { day: "numeric" });
-      const time = activity.allDay ? t("calendar.allDay") : formatTimeLabel(minutes(activity.start));
+      const time = activityDateRangeText(activity) || (activity.allDay ? t("calendar.allDay") : formatTimeLabel(minutes(activity.start)));
       const relativeTarget = past || activity.allDay ? occurrenceEndDateTime(activity) : occurrenceDateTime(activity);
       const relative = formatRelativeTime(relativeTarget);
       const meta = [displayChild(activity), activity.location].filter(Boolean).join(" · ");
@@ -19100,7 +19296,7 @@
     }
 
     function occurrenceEndDateTime(activity) {
-      const value = activity.occurrenceDate || activity.startDate;
+      const value = activityDateRangeText(activity) ? activity.endDate : (activity.occurrenceDate || activity.startDate);
       if (!value) return null;
       const date = parseDateKey(value);
       if (activity.allDay) {
@@ -19487,14 +19683,16 @@
       const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//KidsSync//Family Calendar//EN", "CALSCALE:GREGORIAN", `X-WR-CALNAME:${icsEscape(calendarName)}`];
       state.activities.forEach(activity => {
         const startDate = activity.startDate || dateKey(currentWeekStart);
+        const lastDate = activity.endDate && activity.endDate >= startDate ? activity.endDate : startDate;
         lines.push("BEGIN:VEVENT", `UID:${icsEscape(activity.id)}@kidssync.local`, `SUMMARY:${icsEscape(activity.title)}`);
         if (activity.allDay) {
-          lines.push(`DTSTART;VALUE=DATE:${compactIcsDate(startDate)}`, `DTEND;VALUE=DATE:${compactIcsDate(dateKey(addDays(parseDateKey(startDate), 1)))}`);
+          lines.push(`DTSTART;VALUE=DATE:${compactIcsDate(startDate)}`, `DTEND;VALUE=DATE:${compactIcsDate(dateKey(addDays(parseDateKey(lastDate), 1)))}`);
         } else {
-          lines.push(`DTSTART:${compactIcsDate(startDate)}T${String(activity.start || "09:00").replace(":", "")}00`, `DTEND:${compactIcsDate(startDate)}T${String(activity.end || "09:30").replace(":", "")}00`);
+          lines.push(`DTSTART:${compactIcsDate(startDate)}T${String(activity.start || "09:00").replace(":", "")}00`, `DTEND:${compactIcsDate(lastDate)}T${String(activity.end || "09:30").replace(":", "")}00`);
         }
         lines.push(`STATUS:${activityStatus(activity).toUpperCase()}`);
         lines.push(`PRIORITY:${{ high: 1, normal: 5, low: 9 }[eventImportance(activity)]}`);
+        lines.push(`X-KIDSYNC-EVENT-TYPE:${icsEscape(activity.eventType || "activity")}`);
         if (activity.location) lines.push(`LOCATION:${icsEscape(activity.location)}`);
         const description = [displayChild(activity), activity.responsible, Number(activity.travelMinutes) > 0 ? t("travel.detail", { count: Number(activity.travelMinutes) }) : "", activity.items, activity.notes].filter(Boolean).join(" · ");
         if (description) lines.push(`DESCRIPTION:${icsEscape(description)}`);
@@ -19549,8 +19747,14 @@
         }));
         const frequency = String(rule.FREQ || "none").toLowerCase();
         const importedStatus = String(property("STATUS") || "confirmed").toLowerCase();
+        const importedType = String(property("X-KIDSYNC-EVENT-TYPE") || "activity").toLowerCase();
+        const importedEndDate = importedType === "trip" && end
+          ? (!start.time ? dateKey(addDays(parseDateKey(end.date), -1)) : end.date)
+          : "";
         return {
-          id: makeId("activity"), child: FAMILY_CHILD, startDate: start.date, eventType: "activity",
+          id: makeId("activity"), child: FAMILY_CHILD, startDate: start.date,
+          endDate: importedEndDate >= start.date ? importedEndDate : "",
+          eventType: ["activity", "trip", "deadline", "birthday", "holiday"].includes(importedType) ? importedType : "activity",
           recurrence: ["daily", "weekly", "monthly", "yearly"].includes(frequency) ? frequency : "none",
           repeatInterval: Math.max(1, Number(rule.INTERVAL) || 1), repeatUntil: parseIcsDate(rule.UNTIL)?.date || "",
           repeatDays: rule.BYDAY ? rule.BYDAY.split(",").map(code => weekdayNumbers[code.slice(-2)]).filter(day => day !== undefined) : [],
@@ -20039,7 +20243,7 @@
         const profile = profileMap[activity.child];
         const child = activity.child === FAMILY_CHILD ? t("calendar.family") : `${profile?.avatar || ""} ${activity.child || ""}`.trim();
         const editButton = canEditSharedCalendar() ? `<button class="small-btn edit-shared-event" type="button" data-event-id="${escapeHtml(activity.id)}">${escapeHtml(t("invitations.editEvent"))}</button>` : "";
-        return `<article class="shared-event" data-importance="${eventImportance(activity)}"><span class="shared-event-copy"><strong>${escapeHtml(`${activity.icon || MISC_ICON} ${activity.title || ""}`.trim())}</strong>${eventImportanceBadge(activity)}<span>${escapeHtml([activity.startDate, activity.allDay ? t("calendar.allDay") : `${activity.start || ""} - ${activity.end || ""}`, child].filter(Boolean).join(" · "))}</span></span><span class="shared-event-actions">${editButton}</span></article>`;
+        return `<article class="shared-event" data-importance="${eventImportance(activity)}"><span class="shared-event-copy"><strong>${escapeHtml(`${activity.icon || MISC_ICON} ${activity.title || ""}`.trim())}</strong>${eventImportanceBadge(activity)}<span>${escapeHtml([activityDateRangeText(activity) || activity.startDate, activity.allDay ? t("calendar.allDay") : `${activity.start || ""} - ${activity.end || ""}`, child].filter(Boolean).join(" · "))}</span></span><span class="shared-event-actions">${editButton}</span></article>`;
       }).join("") : `<p class="invitation-empty">${escapeHtml(t("invitations.noEvents"))}</p>`;
       list.querySelectorAll(".edit-shared-event").forEach(button => button.addEventListener("click", () => {
         const activity = sharedCalendarState.shared.activities.find(item => item.id === button.dataset.eventId);
@@ -20243,10 +20447,22 @@
       });
     }
 
+    function updateSharedEventDateFields() {
+      const isTrip = document.getElementById("sharedEventType").value === "trip";
+      const start = document.getElementById("sharedEventDate");
+      const end = document.getElementById("sharedEventEndDate");
+      document.getElementById("sharedEventEndDateField").hidden = !isTrip;
+      end.disabled = !isTrip;
+      end.required = isTrip;
+      end.min = start.value;
+      if (isTrip && start.value && (!end.value || end.value < start.value)) end.value = start.value;
+    }
+
     function applySharedEventTypeDefaults() {
       const type = document.getElementById("sharedEventType").value;
-      if (["deadline", "birthday", "holiday"].includes(type)) document.getElementById("sharedEventAllDay").checked = true;
+      if (["trip", "deadline", "birthday", "holiday"].includes(type)) document.getElementById("sharedEventAllDay").checked = true;
       if (type === "holiday") document.getElementById("sharedEventChild").value = FAMILY_CHILD;
+      updateSharedEventDateFields();
       updateSharedEventTimeFields();
     }
 
@@ -20260,6 +20476,7 @@
       document.getElementById("sharedEventTitle").value = activity?.title || "";
       childSelect.value = activity?.child || profiles[0]?.name || FAMILY_CHILD;
       document.getElementById("sharedEventDate").value = activity?.startDate || dateKey(new Date());
+      document.getElementById("sharedEventEndDate").value = activity?.eventType === "trip" ? (activity?.endDate || activity?.startDate || dateKey(new Date())) : "";
       document.getElementById("sharedEventType").value = activity?.eventType || "activity";
       document.getElementById("sharedEventImportance").value = eventImportance(activity);
       document.getElementById("sharedEventStart").value = activity?.start || "15:00";
@@ -20268,13 +20485,14 @@
       document.getElementById("sharedEventNotes").value = activity?.notes || "";
       document.getElementById("deleteSharedEvent").hidden = !activity;
       document.getElementById("sharedEventStatus").textContent = "";
+      updateSharedEventDateFields();
       updateSharedEventTimeFields();
       document.getElementById("sharedEventDialog").showModal();
     }
 
     function sharedEventIcon(type, existingIcon) {
       if (existingIcon) return existingIcon;
-      return { deadline: "📌", birthday: "🎂", holiday: "🎉", activity: "📅" }[type] || MISC_ICON;
+      return { trip: "✈️", deadline: "📌", birthday: "🎂", holiday: "🎉", activity: "📅" }[type] || MISC_ICON;
     }
 
     async function persistSharedCalendarActivities(activities) {
@@ -20308,6 +20526,13 @@
       const allDay = document.getElementById("sharedEventAllDay").checked;
       const start = document.getElementById("sharedEventStart").value;
       const end = document.getElementById("sharedEventEnd").value;
+      const startDate = document.getElementById("sharedEventDate").value;
+      const type = document.getElementById("sharedEventType").value;
+      const endDate = type === "trip" ? document.getElementById("sharedEventEndDate").value : "";
+      if (type === "trip" && (!endDate || endDate < startDate)) {
+        document.getElementById("sharedEventStatus").textContent = t("validation.endDateAfter");
+        return;
+      }
       if (!allDay && minutes(end) <= minutes(start)) {
         document.getElementById("sharedEventStatus").textContent = t("validation.endAfter");
         return;
@@ -20316,13 +20541,13 @@
       const activities = Array.isArray(sharedCalendarState.shared.activities) ? sharedCalendarState.shared.activities.slice() : [];
       const index = activities.findIndex(activity => activity.id === id);
       const existing = index >= 0 ? activities[index] : {};
-      const type = document.getElementById("sharedEventType").value;
       const activity = {
         ...existing,
         id,
         title: document.getElementById("sharedEventTitle").value.trim(),
         child: document.getElementById("sharedEventChild").value,
-        startDate: document.getElementById("sharedEventDate").value,
+        startDate,
+        endDate,
         eventType: type,
         importance: eventImportance({ importance: document.getElementById("sharedEventImportance").value }),
         recurrence: existing.recurrence || "none",
@@ -20456,7 +20681,7 @@
         };
       }
 
-      const timedActivities = activities.filter(activity => !activity.allDay && activity.start && activity.end);
+      const timedActivities = activities.filter(activity => !activity.allDay && !isHolidayActivity(activity) && activity.start && activity.end);
       if (!timedActivities.length) return { minute: scheduleStartMinutes, activity: activities[0] };
 
       const bucketMinutes = 30;
@@ -20486,12 +20711,18 @@
       return { minute: bestMinute, activity };
     }
 
+    function currentTimeCalendarItem(container, currentMinute) {
+      return [...(container?.querySelectorAll("[data-end-minute]") || [])]
+        .filter(item => Number(item.dataset.endMinute) > currentMinute)
+        .sort((first, second) => Number(first.dataset.startMinute) - Number(second.dataset.startMinute)
+          || Number(first.dataset.endMinute) - Number(second.dataset.endMinute))[0] || null;
+    }
+
     function scrollWeekToSmartTime({ currentTime = false } = {}) {
       const now = new Date();
       const currentMinute = now.getHours() * 60 + now.getMinutes();
       if (currentTime && currentView === "today") {
-        const upcoming = [...todayList.querySelectorAll("[data-end-minute]")]
-          .find(item => Number(item.dataset.endMinute) > currentMinute);
+        const upcoming = currentTimeCalendarItem(todayList, currentMinute);
         upcoming?.scrollIntoView({ behavior: "auto", block: "center" });
         return;
       }
@@ -20500,8 +20731,7 @@
       if (window.matchMedia("(max-width: 740px)").matches) {
         if (currentTime) {
           const today = mobileAgenda.querySelector(".day-card.is-today");
-          const upcoming = [...(today?.querySelectorAll("[data-end-minute]") || [])]
-            .find(item => Number(item.dataset.endMinute) > currentMinute);
+          const upcoming = currentTimeCalendarItem(today, currentMinute);
           (upcoming || today)?.scrollIntoView({ behavior: "auto", block: "start" });
           return;
         }
@@ -20520,6 +20750,7 @@
       const currentMarker = grid.querySelector("[data-current-time-marker]");
       if (currentTime && !currentMarker) return;
       const headerHeight = (grid.querySelector(".time-head")?.offsetHeight || 70)
+        + (grid.querySelector(".holiday-head")?.offsetHeight || 0)
         + (grid.querySelector(".all-day-head")?.offsetHeight || 52);
       const timelineHeight = timeline?.offsetHeight || scheduleDurationMinutes * 2 * userSettings.calendarZoom;
       const focusTop = headerHeight + ((focus.minute - scheduleStartMinutes) / scheduleDurationMinutes) * timelineHeight;
@@ -20738,6 +20969,7 @@
     document.getElementById("sharedCommentForm").addEventListener("submit", submitSharedComment);
     document.getElementById("sharedEventAllDay").addEventListener("change", updateSharedEventTimeFields);
     document.getElementById("sharedEventType").addEventListener("change", applySharedEventTypeDefaults);
+    document.getElementById("sharedEventDate").addEventListener("change", updateSharedEventDateFields);
     document.getElementById("deleteSharedEvent").addEventListener("click", deleteSharedEvent);
     document.getElementById("printSchedule").addEventListener("click", () => {
       document.getElementById("shareStatus").textContent = openPrintableSchedule() ? t("sharing.printOpened") : t("sharing.unavailable");
@@ -21167,16 +21399,18 @@
     fields.eventType.addEventListener("change", applyEventTypeDefaults);
     fields.recurrence.addEventListener("change", () => updateRecurrenceFields({ resetDays: true }));
     fields.date.addEventListener("change", () => {
+      updateTripDateFields();
       if (fields.recurrence.value === "weekly" && !document.querySelector("#repeatWeekdays input:checked")) {
         updateRecurrenceFields({ resetDays: true });
       }
     });
+    fields.endDate.addEventListener("change", () => fields.endDate.setCustomValidity(""));
     fields.icon.addEventListener("change", updateCustomIconField);
     fields.allDay.addEventListener("change", () => {
       updateAllDayFields();
       updateConflictSuggestions();
     });
-    [fields.child, fields.date, fields.start, fields.end].forEach(field => field.addEventListener("change", () => {
+    [fields.child, fields.date, fields.endDate, fields.start, fields.end].forEach(field => field.addEventListener("change", () => {
       updatePopularTimeSelection();
       updateConflictSuggestions();
     }));
@@ -21352,14 +21586,25 @@
       zh: { header: "顶部栏", account: "账户", controls: "工具栏", side: "侧边日历", focus: "专注", restore: "恢复面板", hide: "隐藏", show: "显示", group: "可见面板" }
     };
 
+    function updateCalendarPinnedRows() {
+      if (!weekSchedule.getClientRects().length) return;
+      const headerHeight = grid.querySelector(".time-head")?.offsetHeight || 76;
+      const holidayHeight = grid.querySelector(".holiday-head")?.offsetHeight || 0;
+      const allDayHeight = grid.querySelector(".all-day-head")?.offsetHeight || 0;
+      weekSchedule.style.setProperty("--week-header-height", `${headerHeight}px`);
+      weekSchedule.style.setProperty("--week-holiday-height", `${holidayHeight}px`);
+      weekSchedule.style.setProperty("--week-all-day-height", `${allDayHeight}px`);
+    }
+
     function resizeCalendarWorkspace() {
+      updateCalendarPinnedRows();
       const calendarMain = document.querySelector(".calendar-stage-main");
       const available = Math.max(240, window.innerHeight - (calendarMain.getBoundingClientRect().top + window.scrollY) - 12);
       document.getElementById("appShell").style.setProperty("--calendar-available-height", `${available}px`);
     }
 
     function renderActiveCalendarContext() {
-      const categoryKey = { holidays: "sidebar.holidays", important: "sidebar.specialDays", activity: "filters.activities" }[state.eventFilter];
+      const categoryKey = { holidays: "sidebar.holidays", important: "sidebar.specialDays", activity: "filters.activities", trip: "filters.trips" }[state.eventFilter];
       const query = state.searchQuery.trim();
       const labels = [categoryKey ? t(categoryKey) : "", query ? t("ux.searchFor", { query }) : ""].filter(Boolean);
       document.getElementById("calendarContextBar").hidden = labels.length === 0;
@@ -21438,6 +21683,11 @@
       applyWorkspaceVisibility();
     });
     window.addEventListener("resize", resizeCalendarWorkspace);
+    if (typeof ResizeObserver === "function") {
+      const calendarRowsObserver = new ResizeObserver(updateCalendarPinnedRows);
+      calendarRowsObserver.observe(grid);
+      calendarRowsObserver.observe(weekSchedule);
+    }
     document.addEventListener("keydown", event => {
       if (event.key !== "Escape" || event.defaultPrevented || document.querySelector("dialog[open]")) return;
       for (const id of ["workspacePanelMenu", "plannerOptions", "calendarViewMenu", "moreActions", "sidebarMenu"]) {
@@ -21495,6 +21745,12 @@
         if (validateEventFormStep()) setEventFormStep(eventFormStep + 1);
         return;
       }
+      if (fields.eventType.value === "trip" && (!fields.endDate.value || fields.endDate.value < fields.date.value)) {
+        setEventFormStep(2, { focus: false });
+        fields.endDate.setCustomValidity(t("validation.endDateAfter"));
+        fields.endDate.reportValidity();
+        return;
+      }
       if (!fields.allDay.checked && minutes(fields.end.value) <= minutes(fields.start.value)) {
         fields.end.setCustomValidity(t("validation.endAfter"));
         fields.end.reportValidity();
@@ -21505,6 +21761,7 @@
         id: fields.id.value || makeId("activity"),
         child: fields.child.value,
         startDate: fields.date.value,
+        endDate: fields.eventType.value === "trip" ? fields.endDate.value : "",
         eventType: fields.eventType.value,
         importance: eventImportance({ importance: fields.importance.value }),
         recurrence: fields.recurrence.value,
