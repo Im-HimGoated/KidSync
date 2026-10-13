@@ -1,0 +1,17 @@
+/* Activity markers and quick event lengths. */
+#appShell .mini-calendar-day.has-events { position: relative; padding-bottom: 5px; }
+#appShell .mini-calendar-event-dots { position: absolute; bottom: 3px; left: 50%; display: flex; gap: 2px; translate: -50% 0; pointer-events: none; }
+#appShell .mini-calendar-event-dots i { width: 3px; height: 3px; border-radius: 50%; background: currentColor; }
+#appShell .mini-calendar-marker-key { display: flex; align-items: center; gap: 6px; margin: 8px 0 0; color: var(--muted); font-size: 11px; line-height: 1.4; }
+#appShell .mini-calendar-marker-key > span:first-child { color: var(--blue); letter-spacing: 2px; }
+.event-duration-controls { margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+.event-duration-controls[hidden] { display: none !important; }
+.event-duration-heading { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.event-duration-heading strong { color: var(--ink); font-size: 13px; }
+#eventDurationSummary { color: var(--muted); font-size: 12px; line-height: 1.4; }
+#eventDurationSummary.is-invalid { color: var(--danger, #b33d4b); }
+.event-duration-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.event-duration-options button { min-height: 38px; padding: 8px 4px; border-radius: 8px; font-size: 13px; white-space: nowrap; }
+.event-duration-options button[aria-pressed="true"] { border-color: var(--blue); color: var(--blue); background: var(--blue-soft); }
+.event-duration-options button:disabled { opacity: .5; cursor: not-allowed; }
+@media (max-width: 560px) { .event-duration-options button { min-height: 44px; font-size: 12px; } }

@@ -1,13 +1,20 @@
-const CACHE_NAME = "kidssync-shell-v69";
+const CACHE_NAME = "kidssync-shell-v76";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./assets/ui-polish.css",
+  "./assets/mobile.css",
+  "./assets/calendar-extras.css",
+  "./assets/calendar-insights.css",
+  "./assets/command-palette.css",
+  "./assets/event-drafts.css",
+  "./assets/week-calendar.css",
   "./manifest.json",
   "./assets/kidssync-family-table-v2.png",
   "./assets/kidssync-family-hero.jpg",
   "./assets/kidssync-auth-family.png",
-  "./assets/jspdf.umd.min.js"
+  "./assets/jspdf.umd.min.js",
+  "./assets/lucide.min.js"
 ];
 
 self.addEventListener("install", event => {

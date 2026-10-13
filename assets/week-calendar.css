@@ -1,0 +1,545 @@
+/* Importance stays understandable in the editor, details, and every calendar view. */
+.event-importance-field small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 1.45;
+}
+.event-importance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 3px 6px;
+  border: 1px solid var(--blue-line);
+  border-radius: 5px;
+  color: var(--ink);
+  background: var(--blue-soft);
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.event-importance-badge.is-low {
+  border-color: var(--line);
+  color: var(--muted);
+  background: var(--soft-line);
+}
+.month-event .event-importance-badge {
+  margin-left: 4px;
+  padding: 1px 4px;
+  font-size: 9px;
+  vertical-align: 1px;
+}
+#eventPeekImportance { justify-self: start; }
+
+/* A quieter weekly timeline: color identifies the event, space explains its time. */
+#appShell #weekSchedule {
+  --week-hour-line: color-mix(in srgb, var(--line) 88%, var(--panel));
+  --week-half-hour-line: color-mix(in srgb, var(--line) 46%, var(--panel));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: none;
+  overscroll-behavior: contain;
+  scrollbar-color: color-mix(in srgb, var(--muted) 45%, var(--panel)) var(--panel);
+  scrollbar-width: thin;
+}
+
+#appShell #weekSchedule .schedule-grid,
+#appShell #weekSchedule .schedule-grid.weekdays-only {
+  min-width: 0;
+  width: 100%;
+  background: var(--panel);
+}
+
+/* Date headers and the time gutter retain their context during either scroll. */
+#appShell #weekSchedule .time-head,
+#appShell #weekSchedule .day-head {
+  height: 76px;
+  min-height: 76px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  background: var(--panel);
+  box-shadow: 0 1px 0 var(--line);
+}
+
+#appShell #weekSchedule .day-head {
+  min-width: 0;
+  gap: 6px;
+  padding: 10px 8px;
+  justify-content: flex-start;
+  align-items: center;
+  border-left: 1px solid var(--line);
+  line-height: 1.25;
+  transition: background-color 150ms ease;
+}
+
+#appShell #weekSchedule .day-head:hover {
+  filter: none;
+  background: color-mix(in srgb, var(--blue-soft) 44%, var(--panel));
+  box-shadow: 0 1px 0 var(--line);
+}
+
+#appShell #weekSchedule .day-head.is-today {
+  color: var(--blue);
+  background: color-mix(in srgb, var(--blue-soft) 66%, var(--panel));
+  box-shadow: inset 0 3px 0 var(--blue), 0 1px 0 var(--line);
+}
+
+#appShell #weekSchedule .day-head .weather {
+  flex: 0 0 auto;
+  font-size: 17px;
+}
+
+#appShell #weekSchedule .day-head-label {
+  min-width: 0;
+  white-space: normal;
+}
+
+#appShell #weekSchedule .day-head-label-row {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 4px;
+  font-size: var(--workspace-text-size, 14px);
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+#appShell #weekSchedule .day-head small {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+#appShell #weekSchedule .day-today-badge,
+#appShell #weekSchedule .day-event-count {
+  min-width: 17px;
+  min-height: 17px;
+  padding: 2px 4px;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+#appShell #weekSchedule .day-today-badge {
+  background: var(--blue);
+  color: #fff;
+}
+
+#appShell #weekSchedule .day-event-count {
+  border: 0;
+  color: var(--muted);
+  background: var(--soft-line);
+}
+
+#appShell #weekSchedule .time-head {
+  padding: 8px 4px;
+  font-size: 11px;
+}
+
+#appShell #weekSchedule .time-zone-label {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+#appShell #weekSchedule .time-column {
+  border-right: 0;
+  background: var(--panel);
+}
+
+#appShell #weekSchedule .time-label {
+  right: 9px;
+  max-width: calc(100% - 12px);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+#appShell #weekSchedule .all-day-head,
+#appShell #weekSchedule .all-day-cell {
+  min-height: 50px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--soft-line) 40%, var(--panel));
+}
+
+#appShell #weekSchedule .all-day-head {
+  padding: 8px 3px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+#appShell #weekSchedule .all-day-cell {
+  min-width: 0;
+  gap: 4px;
+  padding: 5px 4px;
+  border-left: 1px solid var(--line);
+}
+
+#appShell #weekSchedule .all-day-cell.is-today {
+  background: color-mix(in srgb, var(--blue-soft) 40%, var(--panel));
+}
+
+#appShell #weekSchedule .all-day-event {
+  position: relative;
+  min-height: 32px;
+  padding: 5px 6px;
+  border-width: 1px;
+  border-left-width: 3px;
+  border-radius: 6px;
+  gap: 5px;
+  color: var(--event-ink);
+  background: var(--event-bg);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  box-shadow: none;
+}
+
+#appShell #weekSchedule .all-day-event-icon { flex: 0 0 auto; align-self: flex-start; }
+#appShell #weekSchedule .all-day-event-copy {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  gap: 2px;
+}
+#appShell #weekSchedule .all-day-event-title {
+  display: -webkit-box;
+  width: 100%;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-weight: 650;
+  line-height: 1.25;
+}
+#appShell #weekSchedule .all-day-event-child {
+  width: 100%;
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#appShell #weekSchedule .all-day-event .event-importance-badge {
+  width: fit-content;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-size: 9px;
+  line-height: 1.2;
+}
+
+/* Hours are stronger than half hours; today has a barely tinted empty canvas. */
+#appShell #weekSchedule .day-column {
+  --week-column-bg: var(--panel);
+  min-width: 0;
+  border-left: 1px solid var(--line);
+  background-color: var(--week-column-bg);
+  background-image:
+    repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--half-hour-row) * 2 - 1px), var(--week-hour-line) calc(var(--half-hour-row) * 2 - 1px), var(--week-hour-line) calc(var(--half-hour-row) * 2)),
+    repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--half-hour-row) - 1px), var(--week-half-hour-line) calc(var(--half-hour-row) - 1px), var(--week-half-hour-line) var(--half-hour-row));
+}
+
+#appShell #weekSchedule .day-column.is-today {
+  --week-column-bg: color-mix(in srgb, var(--blue-soft) 19%, var(--panel));
+}
+
+#appShell #weekSchedule .day-column.is-drop-target,
+#appShell #weekSchedule .all-day-cell.is-drop-target {
+  outline: 2px solid var(--blue);
+  outline-offset: -2px;
+  background-color: color-mix(in srgb, var(--blue-soft) 55%, var(--panel));
+}
+
+/* Timed cards use their full lane without drifting from the time they represent. */
+#appShell #weekSchedule .day-column > .event,
+#appShell #weekSchedule .day-column > .event.overlap-offset {
+  z-index: var(--event-z, 10);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-width: 0;
+  padding: 6px 7px;
+  border: 1px solid color-mix(in srgb, var(--event-line) 65%, var(--event-bg));
+  border-left: 3px solid var(--event-line);
+  border-radius: 8px;
+  color: var(--event-ink);
+  background: var(--event-bg);
+  box-shadow: none;
+  text-align: left;
+  transform: none;
+  transition: box-shadow 150ms ease, border-color 150ms ease, left 150ms ease, right 150ms ease;
+}
+
+#appShell #weekSchedule .day-column > .event .event-icon {
+  display: none;
+}
+
+#appShell #weekSchedule .day-column > .event .event-card-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  min-width: 0;
+  max-height: 100%;
+  gap: 3px;
+  overflow: hidden;
+}
+
+#appShell #weekSchedule .day-column > .event .event-title {
+  order: 0;
+  display: -webkit-box;
+  width: 100%;
+  overflow: hidden;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: inherit;
+  font-size: var(--workspace-text-size, 14px);
+  font-weight: 650;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: normal;
+  flex-shrink: 0;
+}
+
+#appShell #weekSchedule .day-column > .event .event-time,
+#appShell #weekSchedule .day-column > .event.overlap-offset .event-time {
+  order: 1;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+#appShell #weekSchedule .day-column > .event .event-badge,
+#appShell #weekSchedule .day-column > .event .event-importance-badge {
+  order: 2;
+  max-width: 100%;
+  min-height: 0;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+#appShell #weekSchedule .event-importance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: inherit;
+  background: color-mix(in srgb, var(--event-ink) 9%, var(--event-bg));
+  border: 1px solid color-mix(in srgb, var(--event-ink) 18%, var(--event-bg));
+}
+
+#appShell #weekSchedule .day-column > .event .event-child,
+#appShell #weekSchedule .day-column > .event .event-detail {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  color: inherit;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#appShell #weekSchedule .day-column > .event .event-child { order: 3; }
+#appShell #weekSchedule .day-column > .event .event-detail { order: 4; opacity: .85; }
+#appShell.workspace-simple-events #weekSchedule .day-column > .event .event-detail { display: none; }
+
+#appShell #weekSchedule .day-column > .event[data-importance="high"] {
+  border-left-width: 4px;
+  border-top-color: var(--event-line);
+}
+
+#appShell #weekSchedule .day-column > .event[data-importance="low"] {
+  border-left-style: dashed;
+}
+
+/* Preserve the actual event color and text contrast for every priority. */
+#appShell #weekSchedule .day-column > .event.conflict {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #c93651 68%, transparent);
+}
+
+#appShell #weekSchedule .day-column > .event:hover {
+  z-index: 40;
+  border-color: var(--event-ink);
+  outline: none;
+  box-shadow: 0 3px 10px rgb(23 42 58 / 18%);
+  transform: none;
+}
+
+/* Temporarily give a crowded card the full day lane so its details remain legible. */
+@media (hover: hover) and (pointer: fine) {
+  #appShell #weekSchedule .day-column > .event.overlap-offset:hover,
+  #appShell #weekSchedule .day-column > .event.overlap-offset:focus-visible {
+    left: 4px !important;
+    right: 4px !important;
+  }
+}
+
+#appShell #weekSchedule .day-column > .event.overlap-offset .event-title {
+  font-size: max(11px, calc(var(--workspace-text-size, 14px) - 2px));
+}
+
+#appShell #weekSchedule .day-column > .event.overlap-offset .event-time {
+  font-size: 10px;
+}
+
+#appShell #weekSchedule .day-column > .event:focus-visible,
+#appShell #weekSchedule .all-day-event:focus-visible {
+  z-index: 41;
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+
+#appShell #weekSchedule .day-column > .event.is-dragging {
+  z-index: 42;
+  opacity: .55;
+  cursor: grabbing;
+}
+
+#appShell #weekSchedule .event.is-draggable::after {
+  top: 4px;
+  right: 3px;
+  font-size: 10px;
+  opacity: 0;
+}
+
+#appShell #weekSchedule .event.is-draggable:hover::after,
+#appShell #weekSchedule .event.is-draggable:focus-visible::after {
+  opacity: .55;
+}
+
+#appShell #weekSchedule .day-column > .event.compact-duration,
+#appShell #weekSchedule .day-column > .event.compact-duration.overlap-offset {
+  padding: 3px 5px;
+  border-radius: 6px;
+}
+
+#appShell #weekSchedule .day-column > .event.compact-duration .event-card-copy { gap: 1px; }
+#appShell #weekSchedule .day-column > .event.compact-duration .event-title {
+  -webkit-line-clamp: 1;
+  font-size: 12px;
+  line-height: 1.15;
+}
+#appShell #weekSchedule .day-column > .event.compact-duration .event-time { font-size: 10px; line-height: 1.15; }
+
+#appShell #weekSchedule .day-column > .event.compact-duration .event-child,
+#appShell #weekSchedule .day-column > .event.compact-duration .event-detail,
+#appShell #weekSchedule .day-column > .event.compact-duration .event-badge,
+#appShell #weekSchedule .day-column > .event.compact-duration .event-importance-badge {
+  display: none;
+}
+
+#appShell #weekSchedule .day-column > .event.compact-duration[data-importance="high"]::before {
+  content: "↑";
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+#appShell #weekSchedule .day-column > .event.compact-duration[data-importance="high"] .event-title {
+  padding-right: 9px;
+}
+
+#appShell #weekSchedule .day-column > .event.very-short,
+#appShell #weekSchedule .day-column > .event.very-short.overlap-offset {
+  padding: 1px 4px;
+  border-radius: 5px;
+}
+#appShell #weekSchedule .day-column > .event.very-short .event-card-copy { gap: 0; }
+#appShell #weekSchedule .day-column > .event.very-short .event-title { font-size: 11px; line-height: 1.1; }
+#appShell #weekSchedule .day-column > .event.very-short .event-time { font-size: 9px; line-height: 1.1; }
+
+/* A narrow overlap lane may wrap the time range, but should keep whole words. */
+#appShell #weekSchedule .day-column > .event.overlap-offset:not(.very-short) .event-title {
+  overflow-wrap: normal;
+  word-break: normal;
+  font-size: 13px;
+}
+#appShell #weekSchedule .day-column > .event.overlap-offset:not(.very-short) .event-time {
+  overflow: visible;
+  overflow-wrap: normal;
+  word-break: normal;
+  line-height: 1.2;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+#appShell #weekSchedule .current-time-line { background: #d94655; }
+#appShell #weekSchedule .current-time-line::before { background: #d94655; }
+#appShell #weekSchedule .current-time-line span {
+  top: -10px;
+  padding: 2px 4px;
+  border: 1px solid var(--panel);
+  border-radius: 4px;
+  background: #d94655;
+  font-size: 9px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+html.dark-mode #appShell #weekSchedule {
+  --week-hour-line: color-mix(in srgb, var(--line) 80%, var(--panel));
+  --week-half-hour-line: color-mix(in srgb, var(--line) 38%, var(--panel));
+}
+
+html.dark-mode #appShell #weekSchedule .current-time-line,
+html.dark-mode #appShell #weekSchedule .current-time-line::before,
+html.dark-mode #appShell #weekSchedule .current-time-line span {
+  background: #f36979;
+}
+
+html.dark-mode #appShell #weekSchedule .current-time-line span { color: #18252e; }
+
+@media (max-width: 740px) {
+  #appShell #weekSchedule { border-radius: 8px; }
+  #appShell #weekSchedule .day-head { padding-inline: 8px; }
+  #appShell #weekSchedule .all-day-event { min-height: 36px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #appShell #weekSchedule .day-head,
+  #appShell #weekSchedule .day-column > .event { transition: none; }
+}
+
+html.reduce-motion #appShell #weekSchedule .day-head,
+html.reduce-motion #appShell #weekSchedule .day-column > .event { transition: none; }

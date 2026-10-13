@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <title>KidsSync Weekly Schedule</title>
   <meta name="theme-color" content="#1f6898">
   <meta name="mobile-web-app-capable" content="yes">
@@ -9754,9 +9754,56 @@
       #appShell #addActivity .compact-toolbar-symbol { font-size:19px; }
     }
   </style>
+  <style>
+    .app-loader { position:fixed; inset:0; z-index:10000; display:grid; place-items:center; background:var(--panel,#fff); color:var(--ink,#20343d); pointer-events:none; transition:opacity 180ms ease; }
+    .app-loader[hidden] { display:none; }
+    .app-loader.is-ready { opacity:0; }
+    .app-loader-content { display:grid; justify-items:center; gap:16px; }
+    .app-loader-content strong { font-size:24px; letter-spacing:0; }
+    .loader-calendar { display:grid; grid-template-columns:repeat(2,12px); gap:6px; padding:20px 14px 14px; border:2px solid var(--line,#d7e1e6); border-top:6px solid var(--blue,#237cc0); border-radius:8px; }
+    .loader-calendar span { width:12px; height:12px; border-radius:3px; background:var(--blue,#237cc0); animation:calendar-loading 1.2s ease-in-out infinite; }
+    .loader-calendar span:nth-child(2) { animation-delay:150ms; background:var(--green,#28866b); }
+    .loader-calendar span:nth-child(3) { animation-delay:300ms; background:var(--green,#28866b); }
+    .loader-calendar span:nth-child(4) { animation-delay:450ms; }
+    .auth-form button[type="submit"]:disabled::before, #saveStatus.is-syncing::before { content:""; display:inline-block; width:14px; height:14px; flex:0 0 14px; margin-right:8px; vertical-align:-2px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:loading-spin 800ms linear infinite; }
+    @keyframes calendar-loading { 0%,100% { opacity:.4; transform:scale(.85); } 50% { opacity:1; transform:scale(1); } }
+    @keyframes loading-spin { to { transform:rotate(360deg); } }
+    html.reduce-motion .loader-calendar span, html.reduce-motion .auth-form button::before, html.reduce-motion #saveStatus::before { animation:none !important; }
+    html.reduce-motion .app-loader { transition:none; }
+    @media (prefers-reduced-motion:reduce) {
+      .loader-calendar span, .auth-form button[type="submit"]:disabled::before, #saveStatus.is-syncing::before { animation:none; }
+      .app-loader { transition:none; }
+    }
+    @media (prefers-color-scheme:dark) { .app-loader { background:var(--panel,#142129); color:var(--ink,#f1f6f8); } }
+  </style>
   <link rel="stylesheet" href="./assets/ui-polish.css">
+  <link rel="stylesheet" href="./assets/command-palette.css">
+  <link rel="stylesheet" href="./assets/event-drafts.css">
+  <link rel="stylesheet" href="./assets/calendar-insights.css">
+  <link rel="stylesheet" href="./assets/calendar-extras.css">
+  <link rel="stylesheet" href="./assets/week-calendar.css">
+  <link rel="stylesheet" href="./assets/mobile.css">
 </head>
 <body>
+  <div class="app-loader" id="appLoader" role="status" aria-live="polite">
+    <div class="app-loader-content">
+      <div class="loader-calendar" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <strong>KidsSync</strong>
+      <span id="appLoaderLabel">Loading your planner...</span>
+    </div>
+  </div>
+  <script>
+    // A failed dependency must never leave the loading screen covering the app.
+    window.dismissAppLoader = () => {
+      const loader = document.getElementById("appLoader");
+      if (loader.hidden || loader.classList.contains("is-ready")) return;
+      loader.classList.add("is-ready");
+      window.setTimeout(() => { loader.hidden = true; }, 200);
+    };
+    if (navigator.language.startsWith("zh")) document.getElementById("appLoaderLabel").textContent = "正在加载日历...";
+    window.setTimeout(window.dismissAppLoader, 6000);
+    window.addEventListener("error", window.dismissAppLoader, { once:true });
+  </script>
   <section class="welcome-screen" id="welcomeScreen" aria-labelledby="welcomeBrand" hidden>
     <header class="welcome-nav" aria-label="KidsSync navigation" data-i18n-aria="welcome.navigation">
       <div class="welcome-wordmark" aria-label="KidsSync">
@@ -10295,6 +10342,7 @@
       </details>
       <button type="button" id="toggleCalendarFocus"><span aria-hidden="true">⛶</span><span>Focus</span></button>
       <button type="button" id="openLayoutEditor" aria-haspopup="dialog"><span aria-hidden="true">☷</span><span data-i18n="layout.customize">Customize</span></button>
+      <button type="button" id="openCommandPaletteQuick" data-command-palette aria-haspopup="dialog" aria-controls="commandPalette" aria-label="Quick actions" title="Quick actions (Ctrl / ⌘ K)" data-i18n-aria="command.open" data-i18n-title="command.openTitle"><span aria-hidden="true">⌘K</span></button>
       <button type="button" id="workspaceSearch" aria-label="Search activities" title="Search activities" data-i18n-aria="search.label" data-i18n-title="search.label"><span class="sidebar-search-glyph" aria-hidden="true"></span></button>
       <button type="button" id="workspaceQuickAdd" aria-label="Add event" title="Add event" data-i18n-aria="miniCalendar.addEvent" data-i18n-title="miniCalendar.addEvent"><span aria-hidden="true">+</span></button>
       <div class="workspace-date-shortcuts">
@@ -10348,6 +10396,8 @@
         <details class="more-actions" id="moreActions">
           <summary class="compact-toolbar-action sidebar-tooltip sidebar-tooltip-right" aria-label="More" title="More" data-tooltip="More" data-i18n-aria="actions.more" data-i18n-title="actions.more" data-i18n-tooltip="actions.more"><span class="compact-toolbar-symbol compact-toolbar-more" aria-hidden="true">•••</span><span class="compact-toolbar-label" data-i18n="actions.more">More</span></summary>
           <div class="more-actions-menu">
+            <button class="ghost-btn" type="button" data-sidebar-action="dashboard" data-i18n="dashboard.open">Dashboard</button>
+            <button class="ghost-btn" type="button" id="openCommandPalette" data-command-palette aria-haspopup="dialog" aria-controls="commandPalette" data-i18n="command.open">Quick actions</button>
             <button class="ghost-btn" type="button" id="loadPreset" data-i18n="actions.loadExample">Load Example</button>
             <button class="ghost-btn" type="button" id="managePresets" data-i18n="actions.presets">Presets &amp; Rewind</button>
             <button class="ghost-btn feature-btn" type="button" id="openReminders"><span class="button-icon" aria-hidden="true">🔔</span><span data-i18n="reminders.open">Reminders</span><span class="reminder-badge" id="reminderBadge" hidden>0</span></button>
@@ -10408,8 +10458,23 @@
       <button class="ghost-btn" type="button" id="resetScheduleFilters" data-i18n="search.reset">Clear search and filters</button>
     </section>
 
+    <section class="calendar-insights" id="calendarInsights" aria-labelledby="calendarInsightsTitle">
+      <div class="calendar-insights-copy">
+        <h2 id="calendarInsightsTitle" data-i18n="insights.title">View insights</h2>
+        <p><strong id="calendarInsightsCount"></strong><span id="calendarInsightsScope"></span></p>
+      </div>
+      <div class="calendar-insights-health">
+        <p class="calendar-insights-status" id="calendarInsightsStatus" role="status" aria-live="polite" aria-atomic="true"></p>
+        <button class="calendar-insights-warning" type="button" id="calendarInsightsConflicts" hidden></button>
+        <button class="calendar-insights-warning calendar-insights-travel" type="button" id="calendarInsightsTravel" hidden></button>
+      </div>
+    </section>
+
     <div class="calendar-stage">
-      <aside class="mini-calendar" id="calendarSide" aria-label="Mini calendar" data-i18n-aria="miniCalendar.label">
+      <aside class="mini-calendar" id="calendarSide" aria-label="Mini calendar" data-i18n-aria="miniCalendar.label" aria-describedby="miniCalendarLegend">
+        <details class="calendar-side-disclosure" id="calendarSideDisclosure" open>
+          <summary class="calendar-side-toggle" aria-controls="calendarSideContent"><span data-i18n="miniCalendar.mobileBrowse">Dates &amp; calendar tools</span></summary>
+          <div id="calendarSideContent">
         <h2 class="calendar-sidebar-heading"><span aria-hidden="true">🗓️</span><span data-i18n="miniCalendar.sidebarTitle">Calendars</span></h2>
         <div class="mini-calendar-header">
           <h2 class="mini-calendar-title" id="miniCalendarTitle"></h2>
@@ -10418,6 +10483,7 @@
         </div>
         <div class="mini-calendar-weekdays" id="miniCalendarWeekdays" aria-hidden="true"></div>
         <div class="mini-calendar-grid" id="miniCalendarGrid"></div>
+        <p class="mini-calendar-marker-key"><span aria-hidden="true">•••</span><span id="miniCalendarLegend">Dots mark dates with events</span></p>
         <nav class="mini-calendar-tools" aria-label="Calendar tools" data-i18n-aria="miniCalendar.tools">
           <h3 data-i18n="miniCalendar.tools">Calendar tools</h3>
           <button class="mini-calendar-tool is-primary" type="button" id="miniAddActivity"><span class="mini-calendar-tool-icon" aria-hidden="true">＋</span><span data-i18n="miniCalendar.addEvent">Add event</span><span class="mini-calendar-tool-chevron" aria-hidden="true">›</span></button>
@@ -10427,6 +10493,8 @@
           <button class="mini-calendar-tool" type="button" id="miniShareSchedule"><span class="mini-calendar-tool-icon" aria-hidden="true">↗</span><span data-i18n="sharing.share">Share</span><span class="mini-calendar-tool-chevron" aria-hidden="true">›</span></button>
           <button class="mini-calendar-tool" type="button" id="miniManageCalendars"><span class="mini-calendar-tool-icon" aria-hidden="true">⚙</span><span data-i18n="calendars.manage">Manage calendars</span><span class="mini-calendar-tool-chevron" aria-hidden="true">›</span></button>
         </nav>
+          </div>
+        </details>
       </aside>
 
       <div class="calendar-stage-main">
@@ -10458,23 +10526,42 @@
 
   <aside class="event-peek" id="eventPeek" hidden aria-label="Event quick actions">
     <strong id="eventPeekTitle"></strong>
+    <span class="event-importance-badge" id="eventPeekImportance" hidden></span>
     <span id="eventPeekMeta"></span>
     <div class="event-peek-actions"><button class="small-btn" type="button" id="eventPeekView" data-i18n="eventPreview.view">View details</button><button class="small-btn" type="button" id="eventPeekEdit" data-i18n="eventPreview.edit">Edit</button></div>
   </aside>
 
   <dialog class="event-details-dialog" id="eventDetailsDialog" aria-labelledby="eventDetailsTitle">
-    <div class="modal-header"><h2 id="eventDetailsTitle" data-i18n="eventPreview.details">Event details</h2><button class="close-btn" type="button" id="closeEventDetails" aria-label="Close" data-i18n-aria="aria.close">×</button></div>
+    <div class="event-details-toolbar">
+      <button type="button" id="eventDetailsEdit" aria-label="Edit" title="Edit"><i data-lucide="pencil" aria-hidden="true"></i></button>
+      <button type="button" id="eventDetailsDelete" aria-label="Delete" title="Delete" data-i18n-aria="actions.delete" data-i18n-title="actions.delete"><i data-lucide="trash-2" aria-hidden="true"></i></button>
+      <button type="button" id="closeEventDetails" aria-label="Close" title="Close" data-i18n-aria="aria.close" data-i18n-title="aria.close"><i data-lucide="x" aria-hidden="true"></i></button>
+    </div>
     <div class="event-details-body" id="eventDetailsBody"></div>
-    <div class="event-details-actions"><button class="small-btn" type="button" id="eventDetailsDone" data-i18n="eventPreview.done">Close</button><button class="primary-btn" type="button" id="eventDetailsEdit" data-i18n="eventPreview.edit">Edit</button></div>
+    <div class="event-details-confirm" id="eventDetailsConfirm" hidden>
+      <p id="eventDetailsDeletePrompt" role="alert"></p>
+      <div><button class="ghost-btn" type="button" id="eventDetailsCancelDelete" data-i18n="actions.cancel">Cancel</button><button class="danger-btn" type="button" id="eventDetailsConfirmDelete" data-i18n="actions.delete">Delete</button></div>
+    </div>
   </dialog>
 
-  <dialog id="activityDialog">
+  <dialog id="activityDialog" aria-labelledby="dialogTitle">
     <div class="modal-header">
       <h2 id="dialogTitle" data-i18n="dialog.addTitle">Add Event</h2>
       <button class="close-btn" type="button" id="closeDialog" aria-label="Close" data-i18n-aria="aria.close">×</button>
     </div>
     <form id="activityForm" data-current-step="1">
       <input type="hidden" id="activityId">
+      <section class="event-draft-banner" id="eventDraftBanner" aria-labelledby="eventDraftTitle" hidden>
+        <div class="event-draft-copy">
+          <strong id="eventDraftTitle" data-i18n="draft.available">You have an unfinished event</strong>
+          <p id="eventDraftSummary" data-i18n="draft.choose">Resume your saved draft, or discard it to start this event.</p>
+        </div>
+        <div class="event-draft-actions">
+          <button class="small-btn" type="button" id="resumeEventDraft" data-i18n="draft.resume">Resume draft</button>
+          <button class="ghost-btn" type="button" id="discardEventDraft" data-i18n="draft.discard">Discard draft</button>
+        </div>
+      </section>
+      <p class="event-draft-status" id="eventDraftStatus" role="status" aria-live="polite" aria-atomic="true" hidden></p>
       <div class="event-step-progress" aria-live="polite">
         <div class="event-step-copy">
           <strong id="eventStepTitle" data-i18n="eventSteps.event">Event</strong>
@@ -10531,6 +10618,15 @@
         <label data-event-step="1">
           <span data-i18n="form.child">Child</span>
           <select id="child" required></select>
+        </label>
+        <label class="event-importance-field" data-event-step="1">
+          <span data-i18n="importance.label">Importance</span>
+          <select id="importance" aria-describedby="eventImportanceHelp">
+            <option value="high" data-i18n="importance.high">High importance</option>
+            <option value="normal" selected data-i18n="importance.normal">Normal importance</option>
+            <option value="low" data-i18n="importance.low">Low importance</option>
+          </select>
+          <small id="eventImportanceHelp" data-i18n="importance.help">Higher importance appears first in lists and overlapping events.</small>
         </label>
         <label data-event-step="2">
           <span data-i18n="form.date">Date</span>
@@ -10604,6 +10700,15 @@
         <input id="allDay" type="checkbox">
         <span data-i18n="form.allDay">All-day event</span>
       </label>
+      <section class="event-duration-controls" id="eventDurationControls" data-event-step="2" aria-labelledby="eventDurationLabel">
+        <div class="event-duration-heading"><strong id="eventDurationLabel" data-i18n="duration.title">Event length</strong><output id="eventDurationSummary" for="startTime endTime" role="status" aria-live="polite"></output></div>
+        <div class="event-duration-options" role="group" aria-label="Quick event lengths" data-i18n-aria="duration.quick">
+          <button type="button" class="ghost-btn" data-event-duration="15" aria-pressed="false">15 min</button>
+          <button type="button" class="ghost-btn" data-event-duration="30" aria-pressed="false">30 min</button>
+          <button type="button" class="ghost-btn" data-event-duration="60" aria-pressed="false">1 hour</button>
+          <button type="button" class="ghost-btn" data-event-duration="90" aria-pressed="false">1½ hours</button>
+        </div>
+      </section>
       <section class="conflict-suggestions" id="conflictSuggestions" data-event-step="2" hidden aria-live="polite">
         <h3 data-i18n="conflicts.title">Schedule conflict</h3>
         <p id="conflictSuggestionSummary"></p>
@@ -10988,6 +11093,7 @@
         <label><span data-i18n="form.child">Child</span><select id="sharedEventChild" required></select></label>
         <label><span data-i18n="form.date">Date</span><input id="sharedEventDate" type="date" required></label>
         <label><span data-i18n="form.eventType">Event type</span><select id="sharedEventType"><option value="activity" data-i18n="eventType.activity">Activity</option><option value="deadline" data-i18n="eventType.deadline">Deadline</option><option value="birthday" data-i18n="eventType.birthday">Birthday</option><option value="holiday" data-i18n="eventType.holiday">Holiday</option></select></label>
+        <label><span data-i18n="importance.label">Importance</span><select id="sharedEventImportance"><option value="high" data-i18n="importance.high">High importance</option><option value="normal" selected data-i18n="importance.normal">Normal importance</option><option value="low" data-i18n="importance.low">Low importance</option></select></label>
         <label><span data-i18n="form.start">Start time</span><input id="sharedEventStart" type="time" required></label>
         <label><span data-i18n="form.end">End time</span><input id="sharedEventEnd" type="time" required></label>
       </div>
@@ -11278,6 +11384,25 @@
     </div>
   </dialog>
 
+  <dialog id="commandPalette" aria-labelledby="commandPaletteTitle">
+    <div class="command-palette-heading">
+      <h2 id="commandPaletteTitle" data-i18n="command.title">Quick actions</h2>
+      <button class="command-palette-close" id="closeCommandPalette" type="button" aria-label="Close" data-i18n-aria="aria.close">×</button>
+    </div>
+    <label class="command-palette-search">
+      <span aria-hidden="true">⌕</span>
+      <input id="commandPaletteQuery" type="search" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="true" aria-controls="commandPaletteResults" aria-label="Search actions or events" data-i18n-aria="command.placeholder" placeholder="Search actions or events…" data-i18n-placeholder="command.placeholder" autocomplete="off" autofocus>
+    </label>
+    <div class="command-palette-results" id="commandPaletteResults" role="listbox" aria-label="Quick actions" data-i18n-aria="command.title"></div>
+    <span class="sr-only" id="commandPaletteCount" role="status" aria-live="polite"></span>
+    <div class="command-palette-footer">
+      <span><kbd>↑ ↓</kbd><span data-i18n="command.navigate">Navigate</span></span>
+      <span><kbd>Enter</kbd><span data-i18n="command.run">Choose</span></span>
+      <span><kbd>Esc</kbd><span data-i18n="command.close">Close</span></span>
+      <span><kbd>Ctrl / ⌘ K</kbd><span data-i18n="command.reopen">Quick actions</span></span>
+    </div>
+  </dialog>
+
   <dialog class="sidebar-help-dialog" id="sidebarHelpDialog">
     <div class="modal-header"><div><p class="eyebrow" data-i18n="sidebar.help">Help</p><h2 data-i18n="sidebar.helpTitle">How KidsSync works</h2></div><button class="close-btn" type="button" id="closeSidebarHelp" aria-label="Close" data-i18n-aria="aria.close">×</button></div>
     <div class="sidebar-help-body">
@@ -11299,9 +11424,18 @@
   <script src="./supabase-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./assets/jspdf.umd.min.js"></script>
+  <script src="./assets/lucide.min.js"></script>
   <script>
     const translations = {
       en: {
+        "draft.available": "You have an unfinished event",
+        "draft.choose": "Resume your saved draft, or discard it to start this event.",
+        "draft.resume": "Resume draft",
+        "draft.discard": "Discard draft",
+        "draft.saved": "Draft saved on this device",
+        "draft.resumed": "Draft restored. Changes are saved on this device.",
+        "draft.discarded": "Draft discarded. You can start fresh.",
+        "draft.failed": "This draft could not be saved on this device. Save your event before closing.",
         "document.title": "KidsSync | One clear place for the family week",
         "welcome.navigation": "KidsSync navigation",
         "welcome.sections": "Welcome sections",
@@ -11408,6 +11542,36 @@
         "sidebar.navigation": "KidsSync navigation",
         "sidebar.sections": "Planner sections",
         "sidebar.openMenu": "Open navigation menu",
+        "command.open": "Quick actions",
+        "command.openTitle": "Quick actions (Ctrl / ⌘ K)",
+        "command.title": "Quick actions",
+        "command.placeholder": "Search actions or events…",
+        "command.empty": "No actions or events match. Try another search.",
+        "command.resultCount": "{count} results",
+        "command.resultOne": "1 result",
+        "command.navigate": "Navigate",
+        "command.run": "Choose",
+        "command.close": "Close",
+        "command.reopen": "Quick actions",
+        "command.newEvent": "New event",
+        "command.newEventDetail": "Add an event on the selected date",
+        "command.today": "Go to today",
+        "command.todayDetail": "Return to the current date and time",
+        "command.day": "Day view",
+        "command.week": "Week view",
+        "command.four": "4-day view",
+        "command.month": "Month view",
+        "command.viewDetail": "Change the calendar view",
+        "command.dashboard": "Dashboard",
+        "command.dashboardDetail": "See your family overview",
+        "command.search": "Search calendar",
+        "command.searchDetail": "Find events with calendar search and filters",
+        "command.customize": "Customize workspace",
+        "command.customizeDetail": "Adjust spacing, text size, and panels",
+        "command.settings": "Settings",
+        "command.settingsDetail": "Appearance, reminders, and preferences",
+        "command.event": "Event",
+        "command.untitled": "Untitled event",
         "sidebar.chooseDate": "Choose a date",
         "sidebar.familyPlanner": "Family planner",
         "sidebar.activities": "Activities",
@@ -11560,6 +11724,22 @@
         "settings.darkMode": "Dark mode",
         "ux.clearFilters": "Clear filters",
         "ux.searchFor": "Search: {query}",
+        "insights.title": "View insights",
+        "insights.eventOne": "1 scheduled event",
+        "insights.events": "{count} scheduled events",
+        "insights.family": "Family events",
+        "insights.allChildren": "All children & family",
+        "insights.child": "{name} & family",
+        "insights.children": "{count} children & family",
+        "insights.empty": "No scheduled events in this view",
+        "insights.clear": "All clear in this view",
+        "insights.checkNote": "Checks overlap and travel time for the events shown. Cancelled events are excluded.",
+        "insights.overlapOne": "1 overlap",
+        "insights.overlaps": "{count} overlaps",
+        "insights.travelOne": "1 tight trip",
+        "insights.travel": "{count} tight trips",
+        "insights.reviewOverlap": "Review the next overlapping event",
+        "insights.reviewTravel": "Review the next event with too little travel time",
         "layout.customize": "Customize",
         "layout.savedLocally": "Your layout is saved in this browser.",
         "layout.panels": "Panels",
@@ -11743,20 +11923,29 @@
         "popularTimes.noTime": "No time needed",
         "gameScan.dashboardAction": "Scan document",
         "gameScan.title": "Scan document",
-        "gameScan.intro": "Take a photo of the PlayMetrics game description. KidsSync will fill this game’s date, time, and location.",
+        "gameScan.intro": "Add an event flyer, school notice, invitation, or activity description.",
         "gameScan.takePhoto": "Take or choose photo",
         "gameScan.private": "The photo is read on this device.",
         "gameScan.loading": "Preparing the private photo scanner…",
-        "gameScan.reading": "Reading the game details… {progress}%",
+        "gameScan.reading": "Reading the document… {progress}%",
         "gameScan.reviewTitle": "Review what KidsSync found",
         "gameScan.pasteInstead": "Paste the description instead",
-        "gameScan.pasteHelp": "This also works when you copy the game description from PlayMetrics.",
-        "gameScan.textPlaceholder": "Game title, date, time, and location",
+        "gameScan.pasteHelp": "Paste the full event description, including any instructions.",
+        "gameScan.textPlaceholder": "Event, date, time, location, people, and instructions",
         "gameScan.useText": "Use these details",
         "gameScan.noText": "No readable text was found. Try a clearer crop or paste the description below.",
         "gameScan.failed": "The photo could not be read. Paste the description below or try another picture.",
-        "gameScan.applied": "Game details added. Review each field before saving.",
-        "gameScan.partial": "Some details were added. Please check the date and time before saving.",
+        "gameScan.applied": "Event details added. Review each field before saving.",
+        "gameScan.partial": "Details added with items to review below. Nothing has been saved yet.",
+        "gameScan.titleReview": "Review: event title not found",
+        "gameScan.dateReview": "Review: event date not found",
+        "gameScan.timeReview": "Review: event time missing or unclear",
+        "gameScan.estimatedEnd": "Review: end time uses your default duration",
+        "gameScan.overnight": "Review: overnight times need manual entry",
+        "gameScan.timezoneReview": "Review: time zone is written in Notes; times have not been converted",
+        "gameScan.repeatReview": "Review: repeat end date precedes the event date",
+        "gameScan.dateInferred": "Review: start date is the next matching weekday",
+        "gameScan.multipleEvents": "Review: more than one event/date detected; scan one event at a time",
         "gameScan.oneTime": "One-time game",
         "gameScan.fieldTitle": "Title: {value}",
         "gameScan.fieldDate": "Date: {value}",
@@ -12019,6 +12208,8 @@
         "eventPreview.notes": "Notes",
         "eventPreview.repeats": "Repeats",
         "eventPreview.status": "Status",
+        "eventPreview.deletePrompt": "Delete this event? You can undo this afterward.",
+        "eventPreview.deleteSeries": "Delete all occurrences of this repeating event? You can undo this afterward.",
         "dialog.duplicateTitle": "Duplicate Event",
         "form.child": "Child",
         "form.day": "Day",
@@ -12121,6 +12312,13 @@
         "icons.misc": "✨ Misc.",
         "icons.custom": "＋ Custom icon...",
         "eventType.activity": "Activity",
+        "importance.label": "Importance",
+        "importance.high": "High importance",
+        "importance.highShort": "High",
+        "importance.normal": "Normal importance",
+        "importance.low": "Low importance",
+        "importance.lowShort": "Low",
+        "importance.help": "Higher importance appears first in lists and overlapping events.",
         "eventType.deadline": "Deadline",
         "eventType.birthday": "Birthday",
         "eventType.holiday": "Holiday",
@@ -12169,8 +12367,22 @@
         "calendar.today": "Today",
         "miniCalendar.label": "Mini calendar",
         "miniCalendar.sidebarTitle": "Calendars",
+        "miniCalendar.mobileBrowse": "Dates & calendar tools",
         "miniCalendar.tools": "Calendar tools",
         "miniCalendar.addEvent": "Add event",
+        "miniCalendar.eventOne": "1 event",
+        "miniCalendar.eventCount": "{count} events",
+        "miniCalendar.eventLegend": "Dots mark dates with events",
+        "miniCalendar.filteredLegend": "Showing {filter} · dots mark matching dates",
+        "miniCalendar.searchLegend": "Dots mark dates matching your filters",
+        "duration.title": "Event length",
+        "duration.quick": "Quick event lengths",
+        "duration.total": "{count} minutes total",
+        "duration.minutes": "{count} min",
+        "duration.setLength": "Set length to {count} minutes",
+        "duration.dayBoundary": "This length would go past midnight",
+        "duration.invalid": "End time must be after start time",
+        "duration.chooseTimes": "Choose start and end times",
         "miniCalendar.previous": "Previous month",
         "miniCalendar.next": "Next month",
         "calendar.conflict": "Schedule conflict",
@@ -12252,6 +12464,14 @@
         "activity.AoPS": "AoPS"
       },
       zh: {
+        "draft.available": "你有一个尚未完成的日程",
+        "draft.choose": "继续编辑已保存的草稿，或丢弃草稿来新建此日程。",
+        "draft.resume": "继续草稿",
+        "draft.discard": "丢弃草稿",
+        "draft.saved": "草稿已保存在此设备上",
+        "draft.resumed": "草稿已恢复。更改会保存在此设备上。",
+        "draft.discarded": "草稿已丢弃。可以重新开始。",
+        "draft.failed": "无法在此设备上保存草稿。关闭前请先保存日程。",
         "document.title": "KidsSync | 全家一周安排，清晰同步",
         "welcome.navigation": "KidsSync 导航",
         "welcome.sections": "欢迎页面导航",
@@ -12358,6 +12578,36 @@
         "sidebar.navigation": "KidsSync 导航",
         "sidebar.sections": "计划功能",
         "sidebar.openMenu": "打开导航菜单",
+        "command.open": "快捷操作",
+        "command.openTitle": "快捷操作（Ctrl / ⌘ K）",
+        "command.title": "快捷操作",
+        "command.placeholder": "搜索操作或活动…",
+        "command.empty": "没有匹配的操作或活动。请尝试其他搜索。",
+        "command.resultCount": "{count} 个结果",
+        "command.resultOne": "1 个结果",
+        "command.navigate": "选择项目",
+        "command.run": "执行",
+        "command.close": "关闭",
+        "command.reopen": "快捷操作",
+        "command.newEvent": "新建活动",
+        "command.newEventDetail": "在所选日期添加活动",
+        "command.today": "回到今天",
+        "command.todayDetail": "返回当前日期和时间",
+        "command.day": "日视图",
+        "command.week": "周视图",
+        "command.four": "四天视图",
+        "command.month": "月视图",
+        "command.viewDetail": "切换日历视图",
+        "command.dashboard": "家庭总览",
+        "command.dashboardDetail": "查看全家的日程概览",
+        "command.search": "搜索日历",
+        "command.searchDetail": "使用搜索和筛选查找活动",
+        "command.customize": "自定义工作区",
+        "command.customizeDetail": "调整间距、文字大小和面板",
+        "command.settings": "设置",
+        "command.settingsDetail": "外观、提醒和偏好设置",
+        "command.event": "活动",
+        "command.untitled": "未命名活动",
         "sidebar.chooseDate": "选择日期",
         "sidebar.familyPlanner": "家庭规划",
         "sidebar.activities": "活动",
@@ -12510,6 +12760,22 @@
         "settings.darkMode": "深色模式",
         "ux.clearFilters": "清除筛选",
         "ux.searchFor": "搜索：{query}",
+        "insights.title": "当前视图概览",
+        "insights.eventOne": "1 项已安排活动",
+        "insights.events": "{count} 项已安排活动",
+        "insights.family": "家庭活动",
+        "insights.allChildren": "所有孩子和家庭",
+        "insights.child": "{name}和家庭",
+        "insights.children": "{count} 位孩子和家庭",
+        "insights.empty": "当前视图没有已安排活动",
+        "insights.clear": "当前视图无安排冲突",
+        "insights.checkNote": "检查当前显示活动的时间重叠和出行时间，不包含已取消的活动。",
+        "insights.overlapOne": "1 处时间重叠",
+        "insights.overlaps": "{count} 处时间重叠",
+        "insights.travelOne": "1 段出行时间不足",
+        "insights.travel": "{count} 段出行时间不足",
+        "insights.reviewOverlap": "查看下一项时间重叠的活动",
+        "insights.reviewTravel": "查看下一项出行时间不足的活动",
         "layout.customize": "自定义",
         "layout.savedLocally": "布局会保存在此浏览器中。",
         "layout.panels": "面板",
@@ -12693,20 +12959,29 @@
         "popularTimes.noTime": "无需设置时间",
         "gameScan.dashboardAction": "扫描文档",
         "gameScan.title": "扫描文档",
-        "gameScan.intro": "拍摄 PlayMetrics 比赛说明。KidsSync 会填写这场比赛的日期、时间和地点。",
+        "gameScan.intro": "添加活动传单、学校通知、邀请函或活动说明。",
         "gameScan.takePhoto": "拍照或选择图片",
         "gameScan.private": "图片只在此设备上读取。",
         "gameScan.loading": "正在准备私密图片扫描…",
-        "gameScan.reading": "正在读取比赛信息… {progress}%",
+        "gameScan.reading": "正在读取文档… {progress}%",
         "gameScan.reviewTitle": "检查 KidsSync 找到的信息",
         "gameScan.pasteInstead": "改为粘贴比赛说明",
-        "gameScan.pasteHelp": "从 PlayMetrics 复制比赛说明后也可以使用此功能。",
-        "gameScan.textPlaceholder": "比赛名称、日期、时间和地点",
+        "gameScan.pasteHelp": "粘贴完整的活动说明，包括注意事项。",
+        "gameScan.textPlaceholder": "活动、日期、时间、地点、人员和注意事项",
         "gameScan.useText": "使用这些信息",
         "gameScan.noText": "没有找到清晰文字。请裁剪清楚后重试，或在下方粘贴说明。",
         "gameScan.failed": "无法读取此图片。请在下方粘贴说明或换一张图片。",
-        "gameScan.applied": "已添加比赛信息。保存前请检查每个字段。",
-        "gameScan.partial": "已添加部分信息。保存前请检查日期和时间。",
+        "gameScan.applied": "已添加活动信息。保存前请检查每个字段。",
+        "gameScan.titleReview": "请检查：未找到活动名称",
+        "gameScan.dateReview": "请检查：未找到活动日期",
+        "gameScan.timeReview": "请检查：活动时间缺失或不明确",
+        "gameScan.estimatedEnd": "请检查：结束时间使用了默认时长",
+        "gameScan.overnight": "请检查：跨夜活动时间需要手动填写",
+        "gameScan.timezoneReview": "请检查：时区保留在备注中，时间未转换",
+        "gameScan.repeatReview": "请检查：重复结束日期早于活动日期",
+        "gameScan.dateInferred": "请检查：开始日期为下一个匹配的星期日期",
+        "gameScan.multipleEvents": "请检查：检测到多个活动或日期，请每次扫描一个活动",
+        "gameScan.partial": "已添加信息，请检查下方提示。目前尚未保存。",
         "gameScan.oneTime": "单次比赛",
         "gameScan.fieldTitle": "名称：{value}",
         "gameScan.fieldDate": "日期：{value}",
@@ -12955,6 +13230,8 @@
         "eventPreview.notes": "备注",
         "eventPreview.repeats": "重复",
         "eventPreview.status": "状态",
+        "eventPreview.deletePrompt": "删除此事件？删除后可以撤销。",
+        "eventPreview.deleteSeries": "删除此重复事件的所有场次？删除后可以撤销。",
         "dialog.duplicateTitle": "复制事件",
         "form.child": "孩子",
         "form.day": "星期",
@@ -13057,6 +13334,13 @@
         "icons.misc": "✨ 其他",
         "icons.custom": "＋ 自定义图标...",
         "eventType.activity": "活动",
+        "importance.label": "重要程度",
+        "importance.high": "高重要程度",
+        "importance.highShort": "高",
+        "importance.normal": "普通重要程度",
+        "importance.low": "低重要程度",
+        "importance.lowShort": "低",
+        "importance.help": "重要程度较高的事项会在列表和重叠事项中优先显示。",
         "eventType.deadline": "截止事项",
         "eventType.birthday": "生日",
         "eventType.holiday": "节日",
@@ -13119,8 +13403,22 @@
         "calendar.today": "今天",
         "miniCalendar.label": "迷你日历",
         "miniCalendar.sidebarTitle": "日历",
+        "miniCalendar.mobileBrowse": "日期与日历工具",
         "miniCalendar.tools": "日历工具",
         "miniCalendar.addEvent": "添加活动",
+        "miniCalendar.eventOne": "1 个日程",
+        "miniCalendar.eventCount": "{count} 个日程",
+        "miniCalendar.eventLegend": "圆点标记有日程的日期",
+        "miniCalendar.filteredLegend": "正在显示{filter} · 圆点标记符合筛选的日期",
+        "miniCalendar.searchLegend": "圆点仅标记符合筛选的日期",
+        "duration.title": "活动时长",
+        "duration.quick": "快速设置活动时长",
+        "duration.total": "共 {count} 分钟",
+        "duration.minutes": "{count} 分钟",
+        "duration.setLength": "将时长设为 {count} 分钟",
+        "duration.dayBoundary": "此时长会超过午夜",
+        "duration.invalid": "结束时间必须晚于开始时间",
+        "duration.chooseTimes": "请选择开始和结束时间",
         "miniCalendar.previous": "上个月",
         "miniCalendar.next": "下个月",
         "calendar.conflict": "日程冲突",
@@ -14506,6 +14804,7 @@
       child: document.getElementById("child"),
       date: document.getElementById("startDate"),
       eventType: document.getElementById("eventType"),
+      importance: document.getElementById("importance"),
       recurrence: document.getElementById("recurrence"),
       repeatInterval: document.getElementById("repeatInterval"),
       repeatUntil: document.getElementById("repeatUntil"),
@@ -14539,6 +14838,9 @@
     ];
     let eventFormStep = 1;
     let smartDefaultsAppliedTitle = "";
+    let eventDraftSession = null;
+    let eventDraftSaveTimer = 0;
+    const EVENT_DRAFT_FIELDS = ["child", "date", "eventType", "importance", "recurrence", "repeatInterval", "repeatUntil", "start", "end", "title", "icon", "customIcon", "style", "color", "status", "travelMinutes", "notes", "location", "responsible", "items"];
 
     function applyStaticTranslations() {
       document.documentElement.lang = currentLanguage === "zh" ? "zh-CN" : "en";
@@ -14594,6 +14896,7 @@
         setEventDetailsExpanded(true);
         renderPopularTimeOptions();
         setEventFormStep(eventFormStep, { focus: false });
+        renderEventDraftState();
       }
     }
 
@@ -14967,6 +15270,31 @@
       return t(`status.${activityStatus(activity)}`);
     }
 
+    function eventImportance(activity) {
+      return ["low", "normal", "high"].includes(activity?.importance) ? activity.importance : "normal";
+    }
+
+    function importanceRank(activity) {
+      return { low: 0, normal: 1, high: 2 }[eventImportance(activity)];
+    }
+
+    function compareEventImportance(first, second) {
+      return importanceRank(second) - importanceRank(first)
+        || Number(Boolean(second.allDay)) - Number(Boolean(first.allDay))
+        || String(first.start || "").localeCompare(String(second.start || ""))
+        || String(first.title || "").localeCompare(String(second.title || ""))
+        || String(first.id || "").localeCompare(String(second.id || ""));
+    }
+
+    function eventImportanceLabel(activity) {
+      return t(`importance.${eventImportance(activity)}`);
+    }
+
+    function eventImportanceBadge(activity) {
+      const importance = eventImportance(activity);
+      return importance === "normal" ? "" : `<span class="event-importance-badge event-importance is-${importance}" aria-label="${escapeHtml(eventImportanceLabel(activity))}">${importance === "high" ? "<span aria-hidden=\"true\">↑</span> " : ""}${escapeHtml(t(`importance.${importance}Short`))}</span>`;
+    }
+
     function activityCompactTitle(activity) {
       return activityStatus(activity) === "confirmed"
         ? activityTitle(activity)
@@ -15017,6 +15345,7 @@
       status.textContent = t(key);
       status.classList.toggle("is-error", cloudSaveState === "failed" || cloudSaveState === "syncFailed");
       status.classList.toggle("is-syncing", cloudSaveState === "syncing");
+      status.setAttribute("aria-busy", String(cloudSaveState === "syncing"));
       status.classList.toggle("is-offline", cloudSaveState === "offline");
     }
 
@@ -15884,6 +16213,7 @@
         activity.title,
         activityTitle(activity),
         activityStatusLabel(activity),
+        eventImportanceLabel(activity),
         displayChild(activity),
         activity.location,
         activity.responsible,
@@ -15898,7 +16228,7 @@
       const eventType = activity.eventType || "activity";
       if (state.eventFilter === "activity") return eventType === "activity";
       if (state.eventFilter === "holidays") return eventType === "holiday";
-      return eventType !== "activity";
+      return eventImportance(activity) === "high" || eventType !== "activity";
     }
 
     function occurrencesOnDate(date, { ignoreSearch = false, ignoreFilter = false } = {}) {
@@ -16165,42 +16495,55 @@
 
     function buildOverlapGroups(activities) {
       const groups = [];
-      const visited = new Set();
-
-      activities.forEach(activity => {
-        if (visited.has(activity.id)) return;
-        const group = [];
-        const queue = [activity];
-        visited.add(activity.id);
-
-        while (queue.length) {
-          const current = queue.shift();
-          group.push(current);
-          activities.forEach(candidate => {
-            if (!visited.has(candidate.id) && activitiesOverlap(current, candidate)) {
-              visited.add(candidate.id);
-              queue.push(candidate);
-            }
-          });
+      // Use the same minimum footprint as the rendered cards, including short imports.
+      const intervals = activities.map((activity, index) => {
+        const start = minutes(activity.start);
+        return { activity, index, start, end: Math.max(start + 15, minutes(activity.end)) };
+      }).sort((first, second) => first.start - second.start || second.end - first.end
+        || compareEventImportance(first.activity, second.activity) || first.index - second.index);
+      let groupEnd = -Infinity;
+      intervals.forEach(interval => {
+        if (!groups.length || interval.start >= groupEnd) {
+          groups.push([]);
+          groupEnd = interval.end;
+        } else {
+          groupEnd = Math.max(groupEnd, interval.end);
         }
-
-        groups.push(group.sort((first, second) => minutes(first.start) - minutes(second.start)));
+        groups[groups.length - 1].push(interval.activity);
       });
-
       return groups;
     }
 
     function layoutOverlapGroup(group) {
-      const laneEnds = [];
-      const items = group.map(activity => {
+      const lanes = [];
+      const overlaps = (first, second) => first.start < second.end && second.start < first.end;
+      const intervals = group.map((activity, index) => {
         const start = minutes(activity.start);
-        const end = minutes(activity.end);
-        let lane = laneEnds.findIndex(laneEnd => laneEnd <= start);
-        if (lane < 0) lane = laneEnds.length;
-        laneEnds[lane] = end;
-        return { activity, lane };
+        return { activity, index, start, end: Math.max(start + 15, minutes(activity.end)), importance: eventImportance(activity) };
+      }).sort((first, second) => importanceRank(second.activity) - importanceRank(first.activity)
+        || first.start - second.start || second.end - first.end
+        || compareEventImportance(first.activity, second.activity) || first.index - second.index);
+      const items = [];
+      intervals.forEach(interval => {
+        // Priority order is not chronological: check every interval in a lane.
+        // A lower-importance card must also stay right of each overlapping priority card.
+        let lane = items.reduce((minimum, item) => overlaps(item, interval)
+          && importanceRank(item.activity) > importanceRank(interval.activity)
+          ? Math.max(minimum, item.lane + 1) : minimum, 0);
+        while (lanes[lane]?.some(item => overlaps(item, interval))) lane += 1;
+        if (!lanes[lane]) lanes[lane] = [];
+        const item = { ...interval, lane, laneSpan: 1, zIndex: 10 + importanceRank(interval.activity) * 10 };
+        lanes[lane].push(item);
+        items.push(item);
       });
-      return { items, laneCount: laneEnds.length };
+      const laneCount = lanes.length;
+      items.forEach(item => {
+        for (let lane = item.lane + 1; lane < laneCount; lane += 1) {
+          if (lanes[lane]?.some(other => overlaps(item, other))) break;
+          item.laneSpan += 1;
+        }
+      });
+      return { items, laneCount };
     }
 
     function setupDraggableEvent(element, activity) {
@@ -16393,6 +16736,8 @@
     }
 
     function renderGrid() {
+      const scrollContainer = grid.closest?.(".schedule-shell");
+      const previousScroll = scrollContainer ? { top: scrollContainer.scrollTop, left: scrollContainer.scrollLeft } : null;
       const activities = visibleActivities();
       const conflicts = findConflicts(activities);
       const displayDays = visibleWeekDays();
@@ -16405,10 +16750,8 @@
       }));
       grid.style.setProperty("--schedule-height", `${scheduleDurationMinutes * pixelsPerMinute}px`);
       grid.style.setProperty("--half-hour-row", `${30 * pixelsPerMinute}px`);
-      grid.style.gridTemplateColumns = `106px ${displayDays.map(day => {
-        const lanes = Math.max(1, ...dayLayouts.get(day.key).map(group => group.laneCount));
-        return `minmax(${Math.max(220, lanes * 180)}px, 1fr)`;
-      }).join(" ")}`;
+      grid.style.setProperty("--week-day-count", String(displayDays.length));
+      grid.style.gridTemplateColumns = `64px repeat(${displayDays.length}, minmax(150px, 1fr))`;
       grid.classList.toggle("weekdays-only", !state.showWeekends);
       grid.innerHTML = "";
 
@@ -16447,20 +16790,25 @@
       displayDays.forEach(day => {
         const targetDate = calendarDateForDay(day);
         const cell = document.createElement("div");
-        cell.className = "all-day-cell";
+        cell.className = `all-day-cell${isSameDate(targetDate, new Date()) ? " is-today" : ""}`;
         setupDropTarget(cell, targetDate, true);
         activities
           .filter(activity => activity.day === day.key && activity.allDay)
+          .sort(compareEventImportance)
           .forEach(activity => {
             const colors = eventColors(activity);
+            const importance = eventImportance(activity);
             const event = document.createElement("button");
             event.type = "button";
-            event.className = `all-day-event${activity.isBuiltInHoliday ? " is-built-in-holiday" : ""}`;
+            event.className = `all-day-event importance-${importance}${activity.isBuiltInHoliday ? " is-built-in-holiday" : ""}`;
             event.style.setProperty("--event-bg", colors.soft);
             event.style.setProperty("--event-line", colors.line);
             event.style.setProperty("--event-ink", colors.ink);
+            event.style.setProperty("--event-z", String(10 + importanceRank(activity) * 10));
             event.dataset.occurrenceKey = occurrenceKey(activity);
-            event.innerHTML = `<span aria-hidden="true">${escapeHtml(displayIcon(activity))}</span><span>${escapeHtml(activityCompactTitle(activity))} · ${escapeHtml(displayChild(activity))}</span>`;
+            event.dataset.importance = importance;
+            event.innerHTML = `<span class="all-day-event-icon" aria-hidden="true">${escapeHtml(displayIcon(activity))}</span><span class="all-day-event-copy"><span class="all-day-event-title">${escapeHtml(activityCompactTitle(activity))}</span><span class="all-day-event-child">${escapeHtml(displayChild(activity))}</span>${eventImportanceBadge(activity)}</span>`;
+            event.setAttribute("aria-label", `${eventTimeText(activity)} · ${activityTitle(activity)} · ${displayChild(activity)} · ${eventImportanceLabel(activity)}`);
             if (!activity.isBuiltInHoliday) setupDraggableEvent(event, activity);
             bindCalendarEventActions(event, activity, true);
             cell.appendChild(event);
@@ -16482,7 +16830,7 @@
       displayDays.forEach(day => {
         const targetDate = calendarDateForDay(day);
         const column = document.createElement("div");
-        column.className = "day-column";
+        column.className = `day-column${isSameDate(targetDate, new Date()) ? " is-today" : ""}`;
         setupDropTarget(column, targetDate);
         column.addEventListener("click", event => {
           if (Date.now() <= suppressEventClickUntil || event.target.closest(".event")) return;
@@ -16492,32 +16840,38 @@
           openNewEventAtTime(targetDate, snappedMinute);
         });
         dayLayouts.get(day.key).forEach(({ items, laneCount }) => {
-          items.forEach(({ activity, lane }) => {
+          items.forEach(({ activity, lane, laneSpan, importance, zIndex }) => {
             const start = minutes(activity.start);
             const end = minutes(activity.end);
             const top = ((start - scheduleStartMinutes) / scheduleDurationMinutes) * 100;
             const colors = eventColors(activity);
             const event = document.createElement("button");
             event.type = "button";
-            event.className = `event${end - start <= 45 ? " small" : ""}${end - start <= 30 ? " compact-duration" : ""}${end - start <= 20 ? " very-short" : ""}${laneCount > 1 ? " overlap-offset" : ""}${conflicts.has(occurrenceKey(activity)) ? " conflict" : ""}`;
+            event.className = `event importance-${importance}${end - start <= 45 ? " small" : ""}${end - start <= 30 ? " compact-duration" : ""}${end - start <= 20 ? " very-short" : ""}${laneCount > 1 ? " overlap-offset" : ""}${conflicts.has(occurrenceKey(activity)) ? " conflict" : ""}`;
             event.style.top = `${top}%`;
             event.style.height = `${Math.max(15, end - start) * pixelsPerMinute}px`;
             event.style.setProperty("--event-bg", colors.soft);
             event.style.setProperty("--event-line", colors.line);
             event.style.setProperty("--event-ink", colors.ink);
+            event.style.setProperty("--overlap-lane", String(lane));
+            event.style.setProperty("--overlap-count", String(laneCount));
+            event.style.setProperty("--overlap-span", String(laneSpan));
+            event.style.setProperty("--event-z", String(zIndex));
             event.dataset.occurrenceKey = occurrenceKey(activity);
-            if (laneCount > 1) {
-              const laneWidth = 100 / laneCount;
-              event.style.left = `calc(${lane * laneWidth}% + 6px)`;
-              event.style.right = `calc(${(laneCount - lane - 1) * laneWidth}% + 6px)`;
-            }
+            event.dataset.importance = importance;
+            event.dataset.overlapLane = String(lane);
+            event.dataset.overlapCount = String(laneCount);
+            event.dataset.overlapSpan = String(laneSpan);
+            const laneWidth = 100 / laneCount;
+            event.style.left = `calc(${lane * laneWidth}% + 4px)`;
+            event.style.right = `calc(${(laneCount - lane - laneSpan) * laneWidth}% + 4px)`;
             event.innerHTML = eventCardMarkup(activity, {
               badge: conflicts.has(occurrenceKey(activity)) ? t("calendar.conflict") : "",
               badgeClass: "is-conflict"
             });
             setupDraggableEvent(event, activity);
             event.removeAttribute("title");
-            event.setAttribute("aria-label", `${eventTimeText(activity)} · ${activityTitle(activity)} · ${displayChild(activity)}`);
+            event.setAttribute("aria-label", `${eventTimeText(activity)} · ${activityTitle(activity)} · ${displayChild(activity)} · ${eventImportanceLabel(activity)}`);
             bindCalendarEventActions(event, activity, true);
             column.appendChild(event);
           });
@@ -16535,6 +16889,10 @@
         grid.appendChild(column);
       });
       updateCurrentTimeMarkers();
+      if (previousScroll) {
+        scrollContainer.scrollTop = previousScroll.top;
+        scrollContainer.scrollLeft = previousScroll.left;
+      }
     }
 
     function updateCurrentTimeMarkers() {
@@ -16566,7 +16924,7 @@
         const date = calendarDateForDay(day);
         const items = activities
           .filter(activity => activity.day === day.key)
-          .sort((a, b) => Number(b.allDay) - Number(a.allDay) || minutes(a.start) - minutes(b.start));
+          .sort(compareEventImportance);
         const isToday = isSameDate(date, new Date());
         const countLabel = t(items.length === 1 ? "overview.eventOne" : "overview.events", { count: items.length });
         const card = document.createElement("article");
@@ -16604,7 +16962,7 @@
     }
 
     function eventTimeText(activity) {
-      return activity.allDay ? t("calendar.allDay") : `${timeLabel(activity.start)} - ${timeLabel(activity.end)}`;
+      return activity.allDay ? t("calendar.allDay") : `${timeLabel(activity.start)}–${timeLabel(activity.end)}`;
     }
 
     function eventLogistics(activity) {
@@ -16631,6 +16989,7 @@
           ${status === "confirmed" ? "" : `<span class="event-badge is-${status}">${escapeHtml(activityStatusLabel(activity))}</span>`}
           <span class="event-time">${eventTimeText(activity)}</span>
           <span class="event-title">${escapeHtml(activityTitle(activity))}</span>
+          ${eventImportanceBadge(activity)}
           <span class="event-child">${meta}</span>
           ${details ? `<span class="event-detail">${escapeHtml(details)}</span>` : ""}
         </span>
@@ -16650,7 +17009,9 @@
     }
 
     function nextUpActivity(activities) {
-      const timed = activities.filter(activity => activityStatus(activity) !== "cancelled" && !activity.allDay);
+      // List order follows importance; next-up must still follow the clock.
+      const timed = activities.filter(activity => activityStatus(activity) !== "cancelled" && !activity.allDay)
+        .sort((first, second) => minutes(first.start) - minutes(second.start) || compareEventImportance(first, second));
       if (!timed.length) return null;
       const now = new Date();
       const nowMinutes = now.getHours() * 60 + now.getMinutes();
@@ -16664,7 +17025,7 @@
       todayHeading.textContent = formatFullDate(selectedDate);
       todayList.innerHTML = "";
       const activities = occurrencesOnDate(selectedDate)
-        .sort((first, second) => Number(second.allDay) - Number(first.allDay) || minutes(first.start) - minutes(second.start));
+        .sort(compareEventImportance);
       const conflicts = findConflicts(activities);
 
       if (!activities.length) {
@@ -16775,6 +17136,72 @@
       const dateLabel = currentView === "today" ? "" : `${formatShortDate(date)} · `;
       const time = activity.allDay ? t("calendar.allDay") : formatTimeLabel(minutes(activity.start));
       return `${dateLabel}${time} ${displayIcon(activity)} ${activityCompactTitle(activity)} · ${displayChild(activity)}`;
+    }
+
+    function calendarInsightActivities() {
+      const displayedDays = currentView === "week" ? new Set(visibleWeekDays().map(day => day.key)) : null;
+      return currentPeriodOccurrences()
+        .filter(activity => activityStatus(activity) !== "cancelled")
+        .filter(activity => !displayedDays || displayedDays.has(activity.day));
+    }
+
+    function calendarInsightSummary() {
+      const activities = calendarInsightActivities();
+      const selectedKids = kidProfiles.filter(kid => state.visibleKids.has(kid.name));
+      const scope = !selectedKids.length ? t("insights.family")
+        : selectedKids.length === kidProfiles.length ? t("insights.allChildren")
+          : selectedKids.length === 1 ? t("insights.child", { name: selectedKids[0].name })
+            : t("insights.children", { count: selectedKids.length });
+      return {
+        count: activities.length,
+        conflictCount: findConflictPairs(activities).length,
+        travelCount: findTravelWarnings(activities).length,
+        scope
+      };
+    }
+
+    function jumpToCalendarInsightWarning(type) {
+      const activities = calendarInsightActivities();
+      const warningActivities = type === "travel"
+        ? findTravelWarnings(activities).map(warning => warning.activity)
+        : findConflictPairs(activities).flat();
+      if (!warningActivities.length) return;
+      const warningKeys = new Set(warningActivities.map(occurrenceKey));
+      const hasVisibleTarget = [...document.querySelectorAll("[data-occurrence-key]")]
+        .some(element => warningKeys.has(element.dataset.occurrenceKey) && element.getClientRects().length > 0);
+      const jump = type === "travel" ? jumpToNextTravelWarning : jumpToNextConflict;
+      if (hasVisibleTarget) {
+        jump();
+        return;
+      }
+      // Month cells show a few events; reveal the full day before focusing a hidden warning.
+      const dateValue = warningActivities[0].occurrenceDate || warningActivities[0].startDate;
+      if (!dateValue) return;
+      selectedDate = parseDateKey(dateValue);
+      currentWeekStart = getMonday(selectedDate);
+      activateCalendarView("today", true, { remember: false });
+      requestAnimationFrame(jump);
+    }
+
+    function renderCalendarInsights() {
+      const summary = calendarInsightSummary();
+      document.getElementById("calendarInsightsCount").textContent = t(summary.count === 1 ? "insights.eventOne" : "insights.events", { count: summary.count });
+      document.getElementById("calendarInsightsScope").textContent = summary.scope;
+      const status = document.getElementById("calendarInsightsStatus");
+      status.hidden = summary.conflictCount > 0 || summary.travelCount > 0;
+      status.textContent = t(summary.count ? "insights.clear" : "insights.empty");
+      status.classList.toggle("is-clear", summary.count > 0);
+      status.title = t("insights.checkNote");
+      const conflicts = document.getElementById("calendarInsightsConflicts");
+      conflicts.hidden = !summary.conflictCount;
+      conflicts.textContent = t(summary.conflictCount === 1 ? "insights.overlapOne" : "insights.overlaps", { count: summary.conflictCount });
+      conflicts.title = t("insights.reviewOverlap");
+      conflicts.setAttribute("aria-label", `${conflicts.textContent}. ${conflicts.title}`);
+      const travel = document.getElementById("calendarInsightsTravel");
+      travel.hidden = !summary.travelCount;
+      travel.textContent = t(summary.travelCount === 1 ? "insights.travelOne" : "insights.travel", { count: summary.travelCount });
+      travel.title = t("insights.reviewTravel");
+      travel.setAttribute("aria-label", `${travel.textContent}. ${travel.title}`);
     }
 
     function renderScheduleOverview() {
@@ -16918,7 +17345,7 @@
       for (let index = 0; index < 42; index += 1) {
         const date = addDays(gridStart, index);
         const activities = occurrencesOnDate(date)
-          .sort((first, second) => Number(second.allDay) - Number(first.allDay) || minutes(first.start) - minutes(second.start));
+          .sort(compareEventImportance);
         const conflicts = findConflicts(activities);
         const cell = document.createElement("div");
         const outside = date.getMonth() !== currentMonthStart.getMonth();
@@ -16951,7 +17378,7 @@
           event.style.setProperty("--event-line", colors.line);
           event.style.setProperty("--event-ink", colors.ink);
           event.dataset.occurrenceKey = occurrenceKey(activity);
-          event.innerHTML = `<span class="month-event-time">${activity.allDay ? "" : `${escapeHtml(timeLabel(activity.start))} `}${escapeHtml(displayIcon(activity))} </span><span class="month-event-title">${escapeHtml(activityCompactTitle(activity))}</span>`;
+          event.innerHTML = `<span class="month-event-time">${activity.allDay ? "" : `${escapeHtml(timeLabel(activity.start))} `}${escapeHtml(displayIcon(activity))} </span><span class="month-event-title">${escapeHtml(activityCompactTitle(activity))}</span>${eventImportanceBadge(activity)}`;
           bindCalendarEventActions(event, activity);
           cell.appendChild(event);
         });
@@ -16977,6 +17404,11 @@
       if (!title || !weekdayRow || !miniGrid) return;
 
       title.textContent = miniCalendarMonth.toLocaleDateString(locale, { year: "numeric", month: "long" });
+      const filterKey = { holidays: "sidebar.holidays", important: "sidebar.specialDays", activity: "filters.activities" }[state.eventFilter];
+      const hasOtherFilters = Boolean(state.searchQuery.trim()) || Object.keys(kids).some(name => !state.visibleKids.has(name));
+      document.getElementById("miniCalendarLegend").textContent = filterKey
+        ? t("miniCalendar.filteredLegend", { filter: t(filterKey) })
+        : t(hasOtherFilters ? "miniCalendar.searchLegend" : "miniCalendar.eventLegend");
       const sunday = new Date(2026, 0, 4);
       weekdayRow.innerHTML = Array.from({ length: 7 }, (_, index) => {
         const label = addDays(sunday, index).toLocaleDateString(locale, { weekday: "narrow" });
@@ -16997,7 +17429,18 @@
         button.className = `mini-calendar-day${isOutside ? " is-outside" : ""}${isSelected ? " is-selected" : ""}${isToday ? " is-today" : ""}`;
         button.textContent = date.getDate();
         button.dataset.date = dateKey(date);
-        button.setAttribute("aria-label", formatFullDate(date));
+        const eventCount = occurrencesOnDate(date).filter(activity => activityStatus(activity) !== "cancelled").length;
+        const eventCountLabel = t(eventCount === 1 ? "miniCalendar.eventOne" : "miniCalendar.eventCount", { count: eventCount });
+        button.setAttribute("aria-label", `${formatFullDate(date)} · ${eventCountLabel}`);
+        button.title = eventCountLabel;
+        if (eventCount > 0) {
+          button.classList.add("has-events");
+          const dots = document.createElement("span");
+          dots.className = "mini-calendar-event-dots";
+          dots.setAttribute("aria-hidden", "true");
+          for (let dot = 0; dot < Math.min(eventCount, 3); dot += 1) dots.appendChild(document.createElement("i"));
+          button.appendChild(dots);
+        }
         button.setAttribute("aria-pressed", String(isSelected));
         if (isToday) button.setAttribute("aria-current", "date");
         button.addEventListener("click", () => {
@@ -17006,10 +17449,42 @@
           currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
           miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
           const isFilteredCalendar = state.eventFilter === "holidays" || state.eventFilter === "important";
-          activateCalendarView(isFilteredCalendar ? "today" : "week", true);
+          activateCalendarView(isFilteredCalendar ? "today" : currentView, true, { remember: !isFilteredCalendar });
         });
         miniGrid.appendChild(button);
       });
+    }
+
+    function renderEventDurationControls() {
+      const controls = document.getElementById("eventDurationControls");
+      const summary = document.getElementById("eventDurationSummary");
+      controls.hidden = fields.allDay.checked;
+      const validTime = value => /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);
+      const validStart = validTime(fields.start.value);
+      const validEnd = validTime(fields.end.value);
+      const length = validStart && validEnd ? minutes(fields.end.value) - minutes(fields.start.value) : 0;
+      summary.textContent = validStart && validEnd
+        ? (length > 0 ? t("duration.total", { count: length }) : t("duration.invalid"))
+        : t("duration.chooseTimes");
+      summary.classList.toggle("is-invalid", validStart && validEnd && length <= 0);
+      controls.querySelectorAll("[data-event-duration]").forEach(button => {
+        const duration = Number(button.dataset.eventDuration);
+        button.textContent = t("duration.minutes", { count: duration });
+        button.disabled = !validStart || minutes(fields.start.value) + duration > 1439;
+        button.setAttribute("aria-pressed", String(length === duration));
+        button.title = button.disabled ? t("duration.dayBoundary") : t("duration.setLength", { count: duration });
+      });
+    }
+
+    function applyEventDuration(duration) {
+      const allowed = [15, 30, 60, 90];
+      if (!allowed.includes(duration) || fields.allDay.checked || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(fields.start.value)) return false;
+      const endMinute = minutes(fields.start.value) + duration;
+      if (endMinute > 1439) return false;
+      fields.end.value = `${String(Math.floor(endMinute / 60)).padStart(2, "0")}:${String(endMinute % 60).padStart(2, "0")}`;
+      fields.end.dispatchEvent(new Event("change", { bubbles: true }));
+      renderEventDurationControls();
+      return true;
     }
 
     function updateCalendarView() {
@@ -17470,6 +17945,11 @@
     }
 
     function parseScannedDate(text) {
+      const chinese = text.match(/(?:(20\d{2})年)?\s*(\d{1,2})月\s*(\d{1,2})[日号]/);
+      if (chinese) {
+        const candidate = scannedYearOrNext(Number(chinese[2]) - 1, Number(chinese[3]), chinese[1]);
+        if (candidate) return dateKey(candidate);
+      }
       const iso = text.match(/\b(20\d{2})-(\d{1,2})-(\d{1,2})\b/);
       if (iso) {
         const candidate = validScannedDate(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
@@ -17481,10 +17961,19 @@
         if (candidate) return dateKey(candidate);
       }
       const monthNames = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
-      const named = text.match(/\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(\d{4}))?/i);
-      if (!named) return "";
-      const candidate = scannedYearOrNext(monthNames[named[1].slice(0, 3).toLowerCase()], Number(named[2]), named[3]);
-      return candidate ? dateKey(candidate) : "";
+      const named = text.match(/\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{1,2})(?!\d)(?:st|nd|rd|th)?(?:,?\s+(\d{4}))?/i);
+      if (named) {
+        const candidate = scannedYearOrNext(monthNames[named[1].slice(0, 3).toLowerCase()], Number(named[2]), named[3]);
+        if (candidate) return dateKey(candidate);
+      }
+      const dayFirst = text.match(/\b(\d{1,2})\s+(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)(?:\s+(20\d{2}))?\b/i);
+      if (dayFirst) {
+        const candidate = scannedYearOrNext(monthNames[dayFirst[2].slice(0, 3).toLowerCase()], Number(dayFirst[1]), dayFirst[3]);
+        if (candidate) return dateKey(candidate);
+      }
+      if (/\btomorrow\b|明天/i.test(text)) return dateKey(addDays(new Date(), 1));
+      if (/\btoday\b|今天/i.test(text)) return dateKey(new Date());
+      return "";
     }
 
     function scannedClockValue(hourText, minuteText, meridiemText) {
@@ -17501,6 +17990,27 @@
     }
 
     function parseScannedTimes(text) {
+      if (/\ball[ -]day\b|全天|整天/i.test(text)) return { start: "", end: "", allDay: true };
+      // Arrival and check-in are logistics, not the event's start time.
+      const timeLines = text.split("\n").filter(line => !/^\s*(?:[-*•]\s*)?(?:arrival|arrive|check[ -]?in|warm[ -]?up|到达|签到|集合)\s*[:：]/i.test(line));
+      const timeText = timeLines.join("\n");
+      const duration = timeText.match(/(?:duration|lasts?|length|时长)\s*[:：]?\s*(\d+(?:\.\d+)?)\s*(hours?|hrs?|minutes?|mins?|小时|分钟)/i);
+      const durationMinutes = duration ? Math.round(Number(duration[1]) * (/hour|hr|小时/i.test(duration[2]) ? 60 : 1)) : null;
+      const finish = (start, end) => {
+        if (start === null || end !== null && end <= start) return { start: "", end: "", warning: "timeReview" };
+        const resolved = end ?? start + (durationMinutes || Math.max(15, Number(userSettings.defaultEventDuration) || 30));
+        if (resolved > 1439) return { start: "", end: "", warning: "overnight" };
+        return { start: timeInputValue(start), end: timeInputValue(resolved), estimatedEnd: end === null && !durationMinutes };
+      };
+      const clock24 = timeText.match(/\b([01]?\d|2[0-3]):([0-5]\d)\s*(?:-|–|—|to|至|到)\s*([01]?\d|2[0-3]):([0-5]\d)(?!\d|\s*[ap]\.?m)/i);
+      if (clock24 && !/上午|下午|晚上|中午/.test(timeText)) return finish(scannedClockValue(clock24[1], clock24[2]), scannedClockValue(clock24[3], clock24[4]));
+      const chineseClock = timeText.match(/(上午|下午|晚上|中午)?\s*(\d{1,2})(?:[:：](\d{2})|点(半|\d{1,2}分?)?)\s*(?:-|–|—|至|到)\s*(上午|下午|晚上|中午)?\s*(\d{1,2})(?:[:：](\d{2})|点(半|\d{1,2}分?)?)/);
+      if (chineseClock) {
+        const meridiem = word => word === "上午" ? "am" : word ? "pm" : "";
+        const minute = (numeric, word) => numeric || (word === "半" ? "30" : word?.replace("分", "") || "0");
+        return finish(scannedClockValue(chineseClock[2], minute(chineseClock[3], chineseClock[4]), meridiem(chineseClock[1])), scannedClockValue(chineseClock[6], minute(chineseClock[7], chineseClock[8]), meridiem(chineseClock[5] || chineseClock[1])));
+      }
+      text = timeText;
       const range = text.match(/\b(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?\s*(?:-|–|—|to)\s*(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)\b/i);
       if (range) {
         let start = scannedClockValue(range[1], range[2], range[3] || range[6]);
@@ -17508,61 +18018,178 @@
         if (start !== null && end !== null && end <= start && !range[3] && String(range[6]).toLowerCase().startsWith("p")) {
           start = scannedClockValue(range[1], range[2], "am");
         }
-        if (start !== null && end !== null && end > start) return { start: timeInputValue(start), end: timeInputValue(end) };
+        return finish(start, end);
       }
-      const startMatch = text.match(/(?:start|arrival|kickoff|tipoff|game\s*time)(?:\s*time)?\s*[:\-]?\s*(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)/i);
+      const startMatch = text.match(/(?:start|kickoff|tipoff|game\s*time|time)(?:\s*time)?\s*[:\-]?\s*(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)/i);
       const endMatch = text.match(/(?:end|finish)(?:\s*time)?\s*[:\-]?\s*(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)/i);
-      const anyTime = text.match(/\b(\d{1,2})(?::(\d{2}))\s*(a\.?m\.?|p\.?m\.?)\b/i);
+      const anyTime = text.match(/\b(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)\b/i);
       const source = startMatch || anyTime;
-      if (!source) return { start: "", end: "" };
+      if (!source) {
+        const single24 = text.match(/(?:start|time|开始|时间)\s*[:：]\s*([01]?\d|2[0-3]):([0-5]\d)/i);
+        return single24 ? finish(scannedClockValue(single24[1], single24[2]), null) : { start: "", end: "" };
+      }
       const start = scannedClockValue(source[1], source[2], source[3]);
       const explicitEnd = endMatch ? scannedClockValue(endMatch[1], endMatch[2], endMatch[3]) : null;
       if (start === null) return { start: "", end: "" };
-      const end = explicitEnd !== null && explicitEnd > start
-        ? explicitEnd
-        : Math.min(start + Math.max(30, userSettings.defaultEventDuration), 23 * 60 + 59);
-      return { start: timeInputValue(start), end: timeInputValue(end) };
+      return finish(start, explicitEnd);
     }
 
     function scannedLineValue(lines, labels) {
       for (let index = 0; index < lines.length; index += 1) {
         const line = lines[index];
-        const match = line.match(new RegExp(`^(?:${labels.join("|")})\\s*[:\\-]\\s*(.+)$`, "i"));
+        const match = line.match(new RegExp(`^(?:${labels.join("|")})\\s*[:：\\-]\\s*(.+)$`, "i"));
         if (match?.[1]) return match[1].trim();
-        if (new RegExp(`^(?:${labels.join("|")})\\s*:?$`, "i").test(line) && lines[index + 1]) return lines[index + 1];
+        if (new RegExp(`^(?:${labels.join("|")})\\s*[:：]?$`, "i").test(line) && lines[index + 1] && !/^[^:：]{1,40}[:：]/.test(lines[index + 1])) return lines[index + 1];
       }
       return "";
     }
 
     function parseScannedGameDetails(rawText) {
       const text = String(rawText || "").replace(/\r/g, "").replace(/[|]+/g, " ").trim();
-      const lines = text.split("\n").map(line => line.replace(/\s+/g, " ").trim()).filter(Boolean);
-      const date = parseScannedDate(text);
-      const times = parseScannedTimes(text);
-      let title = scannedLineValue(lines, ["event", "game", "match", "title"]);
+      const lines = text.split("\n").map(line => line.replace(/\*\*/g, "").replace(/^\s*(?:[-*•]|\d+[.)])\s+/, "").replace(/\s+/g, " ").trim()).filter(Boolean);
+      const dateText = scannedLineValue(lines, ["date", "start date", "when", "日期", "开始日期"]);
+      let date = parseScannedDate(dateText || lines.filter(line => !/^(?:until|ends on|end date|repeat until|截止重复|结束日期)\s*[:：]/i.test(line)).join("\n"));
+      const times = parseScannedTimes(lines.join("\n"));
+      let title = scannedLineValue(lines, ["event", "game", "match", "title", "activity", "event name", "活动", "活动名称", "标题", "比赛", "课程"]);
       if (title && (parseScannedDate(title) || /\b\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)\b/i.test(title))) title = "";
-      const opponent = scannedLineValue(lines, ["opponent", "versus", "vs\\.?"]);
-      if (!title && opponent) title = `Game vs ${opponent}`;
+      const opponent = scannedLineValue(lines, ["opponent", "away team", "versus", "vs\\.?", "对手", "客队"]);
+      const home = scannedLineValue(lines, ["home team", "主队"]);
+      if (!title && opponent) title = home ? `${home} vs ${opponent}` : `Game vs ${opponent}`;
       if (!title) {
         title = lines.find(line => /\b(vs\.?|versus|game|match|tournament)\b/i.test(line)
           && !/^game\s*(details|description)?$/i.test(line)
-          && !/\b(?:am|pm)\b/i.test(line)) || "Game";
+          && !/\b(?:am|pm)\b/i.test(line)) || lines.find(line => !/[:：]/.test(line) && !parseScannedDate(line) && line.length <= 100) || "";
       }
-      let location = scannedLineValue(lines, ["location", "venue", "field", "address"]);
+      let location = scannedLineValue(lines, ["location", "venue", "field", "地点", "场地"]);
+      const address = scannedLineValue(lines, ["address", "地址"]);
+      if (address && !location.includes(address)) location = [location, address].filter(Boolean).join(", ");
       if (!location) {
         location = lines.find(line => /\b(field|stadium|park|gym|complex|school|center|centre|arena)\b/i.test(line)
           && !/^(location|venue|field)\s*:?$/i.test(line)) || "";
       }
-      return { text, title: title.slice(0, 100), date, start: times.start, end: times.end, location: location.slice(0, 100) };
+      const extras = parseScannedEventExtras(lines, title);
+      const warnings = [];
+      if (!date && extras.repeatDays?.length) {
+        const next = Array.from({ length: 7 }, (_, index) => addDays(new Date(), index)).find(day => extras.repeatDays.includes(day.getDay()));
+        date = dateKey(next);
+        warnings.push("dateInferred");
+      }
+      const statedDates = lines.filter(line => /^(?:date|日期)\s*[:：]/i.test(line)).map(parseScannedDate).filter(Boolean);
+      if (new Set(statedDates).size > 1) warnings.push("multipleEvents");
+      if (!title) warnings.push("titleReview");
+      if (!date) warnings.push("dateReview");
+      if (!times.start && !times.allDay) warnings.push(times.warning || "timeReview");
+      if (times.estimatedEnd) warnings.push("estimatedEnd");
+      if (/\b(?:PST|PDT|EST|EDT|CST|CDT|MST|MDT|UTC|GMT|CET|BST)\b/i.test(text)) warnings.push("timezoneReview");
+      if (extras.repeatUntil && date && extras.repeatUntil < date) { extras.repeatUntil = ""; warnings.push("repeatReview"); }
+      return { text, title: title.slice(0, 100), date, start: times.start, end: times.end, allDay: times.allDay, location: location.slice(0, 100), ...parseScannedLogistics(text), ...extras, warnings };
+    }
+
+    function parseScannedEventExtras(lines, title) {
+      const result = {};
+      const repeats = scannedLineValue(lines, ["repeat", "repeats", "recurrence", "重复", "频率"]) || lines.find(line => /^(?:every|each|weekly|daily|monthly|yearly|每|周一至周五|工作日)/i.test(line)) || "";
+      const interval = repeats.match(/every\s+(\d+)\s+(days?|weeks?|months?|years?)/i);
+      if (interval) {
+        result.recurrence = { d: "daily", w: "weekly", m: "monthly", y: "yearly" }[interval[2][0].toLowerCase()];
+        result.repeatInterval = Math.max(1, Math.min(12, Number(interval[1])));
+      } else {
+        if (/weekdays?|工作日|周一至周五/i.test(repeats)) { result.recurrence = "weekly"; result.repeatDays = [1, 2, 3, 4, 5]; }
+        else if (/daily|every day|每天|每日/i.test(repeats)) result.recurrence = "daily";
+        else if (/monthly|every month|每月/i.test(repeats)) result.recurrence = "monthly";
+        else if (/yearly|annually|every year|每年/i.test(repeats)) result.recurrence = "yearly";
+        else if (/weekly|weekend|every|each|每周|每星期/i.test(repeats)) result.recurrence = "weekly";
+        else if (/none|one.time|不重复|单次/i.test(repeats)) result.recurrence = "none";
+      }
+      if (result.recurrence === "weekly" && !result.repeatDays) {
+        const weekdays = [/\bsun(?:day)?s?\b|[周期]日|[周期]天/i, /\bmon(?:day)?s?\b|[周期]一/i, /\btue(?:sday)?s?\b|[周期]二/i, /\bwed(?:nesday)?s?\b|[周期]三/i, /\bthu(?:rsday)?s?\b|[周期]四/i, /\bfri(?:day)?s?\b|[周期]五/i, /\bsat(?:urday)?s?\b|[周期]六/i];
+        result.repeatDays = weekdays.flatMap((pattern, day) => pattern.test(repeats) ? [day] : []);
+        if (/weekends?|周末/i.test(repeats)) result.repeatDays = [0, 6];
+      }
+      const until = scannedLineValue(lines, ["until", "ends on", "end date", "repeat until", "截止重复", "结束日期"]) || repeats.match(/(?:until|through|截至|直到)\s*(.+)$/i)?.[1];
+      if (until) result.repeatUntil = parseScannedDate(until);
+      const type = scannedLineValue(lines, ["event type", "type", "事件类型", "类型"]) || title;
+      if (/birthday|生日/i.test(type)) result.eventType = "birthday";
+      else if (/holiday|节假日|假期|节日/i.test(type)) result.eventType = "holiday";
+      else if (/deadline|due date|截止/i.test(type)) result.eventType = "deadline";
+      const status = scannedLineValue(lines, ["status", "状态"]);
+      if (/cancelled|canceled|取消/i.test(status)) result.status = "cancelled";
+      else if (/tentative|pending|暂定|待定/i.test(status)) result.status = "tentative";
+      else if (/confirmed|已确认|确认/i.test(status)) result.status = "confirmed";
+      const importance = scannedLineValue(lines, ["importance", "priority", "重要性", "优先级"]);
+      if (/high|urgent|important|高|紧急|重要/i.test(importance)) result.importance = "high";
+      else if (/low|低/i.test(importance)) result.importance = "low";
+      else if (/normal|普通|正常/i.test(importance)) result.importance = "normal";
+      const child = scannedLineValue(lines, ["child", "for", "kid", "孩子", "参与者"]);
+      if (child) {
+        const match = kidProfiles.find(kid => kid.name.toLowerCase() === child.toLowerCase());
+        if (match) result.child = match.name;
+        else if (/^(?:family|all|全家|所有人)$/i.test(child)) result.child = FAMILY_CHILD;
+      }
+      const travel = scannedLineValue(lines, ["travel time", "travel buffer", "travel", "路程时间", "出行时间"]);
+      const travelMinutes = travel?.match(/^(15|30|45|60)\s*(?:min(?:utes?)?|分钟)?$/i);
+      if (travelMinutes) result.travelMinutes = travelMinutes[1];
+      return result;
+    }
+
+    function parseScannedLogistics(text) {
+      const entries = text.split("\n").map(line => ({
+        value: line.trim().replace(/^(?:[-*•]|\d+[.)])\s+/, "").replace(/\*\*/g, "").trim(),
+        bullet: /^\s*(?:[-*•]|\d+[.)])\s+/.test(line)
+      })).filter(entry => entry.value);
+      const lines = entries.map(entry => entry.value);
+      const adultLabel = /^(?:responsible adult|responsible|adult in charge|person in charge|supervising adult|supervisor|caregiver|coach|负责人|负责的成人|带队成人|教练)\s*[:：\-]\s*(.*)$/i;
+      const itemsLabel = /^(?:what to bring|things to bring|items to bring|bring|packing list|equipment|需要携带|携带物品|物品清单|装备)\s*[:：\-]\s*(.*)$/i;
+      const sectionLabel = /^(?:[\w \-/]{1,40}|[\u3400-\u9fff]{1,16})\s*[:：]/;
+      let responsible = "";
+      const items = [];
+      for (let index = 0; index < lines.length; index += 1) {
+        const adult = lines[index].match(adultLabel);
+        if (adult && !responsible) {
+          const next = lines[index + 1] || "";
+          responsible = adult[1] || (!sectionLabel.test(next) ? next : "");
+        }
+        const packing = lines[index].match(itemsLabel);
+        if (!packing) continue;
+        if (packing[1]) items.push(packing[1]);
+        // Continue only list-shaped lines; unrelated prose stays in the notes.
+        for (let next = index + 1; next < entries.length; next += 1) {
+          if (!entries[next].bullet) break;
+          const value = entries[next].value;
+          if (sectionLabel.test(value)) break;
+          items.push(value);
+        }
+        if (!packing[1] && !items.length && lines[index + 1] && !sectionLabel.test(lines[index + 1])) items.push(lines[index + 1]);
+      }
+      if (!responsible) {
+        const mention = text.match(/(?:responsible adult|adult in charge|supervising adult)\s+(?:is|will be)\s+([^\n.!?]+)/i)
+          || text.match(/(?:^|[\n.!?]\s*)([^\n.!?]{2,60}?)\s+(?:will supervise|is supervising|will be supervising|is in charge)\b/i)
+          || text.match(/(?:负责人|负责的成人|带队成人)(?:是|为)\s*([^\n。！？]+)/);
+        if (mention) responsible = mention[1].trim();
+      }
+      if (!items.length) {
+        const instruction = text.match(/\b(?:(?:players|children|kids|participants|families)\s+(?:should|must|need to)|please)\s+bring\s+([^\n.!?]+)/i)
+          || text.match(/(?:^|[.!?]\s+)bring\s+([^\n.!?]+)/im)
+          || text.match(/(?:请携带|需要带上|请带上)\s*([^\n。！？]+)/);
+        if (instruction) items.push(instruction[1].trim());
+      }
+      return { responsible: responsible.slice(0, 60), items: [...new Set(items)].join("; ").slice(0, 160) };
     }
 
     function renderScannedGameSummary(details) {
       const values = [
-        t("gameScan.oneTime"),
-        t("gameScan.fieldTitle", { value: details.title }),
+        details.title ? t("gameScan.fieldTitle", { value: details.title }) : "",
         details.date ? t("gameScan.fieldDate", { value: formatShortDate(parseDateKey(details.date)) }) : "",
         details.start ? t("gameScan.fieldTime", { value: `${formatTimeLabel(minutes(details.start))} - ${formatTimeLabel(minutes(details.end))}` }) : "",
-        details.location ? t("gameScan.fieldLocation", { value: details.location }) : ""
+        details.location ? t("gameScan.fieldLocation", { value: details.location }) : "",
+        details.responsible ? `${t("form.responsible")}: ${details.responsible}` : "",
+        details.items ? `${t("form.items")}: ${details.items}` : "",
+        details.allDay ? t("form.allDay") : "",
+        details.child ? `${t("form.child")}: ${details.child}` : "",
+        details.eventType ? t(`eventType.${details.eventType}`) : "",
+        details.recurrence ? t(`repeat.${details.recurrence}`) : "",
+        details.status ? t(`status.${details.status}`) : "",
+        details.importance ? t(`importance.${details.importance}`) : "",
+        ...(details.warnings || []).map(warning => t(`gameScan.${warning}`))
       ].filter(Boolean);
       document.getElementById("gameScanSummary").innerHTML = values.map(value => `<span>${escapeHtml(value)}</span>`).join("");
       gameScanReview.hidden = false;
@@ -17577,31 +18204,40 @@
         document.getElementById("gameScanTextDetails").open = true;
         return false;
       }
-      fields.title.value = details.title || "Game";
+      if (details.title) fields.title.value = details.title;
       if (details.date) fields.date.value = details.date;
       if (details.start) {
         fields.start.value = details.start;
         fields.end.value = details.end;
         fields.allDay.checked = false;
       }
-      fields.location.value = details.location;
-      fields.eventType.value = "activity";
-      fields.recurrence.value = "none";
-      fields.repeatInterval.value = "1";
-      fields.repeatUntil.value = "";
+      if (details.allDay) fields.allDay.checked = true;
+      if (details.location) fields.location.value = details.location;
+      if (details.responsible) fields.responsible.value = details.responsible;
+      if (details.items) fields.items.value = details.items;
+      ["eventType", "status", "importance", "child", "travelMinutes"].forEach(key => {
+        if (details[key] !== undefined) fields[key].value = details[key];
+      });
+      if (details.recurrence) {
+        fields.recurrence.value = details.recurrence;
+        fields.repeatInterval.value = String(details.repeatInterval || 1);
+        fields.repeatUntil.value = details.repeatUntil || "";
+      }
       fields.notes.value = details.text;
       const inferred = inferredEventDefaults(normalizedEventTitle(details.title));
-      setIconField(inferred?.icon || "⚽");
+      if (details.title) setIconField(inferred?.icon || "✨");
       smartDefaultsAppliedTitle = normalizedEventTitle(fields.title.value);
       updateAllDayFields();
-      updateRecurrenceFields({ resetDays: true });
+      updateRecurrenceFields({ resetDays: Boolean(details.recurrence) });
+      if (details.repeatDays?.length) document.querySelectorAll("#repeatWeekdays input").forEach(input => { input.checked = details.repeatDays.includes(Number(input.value)); });
       updateConflictSuggestions();
       gameScanText.value = details.text;
       renderScannedGameSummary(details);
       gameScanProgress.hidden = false;
       gameScanProgress.classList.add("is-complete");
       gameScanProgress.classList.remove("is-error");
-      gameScanProgressText.textContent = t(details.date && details.start ? "gameScan.applied" : "gameScan.partial");
+      gameScanProgressText.textContent = t(details.warnings?.length || !details.date || !(details.start || details.allDay) ? "gameScan.partial" : "gameScan.applied");
+      scheduleNewEventDraftSave();
       return true;
     }
 
@@ -17625,7 +18261,7 @@
       let worker;
       try {
         const ocr = await ensureOcrLibrary();
-        worker = await ocr.createWorker("eng", 1, {
+        worker = await ocr.createWorker(["eng", "chi_sim"], 1, {
           logger: message => {
             if (message.status !== "recognizing text") return;
             gameScanProgressText.textContent = t("gameScan.reading", { progress: Math.round((message.progress || 0) * 100) });
@@ -17666,6 +18302,168 @@
       updateRecurrenceFields({ resetDays: true });
     }
 
+    function readEventDraft(key) {
+      try {
+        const draft = JSON.parse(localStorage.getItem(key));
+        return draft?.version === 1 && draft.values && typeof draft.values === "object" && !Array.isArray(draft.values)
+          ? draft : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function captureEventDraft() {
+      const values = Object.fromEntries(EVENT_DRAFT_FIELDS.map(name => [name, fields[name].value]));
+      values.allDay = fields.allDay.checked;
+      values.repeatDays = [...document.querySelectorAll("#repeatWeekdays input:checked")].map(input => Number(input.value));
+      values.attendees = selectedAttendees();
+      values.step = eventFormStep;
+      return values;
+    }
+
+    function comparableEventDraft(values) {
+      return JSON.stringify({
+        ...Object.fromEntries(EVENT_DRAFT_FIELDS.map(name => [name, String(values[name] || "").trim()])),
+        allDay: values.allDay,
+        repeatDays: values.repeatDays,
+        attendees: values.attendees
+      });
+    }
+
+    function renderEventDraftState() {
+      const session = eventDraftSession;
+      const banner = document.getElementById("eventDraftBanner");
+      const status = document.getElementById("eventDraftStatus");
+      banner.hidden = !session?.pending;
+      status.hidden = !session?.status;
+      status.textContent = session?.status ? t(session.status) : "";
+      status.dataset.state = session?.status === "draft.failed" ? "error" : session?.saved ? "saved" : "notice";
+    }
+
+    function beginEventDraftSession(isEdit = false) {
+      window.clearTimeout(eventDraftSaveTimer);
+      eventDraftSaveTimer = 0;
+      eventDraftSession = isEdit ? null : {
+        key: scheduleStorageKey("event-draft"),
+        pending: readEventDraft(scheduleStorageKey("event-draft")),
+        baseline: null,
+        saved: false,
+        status: "",
+        lastSaved: ""
+      };
+      renderEventDraftState();
+      const session = eventDraftSession;
+      // Date/time entry points finish their defaults after openDialog returns.
+      // Capture those defaults before treating any user input as an edit.
+      queueMicrotask(() => {
+        if (!session || eventDraftSession !== session) return;
+        session.baseline = comparableEventDraft(captureEventDraft());
+      });
+    }
+
+    function saveNewEventDraft({ allowClosed = false } = {}) {
+      window.clearTimeout(eventDraftSaveTimer);
+      eventDraftSaveTimer = 0;
+      const session = eventDraftSession;
+      if (!session || fields.id.value || session.pending || !session.baseline
+        || (!dialog.open && !allowClosed) || session.key !== scheduleStorageKey("event-draft")) return;
+      const values = captureEventDraft();
+      const comparable = comparableEventDraft(values);
+      const serialized = JSON.stringify(values);
+      try {
+        if (comparable === session.baseline) {
+          if (session.saved) localStorage.removeItem(session.key);
+          session.saved = false;
+          session.status = "";
+          session.lastSaved = "";
+        } else if (serialized !== session.lastSaved) {
+          localStorage.setItem(session.key, JSON.stringify({ version: 1, updatedAt: new Date().toISOString(), values }));
+          session.saved = true;
+          session.status = "draft.saved";
+          session.lastSaved = serialized;
+        }
+      } catch {
+        session.status = "draft.failed";
+      }
+      renderEventDraftState();
+    }
+
+    function scheduleNewEventDraftSave() {
+      if (!eventDraftSession || fields.id.value || eventDraftSession.pending) return;
+      window.clearTimeout(eventDraftSaveTimer);
+      eventDraftSaveTimer = window.setTimeout(saveNewEventDraft, 350);
+    }
+
+    function resumeEventDraft() {
+      const session = eventDraftSession;
+      if (!session?.pending || session.key !== scheduleStorageKey("event-draft")) return;
+      const values = session.pending.values;
+      EVENT_DRAFT_FIELDS.forEach(name => {
+        const field = fields[name];
+        const value = values[name];
+        if (typeof value !== "string") return;
+        if (field.options && ![...field.options].some(option => option.value === value)) return;
+        if (name === "date" && (!/^\d{4}-\d{2}-\d{2}$/.test(value) || dateKey(parseDateKey(value)) !== value)) return;
+        if (["start", "end"].includes(name) && !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)) return;
+        field.value = value;
+      });
+      fields.allDay.checked = values.allDay === true;
+      const repeatDays = Array.isArray(values.repeatDays) ? values.repeatDays.map(Number).filter(day => Number.isInteger(day) && day >= 0 && day <= 6) : [];
+      document.querySelectorAll("#repeatWeekdays input").forEach(input => { input.checked = repeatDays.includes(Number(input.value)); });
+      const validAttendees = new Set(["all", ...kidProfiles.map(kid => kid.name)]);
+      const attendees = Array.isArray(values.attendees) ? values.attendees.filter(name => validAttendees.has(name)) : [];
+      renderAttendeeOptions(attendees.includes("all") || !attendees.length ? ["all"] : attendees);
+      renderEventColorOptions(fields.color.value);
+      updateCustomIconField();
+      updateAllDayFields();
+      updateRecurrenceFields();
+      fields.end.setCustomValidity("");
+      smartDefaultsAppliedTitle = normalizedEventTitle(fields.title.value);
+      session.pending = null;
+      session.saved = true;
+      session.status = "draft.resumed";
+      session.lastSaved = "";
+      setEventFormStep(values.step);
+      renderEventDurationControls();
+      renderEventDraftState();
+      saveNewEventDraft();
+    }
+
+    function discardEventDraft() {
+      const session = eventDraftSession;
+      if (!session || session.key !== scheduleStorageKey("event-draft")) return;
+      try {
+        localStorage.removeItem(session.key);
+        session.pending = null;
+        session.saved = false;
+        session.status = "draft.discarded";
+        session.lastSaved = "";
+      } catch {
+        session.status = "draft.failed";
+      }
+      renderEventDraftState();
+      scheduleNewEventDraftSave();
+      fields.title.focus();
+    }
+
+    function requireEventDraftChoice() {
+      if (!eventDraftSession?.pending) return false;
+      eventDraftSession.status = "draft.choose";
+      renderEventDraftState();
+      document.getElementById("resumeEventDraft").focus();
+      return true;
+    }
+
+    function clearCompletedEventDraft() {
+      const session = eventDraftSession;
+      if (!session || fields.id.value || session.key !== scheduleStorageKey("event-draft")) return;
+      try { localStorage.removeItem(session.key); } catch { }
+      window.clearTimeout(eventDraftSaveTimer);
+      eventDraftSaveTimer = 0;
+      eventDraftSession = null;
+      renderEventDraftState();
+    }
+
     function openDialog(activity) {
       const isEdit = Boolean(activity);
       const defaultStart = 15 * 60;
@@ -17682,6 +18480,7 @@
       const legacyDayIndex = days.findIndex(day => day.key === activity?.day);
       fields.date.value = activity?.startDate || activity?.occurrenceDate || (legacyDayIndex >= 0 ? dateKey(addDays(currentWeekStart, legacyDayIndex)) : defaultEventDate());
       fields.eventType.value = activity?.eventType || "activity";
+      fields.importance.value = eventImportance(activity);
       fields.recurrence.value = activity ? recurrenceValue(activity) : "none";
       fields.repeatInterval.value = String(activity?.repeatInterval || 1);
       fields.repeatUntil.value = activity?.repeatUntil || "";
@@ -17714,7 +18513,8 @@
       dialog.showModal();
       renderPopularTimeOptions();
       setEventFormStep(1, { focus: false });
-      requestAnimationFrame(() => fields.title.focus());
+      beginEventDraftSession(isEdit);
+      requestAnimationFrame(() => (eventDraftSession?.pending ? document.getElementById("resumeEventDraft") : fields.title).focus());
     }
 
     function duplicateActivityDraft() {
@@ -17724,6 +18524,7 @@
       deleteButton.hidden = true;
       duplicateButton.hidden = true;
       deleteButton.closest(".left-actions").hidden = true;
+      beginEventDraftSession();
       fields.title.focus();
       fields.title.select();
     }
@@ -17764,6 +18565,10 @@
       eventPeekActivity = activity;
       const date = parseDateKey(activity.occurrenceDate || activity.startDate || dateKey(selectedDate));
       document.getElementById("eventPeekTitle").textContent = `${displayIcon(activity)} ${activityTitle(activity)}`;
+      const importanceBadge = document.getElementById("eventPeekImportance");
+      importanceBadge.hidden = eventImportance(activity) === "normal";
+      importanceBadge.className = `event-importance-badge event-importance is-${eventImportance(activity)}`;
+      importanceBadge.textContent = eventImportanceLabel(activity);
       document.getElementById("eventPeekMeta").textContent = [formatFullDate(date), eventTimeText(activity), displayChild(activity), activity.location].filter(Boolean).join(" · ");
       document.getElementById("eventPeekEdit").textContent = t(activity.isBuiltInHoliday ? "eventPreview.addEvent" : "eventPreview.edit");
       eventPeek.hidden = false;
@@ -17779,21 +18584,33 @@
       eventDetailsActivity = activity;
       const date = parseDateKey(activity.occurrenceDate || activity.startDate || dateKey(selectedDate));
       const rows = [
-        ["eventPreview.when", `${formatFullDate(date)} · ${eventTimeText(activity)}`],
-        ["eventPreview.who", displayChild(activity)],
-        ["eventPreview.where", activity.location],
-        ["eventPreview.responsible", activity.responsible],
-        ["eventPreview.items", activity.items],
-        ["eventPreview.notes", activity.notes],
-        ["eventPreview.repeats", recurrenceLabel(activity)],
-        ["eventPreview.status", activityStatusLabel(activity)]
-      ].filter(([, value]) => value);
-      document.getElementById("eventDetailsBody").innerHTML = `<h3>${escapeHtml(displayIcon(activity))} ${escapeHtml(activityTitle(activity))}</h3><dl>${rows.map(([label, value]) => `<div><dt>${escapeHtml(t(label))}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>`;
-      document.getElementById("eventDetailsEdit").textContent = t(activity.isBuiltInHoliday ? "eventPreview.addEvent" : "eventPreview.edit");
+        ["users", "eventPreview.who", displayChild(activity)],
+        ["map-pin", "eventPreview.where", activity.location],
+        ["user-round", "eventPreview.responsible", activity.responsible],
+        ["backpack", "eventPreview.items", activity.items],
+        ["align-left", "eventPreview.notes", activity.notes],
+        ["repeat-2", "eventPreview.repeats", recurrenceValue(activity) !== "none" ? recurrenceLabel(activity) : ""],
+        ["bell", "reminders.title", userSettings.notifications && !activity.allDay ? reminderLeadLabel() : ""],
+        ["calendar-days", "sidebar.calendar", calendars.find(calendar => calendar.id === currentCalendarId)?.name],
+        ["circle-check", "eventPreview.status", activityStatus(activity) !== "scheduled" ? activityStatusLabel(activity) : ""],
+        ["flag", "importance.label", eventImportanceLabel(activity)]
+      ].filter(([, , value]) => value);
+      document.getElementById("eventDetailsBody").innerHTML = `<div class="event-details-heading"><span class="event-details-marker" id="eventDetailsMarker" aria-hidden="true"></span><div><h2 id="eventDetailsTitle">${escapeHtml(activityTitle(activity))}</h2><p>${escapeHtml(formatFullDate(date))} · ${escapeHtml(eventTimeText(activity))}</p></div></div><dl>${rows.map(([icon, label, value]) => `<div class="event-details-row"><i data-lucide="${icon}" aria-hidden="true"></i><div><dt>${escapeHtml(t(label))}</dt><dd>${escapeHtml(value)}</dd></div></div>`).join("")}</dl>`;
+      document.getElementById("eventDetailsMarker").style.backgroundColor = eventColors(activity).line;
+      document.getElementById("eventDetailsTitle").insertAdjacentHTML("afterend", eventImportanceBadge(activity));
+      const edit = document.getElementById("eventDetailsEdit");
+      const editLabel = t(activity.isBuiltInHoliday ? "eventPreview.addEvent" : "eventPreview.edit");
+      edit.setAttribute("aria-label", editLabel);
+      edit.title = editLabel;
+      document.getElementById("eventDetailsDelete").hidden = Boolean(activity.isBuiltInHoliday);
+      document.getElementById("eventDetailsConfirm").hidden = true;
+      window.lucide?.createIcons();
       eventDetailsDialog.showModal();
     }
 
     function bindCalendarEventActions(element, activity, suppressDraggedClick = false) {
+      element.dataset.importance = eventImportance(activity);
+      element.setAttribute("aria-label", [activityTitle(activity), eventTimeText(activity), displayChild(activity), eventImportanceLabel(activity), activityStatusLabel(activity)].filter(Boolean).join(" · "));
       element.addEventListener("pointerenter", event => {
         if (event.pointerType === "mouse" && matchMedia("(hover: hover) and (pointer: fine)").matches) {
           clearTimeout(eventPeekShowTimer);
@@ -18003,8 +18820,12 @@
     }
 
     function closeDialog() {
+      saveNewEventDraft();
+      eventDraftSession = null;
+      renderEventDraftState();
       dialog.close();
       form.reset();
+      fields.importance.value = "normal";
       resetGameScan();
       updateCustomIconField();
       setEventDetailsExpanded(true);
@@ -18663,6 +19484,7 @@
           lines.push(`DTSTART:${compactIcsDate(startDate)}T${String(activity.start || "09:00").replace(":", "")}00`, `DTEND:${compactIcsDate(startDate)}T${String(activity.end || "09:30").replace(":", "")}00`);
         }
         lines.push(`STATUS:${activityStatus(activity).toUpperCase()}`);
+        lines.push(`PRIORITY:${{ high: 1, normal: 5, low: 9 }[eventImportance(activity)]}`);
         if (activity.location) lines.push(`LOCATION:${icsEscape(activity.location)}`);
         const description = [displayChild(activity), activity.responsible, Number(activity.travelMinutes) > 0 ? t("travel.detail", { count: Number(activity.travelMinutes) }) : "", activity.items, activity.notes].filter(Boolean).join(" · ");
         if (description) lines.push(`DESCRIPTION:${icsEscape(description)}`);
@@ -18687,6 +19509,14 @@
 
     function icsUnescape(value) {
       return String(value || "").replace(/\\n/gi, "\n").replace(/\\([\\,;])/g, "$1");
+    }
+
+    function importanceFromIcsPriority(value) {
+      const priority = Number(value);
+      if (!Number.isInteger(priority)) return "normal";
+      if (priority >= 1 && priority <= 4) return "high";
+      if (priority >= 6 && priority <= 9) return "low";
+      return "normal";
     }
 
     function importIcsEvents(text) {
@@ -18717,6 +19547,7 @@
           allDay: !start.time, start: start.time || "09:00", end: end?.time || (start.time ? "09:30" : "09:00"),
           title: icsUnescape(title), icon: MISC_ICON, style: "child", notes: icsUnescape(property("DESCRIPTION")),
           status: ["confirmed", "tentative", "cancelled"].includes(importedStatus) ? importedStatus : "confirmed", travelMinutes: 0,
+          importance: importanceFromIcsPriority(property("PRIORITY")),
           location: icsUnescape(property("LOCATION")), responsible: "", items: ""
         };
       }).filter(Boolean);
@@ -18735,6 +19566,7 @@
       return activities.filter(activity => activity && activity.title && (activity.startDate || activity.day)).map(activity => ({
         ...activity,
         id: makeId("activity"),
+        importance: eventImportance(activity),
         child: activity.child === FAMILY_CHILD || kidProfiles.some(kid => kid.name === activity.child) ? activity.child : FAMILY_CHILD
       }));
     }
@@ -19192,12 +20024,12 @@
       const list = document.getElementById("sharedCalendarEvents");
       const profiles = Array.isArray(shared.kids) ? shared.kids.map(normalizeKidProfile) : [];
       const profileMap = Object.fromEntries(profiles.map(profile => [profile.name, profile]));
-      const events = Array.isArray(shared.activities) ? shared.activities.slice().sort((a, b) => `${a.startDate || ""}${a.start || ""}`.localeCompare(`${b.startDate || ""}${b.start || ""}`)) : [];
+      const events = Array.isArray(shared.activities) ? shared.activities.slice().sort((a, b) => String(a.startDate || "").localeCompare(String(b.startDate || "")) || compareEventImportance(a, b)) : [];
       list.innerHTML = events.length ? events.map(activity => {
         const profile = profileMap[activity.child];
         const child = activity.child === FAMILY_CHILD ? t("calendar.family") : `${profile?.avatar || ""} ${activity.child || ""}`.trim();
         const editButton = canEditSharedCalendar() ? `<button class="small-btn edit-shared-event" type="button" data-event-id="${escapeHtml(activity.id)}">${escapeHtml(t("invitations.editEvent"))}</button>` : "";
-        return `<article class="shared-event"><span class="shared-event-copy"><strong>${escapeHtml(`${activity.icon || MISC_ICON} ${activity.title || ""}`.trim())}</strong><span>${escapeHtml([activity.startDate, activity.allDay ? t("calendar.allDay") : `${activity.start || ""} - ${activity.end || ""}`, child].filter(Boolean).join(" · "))}</span></span><span class="shared-event-actions">${editButton}</span></article>`;
+        return `<article class="shared-event" data-importance="${eventImportance(activity)}"><span class="shared-event-copy"><strong>${escapeHtml(`${activity.icon || MISC_ICON} ${activity.title || ""}`.trim())}</strong>${eventImportanceBadge(activity)}<span>${escapeHtml([activity.startDate, activity.allDay ? t("calendar.allDay") : `${activity.start || ""} - ${activity.end || ""}`, child].filter(Boolean).join(" · "))}</span></span><span class="shared-event-actions">${editButton}</span></article>`;
       }).join("") : `<p class="invitation-empty">${escapeHtml(t("invitations.noEvents"))}</p>`;
       list.querySelectorAll(".edit-shared-event").forEach(button => button.addEventListener("click", () => {
         const activity = sharedCalendarState.shared.activities.find(item => item.id === button.dataset.eventId);
@@ -19419,6 +20251,7 @@
       childSelect.value = activity?.child || profiles[0]?.name || FAMILY_CHILD;
       document.getElementById("sharedEventDate").value = activity?.startDate || dateKey(new Date());
       document.getElementById("sharedEventType").value = activity?.eventType || "activity";
+      document.getElementById("sharedEventImportance").value = eventImportance(activity);
       document.getElementById("sharedEventStart").value = activity?.start || "15:00";
       document.getElementById("sharedEventEnd").value = activity?.end || "15:30";
       document.getElementById("sharedEventAllDay").checked = Boolean(activity?.allDay);
@@ -19481,6 +20314,7 @@
         child: document.getElementById("sharedEventChild").value,
         startDate: document.getElementById("sharedEventDate").value,
         eventType: type,
+        importance: eventImportance({ importance: document.getElementById("sharedEventImportance").value }),
         recurrence: existing.recurrence || "none",
         repeatInterval: existing.repeatInterval || 1,
         repeatUntil: existing.repeatUntil || "",
@@ -19569,6 +20403,7 @@
       renderToday();
       renderMonth();
       renderScheduleOverview();
+      renderCalendarInsights();
       renderCalendarEmptyState();
       renderSearchEmptyState();
       renderReminders();
@@ -20016,7 +20851,21 @@
       if (activity) openCalendarActivity(activity);
     });
     document.getElementById("closeEventDetails").addEventListener("click", () => eventDetailsDialog.close());
-    document.getElementById("eventDetailsDone").addEventListener("click", () => eventDetailsDialog.close());
+    document.getElementById("eventDetailsDelete").addEventListener("click", () => {
+      if (!eventDetailsActivity || eventDetailsActivity.isBuiltInHoliday) return;
+      document.getElementById("eventDetailsDeletePrompt").textContent = t(recurrenceValue(eventDetailsActivity) === "none" ? "eventPreview.deletePrompt" : "eventPreview.deleteSeries");
+      document.getElementById("eventDetailsConfirm").hidden = false;
+      document.getElementById("eventDetailsCancelDelete").focus();
+    });
+    document.getElementById("eventDetailsCancelDelete").addEventListener("click", () => {
+      document.getElementById("eventDetailsConfirm").hidden = true;
+      document.getElementById("eventDetailsDelete").focus();
+    });
+    document.getElementById("eventDetailsConfirmDelete").addEventListener("click", () => {
+      if (!eventDetailsActivity || eventDetailsActivity.isBuiltInHoliday) return;
+      eventDetailsDialog.close();
+      deleteCalendarActivity(eventDetailsActivity.id);
+    });
     document.getElementById("eventDetailsEdit").addEventListener("click", () => {
       const activity = eventDetailsActivity;
       eventDetailsDialog.close();
@@ -20169,6 +21018,28 @@
     document.getElementById("managePresets").addEventListener("click", openPresetDialog);
     document.getElementById("closeDialog").addEventListener("click", closeDialog);
     document.getElementById("cancelDialog").addEventListener("click", closeDialog);
+    document.getElementById("resumeEventDraft").addEventListener("click", resumeEventDraft);
+    document.getElementById("discardEventDraft").addEventListener("click", discardEventDraft);
+    form.addEventListener("input", scheduleNewEventDraftSave);
+    form.addEventListener("change", scheduleNewEventDraftSave);
+    form.addEventListener("click", event => {
+      const button = event.target.closest("button");
+      if (button && !["resumeEventDraft", "discardEventDraft"].includes(button.id)) scheduleNewEventDraftSave();
+    });
+    dialog.addEventListener("cancel", event => {
+      event.preventDefault();
+      closeDialog();
+    });
+    dialog.addEventListener("close", () => {
+      if (dialog.open) return;
+      saveNewEventDraft({ allowClosed: true });
+      eventDraftSession = null;
+      renderEventDraftState();
+    });
+    window.addEventListener("beforeunload", () => saveNewEventDraft());
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) saveNewEventDraft();
+    });
     duplicateButton.addEventListener("click", duplicateActivityDraft);
     document.getElementById("undoDelete").addEventListener("click", undoDeletedActivity);
     document.getElementById("dismissUndo").addEventListener("click", dismissUndoToast);
@@ -20259,6 +21130,8 @@
     document.getElementById("resetScheduleFilters").addEventListener("click", resetScheduleFilters);
     jumpConflictButton.addEventListener("click", jumpToNextConflict);
     jumpTravelButton.addEventListener("click", jumpToNextTravelWarning);
+    document.getElementById("calendarInsightsConflicts").addEventListener("click", () => jumpToCalendarInsightWarning("conflict"));
+    document.getElementById("calendarInsightsTravel").addEventListener("click", () => jumpToCalendarInsightWarning("travel"));
     jumpNextEventButton.addEventListener("click", jumpToNextEvent);
     document.querySelectorAll("[data-event-filter]").forEach(button => {
       button.addEventListener("click", () => {
@@ -20297,6 +21170,14 @@
       updatePopularTimeSelection();
       updateConflictSuggestions();
     }));
+    [fields.start, fields.end, fields.allDay].forEach(field => {
+      field.addEventListener("input", renderEventDurationControls);
+      field.addEventListener("change", renderEventDurationControls);
+    });
+    document.querySelectorAll("[data-event-duration]").forEach(button => button.addEventListener("click", () => applyEventDuration(Number(button.dataset.eventDuration))));
+    form.addEventListener("click", () => requestAnimationFrame(() => { if (dialog.open) renderEventDurationControls(); }));
+    new MutationObserver(() => { if (dialog.open) renderEventDurationControls(); }).observe(dialog, { attributes: true, attributeFilter: ["open"] });
+    new MutationObserver(() => { if (dialog.open) renderEventDurationControls(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
     document.querySelectorAll(".event-template").forEach(button => button.addEventListener("click", () => applyEventTemplate(button.dataset.template)));
     document.getElementById("eventStepBack").addEventListener("click", () => setEventFormStep(eventFormStep - 1));
     document.getElementById("eventStepNext").addEventListener("click", () => {
@@ -20598,6 +21479,7 @@
 
     form.addEventListener("submit", event => {
       event.preventDefault();
+      if (requireEventDraftChoice()) return;
       if (eventFormStep < EVENT_FORM_STEPS.length) {
         if (eventFormStep === 1) applySmartEventDefaults();
         if (validateEventFormStep()) setEventFormStep(eventFormStep + 1);
@@ -20614,6 +21496,7 @@
         child: fields.child.value,
         startDate: fields.date.value,
         eventType: fields.eventType.value,
+        importance: eventImportance({ importance: fields.importance.value }),
         recurrence: fields.recurrence.value,
         repeatInterval: fields.recurrence.value === "none" ? 1 : Math.max(1, Math.min(12, Number(fields.repeatInterval.value) || 1)),
         repeatUntil: fields.recurrence.value === "none" ? "" : fields.repeatUntil.value,
@@ -20646,7 +21529,9 @@
       } else {
         state.activities.push(activity);
       }
-      saveActivities();
+      const activitySaved = saveActivities();
+      if (activitySaved) clearCompletedEventDraft();
+      else saveNewEventDraft();
       auditActivity(previousActivity ? "updated" : "created", previousActivity, activity);
       trackProductEvent(existingIndex >= 0 ? "Event Updated" : "Event Created", {
         type: activity.eventType,
@@ -20706,19 +21591,19 @@
       showFeedbackToast(t("feedback.kidsSaved"));
     });
 
-    deleteButton.addEventListener("click", () => {
-      if (!fields.id.value) return;
-      const deletedActivity = state.activities.find(activity => activity.id === fields.id.value);
+    function deleteCalendarActivity(id) {
+      const deletedActivity = state.activities.find(activity => activity.id === id);
       if (!deletedActivity) return;
       rememberCurrentSchedule(t("versions.beforeDelete", { title: activityTitle(deletedActivity) }));
-      state.activities = state.activities.filter(activity => activity.id !== fields.id.value);
+      state.activities = state.activities.filter(activity => activity.id !== id);
       saveActivities();
       auditActivity("deleted", deletedActivity, null);
-      closeDialog();
+      if (dialog.open) closeDialog();
       renderAll();
       scheduleSmartCalendarFocus();
       showDeleteUndo(deletedActivity);
-    });
+    }
+    deleteButton.addEventListener("click", () => deleteCalendarActivity(fields.id.value));
 
     window.addEventListener("online", () => {
       if (activeAccount?.provider !== "supabase" || !cloudSession) return;
@@ -20747,19 +21632,168 @@
       });
     }
 
+    const commandPaletteDialog = document.getElementById("commandPalette");
+    const commandPaletteQuery = document.getElementById("commandPaletteQuery");
+    const commandPaletteResults = document.getElementById("commandPaletteResults");
+    let commandPaletteMatches = [];
+    let commandPaletteIndex = 0;
+    let commandPaletteReturnFocus = null;
+    let commandPaletteSkipFocusReturn = false;
+
+    function commandPaletteActions() {
+      const setView = view => {
+        showCalendarPage();
+        setSidebarActive(state.eventFilter === "holidays" ? "holidays" : state.eventFilter === "important" ? "special-days" : "calendar");
+        activateCalendarView(view);
+      };
+      return [
+        { id: "new", key: "newEvent", detail: "newEventDetail", icon: "+", words: "add create activity 新建 添加 活动", run: () => openNewEventForDate(selectedDate, preferredNewEventChild()) },
+        { id: "today", key: "today", detail: "todayDetail", icon: "◷", words: "now current date time 现在 日期 时间", run: () => document.getElementById("jumpToday").click() },
+        { id: "day", key: "day", detail: "viewDetail", icon: "▣", shortcut: "D", run: () => setView("today") },
+        { id: "week", key: "week", detail: "viewDetail", icon: "▦", shortcut: "W", run: () => setView("week") },
+        { id: "four", key: "four", detail: "viewDetail", icon: "▥", shortcut: "X", words: "four days 四天", run: () => setView("four") },
+        { id: "month", key: "month", detail: "viewDetail", icon: "▦", shortcut: "M", run: () => setView("month") },
+        { id: "dashboard", key: "dashboard", detail: "dashboardDetail", icon: "⌂", words: "overview family 家庭 总览", run: () => showDashboardPage() },
+        { id: "search", key: "search", detail: "searchDetail", icon: "⌕", shortcut: "/", words: "find filter 搜索 查找 筛选", run: () => openScheduleSearch() },
+        { id: "customize", key: "customize", detail: "customizeDetail", icon: "☷", words: "layout spacing text panels 布局 间距 文字 面板", run: () => document.getElementById("openLayoutEditor").click() },
+        { id: "settings", key: "settings", detail: "settingsDetail", icon: "⚙", words: "appearance preferences reminders 外观 偏好 提醒 设置", run: () => { setSidebarActive("settings"); openSettingsDialog(); } }
+      ];
+    }
+
+    function commandPaletteSearch(query) {
+      const normalize = value => String(value || "").normalize("NFKC").toLocaleLowerCase().trim();
+      const terms = normalize(query).split(/\s+/).filter(Boolean);
+      const matches = value => terms.every(term => normalize(value).includes(term));
+      const actions = commandPaletteActions().filter(action => matches([
+        t(`command.${action.key}`), t(`command.${action.detail}`), action.words,
+        translations.en[`command.${action.key}`], translations.zh[`command.${action.key}`]
+      ].join(" "))).map(action => ({ ...action, label: t(`command.${action.key}`), description: t(`command.${action.detail}`) }));
+      if (!terms.length) return actions;
+      const events = state.activities.filter(activity => matches([activity.title, activity.child, activity.location, activity.notes].join(" "))).slice(0, 6).map((activity, index) => ({
+        id: `event-${index}-${activity.id}`, label: activity.title || t("command.untitled"),
+        description: [t("command.event"), displayChild(activity), activity.location].filter(Boolean).join(" · "),
+        icon: displayIcon(activity), run: () => showEventDetails(activity)
+      }));
+      return [...actions, ...events];
+    }
+
+    function renderCommandPalette() {
+      commandPaletteMatches = commandPaletteSearch(commandPaletteQuery.value);
+      commandPaletteIndex = 0;
+      commandPaletteResults.innerHTML = commandPaletteMatches.length ? commandPaletteMatches.map((action, index) => `
+        <button class="command-palette-result" id="commandPaletteOption-${index}" type="button" role="option" tabindex="-1" aria-selected="${index === 0}" data-command-index="${index}">
+          <span class="command-palette-result-icon" aria-hidden="true">${escapeHtml(action.icon)}</span>
+          <span class="command-palette-result-copy"><strong>${escapeHtml(action.label)}</strong><small>${escapeHtml(action.description)}</small></span>
+          ${action.shortcut ? `<kbd aria-hidden="true">${escapeHtml(action.shortcut)}</kbd>` : ""}
+        </button>`).join("") : `<p class="command-palette-empty">${escapeHtml(t("command.empty"))}</p>`;
+      document.getElementById("commandPaletteCount").textContent = t(commandPaletteMatches.length === 1 ? "command.resultOne" : "command.resultCount", { count: commandPaletteMatches.length });
+      if (commandPaletteMatches.length) commandPaletteQuery.setAttribute("aria-activedescendant", "commandPaletteOption-0");
+      else commandPaletteQuery.removeAttribute("aria-activedescendant");
+      commandPaletteResults.scrollTop = 0;
+    }
+
+    function openCommandPalette() {
+      if (document.getElementById("appShell").hidden || document.querySelector("dialog[open]")) return;
+      commandPaletteReturnFocus = document.activeElement;
+      commandPaletteSkipFocusReturn = false;
+      ["sidebarMenu", "moreActions", "plannerOptions", "calendarViewMenu", "workspacePanelMenu"].forEach(id => { document.getElementById(id).open = false; });
+      hideEventPeek();
+      commandPaletteQuery.value = "";
+      renderCommandPalette();
+      commandPaletteDialog.showModal();
+      commandPaletteQuery.focus();
+    }
+
+    function moveCommandPaletteSelection(direction) {
+      if (!commandPaletteMatches.length) return;
+      commandPaletteIndex = (commandPaletteIndex + direction + commandPaletteMatches.length) % commandPaletteMatches.length;
+      commandPaletteResults.querySelectorAll("[data-command-index]").forEach((option, index) => option.setAttribute("aria-selected", String(index === commandPaletteIndex)));
+      const active = document.getElementById(`commandPaletteOption-${commandPaletteIndex}`);
+      commandPaletteQuery.setAttribute("aria-activedescendant", active.id);
+      active.scrollIntoView({ block: "nearest" });
+    }
+
+    function runCommandPaletteSelection(index = commandPaletteIndex) {
+      const action = commandPaletteMatches[index];
+      if (!action) return;
+      commandPaletteSkipFocusReturn = true;
+      commandPaletteDialog.close();
+      action.run();
+    }
+
+    document.querySelectorAll("[data-command-palette]").forEach(button => button.addEventListener("click", openCommandPalette));
+    document.getElementById("closeCommandPalette").addEventListener("click", () => commandPaletteDialog.close());
+    commandPaletteQuery.addEventListener("input", renderCommandPalette);
+    commandPaletteQuery.addEventListener("keydown", event => {
+      if (event.isComposing) return;
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        moveCommandPaletteSelection(event.key === "ArrowDown" ? 1 : -1);
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        runCommandPaletteSelection();
+      }
+    });
+    commandPaletteResults.addEventListener("click", event => {
+      const option = event.target.closest("[data-command-index]");
+      if (option) runCommandPaletteSelection(Number(option.dataset.commandIndex));
+    });
+    commandPaletteDialog.addEventListener("close", () => {
+      if (commandPaletteSkipFocusReturn) {
+        commandPaletteSkipFocusReturn = false;
+        return;
+      }
+      if (document.querySelector("dialog[open]")) return;
+      const original = commandPaletteReturnFocus;
+      if (original?.isConnected && original.getClientRects().length) original.focus({ preventScroll: true });
+      else document.getElementById("openCommandPaletteQuick").focus({ preventScroll: true });
+    });
+    commandPaletteDialog.addEventListener("click", event => {
+      if (event.target !== commandPaletteDialog) return;
+      const bounds = commandPaletteDialog.getBoundingClientRect();
+      if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) commandPaletteDialog.close();
+    });
+    document.addEventListener("keydown", event => {
+      if (event.isComposing || event.altKey || !(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== "k") return;
+      if (document.getElementById("appShell").hidden) return;
+      const modal = document.querySelector("dialog[open]");
+      if (modal && modal !== commandPaletteDialog) return;
+      event.preventDefault();
+      if (commandPaletteDialog.open) commandPaletteDialog.close();
+      else openCommandPalette();
+    });
+
     const deviceAppearanceQuery = window.matchMedia?.("(prefers-color-scheme: dark)");
     deviceAppearanceQuery?.addEventListener?.("change", () => {
       if (userSettings.appearanceMode === "device") applySettings();
     });
 
+    function initializeMobileLayout() {
+      const compactLayout = window.matchMedia("(max-width: 900px)");
+      const sideCalendar = document.getElementById("calendarSideDisclosure");
+      const updateSideCalendar = () => { sideCalendar.open = !compactLayout.matches; };
+      updateSideCalendar();
+      compactLayout.addEventListener("change", updateSideCalendar);
+
+      const menus = ["sidebarMenu", "workspacePanelMenu", "calendarViewMenu", "plannerOptions", "moreActions"]
+        .map(id => document.getElementById(id));
+      menus.forEach(menu => menu.addEventListener("toggle", () => {
+        if (!menu.open) return;
+        menus.forEach(other => { if (other !== menu) other.open = false; });
+      }));
+    }
+
     applySettings();
     applyStaticTranslations();
     renderWorkspaceVisibility();
+    initializeMobileLayout();
     initializeAuthUI();
     window.setTimeout(maybeShowAppearancePrompt, 650);
     populateFormOptions();
     renderAll();
     startNotificationChecks();
+    document.getElementById("appLoaderLabel").textContent = currentLanguage === "zh" ? "正在加载日历..." : "Loading your planner...";
+    requestAnimationFrame(() => requestAnimationFrame(window.dismissAppLoader));
     initializeCloudSync();
     if (activeAccount?.provider !== "supabase") queueWeeklySummary(800);
 

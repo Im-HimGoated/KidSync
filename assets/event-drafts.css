@@ -1,0 +1,66 @@
+#activityDialog .event-draft-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--blue-line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--blue-soft) 60%, var(--panel));
+  color: var(--ink);
+}
+
+#activityDialog .event-draft-copy { min-width: 0; }
+#activityDialog .event-draft-copy strong { font-size: 14px; }
+#activityDialog .event-draft-copy p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#activityDialog .event-draft-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+#activityDialog .event-draft-actions button {
+  min-height: 44px;
+  margin: 0;
+  white-space: nowrap;
+}
+
+#activityDialog .event-draft-actions button:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+}
+
+#activityDialog .event-draft-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+#activityDialog .event-draft-status[data-state="saved"]::before {
+  content: "✓";
+  color: var(--green);
+  font-weight: 800;
+}
+
+#activityDialog .event-draft-status[data-state="error"] { color: #b44352; }
+
+@media (max-width: 600px) {
+  #activityDialog .event-draft-banner { align-items: stretch; flex-direction: column; gap: 10px; padding: 12px; }
+  #activityDialog .event-draft-actions { width: 100%; }
+  #activityDialog .event-draft-actions button { flex: 1 1 auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #activityDialog .event-draft-actions button { transition: none; }
+}

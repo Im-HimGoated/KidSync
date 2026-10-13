@@ -252,6 +252,7 @@ begin
     'start', activity -> 'start',
     'end', activity -> 'end',
     'eventType', activity -> 'eventType',
+    'importance', activity -> 'importance',
     'status', activity -> 'status'
   ))), '[]'::jsonb)
   into safe_activities
