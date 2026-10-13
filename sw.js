@@ -1,4 +1,4 @@
-const CACHE_NAME = "kidssync-shell-v64";
+const CACHE_NAME = "kidssync-shell-v69";
 const APP_SHELL = [
   "./",
   "./index.html",
