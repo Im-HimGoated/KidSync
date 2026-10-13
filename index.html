@@ -17950,7 +17950,7 @@
         const candidate = scannedYearOrNext(Number(chinese[2]) - 1, Number(chinese[3]), chinese[1]);
         if (candidate) return dateKey(candidate);
       }
-      const iso = text.match(/\b(20\d{2})-(\d{1,2})-(\d{1,2})\b/);
+      const iso = text.match(/\b(20\d{2})[-/](\d{1,2})[-/](\d{1,2})\b/);
       if (iso) {
         const candidate = validScannedDate(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
         if (candidate) return dateKey(candidate);
@@ -17973,6 +17973,13 @@
       }
       if (/\btomorrow\b|明天/i.test(text)) return dateKey(addDays(new Date(), 1));
       if (/\btoday\b|今天/i.test(text)) return dateKey(new Date());
+      const weekday = text.trim().match(/^(?:next\s+|this\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)$/i);
+      if (weekday) {
+        const day = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"].indexOf(weekday[1].toLowerCase());
+        const today = new Date();
+        const offset = (day - today.getDay() + 7) % 7;
+        return dateKey(addDays(today, offset || (/^next/i.test(text) ? 7 : 0)));
+      }
       return "";
     }
 
@@ -17990,7 +17997,7 @@
     }
 
     function parseScannedTimes(text) {
-      if (/\ball[ -]day\b|全天|整天/i.test(text)) return { start: "", end: "", allDay: true };
+      if (text.split("\n").some(line => /^(?:(?:time|when|时间)\s*[:：]\s*)?(?:all[ -]day(?:\s+event)?|全天|整天)[.!。]?$/i.test(line.trim()))) return { start: "", end: "", allDay: true };
       // Arrival and check-in are logistics, not the event's start time.
       const timeLines = text.split("\n").filter(line => !/^\s*(?:[-*•]\s*)?(?:arrival|arrive|check[ -]?in|warm[ -]?up|到达|签到|集合)\s*[:：]/i.test(line));
       const timeText = timeLines.join("\n");
@@ -18026,6 +18033,8 @@
       const source = startMatch || anyTime;
       if (!source) {
         const single24 = text.match(/(?:start|time|开始|时间)\s*[:：]\s*([01]?\d|2[0-3]):([0-5]\d)/i);
+        const singleChinese = text.match(/(上午|下午|晚上|中午)\s*(\d{1,2})(?:[:：](\d{2})|点(半|\d{1,2}分?)?)/);
+        if (singleChinese) return finish(scannedClockValue(singleChinese[2], singleChinese[3] || (singleChinese[4] === "半" ? "30" : singleChinese[4]?.replace("分", "") || "0"), singleChinese[1] === "上午" ? "am" : "pm"), null);
         return single24 ? finish(scannedClockValue(single24[1], single24[2]), null) : { start: "", end: "" };
       }
       const start = scannedClockValue(source[1], source[2], source[3]);
@@ -18080,6 +18089,7 @@
       if (!date) warnings.push("dateReview");
       if (!times.start && !times.allDay) warnings.push(times.warning || "timeReview");
       if (times.estimatedEnd) warnings.push("estimatedEnd");
+      if (/\b\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\b/.test(dateText)) warnings.push("numericDateReview");
       if (/\b(?:PST|PDT|EST|EDT|CST|CDT|MST|MDT|UTC|GMT|CET|BST)\b/i.test(text)) warnings.push("timezoneReview");
       if (extras.repeatUntil && date && extras.repeatUntil < date) { extras.repeatUntil = ""; warnings.push("repeatReview"); }
       return { text, title: title.slice(0, 100), date, start: times.start, end: times.end, allDay: times.allDay, location: location.slice(0, 100), ...parseScannedLogistics(text), ...extras, warnings };
