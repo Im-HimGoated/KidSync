@@ -1,4 +1,23 @@
 /* Consistent finishing styles for the planner and supporting screens. */
+.event-step-navigation { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; margin-top:12px; }
+.event-step-navigation button { min-height:44px; padding:6px 4px; border:0; border-bottom:2px solid transparent; border-radius:0; background:transparent; color:var(--muted); font-size:12px; font-weight:600; line-height:1.35; overflow-wrap:anywhere; }
+.event-step-navigation button[aria-current="step"] { border-bottom-color:var(--blue); color:var(--blue); background:var(--blue-soft); }
+.event-step-navigation button:hover { background:var(--soft-line); }
+.event-save-review { min-width:0; padding:0 0 16px; border-bottom:1px solid var(--line); }
+.event-save-review[hidden], .event-close-confirm[hidden] { display:none; }
+.event-save-review h3 { margin:0 0 8px; color:var(--ink); font-size:16px; }
+.event-save-review dl { margin:0; }
+.event-review-row { display:grid; grid-template-columns:minmax(0,1fr) 44px; align-items:center; gap:12px; padding:8px 0; }
+.event-review-row dt { color:var(--muted); font-size:12px; font-weight:500; }
+.event-review-row dd { margin:4px 0 0; color:var(--ink); font-size:14px; line-height:1.5; overflow-wrap:anywhere; }
+.event-review-row button { display:grid; place-items:center; width:44px; height:44px; padding:0; border:0; border-radius:6px; color:var(--blue); background:transparent; }
+.event-review-row button:hover { background:var(--blue-soft); }
+.event-review-row svg { width:18px; height:18px; }
+.event-close-confirm { padding:16px 20px; border-bottom:1px solid var(--line); background:var(--panel); }
+.event-close-confirm p { margin:0 0 12px; color:var(--ink); font-size:14px; line-height:1.5; }
+.event-close-confirm > div { display:flex; flex-wrap:wrap; gap:8px; }
+.event-close-confirm button { min-height:44px; }
+.event-step-navigation button:focus-visible, .event-review-row button:focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
 /* Click-to-open event sheet, shared by all calendar views. */
 #eventDetailsDialog { width:min(540px,calc(100% - 24px)); max-height:calc(100dvh - 24px); padding:0; border:1px solid var(--line); border-radius:8px; overflow-y:auto; background:var(--panel); color:var(--ink); }
 .event-details-toolbar { display:flex; justify-content:flex-end; gap:6px; padding:12px 14px 0; }
@@ -28,7 +47,8 @@
   .event-details-heading, .event-details-row { gap:12px; }
   .event-details-confirm { padding:16px 20px 20px; }
 }
-:root { --ui-radius: 12px; }
+:root { --ui-radius: 12px; --ui-primary-ink: #fff; }
+html.dark-mode { --ui-primary-ink: var(--page); }
 body { -webkit-font-smoothing: antialiased; }
 button, summary, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 button, summary { touch-action: manipulation; }
@@ -50,16 +70,27 @@ button:not(.event), summary { transition: background-color 150ms ease, border-co
 #appShell .workspace-panel-popover button { min-height: 42px; border-radius: 7px; font-weight: 600; }
 #appShell #openLayoutEditor { border-radius: 8px; font-weight: 650; }
 
-#appShell > .toolbar { padding: 8px; gap: 8px; border-radius: var(--ui-radius); box-shadow: none; }
-#appShell .calendar-workspace { background: var(--panel); border-radius: 8px; }
+#appShell > .toolbar { padding: 8px; gap: 8px; border: 1px solid var(--line); border-radius: var(--ui-radius); background: var(--panel); box-shadow: 0 2px 8px color-mix(in srgb, var(--ink) 4%, transparent); }
+#appShell .calendar-workspace { border-color: var(--line); background: color-mix(in srgb, var(--soft-line) 38%, var(--panel)); border-radius: 8px; }
 #appShell .calendar-workspace select { font-weight: 650; }
 #appShell .view-switch, #appShell .language-switch { padding: 3px; border-color: var(--line); border-radius: 9px; background: var(--soft-line); }
-#appShell .view-option, #appShell .language-option { font-size: var(--workspace-text-size); font-weight: 650; line-height: 1.25; white-space: nowrap; }
-#appShell .view-option.is-active { color: var(--blue); background: var(--panel); box-shadow: 0 1px 4px rgb(23 42 58 / 13%); }
-#appShell .language-option.is-active { box-shadow: none; }
+#appShell .view-option, #appShell .language-option { border-radius: 6px; color: var(--muted); font-size: var(--workspace-text-size); font-weight: 650; line-height: 1.25; white-space: nowrap; }
+#appShell .view-option:hover, #appShell .language-option:hover { color: var(--ink); background: color-mix(in srgb, var(--panel) 70%, var(--soft-line)); }
+#appShell .view-option.is-active, #appShell .language-option.is-active { color: var(--blue); background: var(--panel); box-shadow: inset 0 0 0 1px var(--blue-line), 0 1px 3px color-mix(in srgb, var(--ink) 8%, transparent); }
 #appShell .compact-toolbar-action, #appShell .planner-options-toggle { border-radius: 8px; box-shadow: none; }
 #appShell .calendar-zoom { border-radius: 8px; background: var(--panel); }
-#appShell #addActivity { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+#appShell #addActivity { display: inline-flex; align-items: center; justify-content: center; gap: 5px; border-color: var(--trust-primary); color: var(--ui-primary-ink); background: var(--trust-primary); box-shadow: 0 2px 5px color-mix(in srgb, var(--trust-primary) 20%, transparent); }
+#appShell #addActivity:hover { border-color: var(--trust-primary-hover); background: var(--trust-primary-hover); box-shadow: 0 3px 8px color-mix(in srgb, var(--trust-primary) 25%, transparent); }
+
+/* Menus share a calm surface, while their current selection remains easy to find. */
+#appShell .calendar-view-menu > summary { border-radius: 8px; font-weight: 650; }
+#appShell .planner-options-panel, #appShell .calendar-view-menu-panel, #appShell .more-actions-menu { border-color: var(--line); border-radius: var(--ui-radius); color: var(--ink); background: var(--panel); box-shadow: 0 14px 36px color-mix(in srgb, var(--ink) 15%, transparent); }
+#appShell .calendar-view-menu-panel button, #appShell .more-actions-menu > button { border-radius: 7px; font-weight: 600; }
+#appShell .calendar-view-menu-panel button:hover, #appShell .more-actions-menu > button:hover, #appShell .workspace-panel-popover button:hover { color: var(--ink); background: var(--blue-soft); box-shadow: none; }
+#appShell .calendar-view-menu-panel button.is-active { color: var(--blue); background: var(--blue-soft); font-weight: 700; }
+#appShell .calendar-view-menu-panel button.is-active kbd { color: inherit; }
+#appShell :is(.toolbar, .workspace-visibility, .sidebar-nav, .mini-calendar) :is(button, summary, select):focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+#appShell .toolbar .view-option:focus-visible, #appShell .toolbar .language-option:focus-visible, #appShell .toolbar .calendar-workspace select:focus-visible { outline-offset: -2px; }
 
 /* Event text belongs at the start of its block, including long activities. */
 #appShell .schedule-shell { isolation: isolate; border-radius: var(--ui-radius); }
@@ -86,13 +117,26 @@ button:not(.event), summary { transition: background-color 150ms ease, border-co
 #appShell .day-column > .event.very-short { padding: 1px 5px; }
 #appShell .event-badge { width: fit-content; max-width: 100%; font-size: 10px; }
 
-#appShell .mini-calendar { padding: var(--surface-padding); border: 1px solid var(--line); border-radius: var(--ui-radius); background: var(--panel); }
-#appShell .calendar-sidebar-heading { margin-bottom: 18px; font-size: 17px; font-weight: 700; }
+#appShell .mini-calendar { padding: var(--surface-padding); border: 1px solid var(--line); border-radius: var(--ui-radius); background: var(--panel); box-shadow: 0 2px 8px color-mix(in srgb, var(--ink) 3%, transparent); }
+#appShell.workspace-side-left .mini-calendar { border: 1px solid var(--line); }
+#appShell .calendar-sidebar-heading { margin-bottom: 18px; font-size: 17px; font-weight: 650; }
+#appShell .mini-calendar-title { font-weight: 650; }
+#appShell .mini-calendar-nav { border-radius: 8px; }
+#appShell .mini-calendar-weekdays { font-weight: 600; }
 #appShell .mini-calendar-day { font-size: 12px; font-weight: 550; border-radius: 50%; }
-#appShell .mini-calendar-day.is-selected { box-shadow: none; }
+#appShell .mini-calendar-day.is-today { border-color: var(--blue); color: var(--blue); background: var(--blue-soft); font-weight: 750; }
+#appShell .mini-calendar-day.is-selected { border-color: var(--trust-primary); color: var(--ui-primary-ink); background: var(--trust-primary); font-weight: 700; box-shadow: none; }
+#appShell .mini-calendar-day.is-today.is-selected { box-shadow: inset 0 0 0 2px var(--panel); }
 #appShell .mini-calendar-tools { gap: 6px; }
+#appShell .mini-calendar-tools h3 { color: var(--muted); font-size: 12px; font-weight: 650; }
 #appShell .mini-calendar-tool { border-radius: 8px; font-weight: 600; }
-#appShell .mini-calendar-tool:not(.is-primary) { border-color: transparent; background: var(--soft-line); }
+#appShell .mini-calendar-tool:not(.is-primary) { border-color: transparent; background: color-mix(in srgb, var(--soft-line) 55%, var(--panel)); }
+#appShell .mini-calendar-tool-icon { border-radius: 6px; color: var(--blue); background: var(--blue-soft); }
+#appShell .mini-calendar-tool:hover { border-color: var(--blue-line); background: var(--blue-soft); box-shadow: none; }
+#appShell .mini-calendar-tool.is-primary { border-color: var(--blue-line); color: var(--blue); background: var(--blue-soft); }
+#appShell .mini-calendar-tool.is-primary .mini-calendar-tool-icon { color: var(--blue); background: color-mix(in srgb, var(--blue) 12%, var(--blue-soft)); }
+#appShell .mini-calendar-tool.is-primary .mini-calendar-tool-chevron { color: inherit; }
+#appShell .mini-calendar-tool.is-primary:hover, #appShell .mini-calendar-tool.is-primary:focus-visible { border-color: var(--blue); color: var(--blue); background: color-mix(in srgb, var(--blue) 9%, var(--blue-soft)); }
 
 /* Group dashboard information into quiet surfaces with a clear type scale. */
 #appShell .dashboard-page-header { padding: 18px 0; }

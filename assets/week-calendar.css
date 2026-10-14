@@ -58,6 +58,11 @@
   background: var(--panel);
 }
 
+#appShell #weekSchedule:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
 /* Date headers and the time gutter retain their context during either scroll. */
 #appShell #weekSchedule .time-head,
 #appShell #weekSchedule .day-head {
@@ -72,8 +77,8 @@
 
 #appShell #weekSchedule .day-head {
   min-width: 0;
-  gap: 6px;
-  padding: 10px 8px;
+  gap: 8px;
+  padding: 9px 12px;
   justify-content: flex-start;
   align-items: center;
   border-left: 1px solid var(--line);
@@ -87,38 +92,53 @@
   box-shadow: 0 1px 0 var(--line);
 }
 
-#appShell #weekSchedule .day-head.is-today {
-  color: var(--blue);
-  background: color-mix(in srgb, var(--blue-soft) 66%, var(--panel));
-  box-shadow: inset 0 3px 0 var(--blue), 0 1px 0 var(--line);
+#appShell #weekSchedule .day-head:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: -3px;
 }
 
-#appShell #weekSchedule .day-head .weather {
-  flex: 0 0 auto;
-  font-size: 17px;
+#appShell #weekSchedule .day-head.is-today {
+  color: var(--blue);
+  background: color-mix(in srgb, var(--blue-soft) 30%, var(--panel));
+  box-shadow: 0 1px 0 var(--line);
 }
 
 #appShell #weekSchedule .day-head-label {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
+  gap: 5px;
   white-space: normal;
 }
 
 #appShell #weekSchedule .day-head-label-row {
   flex-wrap: wrap;
   justify-content: flex-start;
-  gap: 4px;
-  font-size: var(--workspace-text-size, 14px);
-  font-weight: 650;
+  gap: 5px;
+  color: var(--muted);
+  font-size: max(11px, calc(var(--workspace-text-size, 14px) - 3px));
+  font-weight: 600;
   line-height: 1.3;
 }
 
-#appShell #weekSchedule .day-head small {
-  margin-top: 5px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.2;
+#appShell #weekSchedule .day-head-date {
+  display: grid;
+  place-items: center;
+  align-self: flex-start;
+  width: 34px;
+  height: 34px;
+  margin-left: -5px;
+  border-radius: 50%;
+  color: var(--ink);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
+}
+
+#appShell #weekSchedule .day-head.is-today .day-head-date {
+  color: var(--panel);
+  background: var(--ink);
 }
 
 #appShell #weekSchedule .day-today-badge,
@@ -131,11 +151,15 @@
 }
 
 #appShell #weekSchedule .day-today-badge {
-  background: var(--blue);
-  color: #fff;
+  padding: 0;
+  min-height: 0;
+  color: var(--blue);
+  background: transparent;
 }
 
 #appShell #weekSchedule .day-event-count {
+  align-self: flex-end;
+  margin: 0 0 5px auto;
   border: 0;
   color: var(--muted);
   background: var(--soft-line);

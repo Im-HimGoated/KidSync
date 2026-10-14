@@ -5493,6 +5493,31 @@
     html.dark-mode .popular-time-option:hover,
     html.dark-mode .popular-time-option.is-active { border-color: var(--blue-line); color: var(--ink); background: var(--blue-soft); }
 
+    .trip-date-options {
+      display: grid;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid var(--blue-line);
+      border-radius: 8px;
+      background: var(--blue-soft);
+    }
+
+    .trip-date-options[hidden] { display: none !important; }
+    .trip-date-heading { display: grid; grid-template-columns: 38px minmax(0, 1fr); align-items: center; gap: 10px; }
+    .trip-date-icon { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 8px; color: #fff; background: var(--blue); font-size: 19px; }
+    .trip-date-heading strong, .trip-date-heading output { display: block; }
+    .trip-date-heading strong { color: var(--ink); font-size: 13px; font-weight: 800; }
+    .trip-date-heading output { margin-top: 2px; color: var(--muted); font-size: 12px; font-weight: 650; line-height: 1.35; }
+    .trip-length-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+    .trip-length-option { min-width: 0; min-height: 54px; padding: 7px 8px; border: 1px solid #b9cad6; border-radius: 7px; color: var(--ink); background: var(--panel); text-align: left; }
+    .trip-length-option:hover { border-color: var(--blue-line); background: #f7fafc; }
+    .trip-length-option.is-active { border-color: var(--blue); background: #fff; box-shadow: inset 0 0 0 1px var(--blue); }
+    .trip-length-option strong, .trip-length-option small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .trip-length-option strong { font-size: 11px; font-weight: 800; }
+    .trip-length-option small { margin-top: 3px; color: var(--muted); font-size: 10px; font-weight: 650; }
+    html.dark-mode .trip-length-option { border-color: var(--line); background: #1d2b35; }
+    html.dark-mode .trip-length-option:hover, html.dark-mode .trip-length-option.is-active { border-color: var(--blue-line); background: #253844; }
+
     .account-avatar {
       display: grid;
       flex: 0 0 40px;
@@ -5854,6 +5879,7 @@
       .popular-times-heading small { text-align: left; }
       .popular-time-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .popular-time-option { min-height: 54px; }
+      .trip-length-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       #activityForm .form-actions { align-items: stretch; flex-direction: column-reverse; }
       #activityForm .left-actions, #activityForm .right-actions { width: 100%; }
       #activityForm .right-actions > button { flex: 1 1 0; }
@@ -10501,7 +10527,7 @@
       </aside>
 
       <div class="calendar-stage-main">
-        <section class="schedule-shell calendar-view" id="weekSchedule" aria-label="Weekly schedule" data-i18n-aria="aria.weeklySchedule">
+        <section class="schedule-shell calendar-view" id="weekSchedule" tabindex="0" aria-label="Weekly schedule" data-i18n-aria="aria.weeklySchedule">
           <div class="schedule-grid" id="scheduleGrid"></div>
         </section>
 
@@ -10552,6 +10578,10 @@
       <h2 id="dialogTitle" data-i18n="dialog.addTitle">Add Event</h2>
       <button class="close-btn" type="button" id="closeDialog" aria-label="Close" data-i18n-aria="aria.close">×</button>
     </div>
+    <section class="event-close-confirm" id="eventCloseConfirm" aria-labelledby="eventClosePrompt" hidden>
+      <p id="eventClosePrompt" role="alert" data-i18n="editor.unsaved">You have unsaved changes.</p>
+      <div><button class="ghost-btn" type="button" id="keepEditingEvent" data-i18n="editor.keepEditing">Keep editing</button><button class="danger-btn" type="button" id="discardEventEdits" data-i18n="editor.discard">Discard changes</button></div>
+    </section>
     <form id="activityForm" data-current-step="1">
       <input type="hidden" id="activityId">
       <section class="event-draft-banner" id="eventDraftBanner" aria-labelledby="eventDraftTitle" hidden>
@@ -10571,6 +10601,12 @@
           <span id="eventStepCount">Step 1 of 4</span>
         </div>
         <div class="event-step-track" role="progressbar" aria-valuemin="1" aria-valuemax="4" aria-valuenow="1" aria-label="Event setup progress" data-i18n-aria="eventSteps.progress"><span></span></div>
+        <nav class="event-step-navigation" aria-label="Event setup progress" data-i18n-aria="eventSteps.progress">
+          <button type="button" data-event-step-go="1" data-i18n="eventSteps.event">Event</button>
+          <button type="button" data-event-step-go="2" data-i18n="eventSteps.when">Date &amp; time</button>
+          <button type="button" data-event-step-go="3" data-i18n="eventSteps.schedule">Schedule</button>
+          <button type="button" data-event-step-go="4" data-i18n="eventSteps.details">Details</button>
+        </nav>
       </div>
       <section class="game-scan-panel" id="gameScanPanel" data-event-step="1" aria-labelledby="gameScanTitle">
         <div class="game-scan-heading">
@@ -10689,14 +10725,14 @@
           </div>
         </fieldset>
       </section>
-      <section class="popular-times" data-event-step="2" aria-labelledby="popularTimesLabel">
+      <section class="popular-times" id="popularTimesSection" data-event-step="2" aria-labelledby="popularTimesLabel">
         <div class="popular-times-heading">
           <strong id="popularTimesLabel" data-i18n="popularTimes.title">Popular times</strong>
           <small data-i18n="popularTimes.help">Choose one or enter your own time.</small>
         </div>
         <div class="popular-time-options" id="popularTimeOptions"></div>
       </section>
-      <div class="field-grid" data-event-step="2">
+      <div class="field-grid" id="eventTimeFields" data-event-step="2">
         <label class="time-field" id="startTimeField">
           <span data-i18n="form.start">Start time</span>
           <input id="startTime" type="time" required>
@@ -10706,10 +10742,25 @@
           <input id="endTime" type="time" required>
         </label>
       </div>
-      <label class="check-field" data-event-step="2">
+      <label class="check-field" id="eventAllDayField" data-event-step="2">
         <input id="allDay" type="checkbox">
         <span data-i18n="form.allDay">All-day event</span>
       </label>
+      <section class="trip-date-options" id="tripDateOptions" data-event-step="2" hidden aria-labelledby="tripLengthTitle">
+        <div class="trip-date-heading">
+          <span class="trip-date-icon" aria-hidden="true">✈️</span>
+          <div>
+            <strong id="tripLengthTitle" data-i18n="trip.lengthTitle">Trip length</strong>
+            <output id="tripDateSummary" role="status" aria-live="polite"></output>
+          </div>
+        </div>
+        <div class="trip-length-options" role="group" aria-label="Quick trip lengths" data-i18n-aria="trip.quickLengths">
+          <button class="trip-length-option" type="button" data-trip-days="1" aria-pressed="false"><strong data-i18n="trip.dayTrip">Day trip</strong><small data-i18n="trip.oneDay">1 day</small></button>
+          <button class="trip-length-option" type="button" data-trip-days="2" aria-pressed="false"><strong data-i18n="trip.overnight">Overnight</strong><small data-i18n="trip.twoDays">2 days</small></button>
+          <button class="trip-length-option" type="button" data-trip-days="4" aria-pressed="false"><strong data-i18n="trip.longWeekend">Long weekend</strong><small data-i18n="trip.fourDays">4 days</small></button>
+          <button class="trip-length-option" type="button" data-trip-days="7" aria-pressed="false"><strong data-i18n="trip.oneWeek">One week</strong><small data-i18n="trip.sevenDays">7 days</small></button>
+        </div>
+      </section>
       <section class="event-duration-controls" id="eventDurationControls" data-event-step="2" aria-labelledby="eventDurationLabel">
         <div class="event-duration-heading"><strong id="eventDurationLabel" data-i18n="duration.title">Event length</strong><output id="eventDurationSummary" for="startTime endTime" role="status" aria-live="polite"></output></div>
         <div class="event-duration-options" role="group" aria-label="Quick event lengths" data-i18n-aria="duration.quick">
@@ -10725,6 +10776,10 @@
         <div class="conflict-time-options" id="conflictTimeOptions"></div>
       </section>
       <button class="event-details-toggle" type="button" id="toggleEventDetails" aria-expanded="true" hidden><span aria-hidden="true">＋</span><span data-i18n="form.moreOptions">More options</span></button>
+      <section class="event-save-review" data-event-step="4" aria-labelledby="eventSaveReviewTitle" hidden>
+        <h3 id="eventSaveReviewTitle" data-i18n="editor.review">Review event</h3>
+        <dl id="eventSaveReviewBody"></dl>
+      </section>
       <div class="field-grid advanced-event-field" data-event-step="4">
         <label>
           <span data-i18n="form.icon">Icon</span>
@@ -10836,16 +10891,16 @@
       </fieldset>
       <div class="logistics-grid advanced-event-field" data-event-step="4">
         <label>
-          <span data-i18n="form.location">Location</span>
+          <span id="eventLocationLabel" data-i18n="form.location">Location</span>
           <input id="location" type="text" maxlength="100" placeholder="School, studio, field" data-i18n-placeholder="form.locationPlaceholder">
         </label>
         <label>
-          <span data-i18n="form.responsible">Responsible adult</span>
+          <span id="eventResponsibleLabel" data-i18n="form.responsible">Responsible adult</span>
           <input id="responsible" type="text" maxlength="60" placeholder="Mom, Dad, babysitter" data-i18n-placeholder="form.responsiblePlaceholder">
         </label>
       </div>
       <label class="advanced-event-field" data-event-step="4">
-        <span data-i18n="form.items">Bring / prepare</span>
+        <span id="eventItemsLabel" data-i18n="form.items">Bring / prepare</span>
         <input id="items" type="text" maxlength="160" placeholder="Uniform, water bottle, homework" data-i18n-placeholder="form.itemsPlaceholder">
       </label>
       <label class="advanced-event-field" data-event-step="4">
@@ -11439,6 +11494,11 @@
   <script>
     const translations = {
       en: {
+        "editor.unsaved": "You have unsaved changes.",
+        "editor.keepEditing": "Keep editing",
+        "editor.discard": "Discard changes",
+        "editor.review": "Review event",
+        "editor.notSet": "Not set",
         "draft.available": "You have an unfinished event",
         "draft.choose": "Resume your saved draft, or discard it to start this event.",
         "draft.resume": "Resume draft",
@@ -11933,6 +11993,26 @@
         "popularTimes.evening": "Evening",
         "popularTimes.allDay": "All day",
         "popularTimes.noTime": "No time needed",
+        "trip.lengthTitle": "Trip length",
+        "trip.quickLengths": "Quick trip lengths",
+        "trip.dayTrip": "Day trip",
+        "trip.overnight": "Overnight",
+        "trip.longWeekend": "Long weekend",
+        "trip.oneWeek": "One week",
+        "trip.oneDay": "1 day",
+        "trip.twoDays": "2 days",
+        "trip.fourDays": "4 days",
+        "trip.sevenDays": "7 days",
+        "trip.dayCount": "{count} days",
+        "trip.lengthSummary": "{range} · {duration}",
+        "trip.chooseDates": "Choose a start and end date",
+        "trip.destination": "Destination",
+        "trip.destinationPlaceholder": "City, hotel, airport, or address",
+        "trip.lead": "Trip lead",
+        "trip.leadPlaceholder": "Parent or responsible adult",
+        "trip.packing": "Packing list",
+        "trip.packingPlaceholder": "Passports, medicine, chargers",
+        "trip.notesPlaceholder": "Flight, hotel, confirmation, or pickup notes",
         "gameScan.dashboardAction": "Scan document",
         "gameScan.title": "Scan document",
         "gameScan.intro": "Add an event flyer, school notice, invitation, or activity description.",
@@ -11966,6 +12046,7 @@
         "gameScan.fieldLocation": "Location: {value}",
         "eventSteps.event": "Event",
         "eventSteps.when": "Date & time",
+        "eventSteps.tripWhen": "Trip dates",
         "eventSteps.schedule": "Schedule",
         "eventSteps.details": "Details",
         "eventSteps.count": "Step {current} of {total}",
@@ -11976,6 +12057,8 @@
         "conflicts.summary": "Overlaps with {events}. Try an open time:",
         "conflicts.noAlternatives": "Overlaps with {events}. No open time was found that day.",
         "conflicts.useTime": "Use {time}",
+        "conflicts.tripSummary": "This trip overlaps {count} scheduled events: {events}.",
+        "conflicts.moreEvents": "+{count} more",
         "transfer.exportIcs": "Export calendar (.ics)",
         "transfer.exportBackup": "Export backup (.json)",
         "transfer.importLabel": "Import an .ics or KidsSync .json file",
@@ -12484,6 +12567,11 @@
         "activity.AoPS": "AoPS"
       },
       zh: {
+        "editor.unsaved": "有尚未保存的更改。",
+        "editor.keepEditing": "继续编辑",
+        "editor.discard": "放弃更改",
+        "editor.review": "检查事件",
+        "editor.notSet": "未设置",
         "draft.available": "你有一个尚未完成的日程",
         "draft.choose": "继续编辑已保存的草稿，或丢弃草稿来新建此日程。",
         "draft.resume": "继续草稿",
@@ -12978,6 +13066,26 @@
         "popularTimes.evening": "晚上",
         "popularTimes.allDay": "全天",
         "popularTimes.noTime": "无需设置时间",
+        "trip.lengthTitle": "旅行时长",
+        "trip.quickLengths": "快速选择旅行时长",
+        "trip.dayTrip": "一日游",
+        "trip.overnight": "住一晚",
+        "trip.longWeekend": "长周末",
+        "trip.oneWeek": "一周",
+        "trip.oneDay": "1 天",
+        "trip.twoDays": "2 天",
+        "trip.fourDays": "4 天",
+        "trip.sevenDays": "7 天",
+        "trip.dayCount": "{count} 天",
+        "trip.lengthSummary": "{range} · {duration}",
+        "trip.chooseDates": "请选择开始和结束日期",
+        "trip.destination": "目的地",
+        "trip.destinationPlaceholder": "城市、酒店、机场或地址",
+        "trip.lead": "旅行负责人",
+        "trip.leadPlaceholder": "家长或负责的成人",
+        "trip.packing": "行李清单",
+        "trip.packingPlaceholder": "护照、药品、充电器",
+        "trip.notesPlaceholder": "航班、酒店、确认号或接送备注",
         "gameScan.dashboardAction": "扫描文档",
         "gameScan.title": "扫描文档",
         "gameScan.intro": "添加活动传单、学校通知、邀请函或活动说明。",
@@ -13011,6 +13119,7 @@
         "gameScan.fieldLocation": "地点：{value}",
         "eventSteps.event": "活动",
         "eventSteps.when": "日期与时间",
+        "eventSteps.tripWhen": "旅行日期",
         "eventSteps.schedule": "安排方式",
         "eventSteps.details": "详细信息",
         "eventSteps.count": "第 {current} 步，共 {total} 步",
@@ -13021,6 +13130,8 @@
         "conflicts.summary": "与{events}重叠。可尝试以下空闲时间：",
         "conflicts.noAlternatives": "与{events}重叠。当日未找到可用时间。",
         "conflicts.useTime": "使用{time}",
+        "conflicts.tripSummary": "此旅行与 {count} 个日程重叠：{events}。",
+        "conflicts.moreEvents": "另有 {count} 个",
         "transfer.exportIcs": "导出日历 (.ics)",
         "transfer.exportBackup": "导出备份 (.json)",
         "transfer.importLabel": "导入 .ics 或 KidsSync .json 文件",
@@ -14870,6 +14981,7 @@
     let eventFormStep = 1;
     let smartDefaultsAppliedTitle = "";
     let eventDraftSession = null;
+    let eventEditBaseline = null;
     let eventDraftSaveTimer = 0;
     const EVENT_DRAFT_FIELDS = ["child", "date", "endDate", "eventType", "importance", "recurrence", "repeatInterval", "repeatUntil", "start", "end", "title", "icon", "customIcon", "style", "color", "status", "travelMinutes", "notes", "location", "responsible", "items"];
 
@@ -14899,6 +15011,8 @@
         button.classList.toggle("is-active", active);
         button.setAttribute("aria-pressed", active);
       });
+      updateTripDetailLabels();
+      updateTripDateSummary();
     }
 
     function setLanguage(language) {
@@ -15319,6 +15433,8 @@
 
     function compareCalendarEntries(first, second) {
       return Number(isHolidayActivity(second)) - Number(isHolidayActivity(first))
+        || Number(Boolean(second.startDate && second.endDate && second.endDate > second.startDate))
+          - Number(Boolean(first.startDate && first.endDate && first.endDate > first.startDate))
         || compareEventImportance(first, second);
     }
 
@@ -16857,7 +16973,7 @@
         const countLabel = t(dayActivities.length === 1 ? "overview.eventOne" : "overview.events", { count: dayActivities.length });
         const head = document.createElement("div");
         head.className = `day-head ${day.theme}${isToday ? " is-today" : ""}`;
-        head.innerHTML = `<span class="weather" aria-hidden="true">${day.weather}</span><span class="day-head-label"><span class="day-head-label-row"><span>${dayLabel(day)}</span>${isToday ? `<span class="day-today-badge">${escapeHtml(t("calendar.today"))}</span>` : ""}${dayActivities.length ? `<span class="day-event-count" aria-label="${escapeHtml(countLabel)}">${dayActivities.length}</span>` : ""}</span><small>${formatShortDate(date)}</small></span>`;
+        head.innerHTML = `<span class="day-head-label"><span class="day-head-label-row"><span>${dayLabel(day)}</span>${isToday ? `<span class="day-today-badge">${escapeHtml(t("calendar.today"))}</span>` : ""}</span><span class="day-head-date" aria-hidden="true">${date.getDate()}</span></span>${dayActivities.length ? `<span class="day-event-count" aria-label="${escapeHtml(countLabel)}">${dayActivities.length}</span>` : ""}`;
         head.tabIndex = 0;
         head.setAttribute("role", "button");
         head.setAttribute("aria-label", `${t("actions.addActivity")} — ${formatFullDate(date)}`);
@@ -16924,7 +17040,9 @@
         setupDropTarget(cell, targetDate, true);
         activities
           .filter(activity => activity.day === day.key && activity.allDay && !isHolidayActivity(activity))
-          .sort(compareEventImportance)
+          .sort((first, second) => Number(Boolean(second.startDate && second.endDate && second.endDate > second.startDate))
+            - Number(Boolean(first.startDate && first.endDate && first.endDate > first.startDate))
+            || compareEventImportance(first, second))
           .forEach(activity => {
             const colors = eventColors(activity);
             const importance = eventImportance(activity);
@@ -17097,13 +17215,11 @@
 
     function activityDateRangeText(activity) {
       if (!activity?.startDate || !activity?.endDate || activitySpanDays(activity) === 0) return "";
-      const locale = currentLanguage === "zh" ? "zh-CN" : "en-US";
-      const options = { month: "short", day: "numeric" };
-      return `${parseDateKey(activity.startDate).toLocaleDateString(locale, options)} – ${parseDateKey(activity.endDate).toLocaleDateString(locale, options)}`;
+      return formatTripDateRange(activity.startDate, activity.endDate);
     }
 
     function eventTimeText(activity) {
-      const dateRange = activityDateRangeText(activity);
+      const dateRange = activity.eventType === "trip" ? activityDateRangeText(activity) : "";
       if (dateRange) return dateRange;
       return activity.allDay ? t("calendar.allDay") : `${timeLabel(activity.start)}–${timeLabel(activity.end)}`;
     }
@@ -17859,18 +17975,88 @@
       updatePopularTimeSelection();
     }
 
+    function inclusiveDateCount(startKey, endKey) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(startKey || "") || !/^\d{4}-\d{2}-\d{2}$/.test(endKey || "")) return 0;
+      const span = dateSerial(parseDateKey(endKey)) - dateSerial(parseDateKey(startKey));
+      return Number.isFinite(span) && span >= 0 ? Math.min(span + 1, 367) : 0;
+    }
+
+    function formatTripDateRange(startKey, endKey) {
+      const count = inclusiveDateCount(startKey, endKey);
+      if (!count) return "";
+      const locale = currentLanguage === "zh" ? "zh-CN" : "en-US";
+      const start = parseDateKey(startKey);
+      const end = parseDateKey(endKey);
+      const options = start.getFullYear() === end.getFullYear()
+        ? { month: "short", day: "numeric" }
+        : { year: "numeric", month: "short", day: "numeric" };
+      if (count === 1) return start.toLocaleDateString(locale, options);
+      return `${start.toLocaleDateString(locale, options)} – ${end.toLocaleDateString(locale, options)}`;
+    }
+
+    function tripDurationText(activity) {
+      const count = inclusiveDateCount(activity?.startDate, activity?.endDate);
+      if (!count) return "";
+      return count === 1 ? t("trip.oneDay") : t("trip.dayCount", { count });
+    }
+
+    function updateTripDateSummary() {
+      const summary = document.getElementById("tripDateSummary");
+      if (!summary) return;
+      const count = inclusiveDateCount(fields.date.value, fields.endDate.value);
+      const range = formatTripDateRange(fields.date.value, fields.endDate.value);
+      summary.textContent = count
+        ? t("trip.lengthSummary", { range, duration: count === 1 ? t("trip.oneDay") : t("trip.dayCount", { count }) })
+        : t("trip.chooseDates");
+      document.querySelectorAll("[data-trip-days]").forEach(button => {
+        const active = count === Number(button.dataset.tripDays);
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+    }
+
+    function applyTripLengthPreset(dayCount) {
+      const count = Number(dayCount);
+      if (![1, 2, 4, 7].includes(count) || !fields.date.value) return false;
+      fields.endDate.value = dateKey(addDays(parseDateKey(fields.date.value), count - 1));
+      fields.endDate.setCustomValidity("");
+      updateTripDateSummary();
+      updateConflictSuggestions();
+      return true;
+    }
+
+    function updateTripDetailLabels() {
+      const isTrip = fields.eventType.value === "trip";
+      const whenStepButton = document.querySelector('.event-step-navigation [data-event-step-go="2"]');
+      if (whenStepButton) whenStepButton.textContent = t(isTrip ? "eventSteps.tripWhen" : "eventSteps.when");
+      document.getElementById("eventLocationLabel").textContent = t(isTrip ? "trip.destination" : "form.location");
+      fields.location.placeholder = t(isTrip ? "trip.destinationPlaceholder" : "form.locationPlaceholder");
+      document.getElementById("eventResponsibleLabel").textContent = t(isTrip ? "trip.lead" : "form.responsible");
+      fields.responsible.placeholder = t(isTrip ? "trip.leadPlaceholder" : "form.responsiblePlaceholder");
+      document.getElementById("eventItemsLabel").textContent = t(isTrip ? "trip.packing" : "form.items");
+      fields.items.placeholder = t(isTrip ? "trip.packingPlaceholder" : "form.itemsPlaceholder");
+      fields.notes.placeholder = t(isTrip ? "trip.notesPlaceholder" : "form.notesPlaceholder");
+    }
+
     function updateTripDateFields({ reset = false } = {}) {
       const isTrip = fields.eventType.value === "trip";
       const field = document.getElementById("tripEndDateField");
       document.getElementById("eventDateLabel").textContent = t(isTrip ? "form.startDate" : "form.date");
       field.hidden = eventFormStep !== 2 || !isTrip;
+      document.getElementById("tripDateOptions").hidden = eventFormStep !== 2 || !isTrip;
+      document.getElementById("popularTimesSection").hidden = eventFormStep !== 2 || isTrip;
+      document.getElementById("eventTimeFields").hidden = eventFormStep !== 2 || isTrip;
+      document.getElementById("eventAllDayField").hidden = eventFormStep !== 2 || isTrip;
       fields.endDate.disabled = !isTrip;
       fields.endDate.required = isTrip;
       fields.endDate.min = fields.date.value;
+      if (isTrip) fields.allDay.checked = true;
       if (isTrip && fields.date.value && (reset || !fields.endDate.value || fields.endDate.value < fields.date.value)) {
         fields.endDate.value = fields.date.value;
       }
       fields.endDate.setCustomValidity("");
+      updateTripDetailLabels();
+      updateTripDateSummary();
     }
 
     function setEventFormStep(step, { focus = true } = {}) {
@@ -17881,13 +18067,19 @@
       });
 
       const stepKey = EVENT_FORM_STEPS[eventFormStep - 1];
-      document.getElementById("eventStepTitle").textContent = t(`eventSteps.${stepKey}`);
+      const stepTitleKey = fields.eventType.value === "trip" && eventFormStep === 2 ? "eventSteps.tripWhen" : `eventSteps.${stepKey}`;
+      document.getElementById("eventStepTitle").textContent = t(stepTitleKey);
       document.getElementById("eventStepCount").textContent = t("eventSteps.count", { current: eventFormStep, total: EVENT_FORM_STEPS.length });
       const track = form.querySelector(".event-step-track");
       track.setAttribute("aria-valuenow", String(eventFormStep));
       document.getElementById("eventStepBack").hidden = eventFormStep === 1;
       document.getElementById("eventStepNext").hidden = eventFormStep === EVENT_FORM_STEPS.length;
       document.getElementById("saveActivity").hidden = eventFormStep !== EVENT_FORM_STEPS.length;
+      document.querySelectorAll(".event-step-navigation [data-event-step-go]").forEach(button => {
+        if (Number(button.dataset.eventStepGo) === eventFormStep) button.setAttribute("aria-current", "step");
+        else button.removeAttribute("aria-current");
+      });
+      if (eventFormStep === 4) renderEventSaveReview();
       const editActions = deleteButton.closest(".left-actions");
       editActions.hidden = deleteButton.hidden && duplicateButton.hidden;
 
@@ -17901,6 +18093,40 @@
         const focusTargets = [fields.title, fields.date, fields.eventType, fields.icon];
         requestAnimationFrame(() => focusTargets[eventFormStep - 1]?.focus());
       }
+    }
+
+    function navigateEventFormStep(target) {
+      if (requireEventDraftChoice()) return;
+      const next = Math.max(1, Math.min(EVENT_FORM_STEPS.length, Number(target) || 1));
+      while (eventFormStep < next) {
+        if (eventFormStep === 1) applySmartEventDefaults();
+        if (!validateEventFormStep()) return;
+        setEventFormStep(eventFormStep + 1, { focus: false });
+      }
+      setEventFormStep(next);
+    }
+
+    function eventSaveReviewRows(values) {
+      const missing = t("editor.notSet");
+      const date = values.date ? formatFullDate(parseDateKey(values.date)) : missing;
+      const through = values.eventType === "trip" && values.endDate ? ` – ${formatFullDate(parseDateKey(values.endDate))}` : "";
+      const time = values.allDay ? t("form.allDay") : [values.start, values.end].filter(Boolean).map(value => formatTimeLabel(minutes(value))).join(" – ");
+      const recurrence = values.recurrence || "none";
+      const schedule = Number(values.repeatInterval) > 1 && recurrence !== "none"
+        ? `${values.repeatInterval} ${t(`repeat.unit.${recurrence}`)}` : t(`repeat.${recurrence}`);
+      const weekdayKeys = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const weekdays = recurrence === "weekly" ? (values.repeatDays || []).map(day => t(`day.short${weekdayKeys[day]}`)).join(", ") : "";
+      return [
+        { step: 1, label: t("form.eventName"), value: values.title || missing },
+        { step: 1, label: t("form.child"), value: values.child === FAMILY_CHILD ? t("calendar.family") : values.child || missing },
+        { step: 2, label: t("eventPreview.when"), value: `${date}${through} · ${time || missing}` },
+        { step: 3, label: t("form.repeat"), value: [schedule, weekdays, values.repeatUntil ? `${t("repeat.until")}: ${values.repeatUntil}` : ""].filter(Boolean).join(" · ") }
+      ];
+    }
+
+    function renderEventSaveReview() {
+      document.getElementById("eventSaveReviewBody").innerHTML = eventSaveReviewRows(captureEventDraft()).map(row => `<div class="event-review-row"><div><dt>${escapeHtml(row.label)}</dt><dd>${escapeHtml(row.value)}</dd></div><button type="button" data-event-step-go="${row.step}" aria-label="${escapeHtml(`${t("eventPreview.edit")}: ${row.label}`)}" title="${escapeHtml(`${t("eventPreview.edit")}: ${row.label}`)}"><i data-lucide="pencil" aria-hidden="true"></i></button></div>`).join("");
+      window.lucide?.createIcons();
     }
 
     function validateEventFormStep(step = eventFormStep) {
@@ -18023,6 +18249,18 @@
       return candidates.sort((first, second) => first.distance - second.distance || first.after - second.after || first.start - second.start).slice(0, limit);
     }
 
+    function conflictingTripEvents() {
+      if (fields.eventType.value !== "trip") return [];
+      const count = inclusiveDateCount(fields.date.value, fields.endDate.value);
+      if (!count) return [];
+      const dates = Array.from({ length: count }, (_, index) => addDays(parseDateKey(fields.date.value), index));
+      return state.activities.filter(activity => {
+        if (activity.id === fields.id.value || activityStatus(activity) === "cancelled") return false;
+        const sharesFamily = fields.child.value === FAMILY_CHILD || activity.child === FAMILY_CHILD || activity.child === fields.child.value;
+        return sharesFamily && dates.some(date => activityOccursOn(activity, date));
+      });
+    }
+
     function updateConflictSuggestions() {
       const panel = document.getElementById("conflictSuggestions");
       const summary = document.getElementById("conflictSuggestionSummary");
@@ -18030,6 +18268,17 @@
       if (eventFormStep !== 2) {
         panel.hidden = true;
         options.innerHTML = "";
+        return;
+      }
+      if (fields.eventType.value === "trip") {
+        const conflicts = conflictingTripEvents();
+        panel.hidden = conflicts.length === 0;
+        options.innerHTML = "";
+        if (!conflicts.length) return;
+        const titles = [...new Set(conflicts.map(activity => activityTitle(activity)))];
+        const visibleTitles = titles.slice(0, 3);
+        if (titles.length > visibleTitles.length) visibleTitles.push(t("conflicts.moreEvents", { count: titles.length - visibleTitles.length }));
+        summary.textContent = t("conflicts.tripSummary", { count: conflicts.length, events: visibleTitles.join(", ") });
         return;
       }
       const conflicts = conflictingDraftEvents();
@@ -18536,6 +18785,8 @@
     }
 
     function beginEventDraftSession(isEdit = false) {
+      eventEditBaseline = isEdit ? comparableEventDraft(captureEventDraft()) : null;
+      document.getElementById("eventCloseConfirm").hidden = true;
       window.clearTimeout(eventDraftSaveTimer);
       eventDraftSaveTimer = 0;
       eventDraftSession = isEdit ? null : {
@@ -18768,7 +19019,9 @@
       importanceBadge.hidden = eventImportance(activity) === "normal";
       importanceBadge.className = `event-importance-badge event-importance is-${eventImportance(activity)}`;
       importanceBadge.textContent = eventImportanceLabel(activity);
-      document.getElementById("eventPeekMeta").textContent = [formatFullDate(date), eventTimeText(activity), displayChild(activity), activity.location].filter(Boolean).join(" · ");
+      const dateRange = activity.eventType === "trip" ? activityDateRangeText(activity) : "";
+      const when = dateRange ? [dateRange, tripDurationText(activity)].filter(Boolean).join(" · ") : [formatFullDate(date), eventTimeText(activity)].join(" · ");
+      document.getElementById("eventPeekMeta").textContent = [when, displayChild(activity), activity.location].filter(Boolean).join(" · ");
       document.getElementById("eventPeekEdit").textContent = t(activity.isBuiltInHoliday ? "eventPreview.addEvent" : "eventPreview.edit");
       eventPeek.hidden = false;
       const bounds = anchor.getBoundingClientRect();
@@ -18782,11 +19035,14 @@
       hideEventPeek();
       eventDetailsActivity = activity;
       const date = parseDateKey(activity.occurrenceDate || activity.startDate || dateKey(selectedDate));
+      const dateRange = activity.eventType === "trip" ? activityDateRangeText(activity) : "";
+      const when = dateRange ? [dateRange, tripDurationText(activity)].filter(Boolean).join(" · ") : `${formatFullDate(date)} · ${eventTimeText(activity)}`;
+      const isTrip = activity.eventType === "trip";
       const rows = [
         ["users", "eventPreview.who", displayChild(activity)],
-        ["map-pin", "eventPreview.where", activity.location],
-        ["user-round", "eventPreview.responsible", activity.responsible],
-        ["backpack", "eventPreview.items", activity.items],
+        ["map-pin", isTrip ? "trip.destination" : "eventPreview.where", activity.location],
+        ["user-round", isTrip ? "trip.lead" : "eventPreview.responsible", activity.responsible],
+        ["backpack", isTrip ? "trip.packing" : "eventPreview.items", activity.items],
         ["align-left", "eventPreview.notes", activity.notes],
         ["repeat-2", "eventPreview.repeats", recurrenceValue(activity) !== "none" ? recurrenceLabel(activity) : ""],
         ["bell", "reminders.title", userSettings.notifications && !activity.allDay ? reminderLeadLabel() : ""],
@@ -18794,7 +19050,7 @@
         ["circle-check", "eventPreview.status", activityStatus(activity) !== "scheduled" ? activityStatusLabel(activity) : ""],
         ["flag", "importance.label", eventImportanceLabel(activity)]
       ].filter(([, , value]) => value);
-      document.getElementById("eventDetailsBody").innerHTML = `<div class="event-details-heading"><span class="event-details-marker" id="eventDetailsMarker" aria-hidden="true"></span><div><h2 id="eventDetailsTitle">${escapeHtml(activityTitle(activity))}</h2><p>${escapeHtml(formatFullDate(date))} · ${escapeHtml(eventTimeText(activity))}</p></div></div><dl>${rows.map(([icon, label, value]) => `<div class="event-details-row"><i data-lucide="${icon}" aria-hidden="true"></i><div><dt>${escapeHtml(t(label))}</dt><dd>${escapeHtml(value)}</dd></div></div>`).join("")}</dl>`;
+      document.getElementById("eventDetailsBody").innerHTML = `<div class="event-details-heading"><span class="event-details-marker" id="eventDetailsMarker" aria-hidden="true"></span><div><h2 id="eventDetailsTitle">${escapeHtml(activityTitle(activity))}</h2><p>${escapeHtml(when)}</p></div></div><dl>${rows.map(([icon, label, value]) => `<div class="event-details-row"><i data-lucide="${icon}" aria-hidden="true"></i><div><dt>${escapeHtml(t(label))}</dt><dd>${escapeHtml(value)}</dd></div></div>`).join("")}</dl>`;
       document.getElementById("eventDetailsMarker").style.backgroundColor = eventColors(activity).line;
       document.getElementById("eventDetailsTitle").insertAdjacentHTML("afterend", eventImportanceBadge(activity));
       const edit = document.getElementById("eventDetailsEdit");
@@ -19018,7 +19274,20 @@
       showFeedbackToast(t("feedback.exampleLoaded"));
     }
 
+    function hasUnsavedEventEdits() {
+      return Boolean(fields.id.value && eventEditBaseline !== null && comparableEventDraft(captureEventDraft()) !== eventEditBaseline);
+    }
+
+    function requestCloseEventDialog() {
+      if (!hasUnsavedEventEdits()) { closeDialog(); return; }
+      document.getElementById("eventCloseConfirm").hidden = false;
+      dialog.scrollTo({ top: 0, behavior: "auto" });
+      document.getElementById("keepEditingEvent").focus();
+    }
+
     function closeDialog() {
+      eventEditBaseline = null;
+      document.getElementById("eventCloseConfirm").hidden = true;
       saveNewEventDraft();
       eventDraftSession = null;
       renderEventDraftState();
@@ -21258,8 +21527,13 @@
     document.getElementById("emptyAddEvent").addEventListener("click", () => openNewEventForDate(selectedDate, FAMILY_CHILD));
     document.getElementById("emptyLoadExample").addEventListener("click", loadAndrewMarkPreset);
     document.getElementById("managePresets").addEventListener("click", openPresetDialog);
-    document.getElementById("closeDialog").addEventListener("click", closeDialog);
-    document.getElementById("cancelDialog").addEventListener("click", closeDialog);
+    document.getElementById("closeDialog").addEventListener("click", requestCloseEventDialog);
+    document.getElementById("cancelDialog").addEventListener("click", requestCloseEventDialog);
+    document.getElementById("keepEditingEvent").addEventListener("click", () => {
+      document.getElementById("eventCloseConfirm").hidden = true;
+      document.getElementById("closeDialog").focus();
+    });
+    document.getElementById("discardEventEdits").addEventListener("click", closeDialog);
     document.getElementById("resumeEventDraft").addEventListener("click", resumeEventDraft);
     document.getElementById("discardEventDraft").addEventListener("click", discardEventDraft);
     form.addEventListener("input", scheduleNewEventDraftSave);
@@ -21270,7 +21544,7 @@
     });
     dialog.addEventListener("cancel", event => {
       event.preventDefault();
-      closeDialog();
+      requestCloseEventDialog();
     });
     dialog.addEventListener("close", () => {
       if (dialog.open) return;
@@ -21404,7 +21678,10 @@
         updateRecurrenceFields({ resetDays: true });
       }
     });
-    fields.endDate.addEventListener("change", () => fields.endDate.setCustomValidity(""));
+    fields.endDate.addEventListener("change", () => {
+      fields.endDate.setCustomValidity("");
+      updateTripDateSummary();
+    });
     fields.icon.addEventListener("change", updateCustomIconField);
     fields.allDay.addEventListener("change", () => {
       updateAllDayFields();
@@ -21419,15 +21696,17 @@
       field.addEventListener("change", renderEventDurationControls);
     });
     document.querySelectorAll("[data-event-duration]").forEach(button => button.addEventListener("click", () => applyEventDuration(Number(button.dataset.eventDuration))));
+    document.querySelectorAll("[data-trip-days]").forEach(button => button.addEventListener("click", () => applyTripLengthPreset(Number(button.dataset.tripDays))));
     form.addEventListener("click", () => requestAnimationFrame(() => { if (dialog.open) renderEventDurationControls(); }));
     new MutationObserver(() => { if (dialog.open) renderEventDurationControls(); }).observe(dialog, { attributes: true, attributeFilter: ["open"] });
     new MutationObserver(() => { if (dialog.open) renderEventDurationControls(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
     document.querySelectorAll(".event-template").forEach(button => button.addEventListener("click", () => applyEventTemplate(button.dataset.template)));
-    document.getElementById("eventStepBack").addEventListener("click", () => setEventFormStep(eventFormStep - 1));
-    document.getElementById("eventStepNext").addEventListener("click", () => {
-      if (eventFormStep === 1) applySmartEventDefaults();
-      if (validateEventFormStep()) setEventFormStep(eventFormStep + 1);
+    form.addEventListener("click", event => {
+      const button = event.target.closest("[data-event-step-go]");
+      if (button) navigateEventFormStep(button.dataset.eventStepGo);
     });
+    document.getElementById("eventStepBack").addEventListener("click", () => navigateEventFormStep(eventFormStep - 1));
+    document.getElementById("eventStepNext").addEventListener("click", () => navigateEventFormStep(eventFormStep + 1));
     document.getElementById("toggleEventDetails").addEventListener("click", () => {
       setEventDetailsExpanded(form.classList.contains("is-compact"));
     });
