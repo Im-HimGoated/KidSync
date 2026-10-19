@@ -1,6 +1,6 @@
 /* Shared handoffs are server-authorized. Guest history never impersonates acknowledgements. */
 (() => {
-  const keys = ['title','startDate','endDate','start','end','allDay','child','responsible','location','items','status','recurrence','repeatDays','repeatUntil','travelMinutes','bufferBeforeMinutes','bufferAfterMinutes'];
+  const keys = ['title','startDate','endDate','start','end','allDay','child','responsible','location','items','notes','status','importance','recurrence','repeatDays','repeatUntil','excludedDates','attendees','travelMinutes','bufferBeforeMinutes','bufferAfterMinutes'];
   function changes(before, after) {
     return keys.filter(key => JSON.stringify(before?.[key] ?? '') !== JSON.stringify(after?.[key] ?? ''))
       .map(key => ({ key, before: before?.[key] ?? '', after: after?.[key] ?? '' }));
@@ -38,11 +38,13 @@
   const context = () => shared && sharedCalendarState?.invitation ? { owner:sharedCalendarState.invitation.owner_id, calendar:sharedCalendarState.invitation.calendar_id, data:sharedCalendarState.shared, edit:canEditSharedCalendar() } : { owner:cloudSession?.user?.id || '', calendar:currentCalendarId, data:{ activities:state.activities,kids:kidProfiles }, edit:true };
   const scope = () => `${cloudSession?.user?.id || 'guest'}:${context().owner}:${context().calendar}`;
   const events = () => (context().data.activities || []).filter(e=>e.status!=='cancelled' && activityOccursOn(e,parseDateKey(day))).map(e=>({...e,occurrenceDate:day})).sort((a,b)=>Number(Boolean(b.allDay))-Number(Boolean(a.allDay)) || String(a.start).localeCompare(String(b.start)));
-  const label = value => value === '' || value === null || value === undefined ? tx('none') : typeof value === 'boolean' ? tx(String(value)) : Array.isArray(value) ? value.join(', ') : String(value);
+  const label = value => value === '' || value === null || value === undefined || (Array.isArray(value)&&!value.length) ? tx('none') : typeof value === 'boolean' ? tx(String(value)) : Array.isArray(value) ? value.join(', ') : String(value);
   function message(key) { hub.querySelector('#coordinationStatus').textContent=tx(key); }
   function fieldLabel(key) {
     const en={title:'Event',startDate:'Date',endDate:'End date',start:'Start',end:'End',allDay:'All day',child:'For',responsible:'Responsible adult',location:'Location',items:'Bring',status:'Status',recurrence:'Repeat',repeatDays:'Repeat days',repeatUntil:'Repeat until',travelMinutes:'Travel minutes',bufferBeforeMinutes:'Buffer before',bufferAfterMinutes:'Buffer after'};
     const zh={title:'日程',startDate:'日期',endDate:'结束日期',start:'开始',end:'结束',allDay:'全天',child:'参与者',responsible:'负责成人',location:'地点',items:'携带物品',status:'状态',recurrence:'重复',repeatDays:'重复日期',repeatUntil:'重复至',travelMinutes:'出行分钟数',bufferBeforeMinutes:'之前缓冲',bufferAfterMinutes:'之后缓冲'};
+    Object.assign(en,{notes:'Notes',importance:'Importance',excludedDates:'Moved occurrences',attendees:'Attendees'});
+    Object.assign(zh,{notes:'备注',importance:'重要程度',excludedDates:'已移出的日期',attendees:'参与者'});
     return (currentLanguage==='zh'?zh:en)[key]||key;
   }
   function render() {
@@ -67,6 +69,10 @@
         return `<article class="coord-change"><div><strong>${esc(after?.title||before?.title||record.title||tx('event'))}</strong><span>${esc(tx(!before&&after?'created':before&&!after?'deleted':'updated'))} · ${esc(new Date(record.created_at||record.at).toLocaleString(currentLanguage==='zh'?'zh-CN':'en-US'))}</span><small>${esc(record.actor_email||record.actor||'')}</small></div>${details.length?`<dl>${details.map(d=>`<div><dt>${esc(fieldLabel(d.key))}</dt><dd><del>${esc(label(d.before))}</del><span aria-hidden="true"> → </span><ins>${esc(label(d.after))}</ins></dd></div>`).join('')}</dl>`:`<p class="coord-muted">${esc(tx('oldHistory'))}</p>`}${signed()?`<div class="coord-row-actions"><span class="coord-muted">${esc(tx('count',{n:acknowledgements.filter(a=>a.change_id===record.id).length}))}</span><button type="button" data-coord-ack="${esc(record.id)}" ${mine||busy?'disabled':''}>${esc(tx(mine?'acked':'ack'))}</button></div>`:''}</article>`;
       }).join(''):`<p class="coord-muted">${esc(tx('noChanges'))}</p>`;
     }
+    if(mode==='inbox'&&signed())panel.querySelectorAll('.coord-change').forEach((article,index)=>{
+      const names=acknowledgements.filter(a=>a.change_id===records[index]?.id).map(a=>a.user_email).filter(Boolean);
+      if(names.length){const p=document.createElement('p');p.className='coord-muted';p.textContent=names.join(' · ');article.append(p);}
+    });
     window.lucide?.createIcons();
   }
   async function load() {

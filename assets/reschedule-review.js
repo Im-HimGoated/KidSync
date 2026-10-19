@@ -31,7 +31,7 @@
   function conflictDetails(candidate, others) {
     const range=e=>e.allDay||e.eventType==='trip'?[0,1440]:[minute(e.start)-Math.max(0,Number(e.travelMinutes)||0)-Math.max(0,Number(e.bufferBeforeMinutes)||0),minute(e.end)+Math.max(0,Number(e.bufferAfterMinutes)||0)];
     const shared=(a,b)=>a.child==='__family__'||b.child==='__family__'||a.child===b.child||Boolean(a.responsible&&b.responsible&&a.responsible.trim().toLowerCase()===b.responsible.trim().toLowerCase())||(a.attendees||[]).some(p=>p!=='all'&&(p===b.child||(b.attendees||[]).includes(p)));
-    return others.filter(e=>e.id!==candidate.id&&e.status!=='cancelled'&&shared(candidate,e)).filter(e=>{const [as,ae]=range(candidate),[bs,be]=range(e);return as<be&&bs<ae;});
+    return others.filter(e=>e.id!==candidate.id&&e.status!=='cancelled'&&e.externalBusy!==false&&shared(candidate,e)).filter(e=>{const [as,ae]=range(candidate),[bs,be]=range(e);return as<be&&bs<ae;});
   }
   if(typeof module!=='undefined'&&module.exports){module.exports={date,shift,minute,planMove,conflictDetails};return;}
   const words={

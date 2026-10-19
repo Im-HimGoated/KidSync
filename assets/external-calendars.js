@@ -58,6 +58,7 @@
   }
   async function refresh(provider){
     const session=sessions.get(provider);if(!session||session.busy)return;
+    if(!session.token){session.message='expired';render();return;}
     if(!navigator.onLine){session.message='unavailable';render();return;}
     if(Date.now()>=session.expires){session.events=[];session.message='expired';render();renderAll();return;}
     const own=scope(),ticket=generation;session.busy=true;session.message='refreshing';render();
@@ -105,7 +106,7 @@
   document.addEventListener('click',e=>{if(e.target.closest('[data-source-open]'))open();});
   hub.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-external-close'))hub.close();if(b.dataset.externalConnect)connect(b.dataset.externalConnect);if(b.dataset.externalRefresh)refresh(b.dataset.externalRefresh);if(b.dataset.externalDisconnect){const p=b.dataset.externalDisconnect,s=sessions.get(p);controllers.get(p)?.abort();if(p==='google'&&s?.token)google.accounts.oauth2.revoke(s.token,()=>{});sessions.delete(p);if(p==='microsoft')msalApp?.clearCache().catch(()=>{});render();renderAll();}});
   details.addEventListener('click',e=>{if(e.target.closest('button'))details.close();});
-  window.KidsSyncExternal={renderOverlay,eventsOn(date){if(identity!==scope())return [];const day=dayKey(date);return [...sessions.values()].flatMap(s=>s.events||[]).filter(e=>day>=e.startDate&&day<=(e.endDate||e.startDate));},show(event){
+  window.KidsSyncExternal={renderOverlay,eventsOn(date){if(identity!==scope())return [];const day=dayKey(date);return [...sessions.values()].filter(s=>s.expires>Date.now()).flatMap(s=>s.events||[]).filter(e=>day>=e.startDate&&day<=(e.endDate||e.startDate));},show(event){
     details.innerHTML=`<header class="modal-header"><h2 id="externalEventTitle">${esc(activityTitle(event))}</h2><button type="button" class="close-btn" aria-label="${esc(tx('close'))}">×</button></header><div class="coord-body"><strong>${esc(tx('readOnly'))} · ${esc(event.externalSource==='google'?'Google':'Outlook')}</strong><p>${esc(formatFullDate(parseDateKey(event.startDate)))} · ${esc(eventTimeText(event))}</p>${event.location?`<p>${esc(event.location)}</p>`:''}${event.notes?`<p>${esc(event.notes)}</p>`:''}</div>`;details.showModal();
   }};
   identity=scope();button.textContent=tx('title');
