@@ -21,6 +21,7 @@
 .coord-person, .coord-time, .coord-person-slot { padding: 10px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); min-width: 0; overflow-wrap: anywhere; }
 .coord-person { background: var(--soft-line); font-size: 14px; font-weight: 700; }
 .coord-time { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.coord-time, .coord-person:first-child { position: sticky; left: 0; z-index: 1; background: var(--panel); }
 .coord-commitment { width: 100%; text-align: left; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-left: 4px solid var(--coord-accent); border-radius: 5px; }
 .coord-commitment strong { display: block; font-size: 14px; overflow-wrap: anywhere; }
 .coord-commitment small { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; }

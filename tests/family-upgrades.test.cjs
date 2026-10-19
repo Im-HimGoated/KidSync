@@ -2,7 +2,7 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const {changes,peopleFor,adultConflicts}=require('../assets/family-coordination.js');
+const {changes,peopleFor,adultConflicts,comparisonRuns}=require('../assets/family-coordination.js');
 const {planMove,conflictDetails,date,shift}=require('../assets/reschedule-review.js');
 const {externalEvents,safeGraphUrl}=require('../assets/external-calendars.js');
 const html=fs.readFileSync(require.resolve('../index.html'),'utf8');
@@ -18,6 +18,11 @@ test('adult conflicts include travel buffers, normalize names, and ignore cancel
   assert.deepEqual(adultConflicts([a,b]),[['piano','soccer']]);
   assert.deepEqual(adultConflicts([a,{...b,status:'cancelled'}]),[]);
   assert.deepEqual(adultConflicts([a,{...b,start:'16:30'}]),[]);
+});
+test('shared commitments span adjacent affected columns without covering unrelated people',()=>{
+  assert.deepEqual(comparisonRuns(['Sam','Alex','Pat','Lee'],['Sam','Alex','Lee']),[
+    {start:0,length:2,active:true},{start:2,length:1,active:false},{start:3,length:1,active:true}
+  ]);
 });
 test('change summaries report exact logistics/time differences without unrelated fields',()=>{
   assert.deepEqual(changes(event,{...event,start:'15:30',location:'Park'}),[{key:'start',before:'15:00',after:'15:30'},{key:'location',before:'',after:'Park'}]);

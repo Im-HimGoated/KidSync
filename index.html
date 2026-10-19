@@ -14685,7 +14685,11 @@
       document.getElementById("authScreen").hidden = true;
       document.getElementById("appShell").hidden = false;
       updateAccountIdentity();
-      if (window.matchMedia?.("(max-width: 740px)").matches) showCalendarPage();
+      if (window.matchMedia?.("(max-width: 740px)").matches) {
+        selectedDate = new Date();
+        activateCalendarView("today", true, { remember: false });
+        showCalendarPage();
+      }
       else showDashboardPage({ scroll: false });
       startGuestPreviewTimer();
       trackProductEvent("Planner Preview Started");
@@ -14753,7 +14757,11 @@
         document.getElementById("authScreen").hidden = true;
         document.getElementById("appShell").hidden = false;
         updateAccountIdentity();
-        if (window.matchMedia?.("(max-width: 740px)").matches) showCalendarPage();
+        if (window.matchMedia?.("(max-width: 740px)").matches) {
+          selectedDate = new Date();
+          activateCalendarView("today", true, { remember: false });
+          showCalendarPage();
+        }
         else showDashboardPage({ scroll: false });
         return;
       }
@@ -15656,7 +15664,10 @@
 
     function activityTitle(activity) {
       const key = `activity.${activity.title}`;
-      return translations[currentLanguage][key] || activity.title;
+      const title = translations[currentLanguage][key] || activity.title;
+      if (!activity.externalSource) return title;
+      const source = activity.externalSource === "google" ? "Google" : "Outlook";
+      return `${title} · ${source} · ${currentLanguage === "zh" ? "只读" : "Read-only"}`;
     }
 
     function activityStatus(activity) {
@@ -16877,6 +16888,7 @@
         for (let j = i + 1; j < activities.length; j += 1) {
           const first = activities[i];
           const second = activities[j];
+          if (first.externalBusy === false || second.externalBusy === false) continue;
           if (activityStatus(first) === "cancelled" || activityStatus(second) === "cancelled") continue;
           if (first.allDay || second.allDay) continue;
           const sameDay = first.occurrenceDate && second.occurrenceDate
