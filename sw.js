@@ -1,14 +1,31 @@
-const CACHE_NAME = "kidssync-shell-v86";
+const CACHE_NAME = "kidssync-shell-v108";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./assets/ui-polish.css",
-  "./assets/mobile.css",
+  "./assets/mobile.css?v=95",
   "./assets/calendar-extras.css",
   "./assets/calendar-insights.css",
   "./assets/command-palette.css",
   "./assets/event-drafts.css",
   "./assets/week-calendar.css",
+  "./assets/planner-tools.css",
+  "./assets/planner-tools.js",
+  "./assets/experience.css",
+  "./assets/experience.js",
+  "./assets/family-workspace.css",
+  "./assets/family-coordination.js",
+  "./assets/reschedule-review.js",
+  "./assets/external-calendars.js",
+  "./assets/mobile-agenda.js",
+  "./assets/smart-planner.css?v=4",
+  "./assets/smart-planner.js?v=5",
+  "./assets/ui-features.css",
+  "./assets/ui-features.js",
+  "./assets/smart-scheduling.css?v=2",
+  "./assets/smart-scheduling.js?v=4",
+  "./assets/family-polls.css?v=1",
+  "./assets/family-polls.js?v=2",
   "./manifest.json",
   "./assets/kidssync-family-table-v2.png",
   "./assets/kidssync-family-hero.jpg",
@@ -35,12 +52,33 @@ self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
   const requestUrl = new URL(event.request.url);
   if (requestUrl.origin !== self.location.origin) return;
+  // Never store OAuth responses or serve the calendar shell as an auth callback.
+  if (requestUrl.pathname.endsWith("/oauth-redirect.html")) {
+    event.respondWith(fetch(event.request, { cache: "no-store" }));
+    return;
+  }
 
-  event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-      const copy = response.clone();
-      caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+  const rootPath = new URL("./", self.registration.scope).pathname;
+  const isAppPage = requestUrl.pathname === rootPath || requestUrl.pathname === `${rootPath}index.html`;
+  const isShellAsset = APP_SHELL.some(path => new URL(path, self.registration.scope).pathname === requestUrl.pathname);
+  if (!isAppPage && !isShellAsset) return;
+
+  // Check the network first so a deployed update is visible on the next load.
+  // Only fall back to the cached app page for an actual app navigation.
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    try {
+      const response = await fetch(event.request);
+      if (response.ok && !requestUrl.searchParams.has("code") && !requestUrl.searchParams.has("token")) {
+        const cacheKey = isAppPage ? new URL("./index.html", self.registration.scope) : event.request;
+        await cache.put(cacheKey, response.clone());
+      }
       return response;
-    }).catch(() => caches.match("./index.html")))
-  );
+    } catch {
+      const cached = isAppPage
+        ? await cache.match("./index.html")
+        : await cache.match(event.request);
+      return cached || Response.error();
+    }
+  })());
 });

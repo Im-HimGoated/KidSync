@@ -19,6 +19,7 @@ function context(values, names) {
 function dropContext(activity) {
   const calls = [];
   const ctx = context({
+    window: {},
     state: { activities: [activity] }, draggedOccurrence: { id: activity.id },
     rescheduleDraggedEvent: (...args) => calls.push(args)
   }, ['isHolidayActivity', 'calendarDropAllowed', 'rescheduleCalendarDrop']);
@@ -30,6 +31,16 @@ test('a normal event cannot accidentally become a holiday through the holiday dr
   assert.equal(ctx.calendarDropAllowed({ dataset: { holidayDrop: 'true' } }), false);
   ctx.rescheduleCalendarDrop('2026-10-31', null, true, true);
   assert.equal(calls.length, 0);
+});
+
+test('calendar drops can open the optional review sheet without applying the move immediately', () => {
+  const activity = { id: 'normal', eventType: 'activity', allDay: false };
+  const { ctx, calls } = dropContext(activity), reviews = [];
+  ctx.window.KidsSyncMoves = { review: (...args) => reviews.push(args) };
+  ctx.rescheduleCalendarDrop('2026-10-31', 900, false);
+  assert.equal(calls.length, 0); assert.equal(reviews.length, 1);
+  assert.equal(reviews[0][0], activity); assert.equal(reviews[0][2], '2026-10-31');
+  assert.equal(ctx.draggedOccurrence, null);
 });
 
 test('moving a legacy timed holiday preserves its stored time and all-day flag', () => {

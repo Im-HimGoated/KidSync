@@ -1,0 +1,49 @@
+#plannerToolsDialog { width: min(680px, calc(100% - 24px)); color: var(--ink); background: var(--panel); }
+#plannerToolsDialog .modal-header { position: sticky; top: 0; z-index: 2; background: var(--panel); }
+.planner-tools-body { display: grid; gap: 16px; padding: 20px; min-width: 0; }
+.tools-note { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.tools-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 10px; background: var(--soft-line); }
+.tools-tabs button { min-height: 44px; padding: 8px; border-radius: 7px; color: var(--muted); background: transparent; font-size: 14px; }
+.tools-tabs button[aria-selected="true"] { color: var(--blue); background: var(--panel); font-weight: 700; box-shadow: 0 1px 4px rgb(0 0 0 / 10%); }
+.tools-range { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; }
+.tools-range label { display: grid; gap: 6px; font-size: 13px; font-weight: 650; }
+.tools-range input, .event-copy-row input { width: 100%; min-width: 0; min-height: 44px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--panel); font: inherit; }
+.tools-count { display: inline-grid; place-items: center; min-width: 32px; min-height: 32px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); font-variant-numeric: tabular-nums; }
+#plannerToolsResults { display: grid; gap: 22px; min-width: 0; }
+.tools-agenda-day h3 { margin: 0 0 8px; font-size: 14px; font-weight: 700; }
+.tools-agenda-event { display: grid; grid-template-columns: 125px minmax(0, 1fr); gap: 14px; align-items: start; width: 100%; min-height: 64px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--panel); text-align: left; }
+.tools-agenda-event + .tools-agenda-event { margin-top: 7px; }
+.tools-agenda-event:hover { background: var(--blue-soft); }
+.tools-agenda-time { color: var(--muted); font-size: 12px; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.5; overflow-wrap: anywhere; }
+.tools-agenda-copy { min-width: 0; overflow-wrap: anywhere; }
+.tools-agenda-copy strong { display: block; font-size: 15px; line-height: 1.4; }
+.tools-agenda-copy small { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.tools-empty { margin: 0; padding: 20px 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.tools-private { padding-top: 12px; border-top: 1px solid var(--line); font-size: 12px; }
+.event-utility-panel { display: grid; gap: 16px; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); min-width: 0; }
+.event-utility-actions { display: flex; gap: 8px; }
+.event-utility-panel button { min-height: 44px; padding: 8px 10px; border-radius: 8px; font-size: 13px; white-space: normal; }
+#favoriteEvent[aria-pressed="true"] { color: var(--blue); border-color: var(--blue); background: var(--blue-soft); }
+.tools-status { margin: 0; color: var(--green); font-size: 13px; line-height: 1.5; }
+.tools-status:empty { display: none; }
+#eventSummaryFallback { width: 100%; min-height: 160px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--panel); font-size: 14px; resize: vertical; }
+.event-packing h3 { margin: 0 0 8px; color: var(--ink); font-size: 15px; }
+.tools-packing-progress { margin: 0 0 8px; color: var(--muted); font-size: 13px; }
+.event-packing-items { display: grid; gap: 4px; margin-bottom: 10px; }
+.event-packing-items label { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); font-size: 14px; line-height: 1.5; cursor: pointer; }
+.event-packing-items input { flex: 0 0 22px; width: 22px; height: 22px; margin: 0; accent-color: var(--green); }
+.event-packing-items label:has(input:checked) { background: var(--soft-line); }
+.event-packing-items input:checked + span { color: var(--muted); text-decoration: line-through; }
+.event-packing-items span { min-width: 0; overflow-wrap: anywhere; }
+.event-copy-disclosure > summary { min-height: 44px; padding: 10px 0; color: var(--blue); font-size: 14px; font-weight: 650; cursor: pointer; }
+.event-copy-disclosure > label { display: block; margin: 12px 0 6px; font-size: 13px; font-weight: 650; }
+.event-copy-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+#plannerToolsDialog :is(button, input):focus-visible, .event-utility-panel :is(button, input, summary, textarea):focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+@media (max-width: 740px) {
+  #plannerToolsDialog { max-height: calc(100dvh - 16px); }
+  .planner-tools-body { padding: 14px; }
+  .tools-agenda-event { grid-template-columns: minmax(0, 1fr); gap: 5px; }
+  .tools-range input, .event-copy-row input, #eventSummaryFallback { font-size: 16px; }
+  .event-copy-row { grid-template-columns: minmax(0, 1fr); }
+  .event-utility-actions { gap: 6px; }
+}

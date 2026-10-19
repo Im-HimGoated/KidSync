@@ -39,6 +39,7 @@ function setup() {
     'miniCalendar.filteredLegend': 'Showing {filter} · dots mark matching dates',
     'miniCalendar.searchLegend': 'Dots mark dates matching your filters',
     'sidebar.holidays': 'Holidays', 'sidebar.specialDays': 'Special days', 'filters.activities': 'Activities', 'filters.trips': 'Trips',
+    'filters.holidaysTrips': 'Holidays & trips',
     'holiday.stPatricks': "St. Patrick's Day"
   };
   const context = vm.createContext({
@@ -71,7 +72,7 @@ function setup() {
   return { context, state, elements, persisted, day, count };
 }
 
-test('sidebar markers/counts update from all events to holidays only and back', () => {
+test('sidebar holiday markers include holidays and trips, then reset with all events', () => {
   const { context, state, count, day, elements } = setup();
   context.renderMiniCalendar();
   assert.equal(count('2026-03-17'), 3);
@@ -82,9 +83,12 @@ test('sidebar markers/counts update from all events to holidays only and back', 
   assert.equal(count('2026-03-18'), 0);
   assert.equal(count('2026-03-19'), 0);
   assert.equal(count('2026-03-20'), 0); // Cancelled events do not mark a date.
+  assert.equal(count('2026-03-21'), 1);
+  assert.equal(count('2026-03-22'), 1);
+  assert.equal(count('2026-03-23'), 1);
   assert.ok(!day('2026-03-18').className.includes('has-events'));
-  assert.match(elements.miniCalendarLegend.textContent, /Showing Holidays/);
-  assert.ok(context.monthOccurrences().every(event => event.eventType === 'holiday'));
+  assert.match(elements.miniCalendarLegend.textContent, /Showing Holidays & trips/);
+  assert.ok(context.monthOccurrences().every(event => ['holiday', 'trip'].includes(event.eventType)));
   state.eventFilter = 'all';
   context.renderMiniCalendar();
   assert.equal(count('2026-03-18'), 1);

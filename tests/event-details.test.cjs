@@ -18,7 +18,7 @@ test("event sheet escapes content, renders logistics, and hides holiday deletion
     recurrenceLabel: () => "Weekly", userSettings: { notifications: true }, reminderLeadLabel: () => "30 minutes before",
     calendars: [{ id: "family", name: "Family" }], currentCalendarId: "family",
     activityStatus: () => "scheduled", activityStatusLabel: () => "Scheduled",
-    eventImportanceLabel: () => "Normal", eventImportanceBadge: () => "",
+    eventImportance: () => "normal", eventImportanceLabel: () => "Normal", eventImportanceBadge: () => "",
     escapeHtml: value => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
     t: key => key, activityTitle: event => event.title, eventColors: () => ({ line: "#237cc0" }),
     window: { lucide: { createIcons() {} } }, eventDetailsDialog: { showModal() { opened++; } }
@@ -31,9 +31,14 @@ test("event sheet escapes content, renders logistics, and hides holiday deletion
   assert.match(nodes.eventDetailsBody.innerHTML, /30 minutes before/);
   assert.match(nodes.eventDetailsBody.innerHTML, /Family/);
   assert.equal(nodes.eventDetailsDelete.hidden, false);
+  assert.equal(nodes.eventDetailsDuplicate.hidden, false);
+  assert.equal(nodes.eventDetailsImportanceControl.hidden, false);
+  assert.equal(nodes.eventDetailsImportance.value, "normal");
   assert.equal(nodes.eventDetailsConfirm.hidden, true);
   context.showEventDetails({ title: "Holiday", isBuiltInHoliday: true, allDay: true });
   assert.equal(nodes.eventDetailsDelete.hidden, true);
+  assert.equal(nodes.eventDetailsDuplicate.hidden, true);
+  assert.equal(nodes.eventDetailsImportanceControl.hidden, true);
   assert.doesNotMatch(nodes.eventDetailsBody.innerHTML, /30 minutes before/);
   assert.equal(opened, 2);
 });
@@ -54,4 +59,31 @@ test("deletion targets the stored series, records history and supplies undo", ()
   assert.deepEqual(calls, ["history", "save", "audit", "render", activity]);
   context.deleteCalendarActivity("missing");
   assert.equal(calls.length, 5);
+});
+
+test("details importance saves the series with history and refreshes its visible order", () => {
+  const activity = { id: "soccer", title: "Soccer", importance: "normal" };
+  const feedback = {};
+  const actions = [];
+  const context = vm.createContext({
+    eventDetailsActivity: { ...activity, occurrenceDate: "2026-10-17" },
+    state: { activities: [activity] },
+    document: { getElementById: () => feedback },
+    eventImportance: item => item.importance || "normal",
+    activityTitle: item => item.title,
+    t: key => key,
+    rememberCurrentSchedule: () => actions.push("history"),
+    saveActivities: () => actions.push("save"),
+    auditActivity: (action, before, after) => { actions.push("audit"); assert.equal(before.importance, "normal"); assert.equal(after.importance, "high"); },
+    renderAll: () => actions.push("render"),
+    showEventDetails: updated => { actions.push("details"); assert.equal(updated.importance, "high"); assert.equal(updated.occurrenceDate, "2026-10-17"); }
+  });
+  vm.runInContext(extract("changeEventDetailsImportance", "function locateEventDetailsDate("), context);
+  assert.equal(context.changeEventDetailsImportance("urgent"), false);
+  assert.equal(context.changeEventDetailsImportance("high"), true);
+  assert.equal(activity.importance, "high");
+  assert.deepEqual(actions, ["history", "save", "audit", "render", "details"]);
+  assert.equal(feedback.textContent, "eventActions.importanceSaved");
+  assert.equal(context.changeEventDetailsImportance("high"), true);
+  assert.equal(actions.length, 5);
 });

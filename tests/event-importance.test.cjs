@@ -50,6 +50,10 @@ test("Important filter keeps special dates and also includes high priority activ
   state.eventFilter = "trip";
   assert.equal(ctx.activityMatchesEventFilter({ eventType: "trip", importance: "normal" }), true);
   assert.equal(ctx.activityMatchesEventFilter({ eventType: "activity", importance: "high" }), false);
+  state.eventFilter = "holidays";
+  assert.equal(ctx.activityMatchesEventFilter({ eventType: "holiday", importance: "normal" }), true);
+  assert.equal(ctx.activityMatchesEventFilter({ eventType: "trip", importance: "normal" }), true);
+  assert.equal(ctx.activityMatchesEventFilter({ eventType: "activity", importance: "high" }), false);
   state.eventFilter = "activity";
   assert.equal(ctx.activityMatchesEventFilter({ eventType: "birthday", importance: "high" }), false);
   state.eventFilter = "all";
@@ -95,6 +99,10 @@ test("ICS export and import preserve importance, event type, date ranges, and re
   let sequence = 0;
   const ctx = context({ state, calendars: [], currentCalendarId: "default", currentWeekStart: new Date(2026, 9, 12), FAMILY_CHILD: "__family__", MISC_ICON: "✨", makeId: () => `imported-${++sequence}`, displayChild: () => "Family" }, ["activityStatus", "recurrenceValue", "dateKey", "parseDateKey", "addDays", "compactIcsDate", "icsEscape", "buildIcsCalendar", "parseIcsDate", "icsUnescape", "importanceFromIcsPriority", "importIcsEvents"]);
   const ics = ctx.buildIcsCalendar();
+  const single = ctx.buildIcsCalendar([state.activities[1]]);
+  assert.equal((single.match(/BEGIN:VEVENT/g) || []).length, 1);
+  assert.match(single, /X-KIDSYNC-EVENT-TYPE:trip/);
+  assert.doesNotMatch(single, /SUMMARY:high|SUMMARY:low/);
   ["PRIORITY:1", "PRIORITY:5", "PRIORITY:9"].forEach(priority => assert.match(ics, new RegExp(priority)));
   assert.match(ics, /DTEND;VALUE=DATE:20261016/);
   const imported = Array.from(ctx.importIcsEvents(ics));

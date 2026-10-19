@@ -1,0 +1,64 @@
+// Run with PGLITE_MODULE pointing to @electric-sql/pglite/dist/index.js.
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
+const { PGlite } = await import(process.env.PGLITE_MODULE ? pathToFileURL(process.env.PGLITE_MODULE).href : '@electric-sql/pglite');
+const db = new PGlite();
+const ids = { owner:'00000000-0000-4000-8000-000000000001', editor:'00000000-0000-4000-8000-000000000002', viewer:'00000000-0000-4000-8000-000000000003', outsider:'00000000-0000-4000-8000-000000000004' };
+try {
+  await db.exec(`create role anon; create role authenticated; create schema auth;
+    create table auth.users(id uuid primary key,email text);
+    create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('test.uid',true),'')::uuid $$;
+    create function auth.jwt() returns jsonb language sql stable as $$ select jsonb_build_object('email',current_setting('test.email',true)) $$;
+    grant usage on schema auth,public to anon,authenticated;
+    grant execute on function auth.uid(),auth.jwt() to anon,authenticated;
+    create table public.calendar_members(owner_id uuid,calendar_id text,member_user_id uuid,member_email text,status text,role text);
+    create table public.family_schedules(user_id uuid primary key references auth.users(id),schedule jsonb);
+    insert into auth.users values ${Object.entries(ids).map(([role,id])=>`('${id}','${role}@example.test')`).join(',')};
+    insert into calendar_members values ('${ids.owner}','family','${ids.editor}','editor@example.test','active','editor'),('${ids.owner}','family','${ids.viewer}','viewer@example.test','active','viewer');`);
+  const sql = await readFile(new URL('../supabase/family-coordination.sql',import.meta.url),'utf8');
+  await db.exec(sql); await db.exec(sql);
+  const as = async who => {
+    await db.exec('reset role');
+    await db.query("select set_config('test.uid',$1,false),set_config('test.email',$2,false)",[ids[who] || '',`${who}@example.test`]);
+    await db.exec('set role authenticated');
+  };
+  await db.query("select set_config('test.uid',$1,false),set_config('test.email','owner@example.test',false)",[ids.owner]);
+  await db.query('insert into family_schedules values ($1,$2)',[ids.owner,{calendarData:{family:{activities:[{id:'soccer',title:'Soccer',startDate:'2026-11-01',start:'15:00',end:'16:00'}]}}}]);
+  await as('owner');
+  await db.query('select assign_calendar_pickup($1,$2,$3,$4,$5)',[ids.owner,'family','soccer','2026-11-01','viewer@example.test']);
+  const pickup=async()=> (await db.query('select * from calendar_pickups')).rows[0];
+  let row=await pickup();assert.equal(row.status,'pending');
+  await assert.rejects(db.query('select respond_calendar_pickup($1,$2,$3)',[row.id,'accepted',row.updated_at]),/assigned recipient/);
+  await as('viewer');
+  await assert.rejects(db.query('select assign_calendar_pickup($1,$2,$3,$4,$5)',[ids.owner,'family','soccer','2026-11-01','owner@example.test']),/Editor access/);
+  await db.query('select respond_calendar_pickup($1,$2,$3)',[row.id,'accepted',row.updated_at]);
+  assert.equal((await pickup()).status,'accepted');
+  const change=(await db.query('select * from calendar_changes')).rows[0];
+  await assert.rejects(db.query('insert into calendar_acknowledgements(change_id,user_id) values ($1,$2)',[change.id,ids.owner]),/row-level security/);
+  await db.query('insert into calendar_acknowledgements(change_id,user_id) values ($1,$2)',[change.id,ids.viewer]);
+  assert.equal((await db.query('select * from calendar_acknowledgements')).rows[0].user_email,'viewer@example.test');
+  await assert.rejects(db.query('insert into calendar_acknowledgements(change_id,user_id,user_email) values ($1,$2,$3)',[change.id,ids.viewer,'fake@example.test']),/permission denied/);
+  await assert.rejects(db.query('update calendar_pickups set status=$1 where id=$2',['accepted',row.id]),/permission denied/);
+  await as('outsider');
+  assert.equal((await db.query('select * from calendar_changes')).rows.length,0);
+  assert.equal((await db.query('select * from calendar_pickups')).rows.length,0);
+  assert.equal((await db.query('select * from calendar_acknowledgements')).rows.length,0);
+  await assert.rejects(db.query('select assign_calendar_pickup($1,$2,$3,$4,$5)',[ids.owner,'family','soccer','2026-11-01','outsider@example.test']),/Editor access/);
+  await as('owner');
+  await assert.rejects(db.query('select assign_calendar_pickup($1,$2,$3,$4,$5)',[ids.owner,'family','soccer','2026-11-01','outsider@example.test']),/accepted calendar member/);
+  await db.exec('reset role');
+  await db.query("update family_schedules set schedule=jsonb_set(schedule,'{calendarData,family,activities,0,start}',to_jsonb('15:30'::text)) where user_id=$1",[ids.owner]);
+  await as('viewer');row=await pickup();assert.equal(row.status,'pending');assert.equal(row.responded_at,null);
+  const stale=row.updated_at;
+  await as('editor');await db.query('select assign_calendar_pickup($1,$2,$3,$4,$5)',[ids.owner,'family','soccer','2026-11-01','owner@example.test']);
+  await as('viewer');
+  await assert.rejects(db.query('select respond_calendar_pickup($1,$2,$3)',[row.id,'accepted',stale]),/assigned recipient/);
+  await db.exec('reset role');
+  await db.query("update family_schedules set schedule=jsonb_set(schedule,'{calendarData,family,activities}','[]'::jsonb) where user_id=$1",[ids.owner]);
+  await as('owner');assert.equal((await pickup()).status,'cancelled');
+  await db.exec('reset role; set role anon');
+  await assert.rejects(db.query('select family_calendar_access($1,$2,false)',[ids.owner,'family']),/permission denied/);
+  console.log('PASS: migration replay, change capture, pickup identity/version checks, reconfirmation, acknowledgement identity, editor/viewer/outsider/anon access.');
+} catch (error) { console.error(error.message, error.code || ''); process.exitCode=1; }
+finally { await db.close(); }

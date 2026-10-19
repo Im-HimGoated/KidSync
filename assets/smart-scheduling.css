@@ -1,0 +1,66 @@
+#smartSchedulingDialog { width: min(760px, calc(100% - 24px)); max-height: calc(100dvh - 24px); color: var(--ink); background: var(--panel); }
+#smartSchedulingDialog .modal-header { position: sticky; top: 0; z-index: 10; background: var(--panel); }
+.smart-scheduling-body { display: grid; gap: 16px; padding: 20px; min-width: 0; }
+.smart-note { margin: 0; color: var(--muted); font-size: 12px; font-weight: 400; line-height: 1.65; overflow-wrap: anywhere; }
+#smartSchedulingTabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 10px; background: var(--soft-line); }
+.smart-tabs button { min-height: 44px; padding: 8px; border: 0; border-radius: 7px; color: var(--muted); background: transparent; font-size: 14px; font-weight: 600; }
+.smart-tabs button[aria-selected="true"] { color: var(--blue); background: var(--panel); box-shadow: 0 1px 4px rgb(15 36 52 / 10%); }
+#smartSchedulingDialog :is(input, select, textarea) { width: 100%; min-width: 0; min-height: 44px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--panel); font: inherit; font-size: 14px; }
+#smartFindForm { display: grid; gap: 16px; padding: 0; }
+.smart-field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; min-width: 0; }
+.smart-field-grid label { display: grid; gap: 6px; min-width: 0; font-size: 13px; font-weight: 600; color: var(--ink); }
+.smart-full-row { grid-column: 1 / -1; }
+.smart-people-fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.smart-people-fieldset legend { margin-bottom: 8px; color: var(--ink); font-size: 13px; font-weight: 600; }
+.smart-people { display: flex; flex-wrap: wrap; gap: 8px; }
+.smart-people label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; max-width: 100%; padding: 8px 12px; border: 1px solid var(--line); border-radius: 22px; color: var(--ink); font-size: 13px; cursor: pointer; }
+.smart-people label:has(input:checked) { color: var(--blue); border-color: var(--blue-line); background: var(--blue-soft); }
+#smartSchedulingDialog .smart-people input { flex: 0 0 20px; width: 20px; height: 20px; min-height: 20px; margin: 0; padding: 0; accent-color: var(--blue); }
+.smart-people span { min-width: 0; overflow-wrap: anywhere; }
+.smart-rules { min-width: 0; padding: 0; border-block: 1px solid var(--line); }
+.smart-rules > summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; min-height: 48px; padding: 10px 0; color: var(--blue); font-size: 13px; font-weight: 650; cursor: pointer; list-style: none; }
+.smart-rules > summary::-webkit-details-marker { display: none; }
+.smart-rules > summary::after { content: '+'; margin-left: auto; font-size: 18px; }
+.smart-rules[open] > summary::after { content: '−'; }
+.smart-rules > summary small { color: var(--muted); font-size: 11px; font-weight: 400; line-height: 1.5; }
+.smart-rules > .smart-field-grid { padding-block: 4px 12px; }
+.smart-rules > .smart-note { padding-bottom: 14px; }
+.smart-scope { margin-block: 16px 8px; }
+.smart-find-button { justify-self: start; min-height: 44px; }
+#smartSchedulingResults { display: grid; gap: 18px; margin-top: 18px; }
+#smartSchedulingResults:empty { display: none; }
+.smart-suggestion-day h3 { margin: 0 0 8px; font-size: 14px; }
+.smart-suggestion-day > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.smart-slot { display: grid; gap: 5px; min-width: 0; min-height: 66px; padding: 10px; border: 1px solid var(--blue-line); border-radius: 8px; text-align: left; color: var(--ink); background: var(--panel); }
+.smart-slot:hover { background: var(--blue-soft); border-color: var(--blue); }
+.smart-slot strong { font-size: 12px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.smart-slot small { color: var(--blue); font-size: 11px; line-height: 1.4; }
+.smart-empty { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.smart-quick-label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 650; }
+#smartQuickText { resize: vertical; margin-bottom: 8px; line-height: 1.6; }
+.smart-quick-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.smart-quick-actions button { min-height: 44px; }
+#smartQuickPreview { display: grid; gap: 16px; margin-top: 18px; padding: 18px 0 0; border-top: 1px solid var(--line); }
+#smartQuickPreview[hidden], #smartFindPanel[hidden], #smartQuickPanel[hidden], #smartPollPanel[hidden], #smartQuickFull[hidden], #smartOpenDraft[hidden] { display: none; }
+#smartSchedulingStatus { margin: 0; color: var(--blue); font-size: 13px; line-height: 1.6; }
+#smartSchedulingStatus:empty { display: none; }
+.smart-zone { padding-top: 12px; border-top: 1px solid var(--line); }
+.event-buffer-options { grid-column: 1 / -1; }
+.event-buffer-options input { width: 100%; min-width: 0; min-height: 44px; padding: 8px 10px; font-size: 14px; }
+.event-buffer-options[hidden], .smart-buffer-warning[hidden] { display: none; }
+.smart-buffer-warning { grid-column: 1 / -1; margin: 0; padding: 10px 12px; border-left: 3px solid var(--blue); border-radius: 4px; color: var(--ink); background: var(--blue-soft); font-size: 13px; line-height: 1.5; }
+.smart-buffer-summary { margin: 20px 0 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+#appShell .day-column > .smart-time-buffer { position: absolute; z-index: 2; display: flex; align-items: center; min-width: 0; padding: 2px 5px; border: 1px dashed var(--blue-line); border-radius: 4px; color: var(--muted); background: color-mix(in srgb, var(--blue-soft) 38%, transparent); font-size: 10px; line-height: 1.2; overflow: hidden; pointer-events: none; }
+#smartSchedulingDialog :is(button, input, select, textarea, summary):focus-visible, .event-buffer-options :is(input, summary):focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+html.ui-high-contrast #smartSchedulingDialog .primary-btn { color: #fff; background: #174b70; border-color: #174b70; }
+html.dark-mode.ui-high-contrast #smartSchedulingDialog .primary-btn { color: #102a3a; background: #c1e4ff; border-color: #c1e4ff; }
+@media (max-width: 600px) {
+  .smart-scheduling-body { padding: 14px; }
+  .smart-field-grid { grid-template-columns: minmax(0, 1fr); }
+  .smart-suggestion-day > div { grid-template-columns: minmax(0, 1fr); }
+  .smart-slot { min-height: 54px; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  #smartSchedulingDialog :is(input, select, textarea), .event-buffer-options input { font-size: 16px; }
+  .smart-find-button, #smartQuickPreview > button { width: 100%; }
+  .smart-tabs button { font-size: 13px; }
+  .smart-rules > summary small { flex-basis: 100%; order: 1; }
+}

@@ -15,11 +15,11 @@ test('static IDs are unique and explicit form labels resolve', () => {
 });
 
 test('all local markup assets, offline shell entries and manifest icons exist', () => {
-  for (const match of markup.matchAll(/<(?:link|script|img)\b[^>]*\b(?:src|href)="(\.\/[^"?#]+)"/g)) assert(fs.existsSync(path.join(root, match[1])), match[1]);
+  for (const match of markup.matchAll(/<(?:link|script|img)\b[^>]*\b(?:src|href)="(\.\/[^"#]+)"/g)) assert(fs.existsSync(path.join(root, match[1].split('?')[0])), match[1]);
   // Scripts were removed from markup to keep generated HTML out of ID checks.
   for (const match of html.matchAll(/<script\b[^>]*\bsrc="(\.\/[^"?#]+)"/g)) assert(fs.existsSync(path.join(root, match[1])), match[1]);
   const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-  for (const match of worker.split('];', 1)[0].matchAll(/"(\.\/[^\"]*)"/g)) assert(fs.existsSync(path.join(root, match[1])), match[1]);
+  for (const match of worker.split('];', 1)[0].matchAll(/"(\.\/[^\"]*)"/g)) assert(fs.existsSync(path.join(root, match[1].split('?')[0])), match[1]);
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8'));
   for (const icon of manifest.icons) assert(fs.existsSync(path.join(root, icon.src)), icon.src);
 });

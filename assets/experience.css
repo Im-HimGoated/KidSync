@@ -1,0 +1,66 @@
+/* Task-focused controls added without changing the calendar's existing visual system. */
+#appShell .more-actions-menu {
+  max-height: min(72dvh, 520px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+#appShell .more-actions-group {
+  border-top: 1px solid var(--line);
+  padding-top: 4px;
+}
+#appShell .more-actions-group > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 42px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+#appShell .more-actions-group > summary::-webkit-details-marker { display: none; }
+#appShell .more-actions-group > summary::after { content: "⌄"; color: var(--muted); transition: transform 150ms ease; }
+#appShell .more-actions-group[open] > summary::after { transform: rotate(180deg); }
+#appShell .more-actions-group > summary:hover,
+#appShell .more-actions-group > summary:focus-visible { background: var(--blue-soft); }
+#appShell .more-actions-group > div { display: grid; gap: 4px; padding-left: 8px; }
+#appShell .more-actions-group .ghost-btn { min-height: 38px; }
+
+#appShell .dashboard-start {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin: 6px 0 16px;
+  padding: 20px;
+  border: 1px solid var(--blue-line);
+  border-radius: 12px;
+  background: var(--blue-soft);
+}
+#appShell .dashboard-start[hidden] { display: none; }
+#appShell .dashboard-start h2 { margin: 2px 0 5px; color: var(--ink); font-size: 20px; }
+#appShell .dashboard-start p { margin: 0; color: var(--muted); line-height: 1.45; }
+#appShell .dashboard-start .dashboard-start-kicker { color: var(--blue); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; }
+#appShell .dashboard-start-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+#appShell .dashboard-start-actions button { min-height: 42px; }
+
+.share-tabs { display: flex; gap: 5px; margin: 0 20px 18px; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft-line); }
+.share-dialog-intro { margin: 0 20px 16px; color: var(--muted); line-height: 1.45; }
+.share-tabs button { flex: 1; min-height: 42px; padding: 8px 12px; border: 0; border-radius: 7px; color: var(--muted); background: transparent; font: inherit; font-weight: 700; cursor: pointer; }
+.share-tabs button[aria-selected="true"] { color: var(--ink); background: var(--panel); box-shadow: 0 1px 4px rgb(15 36 52 / 10%); }
+.share-tabs button:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+.share-files-panel[hidden], .share-access-panel[hidden], #ownerCommentsPanel[hidden] { display: none !important; }
+.share-section-intro { margin: 0 20px 14px; color: var(--muted); }
+.share-files-panel .share-copy { box-sizing: border-box; max-width: calc(100% - 40px); margin: 0 20px 14px; }
+@media (max-width: 740px) {
+  #appShell .dashboard-start { padding: 16px; }
+  #appShell .dashboard-start-actions { width: 100%; }
+  #appShell .dashboard-start-actions button { flex: 1 1 150px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #appShell .more-actions-group > summary::after { transition: none; }
+}

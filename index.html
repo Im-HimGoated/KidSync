@@ -9808,7 +9808,14 @@
   <link rel="stylesheet" href="./assets/calendar-insights.css">
   <link rel="stylesheet" href="./assets/calendar-extras.css">
   <link rel="stylesheet" href="./assets/week-calendar.css">
-  <link rel="stylesheet" href="./assets/mobile.css">
+  <link rel="stylesheet" href="./assets/planner-tools.css">
+  <link rel="stylesheet" href="./assets/ui-features.css">
+  <link rel="stylesheet" href="./assets/smart-scheduling.css?v=2">
+  <link rel="stylesheet" href="./assets/family-polls.css?v=1">
+  <link rel="stylesheet" href="./assets/smart-planner.css?v=4">
+  <link rel="stylesheet" href="./assets/family-workspace.css">
+  <link rel="stylesheet" href="./assets/experience.css">
+  <link rel="stylesheet" href="./assets/mobile.css?v=95">
 </head>
 <body>
   <div class="app-loader" id="appLoader" role="status" aria-live="polite">
@@ -10254,7 +10261,7 @@
         <span class="sidebar-brand-copy"><strong>Kids<span>Sync</span></strong><small data-i18n="sidebar.familyPlanner">Family planner</small></span>
       </div>
       <div class="sidebar-date-controls">
-        <button class="sidebar-today" type="button" id="jumpToday" data-i18n="actions.today">Today</button>
+        <button class="sidebar-today" type="button" id="jumpToday" aria-keyshortcuts="T" data-i18n="actions.today">Today</button>
         <button class="sidebar-icon-button sidebar-tooltip" type="button" id="prevWeek" aria-label="Previous period" title="Previous period" data-tooltip="Previous period" data-i18n-aria="aria.previousPeriod" data-i18n-title="aria.previousPeriod" data-i18n-tooltip="aria.previousPeriod"><span aria-hidden="true">‹</span></button>
         <button class="sidebar-icon-button sidebar-tooltip" type="button" id="nextWeek" aria-label="Next period" title="Next period" data-tooltip="Next period" data-i18n-aria="aria.nextPeriod" data-i18n-title="aria.nextPeriod" data-i18n-tooltip="aria.nextPeriod"><span aria-hidden="true">›</span></button>
         <button class="sidebar-period-button" type="button" id="openPeriodPicker" aria-label="Choose a date" title="Choose a date" data-i18n-aria="sidebar.chooseDate" data-i18n-title="sidebar.chooseDate">
@@ -10298,6 +10305,19 @@
           <button class="ghost-btn" type="button" id="dashboardGoCalendar"><span aria-hidden="true">▣</span><span data-i18n="dashboard.openCalendar">Open calendar</span></button>
         </div>
       </header>
+
+      <section class="dashboard-start" id="dashboardStart" aria-labelledby="dashboardStartTitle" hidden>
+        <div>
+          <p class="dashboard-start-kicker" data-experience-text="startKicker">Get started</p>
+          <h2 id="dashboardStartTitle" data-experience-text="startTitle">Build your family schedule</h2>
+          <p data-experience-text="startBody">Personalize the children or add your first event. You can explore with example events at any time.</p>
+        </div>
+        <div class="dashboard-start-actions">
+          <button class="primary-btn" type="button" id="dashboardStartEvent" data-experience-text="startEvent">Add first event</button>
+          <button class="ghost-btn" type="button" id="dashboardStartChild" data-experience-text="startChild">Set up children</button>
+          <button class="ghost-btn" type="button" id="dashboardStartExample" data-experience-text="startExample">Try example</button>
+        </div>
+      </section>
 
       <div class="dashboard-stats" id="dashboardStats"></div>
 
@@ -10379,6 +10399,7 @@
       </div>
       <div class="calendar-context-bar" id="calendarContextBar" hidden>
         <span id="calendarContextLabel" role="status"></span>
+        <div id="activeFilterChips" role="group" aria-label="Active filters"></div>
         <button type="button" id="clearCalendarContext" data-i18n="ux.clearFilters">Clear filters</button>
       </div>
     </nav>
@@ -10418,20 +10439,42 @@
           <button class="calendar-zoom-button" type="button" id="zoomIn" aria-label="Zoom in calendar" title="Zoom in calendar" data-i18n-aria="aria.zoomIn" data-i18n-title="aria.zoomIn"><span aria-hidden="true">+</span></button>
         </div>
         <button class="ghost-btn feature-btn compact-toolbar-action sidebar-tooltip" type="button" id="openDashboard" aria-label="Dashboard" title="Dashboard" data-tooltip="Dashboard" data-i18n-aria="dashboard.open" data-i18n-title="dashboard.open" data-i18n-tooltip="dashboard.open"><span class="button-icon" aria-hidden="true">▦</span><span class="compact-toolbar-label" data-i18n="dashboard.open">Dashboard</span></button>
-        <button class="primary-btn compact-toolbar-action sidebar-tooltip" type="button" id="addActivity" aria-label="Add Event" title="Add Event" data-tooltip="Add Event" data-i18n-aria="actions.addActivity" data-i18n-title="actions.addActivity" data-i18n-tooltip="actions.addActivity"><span class="compact-toolbar-symbol" aria-hidden="true">+</span><span class="compact-toolbar-label" data-i18n="dashboard.addEvent">Add event</span></button>
+        <button class="primary-btn compact-toolbar-action sidebar-tooltip" type="button" id="addActivity" aria-label="Add Event" title="Add Event" data-tooltip="Add Event" aria-keyshortcuts="N" data-i18n-aria="actions.addActivity" data-i18n-title="actions.addActivity" data-i18n-tooltip="actions.addActivity"><span class="compact-toolbar-symbol" aria-hidden="true">+</span><span class="compact-toolbar-label" data-i18n="dashboard.addEvent">Add event</span></button>
         <details class="more-actions" id="moreActions">
           <summary class="compact-toolbar-action sidebar-tooltip sidebar-tooltip-right" aria-label="More" title="More" data-tooltip="More" data-i18n-aria="actions.more" data-i18n-title="actions.more" data-i18n-tooltip="actions.more"><span class="compact-toolbar-symbol compact-toolbar-more" aria-hidden="true">•••</span><span class="compact-toolbar-label" data-i18n="actions.more">More</span></summary>
           <div class="more-actions-menu">
-            <button class="ghost-btn" type="button" data-sidebar-action="dashboard" data-i18n="dashboard.open">Dashboard</button>
+            <button class="ghost-btn mobile-menu-item" type="button" id="mobileCustomizeLayout" data-i18n="layout.customize">Customize</button>
+            <button class="ghost-btn mobile-menu-item" type="button" id="mobileFocusCalendar" data-i18n="layout.focusCalendar">Focus calendar</button>
             <button class="ghost-btn" type="button" id="openCommandPalette" data-command-palette aria-haspopup="dialog" aria-controls="commandPalette" data-i18n="command.open">Quick actions</button>
-            <button class="ghost-btn" type="button" id="loadPreset" data-i18n="actions.loadExample">Load Example</button>
-            <button class="ghost-btn" type="button" id="managePresets" data-i18n="actions.presets">Presets &amp; Rewind</button>
             <button class="ghost-btn feature-btn" type="button" id="openReminders"><span class="button-icon" aria-hidden="true">🔔</span><span data-i18n="reminders.open">Reminders</span><span class="reminder-badge" id="reminderBadge" hidden>0</span></button>
-            <button class="ghost-btn feature-btn" type="button" id="openWeeklySummary"><span class="button-icon" aria-hidden="true">▦</span><span data-i18n="weeklySummary.open">Weekly summary</span></button>
-            <button class="ghost-btn" type="button" id="toggleWeekends" aria-pressed="false" data-i18n="actions.hideWeekends">Hide weekends</button>
             <button class="ghost-btn feature-btn share-btn" type="button" id="shareSchedule"><span class="button-icon" aria-hidden="true">↗</span><span data-i18n="sharing.share">Share</span></button>
-            <button class="ghost-btn feature-btn" type="button" id="openVersionHistory"><span class="button-icon" aria-hidden="true">↶</span><span data-i18n="versions.open">Version history</span></button>
-            <button class="ghost-btn" type="button" id="openActivityHistory" data-i18n="history.open">Activity history</button>
+            <details class="more-actions-group">
+              <summary data-experience-text="menuPlan">Plan and review</summary>
+              <div>
+                <button class="ghost-btn" type="button" id="openPlannerTools" aria-haspopup="dialog" aria-controls="plannerToolsDialog" data-tools-text="tools">Planner tools</button>
+                <button class="ghost-btn" type="button" data-open-smart-scheduling="find" aria-haspopup="dialog" aria-controls="smartSchedulingDialog" data-smart-text="smart">Smart scheduling</button>
+                <button class="ghost-btn" type="button" id="openSmartPlanner" aria-haspopup="dialog" aria-controls="smartPlannerDialog"><span>Family brief &amp; views</span></button>
+                <button class="ghost-btn feature-btn" type="button" id="openWeeklySummary"><span class="button-icon" aria-hidden="true">▦</span><span data-i18n="weeklySummary.open">Weekly summary</span></button>
+                <button class="ghost-btn" type="button" id="loadPreset" data-i18n="actions.loadExample">Load Example</button>
+              </div>
+            </details>
+            <details class="more-actions-group">
+              <summary data-experience-text="menuView">View and display</summary>
+              <div>
+                <button class="ghost-btn" type="button" data-sidebar-action="dashboard" data-i18n="dashboard.open">Dashboard</button>
+                <button class="ghost-btn" type="button" data-open-visual-preferences aria-haspopup="dialog" aria-controls="visualPreferencesDialog" data-visual-text="display">Display options</button>
+                <button class="ghost-btn" type="button" id="toggleWeekends" aria-pressed="false" data-i18n="actions.hideWeekends">Hide weekends</button>
+              </div>
+            </details>
+            <details class="more-actions-group">
+              <summary data-experience-text="menuHistory">History and help</summary>
+              <div>
+                <button class="ghost-btn" type="button" id="managePresets" data-i18n="actions.presets">Presets &amp; Rewind</button>
+                <button class="ghost-btn feature-btn" type="button" id="openVersionHistory"><span class="button-icon" aria-hidden="true">↶</span><span data-i18n="versions.open">Version history</span></button>
+                <button class="ghost-btn" type="button" id="openActivityHistory" data-i18n="history.open">Activity history</button>
+                <button class="ghost-btn" type="button" id="openShortcutGuide" aria-haspopup="dialog" aria-controls="sidebarHelpDialog" aria-keyshortcuts="Shift+/" data-i18n="shortcuts.open">Keyboard shortcuts</button>
+              </div>
+            </details>
             <button class="ghost-btn mobile-menu-item" type="button" data-sidebar-action="help" data-i18n="sidebar.help">Help</button>
             <button class="ghost-btn mobile-menu-item" type="button" data-sidebar-action="settings" data-i18n="settings.open">Settings</button>
           </div>
@@ -10500,6 +10543,7 @@
     </section>
 
     <div class="calendar-stage">
+      <div class="calendar-side-resize" id="calendarSideResize" role="separator" tabindex="0" aria-label="Resize side calendar" aria-orientation="vertical" aria-controls="calendarSide" aria-valuemin="220" aria-valuemax="360" aria-valuenow="260"></div>
       <aside class="mini-calendar" id="calendarSide" aria-label="Mini calendar" data-i18n-aria="miniCalendar.label" aria-describedby="miniCalendarLegend">
         <details class="calendar-side-disclosure" id="calendarSideDisclosure" open>
           <summary class="calendar-side-toggle" aria-controls="calendarSideContent"><span data-i18n="miniCalendar.mobileBrowse">Dates &amp; calendar tools</span></summary>
@@ -10507,11 +10551,13 @@
         <h2 class="calendar-sidebar-heading"><span aria-hidden="true">🗓️</span><span data-i18n="miniCalendar.sidebarTitle">Calendars</span></h2>
         <div class="mini-calendar-header">
           <h2 class="mini-calendar-title" id="miniCalendarTitle"></h2>
+          <button class="mini-calendar-today" type="button" id="miniCalendarToday" data-i18n="actions.today" aria-keyshortcuts="T">Today</button>
           <button class="mini-calendar-nav" type="button" id="miniCalendarPrevious" aria-label="Previous month" data-i18n-aria="miniCalendar.previous">‹</button>
           <button class="mini-calendar-nav" type="button" id="miniCalendarNext" aria-label="Next month" data-i18n-aria="miniCalendar.next">›</button>
         </div>
         <div class="mini-calendar-weekdays" id="miniCalendarWeekdays" aria-hidden="true"></div>
-        <div class="mini-calendar-grid" id="miniCalendarGrid"></div>
+        <div class="mini-calendar-grid" id="miniCalendarGrid" aria-describedby="miniCalendarKeyboardHint"></div>
+        <p class="sr-only" id="miniCalendarKeyboardHint" data-i18n="shortcuts.miniCalendar">Use arrow keys to move by day, Home or End for the week, and Page Up or Page Down for the month. Press Enter to open the focused date.</p>
         <p class="mini-calendar-marker-key"><span aria-hidden="true">•••</span><span id="miniCalendarLegend">Dots mark dates with events</span></p>
         <nav class="mini-calendar-tools" aria-label="Calendar tools" data-i18n-aria="miniCalendar.tools">
           <h3 data-i18n="miniCalendar.tools">Calendar tools</h3>
@@ -10530,6 +10576,16 @@
         <section class="schedule-shell calendar-view" id="weekSchedule" tabindex="0" aria-label="Weekly schedule" data-i18n-aria="aria.weeklySchedule">
           <div class="schedule-grid" id="scheduleGrid"></div>
         </section>
+        <details class="timeline-navigator" id="timelineNavigator" hidden>
+          <summary aria-controls="timelineJumpPanel"><span aria-hidden="true">↕</span><span data-visual-text="jump">Jump to time</span></summary>
+          <div class="timeline-jump-panel" id="timelineJumpPanel">
+            <button type="button" data-jump-minute="now" data-visual-text="now">Current hour</button>
+            <button type="button" data-jump-minute="0" data-visual-text="night">Midnight</button>
+            <button type="button" data-jump-minute="360" data-visual-text="morning">6 AM</button>
+            <button type="button" data-jump-minute="720" data-visual-text="noon">Noon</button>
+            <button type="button" data-jump-minute="1080" data-visual-text="evening">6 PM</button>
+          </div>
+        </details>
 
         <section class="mobile-agenda calendar-view" id="mobileAgenda" aria-label="Mobile weekly agenda" data-i18n-aria="aria.mobileAgenda"></section>
 
@@ -10560,6 +10616,99 @@
     <div class="event-peek-actions"><button class="small-btn" type="button" id="eventPeekView" data-i18n="eventPreview.view">View details</button><button class="small-btn" type="button" id="eventPeekEdit" data-i18n="eventPreview.edit">Edit</button></div>
   </aside>
 
+  <dialog id="smartSchedulingDialog" aria-labelledby="smartSchedulingTitle">
+    <div class="modal-header"><h2 id="smartSchedulingTitle" data-smart-text="smart">Smart scheduling</h2><button class="close-btn" type="button" id="closeSmartScheduling" aria-label="Close">×</button></div>
+    <div class="smart-scheduling-body">
+      <p class="smart-note" data-smart-text="intro">Find room for a plan, or turn a sentence into an event. You review everything before saving.</p>
+      <div class="smart-tabs" id="smartSchedulingTabs" role="tablist" aria-labelledby="smartSchedulingTitle">
+        <button id="smartFindTab" type="button" role="tab" aria-controls="smartFindPanel" aria-selected="true" data-smart-mode="find" data-smart-text="find">Find family time</button>
+        <button id="smartQuickTab" type="button" role="tab" aria-controls="smartQuickPanel" aria-selected="false" tabindex="-1" data-smart-mode="quick" data-smart-text="quick">Quick Add</button>
+        <button id="smartPollTab" type="button" role="tab" aria-controls="smartPollPanel" aria-selected="false" tabindex="-1" data-smart-mode="poll" data-smart-text="poll">Family poll</button>
+      </div>
+      <section id="smartFindPanel" role="tabpanel" aria-labelledby="smartFindTab">
+        <form id="smartFindForm">
+          <fieldset class="smart-people-fieldset"><legend data-smart-text="who">Who needs to be free?</legend><div id="smartPeople" class="smart-people"></div></fieldset>
+          <div class="smart-field-grid">
+            <label for="smartFromDate"><span data-smart-text="date">Starting date</span><input id="smartFromDate" type="date" min="1900-01-01" max="9999-12-31" required></label>
+            <label for="smartDayCount"><span data-smart-text="days">Search ahead</span><select id="smartDayCount"><option value="1" data-smart-text="day1">1 day</option><option value="3" data-smart-text="day3">3 days</option><option value="7" selected data-smart-text="day7">7 days</option><option value="14" data-smart-text="day14">14 days</option></select></label>
+            <label for="smartEarliest"><span data-smart-text="earliest">Not before</span><input id="smartEarliest" type="time" value="08:00" required></label>
+            <label for="smartLatest"><span data-smart-text="latest">Finish by</span><input id="smartLatest" type="time" value="21:00" required></label>
+            <label class="smart-full-row" for="smartDuration"><span data-smart-text="duration">Event length</span><select id="smartDuration"><option value="15" data-smart-minutes="15">15 min</option><option value="30" selected data-smart-minutes="30">30 min</option><option value="45" data-smart-minutes="45">45 min</option><option value="60" data-smart-minutes="60">60 min</option><option value="90" data-smart-minutes="90">90 min</option><option value="120" data-smart-minutes="120">120 min</option></select></label>
+          </div>
+          <details class="smart-rules"><summary><span data-smart-text="buffer">Breathing room</span><small id="smartRulesSummary"></small></summary>
+            <div class="smart-field-grid">
+              <label for="smartBefore"><span data-smart-text="before">Before</span><input id="smartBefore" type="number" min="0" max="120" step="1" value="15" required></label>
+              <label for="smartAfter"><span data-smart-text="after">After</span><input id="smartAfter" type="number" min="0" max="120" step="1" value="15" required></label>
+              <label class="smart-full-row" for="smartNotice"><span data-smart-text="notice">Advance notice</span><select id="smartNotice" aria-describedby="smartNoticeHint"><option value="0" data-smart-text="none">None</option><option value="30" selected data-smart-minutes="30">30 min</option><option value="60" data-smart-minutes="60">60 min</option><option value="1440" data-smart-text="nextDay">24 hours</option></select></label>
+            </div><p id="smartNoticeHint" class="smart-note" data-smart-text="noticeHint">How soon the event can start, counted from now.</p>
+          </details>
+          <details class="smart-rules"><summary><span data-smart-text="limits">Daily limits</span><small data-smart-text="unlimited">0 means no limit</small></summary>
+            <div class="smart-field-grid">
+              <label for="smartMaxEvents"><span data-smart-text="maxEvents">Max events per person</span><input id="smartMaxEvents" type="number" min="0" max="30" step="1" value="0" required></label>
+              <label for="smartMaxMinutes"><span data-smart-text="maxMinutes">Max planned minutes per person</span><input id="smartMaxMinutes" type="number" min="0" max="1440" step="15" value="0" required></label>
+            </div><p class="smart-note" data-smart-text="limitsHint">Suggestions only. Counts all saved events for each selected person, including hidden ones. Planned minutes exclude travel, buffers, trips, and all-day events. Manual saves are not restricted.</p>
+          </details>
+          <button class="primary-btn smart-find-button" type="submit" data-smart-text="findButton">Find open times</button>
+        </form>
+        <p class="smart-note smart-scope" data-smart-text="scope">Checks only this KidsSync calendar, including events hidden by filters. It does not check Google, Apple, or other calendars.</p>
+        <p class="smart-note" data-smart-text="busy">Trips and saved all-day events block the day. Built-in holidays do not. Cancelled events are ignored.</p>
+        <div id="smartSchedulingResults"></div>
+      </section>
+      <section id="smartQuickPanel" role="tabpanel" aria-labelledby="smartQuickTab" hidden>
+        <label class="smart-quick-label" for="smartQuickText" data-smart-text="quickLabel">Describe a one-time event</label>
+        <textarea id="smartQuickText" rows="3" maxlength="500" aria-describedby="smartQuickHint" placeholder="Piano tomorrow 4–5pm @ Music Studio"></textarea>
+        <p id="smartQuickHint" class="smart-note" data-smart-text="quickHint">Use today, tomorrow, a weekday, or YYYY-MM-DD; include a time or time range. Add a place with @. English and Chinese are supported.</p>
+        <div class="smart-quick-actions"><button class="ghost-btn" id="smartQuickExample" type="button" data-smart-text="exampleLabel">Try an example</button><button class="primary-btn" id="smartQuickParse" type="button" data-smart-text="parse">Preview event</button></div>
+        <form id="smartQuickPreview" hidden>
+          <div class="smart-field-grid">
+            <label class="smart-full-row" for="smartQuickTitle"><span data-smart-text="title">Event name</span><input id="smartQuickTitle" type="text" maxlength="100" required></label>
+            <label for="smartQuickChild"><span data-smart-text="child">For</span><select id="smartQuickChild"></select></label>
+            <label for="smartQuickDate"><span data-smart-text="eventDate">Date</span><input id="smartQuickDate" type="date" min="1900-01-01" max="9999-12-31" required></label>
+            <label for="smartQuickStart"><span data-smart-text="start">Starts</span><input id="smartQuickStart" type="time" required></label>
+            <label for="smartQuickEnd"><span data-smart-text="end">Ends</span><input id="smartQuickEnd" type="time" required></label>
+            <label class="smart-full-row" for="smartQuickLocation"><span data-smart-text="location">Location</span><input id="smartQuickLocation" type="text" maxlength="100"></label>
+          </div><button class="primary-btn" type="submit" data-smart-text="review">Review in event editor</button>
+        </form>
+        <button class="ghost-btn" id="smartQuickFull" type="button" data-smart-text="full" hidden>Use full event editor</button>
+      </section>
+      <p id="smartSchedulingStatus" role="status" aria-live="polite"></p>
+      <section id="smartPollPanel" role="tabpanel" aria-labelledby="smartPollTab" hidden></section>
+      <button class="ghost-btn" id="smartOpenDraft" type="button" data-smart-text="openDraft" hidden>Open unfinished event</button>
+      <p class="smart-note smart-zone" id="smartSchedulingZone"></p>
+    </div>
+  </dialog>
+
+  <dialog id="visualPreferencesDialog" aria-labelledby="visualPreferencesTitle">
+    <div class="modal-header"><h2 id="visualPreferencesTitle" data-visual-text="display">Display options</h2><button class="close-btn" id="closeVisualPreferences" type="button" aria-label="Close">×</button></div>
+    <div class="visual-preferences-body">
+      <p class="visual-note" data-visual-text="intro">Make the planner easier to read without changing your events.</p>
+      <label class="visual-setting" for="uiContrast"><span><strong data-visual-text="contrast">High contrast</strong><small id="uiContrastHint" data-visual-text="contrastHint">Stronger text, borders, and keyboard focus in light and dark modes.</small></span><input id="uiContrast" type="checkbox" aria-describedby="uiContrastHint"></label>
+      <label class="visual-setting" for="uiGuides"><span><strong data-visual-text="guides">Time-slot hover guide</strong><small id="uiGuidesHint" data-visual-text="guideHint">On a computer, point at an empty time slot to preview its time. Click to add an event.</small></span><input id="uiGuides" type="checkbox" aria-describedby="uiGuidesHint" checked></label>
+      <div class="visual-preview"><small data-visual-text="preview">Preview</small><div class="visual-preview-card"><strong data-visual-text="sample">Family activity</strong><span data-visual-text="sampleMeta">4:30 PM · Andrew</span></div></div>
+      <p class="visual-note visual-resize-note" data-visual-text="resizeNote">Drag the edge beside the side calendar to resize it. Keyboard users can focus the divider and use arrow keys.</p>
+      <p id="visualPreferencesStatus" role="status" aria-live="polite"></p>
+      <div class="visual-preferences-footer"><p class="visual-note" data-visual-text="local">These display choices stay on this device.</p><button class="primary-btn" id="doneVisualPreferences" type="button" data-visual-text="done">Done</button></div>
+    </div>
+  </dialog>
+
+  <dialog id="plannerToolsDialog" aria-labelledby="plannerToolsTitle">
+    <div class="modal-header">
+      <h2 id="plannerToolsTitle" data-tools-text="tools">Planner tools</h2>
+      <button class="close-btn" id="closePlannerTools" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="planner-tools-body">
+      <p class="tools-note" data-tools-text="toolsHint">See the next 30 days or revisit your favorite events.</p>
+      <div class="tools-tabs" role="tablist" aria-labelledby="plannerToolsTitle">
+        <button id="toolsAgendaTab" type="button" role="tab" aria-selected="true" aria-controls="plannerToolsResults" data-tools-mode="agenda" data-tools-text="agenda">30-day agenda</button>
+        <button id="toolsFavoritesTab" type="button" role="tab" aria-selected="false" aria-controls="plannerToolsResults" tabindex="-1" data-tools-mode="favorites" data-tools-text="favorites">Favorites</button>
+      </div>
+      <div class="tools-range"><label for="plannerToolsStart"><span data-tools-text="from">Starting date</span><input id="plannerToolsStart" type="date" min="1900-01-01" max="9999-12-31"></label><span class="tools-count" id="plannerToolsCount" role="status"></span></div>
+      <p class="tools-note" data-tools-text="scope">Uses the current calendar, child filters, category, and search. Cancelled events are excluded.</p>
+      <div id="plannerToolsResults" role="tabpanel" aria-labelledby="toolsAgendaTab" tabindex="0"></div>
+      <p class="tools-note tools-private" data-tools-text="device">Favorites and packing progress are personal to this calendar on this device; they are not shared or synced.</p>
+    </div>
+  </dialog>
+
   <dialog class="event-details-dialog" id="eventDetailsDialog" aria-labelledby="eventDetailsTitle">
     <div class="event-details-toolbar">
       <button type="button" id="eventDetailsEdit" aria-label="Edit" title="Edit"><i data-lucide="pencil" aria-hidden="true"></i></button>
@@ -10567,6 +10716,21 @@
       <button type="button" id="closeEventDetails" aria-label="Close" title="Close" data-i18n-aria="aria.close" data-i18n-title="aria.close"><i data-lucide="x" aria-hidden="true"></i></button>
     </div>
     <div class="event-details-body" id="eventDetailsBody"></div>
+    <div class="event-details-actions" aria-label="Event actions" data-i18n-aria="eventActions.title">
+      <button type="button" id="eventDetailsDuplicate"><i data-lucide="copy-plus" aria-hidden="true"></i><span data-i18n="actions.duplicate">Duplicate</span></button>
+      <button type="button" id="eventDetailsCopy"><i data-lucide="clipboard" aria-hidden="true"></i><span data-i18n="eventActions.copy">Copy details</span></button>
+      <button type="button" id="eventDetailsDownload"><i data-lucide="download" aria-hidden="true"></i><span data-i18n="eventActions.download">Download event</span></button>
+      <button type="button" id="eventDetailsLocate"><i data-lucide="calendar-days" aria-hidden="true"></i><span data-i18n="eventActions.locate">View date</span></button>
+    </div>
+    <div class="event-details-importance" id="eventDetailsImportanceControl">
+      <label for="eventDetailsImportance" data-i18n="importance.label">Importance</label>
+      <select id="eventDetailsImportance" aria-label="Importance" data-i18n-aria="importance.label">
+        <option value="high" data-i18n="importance.high">High importance</option>
+        <option value="normal" data-i18n="importance.normal">Normal importance</option>
+        <option value="low" data-i18n="importance.low">Low importance</option>
+      </select>
+    </div>
+    <p class="event-details-feedback" id="eventDetailsFeedback" role="status" aria-live="polite"></p>
     <div class="event-details-confirm" id="eventDetailsConfirm" hidden>
       <p id="eventDetailsDeletePrompt" role="alert"></p>
       <div><button class="ghost-btn" type="button" id="eventDetailsCancelDelete" data-i18n="actions.cancel">Cancel</button><button class="danger-btn" type="button" id="eventDetailsConfirmDelete" data-i18n="actions.delete">Delete</button></div>
@@ -10608,14 +10772,14 @@
           <button type="button" data-event-step-go="4" data-i18n="eventSteps.details">Details</button>
         </nav>
       </div>
-      <section class="game-scan-panel" id="gameScanPanel" data-event-step="1" aria-labelledby="gameScanTitle">
-        <div class="game-scan-heading">
+      <details class="game-scan-panel" id="gameScanPanel" data-event-step="1" aria-labelledby="gameScanTitle" open>
+        <summary class="game-scan-heading">
           <span class="game-scan-icon" aria-hidden="true">▣</span>
           <div>
             <h3 id="gameScanTitle" data-i18n="gameScan.title">Scan document</h3>
-            <p data-i18n="gameScan.intro">Take a photo of the PlayMetrics game description. KidsSync will fill this game’s date, time, and location.</p>
           </div>
-        </div>
+        </summary>
+        <p class="game-scan-intro" data-i18n="gameScan.intro">Add an event flyer, school notice, invitation, or activity description.</p>
         <div class="game-scan-actions">
           <label class="game-scan-button" for="gameScanPhoto"><span aria-hidden="true">＋</span><span data-i18n="gameScan.takePhoto">Take or choose photo</span></label>
           <input id="gameScanPhoto" type="file" accept="image/png,image/jpeg,image/webp" capture="environment" hidden>
@@ -10638,7 +10802,7 @@
           <textarea id="gameScanText" rows="5" placeholder="Game title, date, time, and location" data-i18n-placeholder="gameScan.textPlaceholder"></textarea>
           <button class="small-btn" type="button" id="parseGameScanText" data-i18n="gameScan.useText">Use these details</button>
         </details>
-      </section>
+      </details>
       <details class="event-template-strip" id="eventTemplates" data-event-step="3">
         <summary><span aria-hidden="true">▦</span><span data-i18n="templates.title">Event shortcuts</span></summary>
         <div class="event-template-options">
@@ -10746,6 +10910,14 @@
         <input id="allDay" type="checkbox">
         <span data-i18n="form.allDay">All-day event</span>
       </label>
+      <details class="smart-rules event-buffer-options" id="eventBufferOptions" data-event-step="2">
+        <summary><span data-smart-text="buffer">Breathing room</span><small id="eventBufferSummary"></small></summary>
+        <div class="smart-field-grid">
+          <label for="bufferBefore"><span data-smart-text="before">Before</span><input id="bufferBefore" type="number" min="0" max="120" step="1" value="0"></label>
+          <label for="bufferAfter"><span data-smart-text="after">After</span><input id="bufferAfter" type="number" min="0" max="120" step="1" value="0"></label>
+        </div><p class="smart-note" data-smart-text="bufferHint">Saved with the event and respected by this time finder. Manual events can still overlap; buffers are not separate events or external-calendar reservations.</p>
+      </details>
+      <p class="smart-buffer-warning" id="bufferConflictHint" data-event-step="2" role="status" hidden></p>
       <section class="trip-date-options" id="tripDateOptions" data-event-step="2" hidden aria-labelledby="tripLengthTitle">
         <div class="trip-date-heading">
           <span class="trip-date-icon" aria-hidden="true">✈️</span>
@@ -11019,8 +11191,13 @@
       <h2 data-i18n="sharing.title">Share Schedule</h2>
       <button class="close-btn" type="button" id="closeShareDialog" aria-label="Close" data-i18n-aria="aria.close">×</button>
     </div>
-    <p style="padding: 0 20px; color: var(--muted)" data-i18n="sharing.description">Create a secure link for one person, choose what they can do, and include a note.</p>
-    <section class="share-access-panel" id="shareAccessPanel" hidden>
+    <p class="share-dialog-intro" id="shareDialogIntro" data-experience-text="shareAccessIntro">Create a secure link for one person, choose what they can do, and include a note.</p>
+    <div class="share-tabs" role="tablist" aria-label="Share tools" id="shareTabs">
+      <button type="button" role="tab" id="shareAccessTab" aria-controls="shareAccessPanel" aria-selected="true" data-share-tab="access" data-experience-text="sharePeople">People</button>
+      <button type="button" role="tab" id="shareCommentsTab" aria-controls="ownerCommentsPanel" aria-selected="false" data-share-tab="comments" data-experience-text="shareComments">Comments</button>
+      <button type="button" role="tab" id="shareFilesTab" aria-controls="shareFilesPanel" aria-selected="false" data-share-tab="files" data-experience-text="shareFiles">Export and import</button>
+    </div>
+    <section class="share-access-panel" id="shareAccessPanel" role="tabpanel" aria-labelledby="shareAccessTab" hidden>
       <h3 data-i18n="sharing.accessTitle">Share this calendar</h3>
       <p class="share-access-intro" data-i18n="sharing.accessIntro">The link only works for the email you invite. They can sign in or create an account after opening it.</p>
       <div class="member-invite-grid">
@@ -11050,7 +11227,8 @@
         <button class="ghost-btn" type="button" id="emailGeneratedShareLink" data-i18n="sharing.emailLink">Email link</button>
       </div>
       <div class="calendar-list" id="memberList"></div>
-      <section class="calendar-comments-panel" id="ownerCommentsPanel">
+    </section>
+      <section class="calendar-comments-panel" id="ownerCommentsPanel" role="tabpanel" aria-labelledby="shareCommentsTab" hidden>
         <h4 data-i18n="comments.title">Calendar comments</h4>
         <p class="calendar-comments-intro" data-i18n="comments.ownerIntro">Read feedback from commenters and reply here.</p>
         <div class="calendar-comment-list" id="ownerCommentList"></div>
@@ -11060,7 +11238,8 @@
         </form>
         <p class="calendar-comment-status" id="ownerCommentStatus" role="status"></p>
       </section>
-    </section>
+    <section class="share-files-panel" id="shareFilesPanel" role="tabpanel" aria-labelledby="shareFilesTab" hidden>
+      <p class="share-section-intro" data-experience-text="shareFilesIntro">Make a copy of your schedule or import events from a file.</p>
     <textarea class="share-copy" id="shareText" readonly aria-label="Shareable schedule text"></textarea>
     <div class="transfer-tools">
       <button class="ghost-btn" type="button" id="printSchedule" data-i18n="sharing.print">Print schedule</button>
@@ -11083,6 +11262,7 @@
         <button class="primary-btn" type="button" id="nativeShareSchedule" data-i18n="sharing.send">Send</button>
       </div>
     </div>
+    </section>
     <p class="preset-status" id="shareStatus" style="padding: 0 20px 16px"></p>
   </dialog>
 
@@ -11192,6 +11372,13 @@
       <label class="layout-slider-row" for="layoutSideWidth"><span data-i18n="layout.sideWidth">Side calendar width</span><output id="layoutSideValue" for="layoutSideWidth"></output><input type="range" id="layoutSideWidth" min="220" max="360" step="10"></label>
       <label class="layout-setting-row"><span data-i18n="layout.weather">Day illustrations</span><input type="checkbox" id="layoutWeather"></label>
       <label class="layout-setting-row"><span data-i18n="layout.details">Event details</span><input type="checkbox" id="layoutDetails"></label>
+      <fieldset class="layout-panel-settings">
+        <legend data-i18n="layout.visiblePanels">Visible panels</legend>
+        <label class="layout-setting-row"><span data-i18n="layout.panelHeader">Header</span><input type="checkbox" data-layout-panel="header"></label>
+        <label class="layout-setting-row"><span data-i18n="layout.panelAccount">Account</span><input type="checkbox" data-layout-panel="account"></label>
+        <label class="layout-setting-row"><span data-i18n="layout.panelControls">Controls</span><input type="checkbox" data-layout-panel="controls"></label>
+        <label class="layout-setting-row"><span data-i18n="layout.panelSide">Side calendar</span><input type="checkbox" data-layout-panel="side"></label>
+      </fieldset>
       <div class="layout-editor-actions"><button class="ghost-btn" type="button" id="resetWorkspaceLayout" data-i18n="layout.reset">Reset layout</button><button class="primary-btn" type="button" id="doneLayoutEditor" data-i18n="actions.done">Done</button></div>
     </div>
   </dialog>
@@ -11235,6 +11422,7 @@
 
       <section class="settings-group">
         <h3 data-i18n="settings.appearance">Appearance</h3>
+        <button class="ghost-btn" type="button" data-open-visual-preferences aria-haspopup="dialog" aria-controls="visualPreferencesDialog" data-visual-text="display">Display options</button>
         <label class="setting-row">
           <span data-i18n="settings.appearanceMode">Appearance mode</span>
           <select id="appearanceModeSelect">
@@ -11483,6 +11671,18 @@
         <article><strong data-i18n="sidebar.helpHolidayTitle">Use holidays</strong><p data-i18n="sidebar.helpHolidayBody">Open Holidays to see built-in holidays, then add your own event on the same date.</p></article>
         <article><strong data-i18n="sidebar.helpSettingsTitle">Personalize Settings</strong><p data-i18n="sidebar.helpSettingsBody">Change appearance, time format, default view, event length, and motion preferences in Settings.</p></article>
       </div>
+      <section class="shortcut-guide" aria-labelledby="shortcutGuideTitle">
+        <h3 id="shortcutGuideTitle" tabindex="-1" data-i18n="shortcuts.title">Keyboard shortcuts</h3>
+        <p data-i18n="shortcuts.intro">These work while the calendar is open and you are not typing in a field.</p>
+        <dl>
+          <div><dt><kbd>N</kbd></dt><dd data-i18n="shortcuts.newEvent">Add an event</dd></div>
+          <div><dt><kbd>T</kbd></dt><dd data-i18n="shortcuts.today">Return to today</dd></div>
+          <div><dt><kbd>D</kbd> <kbd>W</kbd> <kbd>X</kbd> <kbd>M</kbd></dt><dd data-i18n="shortcuts.views">Day, week, four-day, and month views</dd></div>
+          <div><dt><kbd>/</kbd></dt><dd data-i18n="shortcuts.search">Search events</dd></div>
+          <div><dt><kbd>?</kbd></dt><dd data-i18n="shortcuts.guide">Show this guide</dd></div>
+        </dl>
+        <p data-i18n="shortcuts.miniCalendar">Use arrow keys to move by day, Home or End for the week, and Page Up or Page Down for the month. Press Enter to open the focused date.</p>
+      </section>
       <div class="form-actions"><span></span><button class="primary-btn" type="button" id="doneSidebarHelp" data-i18n="actions.done">Done</button></div>
     </div>
   </dialog>
@@ -11657,6 +11857,15 @@
         "sidebar.synced": "Your family week, in one place",
         "sidebar.helpTitle": "How KidsSync works",
         "sidebar.helpIntro": "A few quick ways to move through your family week.",
+        "shortcuts.open": "Keyboard shortcuts",
+        "shortcuts.title": "Keyboard shortcuts",
+        "shortcuts.intro": "These work while the calendar is open and you are not typing in a field.",
+        "shortcuts.newEvent": "Add an event",
+        "shortcuts.today": "Return to today",
+        "shortcuts.views": "Day, week, four-day, and month views",
+        "shortcuts.search": "Search events",
+        "shortcuts.guide": "Show this guide",
+        "shortcuts.miniCalendar": "Use arrow keys to move by day, Home or End for the week, and Page Up or Page Down for the month. Press Enter to open the focused date.",
         "sidebar.helpClickTitle": "Click a time",
         "sidebar.helpClickBody": "Click any open hour to start an event there.",
         "sidebar.helpDayTitle": "Click a day",
@@ -11670,7 +11879,7 @@
         "sidebar.helpShareTitle": "Share with care",
         "sidebar.helpShareBody": "Sign in to share with viewers, commenters, or editors.",
         "sidebar.helpHolidayTitle": "Use holidays",
-        "sidebar.helpHolidayBody": "Open Holidays to see built-in holidays, then add your own event on the same date.",
+        "sidebar.helpHolidayBody": "Open Holidays to see built-in holidays and upcoming trips together.",
         "sidebar.helpSettingsTitle": "Personalize Settings",
         "sidebar.helpSettingsBody": "Change appearance, time format, default view, event length, and motion preferences in Settings.",
         "auth.welcome": "Welcome to KidsSync",
@@ -11812,6 +12021,11 @@
         "insights.reviewOverlap": "Review the next overlapping event",
         "insights.reviewTravel": "Review the next event with too little travel time",
         "layout.customize": "Customize",
+        "layout.focusCalendar": "Focus calendar",
+        "layout.panelHeader": "Header",
+        "layout.panelAccount": "Account",
+        "layout.panelControls": "Controls",
+        "layout.panelSide": "Side calendar",
         "layout.savedLocally": "Your layout is saved in this browser.",
         "layout.panels": "Panels",
         "layout.visiblePanels": "Visible panels",
@@ -12262,6 +12476,14 @@
         "versions.beforeImport": "Before importing {name}",
         "versions.beforePreset": "Before loading {name}",
         "actions.duplicate": "Duplicate",
+        "eventActions.title": "Event actions",
+        "eventActions.copy": "Copy details",
+        "eventActions.download": "Download event",
+        "eventActions.locate": "View date",
+        "eventActions.copied": "Event details copied.",
+        "eventActions.copyUnavailable": "Clipboard is unavailable. Try another browser or allow clipboard access.",
+        "eventActions.downloaded": "Event downloaded.",
+        "eventActions.importanceSaved": "Importance updated.",
         "actions.cancel": "Cancel",
         "actions.save": "Save",
         "actions.load": "Load",
@@ -12436,6 +12658,7 @@
         "kids.defaultName": "Child {number}",
         "kids.color": "Color",
         "kids.remove": "Remove {name}",
+        "kids.removeAction": "Remove child",
         "kids.avatar": "Avatar",
         "kids.grade": "Grade",
         "kids.gradePlaceholder": "5th grade",
@@ -12531,6 +12754,7 @@
         "filters.all": "All",
         "filters.activities": "Activities",
         "filters.trips": "Trips",
+        "filters.holidaysTrips": "Holidays & trips",
         "filters.important": "Important",
         "month.more": "+{count} more",
         "holiday.newYear": "New Year’s Day",
@@ -12730,6 +12954,15 @@
         "sidebar.synced": "把家庭一周安排放在一起",
         "sidebar.helpTitle": "KidsSync 使用方法",
         "sidebar.helpIntro": "几种快速安排家庭一周的方法。",
+        "shortcuts.open": "键盘快捷键",
+        "shortcuts.title": "键盘快捷键",
+        "shortcuts.intro": "打开日历且未在输入框中输入时可以使用这些快捷键。",
+        "shortcuts.newEvent": "添加日程",
+        "shortcuts.today": "返回今天",
+        "shortcuts.views": "日、周、四天和月视图",
+        "shortcuts.search": "搜索日程",
+        "shortcuts.guide": "显示本指南",
+        "shortcuts.miniCalendar": "在迷你日历中，方向键按天移动，Home 或 End 跳到本周首尾，Page Up 或 Page Down 按月移动。按 Enter 打开聚焦的日期。",
         "sidebar.helpClickTitle": "点击时间",
         "sidebar.helpClickBody": "点击任意空闲时间即可在那里创建活动。",
         "sidebar.helpDayTitle": "点击日期",
@@ -12743,7 +12976,7 @@
         "sidebar.helpShareTitle": "安心共享",
         "sidebar.helpShareBody": "登录后即可与查看者、评论者或编辑者共享。",
         "sidebar.helpHolidayTitle": "使用节假日",
-        "sidebar.helpHolidayBody": "打开节假日查看内置节日，也可以在同一天添加自己的活动。",
+        "sidebar.helpHolidayBody": "打开节假日，即可一起查看内置节日和即将到来的旅行。",
         "sidebar.helpSettingsTitle": "自定义设置",
         "sidebar.helpSettingsBody": "在设置中更改外观、时间格式、默认视图、活动时长和动画偏好。",
         "auth.welcome": "欢迎使用 KidsSync",
@@ -12885,6 +13118,11 @@
         "insights.reviewOverlap": "查看下一项时间重叠的活动",
         "insights.reviewTravel": "查看下一项出行时间不足的活动",
         "layout.customize": "自定义",
+        "layout.focusCalendar": "专注日历",
+        "layout.panelHeader": "顶部栏",
+        "layout.panelAccount": "账户",
+        "layout.panelControls": "工具栏",
+        "layout.panelSide": "侧边日历",
         "layout.savedLocally": "布局会保存在此浏览器中。",
         "layout.panels": "面板",
         "layout.visiblePanels": "可见面板",
@@ -13321,6 +13559,14 @@
         "versions.beforeImport": "导入 {name} 之前",
         "versions.beforePreset": "载入 {name} 之前",
         "actions.duplicate": "复制",
+        "eventActions.title": "事件操作",
+        "eventActions.copy": "复制详情",
+        "eventActions.download": "下载事件",
+        "eventActions.locate": "查看日期",
+        "eventActions.copied": "事件详情已复制。",
+        "eventActions.copyUnavailable": "无法使用剪贴板。请尝试其他浏览器或允许剪贴板访问。",
+        "eventActions.downloaded": "事件已下载。",
+        "eventActions.importanceSaved": "重要程度已更新。",
         "actions.cancel": "取消",
         "actions.save": "保存",
         "actions.load": "载入",
@@ -13509,6 +13755,7 @@
         "kids.defaultName": "孩子 {number}",
         "kids.color": "颜色",
         "kids.remove": "移除 {name}",
+        "kids.removeAction": "移除孩子",
         "kids.avatar": "头像",
         "kids.grade": "年级",
         "kids.gradePlaceholder": "五年级",
@@ -13604,6 +13851,7 @@
         "filters.all": "全部",
         "filters.activities": "活动",
         "filters.trips": "旅行",
+        "filters.holidaysTrips": "节假日与旅行",
         "filters.important": "重要日程",
         "month.more": "还有 {count} 项",
         "holiday.newYear": "元旦",
@@ -14437,11 +14685,11 @@
       document.getElementById("authScreen").hidden = true;
       document.getElementById("appShell").hidden = false;
       updateAccountIdentity();
-      showDashboardPage({ scroll: false });
+      if (window.matchMedia?.("(max-width: 740px)").matches) showCalendarPage();
+      else showDashboardPage({ scroll: false });
       startGuestPreviewTimer();
       trackProductEvent("Planner Preview Started");
       window.scrollTo({ top: 0, behavior: "auto" });
-      window.setTimeout(maybeShowAppearancePrompt, 250);
     }
 
     function showAuthScreen(view = "signin") {
@@ -14505,7 +14753,8 @@
         document.getElementById("authScreen").hidden = true;
         document.getElementById("appShell").hidden = false;
         updateAccountIdentity();
-        showDashboardPage({ scroll: false });
+        if (window.matchMedia?.("(max-width: 740px)").matches) showCalendarPage();
+        else showDashboardPage({ scroll: false });
         return;
       }
 
@@ -14732,7 +14981,6 @@
     const scheduleDurationMinutes = scheduleEndMinutes - scheduleStartMinutes;
     const CALENDAR_ZOOM_LEVELS = [0.75, 1, 1.25, 1.5];
     const FAMILY_CHILD = "__family__";
-    const APPEARANCE_PROMPT_SEEN_KEY = "kidssync.appearance-preference-seen";
     const DEFAULT_SETTINGS = {
       notifications: false,
       reminderMinutes: 30,
@@ -14746,7 +14994,7 @@
       defaultEventDuration: 30,
       showWeekends: true,
       focusFirstEvent: true,
-      calendarZoom: 1,
+      calendarZoom: 0.75,
       weeklySummarySeenWeek: ""
     };
 
@@ -14959,6 +15207,8 @@
       color: document.getElementById("eventColor"),
       status: document.getElementById("status"),
       travelMinutes: document.getElementById("travelMinutes"),
+      bufferBefore: document.getElementById("bufferBefore"),
+      bufferAfter: document.getElementById("bufferAfter"),
       notes: document.getElementById("notes"),
       location: document.getElementById("location"),
       responsible: document.getElementById("responsible"),
@@ -14983,7 +15233,7 @@
     let eventDraftSession = null;
     let eventEditBaseline = null;
     let eventDraftSaveTimer = 0;
-    const EVENT_DRAFT_FIELDS = ["child", "date", "endDate", "eventType", "importance", "recurrence", "repeatInterval", "repeatUntil", "start", "end", "title", "icon", "customIcon", "style", "color", "status", "travelMinutes", "notes", "location", "responsible", "items"];
+    const EVENT_DRAFT_FIELDS = ["child", "date", "endDate", "eventType", "importance", "recurrence", "repeatInterval", "repeatUntil", "start", "end", "title", "icon", "customIcon", "style", "color", "status", "travelMinutes", "bufferBefore", "bufferAfter", "notes", "location", "responsible", "items"];
 
     function applyStaticTranslations() {
       document.documentElement.lang = currentLanguage === "zh" ? "zh-CN" : "en";
@@ -15013,6 +15263,7 @@
       });
       updateTripDetailLabels();
       updateTripDateSummary();
+      window.KidsSyncExperience?.localize();
     }
 
     function setLanguage(language) {
@@ -15173,14 +15424,7 @@
     }
 
     function dismissAppearanceDialog() {
-      localStorage.setItem(APPEARANCE_PROMPT_SEEN_KEY, "true");
       appearanceDialog.close();
-    }
-
-    function maybeShowAppearancePrompt() {
-      if (localStorage.getItem(APPEARANCE_PROMPT_SEEN_KEY) === "true") return;
-      if (appearanceDialog.open || document.getElementById("appShell").hidden) return;
-      openAppearanceDialog();
     }
 
     function openSettingsDialog() {
@@ -15234,6 +15478,16 @@
     function openSidebarHelp() {
       setSidebarActive("help");
       sidebarHelpDialog.showModal();
+    }
+
+    function openShortcutGuide() {
+      document.getElementById("moreActions").open = false;
+      if (!sidebarHelpDialog.open) openSidebarHelp();
+      window.requestAnimationFrame(() => {
+        const heading = document.getElementById("shortcutGuideTitle");
+        heading.scrollIntoView({ block: "start", behavior: "auto" });
+        heading.focus({ preventScroll: true });
+      });
     }
 
     function closeSidebarHelpDialog() {
@@ -16042,6 +16296,8 @@
         at: new Date().toISOString(),
         eventId: event.id || "",
         title: event.title || "Untitled event",
+        before: before ? JSON.parse(JSON.stringify(before)) : null,
+        after: after ? JSON.parse(JSON.stringify(after)) : null,
         count
       });
       activityAudit = activityAudit.slice(0, 100);
@@ -16135,7 +16391,7 @@
         try { view = JSON.parse(stored); } catch {}
         if (["today", "week", "four", "month"].includes(view)) return view;
       } catch {}
-      return userSettings.defaultView;
+      return window.matchMedia?.("(max-width: 740px)").matches ? "today" : userSettings.defaultView;
     }
 
     function saveSettings() {
@@ -16329,6 +16585,7 @@
     }
 
     function activityStartsOn(activity, date) {
+      if (Array.isArray(activity.excludedDates) && activity.excludedDates.includes(dateKey(date))) return false;
       if (!activity.startDate) {
         const day = days.find(item => item.key === activity.day);
         return day ? days[date.getDay() === 0 ? 6 : date.getDay() - 1]?.key === day.key : false;
@@ -16408,7 +16665,7 @@
       const eventType = activity.eventType || "activity";
       if (state.eventFilter === "activity") return eventType === "activity";
       if (state.eventFilter === "trip") return eventType === "trip";
-      if (state.eventFilter === "holidays") return eventType === "holiday";
+      if (state.eventFilter === "holidays") return eventType === "holiday" || eventType === "trip";
       return eventImportance(activity) === "high" || ["deadline", "birthday", "holiday"].includes(eventType);
     }
 
@@ -16423,7 +16680,10 @@
       const holidays = activityMatchesEventFilter({ eventType: "holiday" })
         ? builtInHolidayActivities(date).filter(activity => ignoreSearch || activityMatchesSearch(activity))
         : [];
-      return [...activities, ...holidays];
+      const external = typeof window !== "undefined" && window.KidsSyncExternal
+        ? window.KidsSyncExternal.eventsOn(date).filter(activity => (ignoreSearch || activityMatchesSearch(activity)) && (ignoreFilter || activityMatchesEventFilter(activity)))
+          .map(activity => ({ ...activity, day: day.key, occurrenceDate: dateKey(date), spanPosition: activitySpanPosition(activity, date) })) : [];
+      return [...activities, ...holidays, ...external];
     }
 
     function weekOccurrences(options = {}) {
@@ -16728,6 +16988,7 @@
     }
 
     function setupDraggableEvent(element, activity) {
+      if (activity.externalSource) return;
       element.classList.add("is-draggable");
       element.title = t("drag.hint");
       element.setAttribute("aria-keyshortcuts", isHolidayActivity(activity)
@@ -16867,6 +17128,11 @@
       if (!activity || (holidayBand && !isHolidayActivity(activity))) return;
       // Moving a holiday changes its date, without rewriting its stored time or type.
       const holiday = isHolidayActivity(activity);
+      if (typeof window !== "undefined" && window.KidsSyncMoves) {
+        window.KidsSyncMoves.review(activity, { ...draggedOccurrence }, targetDate, holiday ? null : startMinute, holiday ? Boolean(activity.allDay) : allDay);
+        draggedOccurrence = null;
+        return;
+      }
       rescheduleDraggedEvent(targetDate, holiday ? null : startMinute, holiday ? Boolean(activity.allDay) : allDay);
     }
 
@@ -17177,7 +17443,7 @@
         const isToday = isSameDate(date, new Date());
         const countLabel = t(items.length === 1 ? "overview.eventOne" : "overview.events", { count: items.length });
         const card = document.createElement("article");
-        card.className = `day-card${isToday ? " is-today" : ""}`;
+        card.className = `day-card${isToday ? " is-today" : ""}${items.length ? "" : " is-empty"}`;
         card.innerHTML = `<h2 class="agenda-day-heading"><span>${day.weather} ${dayLabel(day)} · ${formatShortDate(date)}</span>${isToday ? `<span class="day-today-badge">${escapeHtml(t("calendar.today"))}</span>` : ""}${items.length ? `<span class="day-event-count" aria-label="${escapeHtml(countLabel)}">${items.length}</span>` : ""}</h2><div class="agenda-list"></div>`;
         const list = card.querySelector(".agenda-list");
 
@@ -17450,6 +17716,7 @@
       const summary = calendarInsightSummary();
       document.getElementById("calendarInsightsCount").textContent = t(summary.count === 1 ? "insights.eventOne" : "insights.events", { count: summary.count });
       document.getElementById("calendarInsightsScope").textContent = summary.scope;
+      document.getElementById("calendarInsightsScope").dataset.filtered = String(kidProfiles.some(kid => !state.visibleKids.has(kid.name)));
       const status = document.getElementById("calendarInsightsStatus");
       status.hidden = summary.conflictCount > 0 || summary.travelCount > 0;
       status.textContent = t(summary.count ? "insights.clear" : "insights.empty");
@@ -17619,6 +17886,15 @@
         dateButton.className = "month-date";
         dateButton.textContent = date.getDate();
         dateButton.setAttribute("aria-label", formatFullDate(date));
+        if (activities.length) {
+          const countLabel = t(activities.length === 1 ? "overview.eventOne" : "overview.events", { count: activities.length });
+          dateButton.setAttribute("aria-label", `${formatFullDate(date)} · ${countLabel}`);
+          const compactCount = document.createElement("span");
+          compactCount.className = "month-mobile-summary";
+          compactCount.setAttribute("aria-hidden", "true");
+          compactCount.textContent = String(activities.length);
+          dateButton.appendChild(compactCount);
+        }
         const showSelectedDay = () => {
           selectedDate = new Date(date);
           currentWeekStart = getMonday(selectedDate);
@@ -17668,7 +17944,7 @@
       if (!title || !weekdayRow || !miniGrid) return;
 
       title.textContent = miniCalendarMonth.toLocaleDateString(locale, { year: "numeric", month: "long" });
-      const filterKey = { holidays: "sidebar.holidays", important: "sidebar.specialDays", activity: "filters.activities", trip: "filters.trips" }[state.eventFilter];
+      const filterKey = { holidays: "filters.holidaysTrips", important: "sidebar.specialDays", activity: "filters.activities", trip: "filters.trips" }[state.eventFilter];
       const hasOtherFilters = Boolean(state.searchQuery.trim()) || Object.keys(kids).some(name => !state.visibleKids.has(name));
       document.getElementById("miniCalendarLegend").textContent = filterKey
         ? t("miniCalendar.filteredLegend", { filter: t(filterKey) })
@@ -17681,6 +17957,9 @@
 
       const firstOfMonth = new Date(miniCalendarMonth.getFullYear(), miniCalendarMonth.getMonth(), 1);
       const gridStart = addDays(firstOfMonth, -firstOfMonth.getDay());
+      const gridEnd = addDays(gridStart, 41);
+      const selectedKey = dateKey(selectedDate);
+      const tabStopDate = selectedKey >= dateKey(gridStart) && selectedKey <= dateKey(gridEnd) ? selectedKey : dateKey(firstOfMonth);
       const today = new Date();
       miniGrid.innerHTML = "";
 
@@ -17693,6 +17972,7 @@
         button.className = `mini-calendar-day${isOutside ? " is-outside" : ""}${isSelected ? " is-selected" : ""}${isToday ? " is-today" : ""}`;
         button.textContent = date.getDate();
         button.dataset.date = dateKey(date);
+        button.tabIndex = button.dataset.date === tabStopDate ? 0 : -1;
         const eventCount = occurrencesOnDate(date).filter(activity => activityStatus(activity) !== "cancelled").length;
         const eventCountLabel = t(eventCount === 1 ? "miniCalendar.eventOne" : "miniCalendar.eventCount", { count: eventCount });
         button.setAttribute("aria-label", `${formatFullDate(date)} · ${eventCountLabel}`);
@@ -17708,12 +17988,14 @@
         button.setAttribute("aria-pressed", String(isSelected));
         if (isToday) button.setAttribute("aria-current", "date");
         button.addEventListener("click", () => {
+          const retainFocus = document.activeElement === button;
           selectedDate = new Date(date);
           currentWeekStart = getMonday(selectedDate);
           currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
           miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
           const isFilteredCalendar = state.eventFilter === "holidays" || state.eventFilter === "important";
           activateCalendarView(isFilteredCalendar ? "today" : currentView, true, { remember: !isFilteredCalendar });
+          if (retainFocus) window.requestAnimationFrame(() => miniGrid.querySelector(`[data-date="${dateKey(date)}"]`)?.focus());
         });
         miniGrid.appendChild(button);
       });
@@ -18088,6 +18370,7 @@
       updateConflictSuggestions();
       updatePopularTimeSelection();
       dialog.scrollTo({ top: 0, behavior: "auto" });
+      window.KidsSyncScheduler?.updateBufferEditor();
 
       if (focus) {
         const focusTargets = [fields.title, fields.date, fields.eventType, fields.icon];
@@ -18154,6 +18437,7 @@
       document.getElementById("startTimeField").classList.toggle("is-disabled", allDay);
       document.getElementById("endTimeField").classList.toggle("is-disabled", allDay);
       updatePopularTimeSelection();
+      window.KidsSyncScheduler?.updateBufferEditor();
     }
 
     function updateRecurrenceFields({ resetDays = false } = {}) {
@@ -18313,6 +18597,7 @@
     }
 
     function resetGameScan() {
+      document.getElementById("gameScanPanel").open = !window.matchMedia("(max-width: 740px)").matches;
       if (gameScanPreviewUrl) URL.revokeObjectURL(gameScanPreviewUrl);
       gameScanPreviewUrl = "";
       gameScanInput.value = "";
@@ -18689,6 +18974,7 @@
         return;
       }
       gameScanRunning = true;
+      document.getElementById("gameScanPanel").open = true;
       if (gameScanPreviewUrl) URL.revokeObjectURL(gameScanPreviewUrl);
       gameScanPreviewUrl = URL.createObjectURL(file);
       gameScanPreview.src = gameScanPreviewUrl;
@@ -18912,6 +19198,7 @@
     }
 
     function openDialog(activity) {
+      if (activity?.externalSource && window.KidsSyncExternal) { window.KidsSyncExternal.show(activity); return; }
       const isEdit = Boolean(activity);
       const defaultStart = 15 * 60;
       const defaultEnd = Math.min(scheduleEndMinutes, defaultStart + userSettings.defaultEventDuration);
@@ -18942,6 +19229,8 @@
       renderAttendeeOptions(activity?.attendees || ["all"]);
       fields.status.value = activityStatus(activity);
       fields.travelMinutes.value = String(Math.max(0, Number(activity?.travelMinutes) || 0));
+      fields.bufferBefore.value = String(Math.max(0, Math.min(120, Math.round(Number(activity?.bufferBeforeMinutes) || 0))));
+      fields.bufferAfter.value = String(Math.max(0, Math.min(120, Math.round(Number(activity?.bufferAfterMinutes) || 0))));
       fields.notes.value = activity?.notes || "";
       fields.location.value = activity?.location || "";
       fields.responsible.value = activity?.responsible || "";
@@ -19032,6 +19321,7 @@
     }
 
     function showEventDetails(activity) {
+      if (activity.externalSource && window.KidsSyncExternal) { window.KidsSyncExternal.show(activity); return; }
       hideEventPeek();
       eventDetailsActivity = activity;
       const date = parseDateKey(activity.occurrenceDate || activity.startDate || dateKey(selectedDate));
@@ -19058,9 +19348,62 @@
       edit.setAttribute("aria-label", editLabel);
       edit.title = editLabel;
       document.getElementById("eventDetailsDelete").hidden = Boolean(activity.isBuiltInHoliday);
+      document.getElementById("eventDetailsDuplicate").hidden = Boolean(activity.isBuiltInHoliday);
+      document.getElementById("eventDetailsImportanceControl").hidden = Boolean(activity.isBuiltInHoliday);
+      document.getElementById("eventDetailsImportance").value = eventImportance(activity);
+      document.getElementById("eventDetailsFeedback").textContent = "";
       document.getElementById("eventDetailsConfirm").hidden = true;
       window.lucide?.createIcons();
-      eventDetailsDialog.showModal();
+      if (!eventDetailsDialog.open) eventDetailsDialog.showModal();
+      window.KidsSyncTools?.attach(activity);
+      window.KidsSyncMoves?.attach(activity);
+      window.KidsSyncScheduler?.attachDetails(activity);
+    }
+
+    function eventDetailsPlainText(activity) {
+      const date = parseDateKey(activity.occurrenceDate || activity.startDate || dateKey(selectedDate));
+      const dateRange = activity.eventType === "trip" ? activityDateRangeText(activity) : "";
+      return [
+        activityTitle(activity),
+        dateRange || `${formatFullDate(date)} · ${eventTimeText(activity)}`,
+        `${t("eventPreview.who")}: ${displayChild(activity)}`,
+        activity.location && `${t(activity.eventType === "trip" ? "trip.destination" : "eventPreview.where")}: ${activity.location}`,
+        activity.responsible && `${t("eventPreview.responsible")}: ${activity.responsible}`,
+        activity.items && `${t("eventPreview.items")}: ${activity.items}`,
+        activity.notes && `${t("eventPreview.notes")}: ${activity.notes}`
+      ].filter(Boolean).join("\n");
+    }
+
+    function changeEventDetailsImportance(level) {
+      if (!eventDetailsActivity || eventDetailsActivity.isBuiltInHoliday || !["high", "normal", "low"].includes(level)) return false;
+      const stored = state.activities.find(activity => activity.id === eventDetailsActivity.id);
+      if (!stored) return false;
+      if (eventImportance(stored) === level) return true;
+      rememberCurrentSchedule(t("versions.beforeEdit", { title: activityTitle(stored) }));
+      const before = { ...stored };
+      stored.importance = level;
+      saveActivities();
+      auditActivity("updated", before, stored);
+      const updated = { ...eventDetailsActivity, importance: level };
+      renderAll();
+      showEventDetails(updated);
+      document.getElementById("eventDetailsFeedback").textContent = t("eventActions.importanceSaved");
+      return true;
+    }
+
+    function locateEventDetailsDate(activity) {
+      const date = parseDateKey(activity.occurrenceDate || activity.startDate || dateKey(selectedDate));
+      if (!(date instanceof Date) || Number.isNaN(date.getTime())) return;
+      eventDetailsDialog.close();
+      showCalendarPage();
+      setSidebarActive("calendar");
+      state.eventFilter = "all";
+      state.searchQuery = "";
+      scheduleSearch.value = "";
+      if (kids[activity.child]) state.visibleKids.add(activity.child);
+      selectedDate = date;
+      activateCalendarView("today", true, { remember: false });
+      window.scrollTo({ top: 0, behavior: "auto" });
     }
 
     function bindCalendarEventActions(element, activity, suppressDraggedClick = false) {
@@ -19130,7 +19473,7 @@
               ${Object.entries(palettes).map(([key]) => `<option value="${key}"${kid.palette === key ? " selected" : ""}>${t(`color.${key}`)}</option>`).join("")}
             </select>
           </label>
-          <button class="remove-kid" type="button" aria-label="${t("kids.remove", { name: escapeHtml(kid.name) })}" ${kidDraft.length === 1 ? "disabled" : ""}>×</button>
+          <button class="remove-kid" type="button" aria-label="${t("kids.remove", { name: escapeHtml(kid.name) })}" ${kidDraft.length === 1 ? "disabled" : ""}><span aria-hidden="true">×</span><span class="remove-kid-label">${t("kids.removeAction")}</span></button>
           <div class="kid-profile-details">
             <label>
               ${t("kids.grade")}
@@ -19471,6 +19814,7 @@
     }
 
     function renderDashboard() {
+      document.getElementById("dashboardStart").hidden = state.activities.length > 0;
       const profile = loadFamilyProfile();
       const accountName = profile.name || activeAccount?.email?.split("@")[0] || "there";
       document.getElementById("dashboardGreeting").textContent = activeAccount ? t("dashboard.greeting", { name: accountName }) : t("dashboard.greetingGuest");
@@ -19929,11 +20273,11 @@
       return `${base}.${extension}`;
     }
 
-    function downloadCalendarFile(content, type, extension) {
+    function downloadCalendarFile(content, type, extension, filename = safeCalendarFilename(extension)) {
       const blob = new Blob([content], { type });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = safeCalendarFilename(extension);
+      link.download = filename;
       link.click();
       window.setTimeout(() => URL.revokeObjectURL(link.href), 0);
     }
@@ -19946,11 +20290,11 @@
       return String(value || "").replaceAll("\\", "\\\\").replaceAll("\n", "\\n").replaceAll(",", "\\,").replaceAll(";", "\\;");
     }
 
-    function buildIcsCalendar() {
+    function buildIcsCalendar(activities = state.activities) {
       const calendarName = calendars.find(calendar => calendar.id === currentCalendarId)?.name || t("calendars.default");
       const weekdayCodes = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
       const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//KidsSync//Family Calendar//EN", "CALSCALE:GREGORIAN", `X-WR-CALNAME:${icsEscape(calendarName)}`];
-      state.activities.forEach(activity => {
+      activities.forEach(activity => {
         const startDate = activity.startDate || dateKey(currentWeekStart);
         const lastDate = activity.endDate && activity.endDate >= startDate ? activity.endDate : startDate;
         lines.push("BEGIN:VEVENT", `UID:${icsEscape(activity.id)}@kidssync.local`, `SUMMARY:${icsEscape(activity.title)}`);
@@ -20518,6 +20862,7 @@
         const activity = sharedCalendarState.shared.activities.find(item => item.id === button.dataset.eventId);
         openSharedEventDialog(activity);
       }));
+      window.KidsSyncFamily?.shared();
     }
 
     function configureSharedCalendarAccess() {
@@ -20881,6 +21226,7 @@
         renderMemberList();
       }
       document.getElementById("shareDialog").showModal();
+      window.KidsSyncExperience?.openShare(isCalendarOwner());
     }
 
     function emailWeeklySummary() {
@@ -20915,6 +21261,13 @@
       if (!dashboardPage.hidden) renderDashboard();
       renderActiveCalendarContext();
       requestAnimationFrame(resizeCalendarWorkspace);
+      window.KidsSyncTools?.refresh();
+      window.KidsSyncUI?.refresh();
+      window.KidsSyncScheduler?.refresh();
+      window.KidsSyncSmart?.refresh();
+      window.KidsSyncFamily?.refresh();
+      window.KidsSyncExternal?.renderOverlay();
+      window.KidsSyncMobile?.refresh();
     }
 
     function calendarFocusTimestamp(activity) {
@@ -21193,6 +21546,7 @@
     });
     document.getElementById("closeSidebarHelp").addEventListener("click", closeSidebarHelpDialog);
     document.getElementById("doneSidebarHelp").addEventListener("click", closeSidebarHelpDialog);
+    document.getElementById("openShortcutGuide").addEventListener("click", openShortcutGuide);
     sidebarHelpDialog.addEventListener("cancel", event => {
       event.preventDefault();
       closeSidebarHelpDialog();
@@ -21362,6 +21716,37 @@
       if (activity) openCalendarActivity(activity);
     });
     document.getElementById("closeEventDetails").addEventListener("click", () => eventDetailsDialog.close());
+    document.getElementById("eventDetailsDuplicate").addEventListener("click", () => {
+      if (!eventDetailsActivity || eventDetailsActivity.isBuiltInHoliday) return;
+      const activity = eventDetailsActivity;
+      eventDetailsDialog.close();
+      openCalendarActivity(activity);
+      duplicateActivityDraft();
+    });
+    document.getElementById("eventDetailsCopy").addEventListener("click", async () => {
+      if (!eventDetailsActivity) return;
+      if (window.KidsSyncTools?.copySummary) return window.KidsSyncTools.copySummary();
+      const feedback = document.getElementById("eventDetailsFeedback");
+      try {
+        await navigator.clipboard.writeText(eventDetailsPlainText(eventDetailsActivity));
+        feedback.textContent = t("eventActions.copied");
+      } catch {
+        feedback.textContent = t("eventActions.copyUnavailable");
+      }
+    });
+    document.getElementById("eventDetailsDownload").addEventListener("click", () => {
+      if (!eventDetailsActivity) return;
+      const activity = state.activities.find(item => item.id === eventDetailsActivity.id) || eventDetailsActivity;
+      const slug = String(activity.title || "event").replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").slice(0, 60) || "event";
+      downloadCalendarFile(buildIcsCalendar([activity]), "text/calendar;charset=utf-8", "ics", `${slug}.ics`);
+      document.getElementById("eventDetailsFeedback").textContent = t("eventActions.downloaded");
+    });
+    document.getElementById("eventDetailsLocate").addEventListener("click", () => {
+      if (eventDetailsActivity) locateEventDetailsDate(eventDetailsActivity);
+    });
+    document.getElementById("eventDetailsImportance").addEventListener("change", event => {
+      if (!changeEventDetailsImportance(event.currentTarget.value)) event.currentTarget.value = eventImportance(eventDetailsActivity);
+    });
     document.getElementById("eventDetailsDelete").addEventListener("click", () => {
       if (!eventDetailsActivity || eventDetailsActivity.isBuiltInHoliday) return;
       document.getElementById("eventDetailsDeletePrompt").textContent = t(recurrenceValue(eventDetailsActivity) === "none" ? "eventPreview.deletePrompt" : "eventPreview.deleteSeries");
@@ -21625,14 +22010,25 @@
       const isTyping = target instanceof HTMLElement && target.matches("input, textarea, select, [contenteditable='true']");
       const shell = document.getElementById("appShell");
       const shortcutView = { d: "today", w: "week", x: "four", m: "month" }[event.key.toLowerCase()];
-      if (shortcutView && !isTyping && !event.ctrlKey && !event.metaKey && !event.altKey
-        && !shell.hidden && !shell.classList.contains("is-dashboard-view") && !document.querySelector("dialog[open]")) {
-        event.preventDefault();
-        document.querySelector(`.view-switch [data-view="${shortcutView}"]`).click();
-      }
-      if (event.key === "/" && !isTyping && !shell.hidden && !document.querySelector("dialog[open]")) {
-        event.preventDefault();
-        openScheduleSearch();
+      const calendarShortcut = !isTyping && !event.isComposing && !event.ctrlKey && !event.metaKey && !event.altKey
+        && !shell.hidden && !shell.classList.contains("is-dashboard-view") && !document.querySelector("dialog[open]");
+      if (calendarShortcut) {
+        if (shortcutView) {
+          event.preventDefault();
+          document.querySelector(`.view-switch [data-view="${shortcutView}"]`).click();
+        } else if (event.key === "/") {
+          event.preventDefault();
+          openScheduleSearch();
+        } else if (event.key.toLowerCase() === "n" && !event.repeat) {
+          event.preventDefault();
+          document.getElementById("addActivity").click();
+        } else if (event.key.toLowerCase() === "t" && !event.repeat) {
+          event.preventDefault();
+          document.getElementById("jumpToday").click();
+        } else if (event.key === "?") {
+          event.preventDefault();
+          openShortcutGuide();
+        }
       }
       if (event.key === "Escape" && document.activeElement === scheduleSearch && state.searchQuery) {
         event.preventDefault();
@@ -21789,6 +22185,9 @@
       document.getElementById("layoutSidePosition").value = workspaceLayout.sidePosition;
       document.getElementById("layoutWeather").checked = workspaceLayout.weather;
       document.getElementById("layoutDetails").checked = workspaceLayout.details;
+      document.querySelectorAll("[data-layout-panel]").forEach(input => {
+        input.checked = !hiddenWorkspacePanels.has(input.dataset.layoutPanel) && !(input.dataset.layoutPanel === "account" && hiddenWorkspacePanels.has("header"));
+      });
     }
 
     function applyWorkspaceLayout() {
@@ -21804,6 +22203,7 @@
       renderLayoutEditor();
       renderDashboardCollapses();
       requestAnimationFrame(resizeCalendarWorkspace);
+      window.KidsSyncUI?.syncResize();
     }
 
     function renderDashboardCollapses() {
@@ -21838,6 +22238,12 @@
     }
 
     document.getElementById("openLayoutEditor").addEventListener("click", () => { renderLayoutEditor(); layoutDialog.showModal(); });
+    document.getElementById("mobileCustomizeLayout").addEventListener("click", () => document.getElementById("openLayoutEditor").click());
+    document.getElementById("mobileFocusCalendar").addEventListener("click", () => document.getElementById("toggleCalendarFocus").click());
+    document.querySelectorAll("[data-layout-panel]").forEach(input => input.addEventListener("change", () => {
+      document.querySelector(`[data-panel-toggle="${input.dataset.layoutPanel}"]`).click();
+      renderLayoutEditor();
+    }));
     ["closeLayoutEditor", "doneLayoutEditor"].forEach(id => document.getElementById(id).addEventListener("click", () => layoutDialog.close()));
     document.querySelectorAll("[data-layout-density]").forEach(button => button.addEventListener("click", () => {
       workspaceLayout.density = button.dataset.layoutDensity;
@@ -21878,17 +22284,18 @@
     function resizeCalendarWorkspace() {
       updateCalendarPinnedRows();
       const calendarMain = document.querySelector(".calendar-stage-main");
-      const available = Math.max(240, window.innerHeight - (calendarMain.getBoundingClientRect().top + window.scrollY) - 12);
+      const available = Math.max(520, window.innerHeight - calendarMain.getBoundingClientRect().top - 12);
       document.getElementById("appShell").style.setProperty("--calendar-available-height", `${available}px`);
     }
 
     function renderActiveCalendarContext() {
-      const categoryKey = { holidays: "sidebar.holidays", important: "sidebar.specialDays", activity: "filters.activities", trip: "filters.trips" }[state.eventFilter];
+      const categoryKey = { holidays: "filters.holidaysTrips", important: "sidebar.specialDays", activity: "filters.activities", trip: "filters.trips" }[state.eventFilter];
       const query = state.searchQuery.trim();
       const labels = [categoryKey ? t(categoryKey) : "", query ? t("ux.searchFor", { query }) : ""].filter(Boolean);
       document.getElementById("calendarContextBar").hidden = labels.length === 0;
       document.getElementById("calendarContextLabel").textContent = labels.join(" · ");
       document.getElementById("compactPeriodLabel").textContent = weekLabel.textContent;
+      window.KidsSyncUI?.renderFilters();
     }
 
     function renderWorkspaceVisibility() {
@@ -22008,6 +22415,34 @@
     }
     document.getElementById("miniCalendarPrevious").addEventListener("click", () => navigateMiniCalendar(-1));
     document.getElementById("miniCalendarNext").addEventListener("click", () => navigateMiniCalendar(1));
+    document.getElementById("miniCalendarToday").addEventListener("click", jumpToToday);
+    document.getElementById("miniCalendarGrid").addEventListener("keydown", event => {
+      const button = event.target instanceof HTMLElement ? event.target.closest(".mini-calendar-day[data-date]") : null;
+      if (!button || event.altKey || event.ctrlKey || event.metaKey) return;
+      const date = parseDateKey(button.dataset.date);
+      let nextDate;
+      if (event.key === "ArrowLeft") nextDate = addDays(date, -1);
+      else if (event.key === "ArrowRight") nextDate = addDays(date, 1);
+      else if (event.key === "ArrowUp") nextDate = addDays(date, -7);
+      else if (event.key === "ArrowDown") nextDate = addDays(date, 7);
+      else if (event.key === "Home") nextDate = addDays(date, -date.getDay());
+      else if (event.key === "End") nextDate = addDays(date, 6 - date.getDay());
+      else if (event.key === "PageUp" || event.key === "PageDown") {
+        const month = new Date(date.getFullYear(), date.getMonth() + (event.key === "PageUp" ? -1 : 1), 1);
+        const lastDay = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+        nextDate = new Date(month.getFullYear(), month.getMonth(), Math.min(date.getDate(), lastDay));
+      } else return;
+      event.preventDefault();
+      if (nextDate.getFullYear() < 1900 || nextDate.getFullYear() > 9999) return;
+      if (nextDate.getMonth() !== miniCalendarMonth.getMonth() || nextDate.getFullYear() !== miniCalendarMonth.getFullYear()) {
+        miniCalendarMonth = new Date(nextDate.getFullYear(), nextDate.getMonth(), 1);
+        renderMiniCalendar();
+      }
+      const grid = document.getElementById("miniCalendarGrid");
+      grid.querySelectorAll(".mini-calendar-day").forEach(day => { day.tabIndex = -1; });
+      const nextButton = grid.querySelector(`[data-date="${dateKey(nextDate)}"]`);
+      if (nextButton) { nextButton.tabIndex = 0; nextButton.focus(); }
+    });
     document.getElementById("miniAddActivity").addEventListener("click", () => document.getElementById("addActivity").click());
     document.getElementById("miniOpenDashboard").addEventListener("click", () => document.getElementById("openDashboard").click());
     document.getElementById("miniOpenReminders").addEventListener("click", () => document.getElementById("openReminders").click());
@@ -22059,6 +22494,8 @@
         attendees: selectedAttendees(),
         status: fields.status.value,
         travelMinutes: Math.max(0, Number(fields.travelMinutes.value) || 0),
+        bufferBeforeMinutes: Math.max(0, Math.min(120, Math.round(Number(fields.bufferBefore?.value) || 0))),
+        bufferAfterMinutes: Math.max(0, Math.min(120, Math.round(Number(fields.bufferAfter?.value) || 0))),
         notes: fields.notes.value.trim(),
         location: fields.location.value.trim(),
         responsible: fields.responsible.value.trim(),
@@ -22067,6 +22504,7 @@
 
       const existingIndex = state.activities.findIndex(item => item.id === activity.id);
       const previousActivity = existingIndex >= 0 ? { ...state.activities[existingIndex] } : null;
+      if (previousActivity?.excludedDates) activity.excludedDates = [...previousActivity.excludedDates];
       if (!previousActivity || JSON.stringify(previousActivity) !== JSON.stringify(activity)) {
         rememberCurrentSchedule(t(previousActivity ? "versions.beforeEdit" : "versions.beforeCreate", { title: activityTitle(activity) }));
       }
@@ -22334,7 +22772,6 @@
     renderWorkspaceVisibility();
     initializeMobileLayout();
     initializeAuthUI();
-    window.setTimeout(maybeShowAppearancePrompt, 650);
     populateFormOptions();
     renderAll();
     startNotificationChecks();
@@ -22349,5 +22786,15 @@
       });
     }
   </script>
+  <script src="./assets/smart-planner.js?v=5"></script>
+  <script src="./assets/family-coordination.js"></script>
+  <script src="./assets/reschedule-review.js"></script>
+  <script src="./assets/external-calendars.js"></script>
+  <script src="./assets/mobile-agenda.js"></script>
+  <script src="./assets/planner-tools.js"></script>
+  <script src="./assets/ui-features.js"></script>
+  <script src="./assets/smart-scheduling.js?v=4"></script>
+  <script src="./assets/family-polls.js?v=2"></script>
+  <script src="./assets/experience.js"></script>
 </body>
 </html>

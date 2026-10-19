@@ -16,3 +16,9 @@ window.KIDSSYNC_MONITORING = {
 window.KIDSSYNC_GOOGLE_MAPS = {
   embedApiKey: ""
 };
+
+// Public OAuth client IDs, not secrets. See CALENDAR_CONNECTIONS.md.
+window.KIDSSYNC_CALENDAR_CONNECTIONS = {
+  googleClientId: "",
+  microsoftClientId: ""
+};

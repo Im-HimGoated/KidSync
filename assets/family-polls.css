@@ -1,0 +1,28 @@
+#smartPollPanel { display: grid; gap: 16px; min-width: 0; }
+#smartPollPanel[hidden], #smartPollPanel [hidden] { display: none; }
+#smartPollPanel :is(form, label) { display: grid; gap: 10px; min-width: 0; padding: 0; font-size: 13px; font-weight: 600; }
+#smartPollPanel form { gap: 16px; }
+#smartPollPanel button { min-height: 44px; white-space: normal; }
+#smartPollPanel button:disabled { opacity: .6; cursor: not-allowed; }
+#smartPollPanel textarea { resize: vertical; line-height: 1.6; }
+.poll-local { padding: 12px; margin: 0; border-left: 3px solid var(--blue); color: var(--muted); background: var(--blue-soft); font-size: 12px; font-weight: 400; line-height: 1.6; overflow-wrap: anywhere; }
+.poll-heading, .poll-option-heading, .poll-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; min-width: 0; }
+.poll-heading h3, .poll-option-heading h4 { margin: 0; overflow-wrap: anywhere; }
+.poll-heading h3 { font-size: 18px; }
+.poll-option-heading h4 { font-size: 14px; }
+.poll-options { display: grid; gap: 14px; }
+.poll-option { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 9px; min-width: 0; }
+.poll-best { display: inline-block; padding: 4px 8px; border-radius: 5px; color: var(--blue); background: var(--blue-soft); font-size: 12px; font-weight: 650; }
+.poll-time { margin: 0; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.poll-votes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.poll-votes label span { overflow-wrap: anywhere; }
+.poll-confirm { padding: 12px; border: 1px solid var(--line); border-radius: 7px; font-size: 13px; line-height: 1.6; }
+.poll-confirm p { margin-top: 0; }
+#familyPollStatus { color: var(--ink); font-size: 13px; line-height: 1.6; margin: 0; }
+#familyPollStatus:empty { display: none; }
+@media (max-width: 600px) {
+  .poll-votes { grid-template-columns: minmax(0, 1fr); }
+  .poll-actions { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .poll-option { padding: 12px; }
+  .poll-option button { width: 100%; }
+}

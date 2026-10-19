@@ -60,8 +60,9 @@ test('only one floating menu is open at a time', () => {
 });
 
 test('mobile assets are loaded last and included in the offline shell', () => {
-  assert.match(html, /href="\.\/assets\/mobile\.css">\s*<\/head>/);
-  assert.ok(sw.includes('"./assets/mobile.css"'));
+  const mobileStylesheet = html.match(/href="(\.\/assets\/mobile\.css(?:\?v=\d+)?)">\s*<\/head>/);
+  assert(mobileStylesheet);
+  assert.ok(sw.includes(`"${mobileStylesheet[1]}"`));
   assert.match(html, /<details class="calendar-side-disclosure" id="calendarSideDisclosure" open>/);
   assert.match(html, /<summary class="calendar-side-toggle" aria-controls="calendarSideContent">/);
   assert.match(html, /<div id="calendarSideContent">/);
@@ -85,6 +86,18 @@ test('mobile layout keeps browser zoom, large inputs, and touch targets', () => 
   assert.match(html, /data-sidebar-action="dashboard" data-i18n="dashboard.open"/);
   assert.match(html, /mobile-menu-item[^>]*data-sidebar-action="help"/);
   assert.match(html, /mobile-menu-item[^>]*data-sidebar-action="settings"/);
+  assert.match(css, /@media \(max-width: 900px\)[\s\S]*?#appShell \.sidebar-calendar-row,[\s\S]*?min-height: 44px;/);
+  assert.match(css, /#appShell \.sidebar-calendar-heading button,[\s\S]*?#appShell \.dashboard-collapse \{[\s\S]*?min-width: 44px;/);
+});
+
+test('mobile dashboard and editor keep calendar controls and actions out of the way', () => {
+  assert.match(css, /#appShell\.is-dashboard-view \.sidebar-date-controls,[\s\S]*?#appShell\.is-dashboard-view \.workspace-visibility \{ display: none; \}/);
+  assert.match(css, /#activityDialog #activityForm \.form-actions \{[\s\S]*?position: sticky;[\s\S]*?bottom: 0;/);
+  assert.match(css, /@media \(max-width: 740px\) and \(max-height: 500px\)[\s\S]*?#activityDialog #activityForm \.form-actions \{ position: static; \}/);
+  assert.match(css, /#appShell \.dashboard-week-chart \{ grid-template-columns: repeat\(4, minmax\(0, 1fr\)\); gap: 8px; \}/);
+  assert.match(css, /#appShell \.planner-options-panel \.overview-next \{[\s\S]*?grid-template-columns: auto minmax\(0, 1fr\);/);
+  assert.match(css, /\.settings-dialog \.setting-row:has\(select\) \{ align-items: stretch; flex-direction: column;/);
+  assert.match(html, /class="remove-kid-label">\$\{t\("kids\.removeAction"\)\}<\/span>/);
 });
 
 test('toolbar minimum columns leave room at 320–740px, including a scrollbar', () => {
@@ -96,4 +109,30 @@ test('toolbar minimum columns leave room at 320–740px, including a scrollbar',
     const required = width <= 360 ? 60 + 88 + 44 + 44 + 3 * 4 : 68 + 96 + 44 + 44 + 3 * 6;
     assert.ok(required <= available, `Toolbar minimums exceed a ${width}px screen`);
   }
+});
+
+test('mobile layout tools remain reachable without consuming a permanent toolbar row', () => {
+  assert.match(html, /id="mobileCustomizeLayout" data-i18n="layout.customize"/);
+  assert.match(html, /id="mobileFocusCalendar" data-i18n="layout.focusCalendar"/);
+  for (const panel of ['header', 'account', 'controls', 'side']) assert(html.includes(`data-layout-panel="${panel}"`));
+  assert(css.includes('#appShell:not(.has-minimized-panels):not(.is-dashboard-view) .workspace-visibility'));
+  assert(css.includes('#appShell #calendarInsightsScope[data-filtered="true"]'));
+});
+
+test('scanner starts compact on a phone and expanded on desktop', () => {
+  const start = html.indexOf('    function resetGameScan(');
+  const end = html.indexOf('\n    }', start) + 6;
+  for (const mobile of [true, false]) {
+    const nodes = {};
+    const context = vm.createContext({
+      document: { getElementById: id => nodes[id] ||= {} }, window: { matchMedia: () => ({ matches: mobile }) },
+      gameScanPreviewUrl: '', gameScanInput: {}, gameScanText: {}, gameScanProgressText: {},
+      gameScanProgress: { classList: { remove() {} } }, gameScanReview: {}, gameScanPreview: { removeAttribute() {} }
+    });
+    vm.runInContext(html.slice(start, end), context);
+    context.resetGameScan();
+    assert.equal(nodes.gameScanPanel.open, !mobile);
+  }
+  assert.match(html, /<details class="game-scan-panel" id="gameScanPanel"/);
+  assert.match(css, /#activityForm \.game-scan-heading[^}]+min-height: 44px/);
 });

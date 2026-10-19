@@ -1,0 +1,63 @@
+#smartPlannerDialog { width: min(700px, calc(100% - 24px)); max-height: calc(100dvh - 24px); padding: 0; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--panel); overflow: auto; }
+#smartPlannerDialog .modal-header { position: sticky; top: 0; z-index: 2; background: var(--panel); }
+#smartPlannerDialog .modal-header h2 { font-size: 20px; }
+#smartPlannerDialog svg { width: 19px; height: 19px; flex: 0 0 auto; }
+#smartPlannerDialog button { min-height: 44px; white-space: normal; }
+#smartPlannerDialog .close-btn { display: grid; place-items: center; min-width: 44px; }
+.family-body { display: grid; gap: 20px; padding: 20px; min-width: 0; }
+.family-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; background: var(--soft-line); border-radius: 8px; }
+.family-tabs button { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px; color: var(--muted); background: transparent; border-radius: 5px; font-size: 14px; }
+.family-tabs button[aria-selected="true"] { color: var(--blue); background: var(--panel); font-weight: 700; box-shadow: 0 1px 4px rgb(0 0 0 / 10%); }
+#smartPanel { display: grid; gap: 16px; min-width: 0; }
+.family-scope, .family-empty, .family-current { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.family-current { color: var(--ink); padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+#smartViewForm { padding: 0; }
+#smartPlannerDialog label { display: grid; gap: 6px; min-width: 0; color: var(--ink); font-size: 13px; font-weight: 650; }
+#smartPlannerDialog :is(input, select) { box-sizing: border-box; width: 100%; min-width: 0; max-width: 100%; min-height: 44px; padding: 8px 10px; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; font: inherit; font-size: 16px; }
+#smartPlannerDialog :is(button, input, select):focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.family-day-nav { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; gap: 12px; align-items: end; }
+.family-day-nav button { display: grid; place-items: center; padding: 8px; }
+.family-brief-count { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding-bottom: 14px; font-size: 14px; color: var(--muted); }
+.family-brief-count strong { color: var(--ink); }
+.family-balance { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); min-width: 0; }
+.family-balance h3 { margin: 0; font-size: 16px; }
+.family-balance-rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.family-balance-card { display: grid; gap: 7px; min-width: 0; padding: 12px; border: 1px solid var(--line); border-radius: 7px; font-size: 13px; overflow-wrap: anywhere; }
+.family-balance-card span, .family-balance-card small { color: var(--muted); line-height: 1.5; }
+.family-balance-card meter { width: 100%; accent-color: var(--blue); }
+.family-balance-card meter::-webkit-meter-bar { height: 6px; border: 0; background: var(--soft-line); }
+.family-balance-card meter::-webkit-meter-optimum-value { background: var(--blue); }
+.family-balance-card.is-near meter::-webkit-meter-optimum-value { background: #b2842c; }
+.family-balance-card.is-over meter::-webkit-meter-optimum-value { background: #b85c31; }
+.family-balance-card meter::-moz-meter-bar { background: var(--blue); }
+.family-balance-card.is-near meter::-moz-meter-bar { background: #b2842c; }
+.family-balance-card.is-over meter::-moz-meter-bar { background: #b85c31; }
+.family-balance-card.is-over { border-color: #b85c31; }
+.family-balance-card.is-over small { color: var(--ink); font-weight: 650; }
+.family-brief-event { display: grid; grid-template-columns: 105px minmax(0, 1fr); gap: 16px; width: 100%; padding: 16px 0; text-align: left; color: var(--ink); background: transparent; border-top: 1px solid var(--line); }
+.family-brief-event > span { min-width: 0; overflow-wrap: anywhere; }
+.family-brief-event strong { display: block; font-size: 15px; line-height: 1.5; }
+.family-brief-time, .family-brief-event small { display: block; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.family-brief-event small { margin-top: 4px; }
+.family-brief-event .family-departure { color: var(--blue); font-weight: 700; }
+.family-attention { display: block; margin-top: 8px; color: var(--ink); font-size: 12px; font-weight: 650; border-left: 3px solid #d99b35; padding-left: 8px; line-height: 1.6; }
+#smartViewForm { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 12px; }
+#smartViewForm button { display: flex; gap: 8px; align-items: center; justify-content: center; padding: 10px 14px; font-size: 14px; }
+.family-saved-row { display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: 8px; align-items: center; border-top: 1px solid var(--line); }
+.family-view-open { padding: 16px 0; background: transparent; text-align: left; color: var(--ink); overflow-wrap: anywhere; }
+.family-view-open strong { display: block; font-size: 15px; }
+.family-view-open small { display: block; margin-top: 6px; font-size: 13px; color: var(--muted); line-height: 1.6; }
+.family-saved-row > .ghost-btn { padding: 8px; display: grid; place-items: center; }
+#smartStatus { margin: 0; color: var(--ink); font-size: 13px; line-height: 1.6; }
+#smartStatus:empty { display: none; }
+@media (max-width: 480px) {
+  .family-balance-rows { grid-template-columns: minmax(0, 1fr); }
+  .family-body { padding: 14px; gap: 16px; }
+  .family-tabs button { flex-direction: column; gap: 4px; font-size: 12px; }
+  #smartViewForm { grid-template-columns: minmax(0, 1fr); }
+  .family-brief-event { grid-template-columns: minmax(0, 1fr); gap: 5px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  #smartPlannerDialog[open] { animation: smart-appear 150ms ease-out; }
+  @keyframes smart-appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+}

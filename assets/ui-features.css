@@ -1,0 +1,79 @@
+/* Five focused UI helpers, without adding a permanent toolbar row. */
+html.ui-high-contrast { --ink: #102a3a; --muted: #334e5e; --line: #788e9c; --blue: #124d78; --green: #175d44; --blue-line: #527993; }
+html.dark-mode.ui-high-contrast { --ink: #fff; --muted: #d8e5ee; --line: #8ba1b2; --blue: #abd9ff; --green: #a8e4c5; --blue-line: #82b7d9; }
+html.ui-high-contrast :is(button, summary, input, select, textarea, [role="separator"]):focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+html.ui-high-contrast #weekSchedule { --week-hour-line: var(--line); --week-half-hour-line: color-mix(in srgb, var(--line) 70%, var(--panel)); }
+html.ui-high-contrast #appShell :is(.event-time, .event-title, .event-child) { font-weight: 650; }
+html.ui-high-contrast .active-filter-chip { border-width: 2px; }
+
+#visualPreferencesDialog { width: min(520px, calc(100% - 24px)); color: var(--ink); background: var(--panel); }
+#visualPreferencesDialog .modal-header { position: sticky; top: 0; z-index: 2; }
+.visual-preferences-body { display: grid; gap: 18px; padding: 20px; min-width: 0; }
+.visual-note { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.visual-setting { display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: 14px; align-items: center; min-height: 56px; padding: 12px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+.visual-setting strong, .visual-setting small { display: block; }
+.visual-setting strong { color: var(--ink); font-size: 15px; line-height: 1.5; }
+.visual-setting small { margin-top: 4px; color: var(--muted); font-size: 13px; font-weight: 400; line-height: 1.6; }
+.visual-setting input { width: 24px; height: 24px; margin: 10px; accent-color: var(--green); }
+.visual-preview { padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft-line); }
+.visual-preview > small { color: var(--muted); font-size: 11px; }
+.visual-preview-card { display: grid; gap: 5px; margin-top: 10px; padding: 12px; border: 1px solid var(--blue-line); border-left: 4px solid var(--blue); border-radius: 7px; background: var(--panel); }
+.visual-preview-card strong { color: var(--ink); font-size: 15px; }
+.visual-preview-card span { color: var(--muted); font-size: 13px; }
+#visualPreferencesStatus { margin: 0; color: var(--green); font-size: 13px; line-height: 1.5; }
+#visualPreferencesStatus:empty { display: none; }
+html.ui-high-contrast #visualPreferencesDialog .primary-btn { color: #fff; background: #174b70; border-color: #174b70; }
+html.dark-mode.ui-high-contrast #visualPreferencesDialog .primary-btn { color: #102a3a; background: #c1e4ff; border-color: #c1e4ff; }
+.visual-preferences-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.visual-preferences-footer button { min-height: 44px; min-width: 72px; }
+
+#calendarContextLabel { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+#appShell #calendarContextBar { padding-top: 4px; gap: 8px; align-items: flex-start; border: 0; }
+#activeFilterChips { display: flex; flex: 1 1 auto; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+#appShell .active-filter-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; max-width: 100%; padding: 6px 10px; border: 1px solid var(--blue-line); border-radius: 20px; color: var(--blue); background: var(--blue-soft); font-size: 12px; line-height: 1.4; font-weight: 600; text-align: left; }
+#appShell .active-filter-chip > span:first-child { flex: 1 1 auto; width: auto; min-width: 0; font-size: inherit; text-align: left; overflow-wrap: anywhere; }
+.active-filter-chip > span:last-child { flex: 0 0 auto; font-size: 18px; }
+#appShell #clearCalendarContext { flex: 0 0 auto; min-height: 36px; padding: 6px 8px; font-size: 12px; }
+#appShell .active-filter-chip:hover { border-color: var(--blue); }
+
+#appShell .calendar-stage-main, #appShell .calendar-stage { position: relative; }
+#appShell #calendarSide { container-name: side-calendar; container-type: inline-size; }
+@container side-calendar (max-width: 250px) {
+  #appShell .mini-calendar-header { grid-template-columns: minmax(0, 1fr) 36px 36px; row-gap: 6px; }
+  #appShell .mini-calendar-header .mini-calendar-title { grid-column: 1 / -1; grid-row: 1; overflow: visible; text-overflow: clip; white-space: normal; }
+  #appShell #miniCalendarToday { grid-column: 1; grid-row: 2; justify-self: start; }
+  #appShell #miniCalendarPrevious { grid-column: 2; grid-row: 2; }
+  #appShell #miniCalendarNext { grid-column: 3; grid-row: 2; }
+}
+.timeline-navigator { position: absolute; right: 18px; bottom: 16px; z-index: 85; }
+.timeline-navigator[hidden], #appShell.is-dashboard-view .timeline-navigator { display: none; }
+.timeline-navigator > summary { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 24px; color: var(--ink); background: var(--panel); box-shadow: 0 3px 12px rgb(15 36 52 / 15%); font-size: 12px; font-weight: 650; cursor: pointer; list-style: none; }
+.timeline-navigator > summary::-webkit-details-marker { display: none; }
+.timeline-navigator[open] > summary { border-color: var(--blue); color: var(--blue); }
+.timeline-jump-panel { position: absolute; right: 0; bottom: calc(100% + 8px); display: grid; gap: 4px; min-width: 170px; max-height: min(330px, 55dvh); overflow-y: auto; padding: 8px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); box-shadow: 0 6px 22px rgb(15 36 52 / 16%); }
+.timeline-jump-panel button { min-height: 44px; padding: 8px 12px; border: 0; border-radius: 6px; text-align: left; color: var(--ink); background: transparent; font-size: 13px; }
+.timeline-jump-panel button:hover { background: var(--blue-soft); }
+.timeline-jump-panel button:first-child { color: var(--blue); font-weight: 650; border-bottom: 1px solid var(--line); }
+#appShell #weekSchedule .day-column.ui-slot-hover::before { content: ''; position: absolute; inset: var(--ui-slot-top) 0 auto; z-index: 3; height: 1px; background: var(--blue); pointer-events: none; }
+#appShell #weekSchedule .day-column.ui-slot-hover::after { content: attr(data-ui-time); position: absolute; top: var(--ui-slot-top); left: 6px; z-index: 4; padding: 4px 7px; border: 1px solid var(--blue); border-radius: 5px; color: var(--blue); background: var(--panel); font-size: 11px; font-weight: 650; line-height: 1.3; font-variant-numeric: tabular-nums; pointer-events: none; transform: translateY(4px); box-shadow: 0 1px 4px rgb(15 36 52 / 12%); }
+.calendar-side-resize { display: none; }
+@media (min-width: 901px) {
+  #appShell:not(.panels-hide-side) .calendar-side-resize { display: block; position: absolute; top: 12px; bottom: 12px; right: calc(var(--workspace-side-width) + var(--workspace-gap) / 2 - 6px); z-index: 70; width: 12px; border-radius: 6px; cursor: col-resize; touch-action: none; }
+  #appShell.workspace-side-left:not(.panels-hide-side) .calendar-side-resize { right: auto; left: calc(var(--workspace-side-width) + var(--workspace-gap) / 2 - 6px); }
+  .calendar-side-resize::before { content: ''; position: absolute; top: 38%; bottom: 38%; left: 4px; width: 4px; border-radius: 4px; background: var(--line); }
+  .calendar-side-resize:hover::before, .calendar-side-resize:focus-visible::before, .ui-resizing-side .calendar-side-resize::before { background: var(--blue); }
+  .ui-resizing-side { user-select: none; cursor: col-resize; }
+}
+@media (max-width: 740px) {
+  .timeline-navigator { display: none !important; }
+  #appShell .active-filter-chip, #appShell #clearCalendarContext { min-height: 44px; font-size: 12px; }
+  #appShell #calendarContextBar { padding: 0; margin-bottom: 8px; }
+  .visual-preferences-body { padding: 14px; gap: 14px; }
+  .visual-preferences-footer { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .visual-preferences-footer button { width: 100%; }
+}
+@media (max-width: 900px) { .visual-resize-note { display: none; } }
+@media (hover: none), (pointer: coarse) {
+  .calendar-side-resize { display: none !important; }
+  #appShell #weekSchedule .day-column.ui-slot-hover::before, #appShell #weekSchedule .day-column.ui-slot-hover::after { display: none; }
+}

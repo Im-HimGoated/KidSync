@@ -1,0 +1,75 @@
+#familyCoordinationDialog, #moveReviewDialog, #externalCalendarsDialog { width: min(920px, calc(100% - 24px)); max-height: calc(100dvh - 24px); padding: 0; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--panel); overflow: auto; }
+:is(#familyCoordinationDialog,#moveReviewDialog,#externalCalendarsDialog) .modal-header { position: sticky; top: 0; z-index: 3; background: var(--panel); }
+:is(#familyCoordinationDialog,#moveReviewDialog,#externalCalendarsDialog) h2 { font-size: 20px; }
+:is(#familyCoordinationDialog,#moveReviewDialog,#externalCalendarsDialog) button { min-height: 44px; padding: 8px 12px; white-space: normal; }
+:is(#familyCoordinationDialog,#moveReviewDialog,#externalCalendarsDialog) .modal-header .close-btn { flex: 0 0 44px; width: 44px; min-width: 44px; height: 44px; padding: 0; }
+:is(#familyCoordinationDialog,#moveReviewDialog,#externalCalendarsDialog) button:disabled { opacity: .55; cursor: not-allowed; }
+:is(#familyCoordinationDialog,#moveReviewDialog,#externalCalendarsDialog) svg { width: 18px; height: 18px; flex-shrink: 0; }
+:is(#familyCoordinationDialog,#moveReviewDialog,#externalCalendarsDialog) :is(input,select) { box-sizing: border-box; min-width: 0; max-width: 100%; width: 100%; min-height: 44px; padding: 8px; color: var(--ink); border: 1px solid var(--line); border-radius: 6px; background: var(--panel); font-size: 16px; }
+:is(#familyCoordinationDialog,#moveReviewDialog,#externalCalendarsDialog) label { display: grid; gap: 6px; min-width: 0; font-size: 13px; font-weight: 650; }
+:is(#familyCoordinationDialog,#moveReviewDialog,#externalCalendarsDialog) :is(button,input,select):focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.coord-body { display: grid; gap: 18px; padding: 20px; min-width: 0; }
+.coord-tabs { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 4px; border-bottom: 1px solid var(--line); }
+.coord-tabs button { display: flex; gap: 8px; align-items: center; justify-content: center; background: transparent; color: var(--muted); border-bottom: 3px solid transparent; border-radius: 0; font-size: 14px; }
+.coord-tabs button[aria-selected="true"] { color: var(--blue); border-bottom-color: var(--blue); font-weight: 700; }
+.coord-date { display: grid; grid-template-columns: 44px minmax(0,1fr) 44px 44px; gap: 8px; align-items: end; }
+.coord-date button { display: grid; place-items: center; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; }
+.coord-muted { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.coord-warning { margin: 0 0 12px; padding: 10px; border-left: 3px solid #d99b35; background: var(--soft-line); color: var(--ink); font-size: 14px; line-height: 1.5; }
+.coord-comparison-scroll { overflow-x: auto; border: 1px solid var(--line); }
+.coord-comparison { display: grid; grid-template-columns: 100px repeat(var(--coord-columns),minmax(150px,1fr)); min-width: min-content; }
+.coord-person, .coord-time, .coord-person-slot { padding: 10px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); min-width: 0; overflow-wrap: anywhere; }
+.coord-person { background: var(--soft-line); font-size: 14px; font-weight: 700; }
+.coord-time { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.coord-commitment { width: 100%; text-align: left; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-left: 4px solid var(--coord-accent); border-radius: 5px; }
+.coord-commitment strong { display: block; font-size: 14px; overflow-wrap: anywhere; }
+.coord-commitment small { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; }
+.coord-commitment.has-warning { outline: 2px solid #d99b35; outline-offset: -2px; }
+#coordAssignForm { display: grid; gap: 12px; padding: 0 0 18px; border-bottom: 1px solid var(--line); }
+#coordPanel { min-width: 0; }
+#coordPanel h3 { font-size: 15px; }
+.coord-request-list article, .coord-change { display: grid; gap: 8px; padding: 16px 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; font-size: 14px; }
+.coord-change > div:first-child { display: grid; gap: 5px; }
+.coord-change :is(span,small) { color: var(--muted); font-size: 13px; }
+.coord-change dl { margin: 0; display: grid; gap: 10px; }
+.coord-change dl > div { display: grid; grid-template-columns: 100px minmax(0,1fr); gap: 10px; }
+.coord-change dt { color: var(--muted); font-size: 12px; }
+.coord-change dd { margin: 0; font-size: 13px; line-height: 1.5; }
+.coord-change ins { text-decoration: none; color: var(--ink); font-weight: 650; }
+.coord-row-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.coord-row-actions button { color: var(--blue); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
+.coord-state { font-weight: 700; color: var(--muted); }
+.coord-state[data-state="accepted"] { color: var(--green); }
+#coordinationStatus { margin: 0; font-size: 14px; line-height: 1.5; }
+.move-summary { display: grid; gap: 12px; }
+.move-summary p { margin: 0; line-height: 1.5; overflow-wrap: anywhere; }
+.move-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: end; }
+.move-undo:not([hidden]) { position: fixed; right: 16px; bottom: 24px; z-index: 30000; display: flex; align-items: center; gap: 12px; max-width: calc(100% - 32px); padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); box-shadow: 0 4px 20px rgb(0 0 0 / 20%); font-size: 14px; }
+.move-undo button { min-height: 44px; padding: 8px; color: var(--blue); background: transparent; }
+#moveReviewDialog .move-all-day { display: flex; align-items: center; gap: 10px; }
+#moveReviewDialog .move-all-day input { width: 22px; height: 22px; min-height: 22px; }
+.external-row { display: grid; gap: 12px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.external-row h3 { margin: 0; font-size: 16px; }
+.external-status { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.external-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.external-overlay { border: 1px dashed var(--line); padding: 12px; border-radius: 6px; background: var(--panel); }
+.external-overlay article { display: grid; grid-template-columns: 130px minmax(0,1fr); gap: 10px; padding: 12px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; font-size: 14px; }
+.external-overlay article small { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; }
+#mobileNextCommitment { display: none; }
+#externalEventDialog { width: min(620px,calc(100% - 24px)); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+#externalEventDialog p { overflow-wrap: anywhere; white-space: pre-wrap; line-height: 1.6; }
+.external-source-strip { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 0; }
+.external-source-strip[hidden] { display: none; }
+.external-source-strip button { min-height: 44px; padding: 8px 10px; border: 1px dashed var(--line); color: var(--muted); background: var(--panel); border-radius: 6px; font-size: 12px; text-align: left; }
+@media (max-width:740px) {
+  .coord-body { padding: 14px; }
+  .coord-tabs button { flex-direction: column; font-size: 12px; gap: 5px; }
+  .coord-date { grid-template-columns: 44px minmax(0,1fr) 44px; }
+  .coord-date > button:last-child { grid-column: 1 / -1; justify-self: end; }
+  .coord-change dl > div { grid-template-columns: minmax(0,1fr); gap: 3px; }
+  .external-overlay article { grid-template-columns: minmax(0,1fr); }
+  #mobileNextCommitment:not([hidden]) { display: flex; width: 100%; align-items: center; gap: 12px; padding: 12px 0; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink); text-align: left; }
+  #mobileNextCommitment > span { min-width: 0; overflow-wrap: anywhere; }
+  #mobileNextCommitment strong, #mobileNextCommitment small { display: block; }
+  #mobileNextCommitment small { color: var(--muted); margin-top: 4px; font-size: 12px; }
+}
