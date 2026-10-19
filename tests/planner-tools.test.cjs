@@ -208,5 +208,9 @@ test('planner helper dictionaries match and integration keeps the main toolbar u
   assert.match(html, /class="more-actions-menu">[\s\S]*?id="openPlannerTools"/);
   assert.match(html, /window\.KidsSyncTools\?\.attach\(activity\)/);
   assert.match(html, /window\.KidsSyncTools\?\.refresh\(\)/);
-  assert.match(html, /<script src="\.\/assets\/planner-tools.js"><\/script>\s*<script src="\.\/assets\/ui-features.js"><\/script>\s*<script src="\.\/assets\/smart-scheduling.js\?v=4"><\/script>\s*<script src="\.\/assets\/family-polls.js\?v=2"><\/script>/);
+  const scripts = [...html.matchAll(/<script src="([^\"]+)"><\/script>/g)].map(match => match[1].split('?')[0]);
+  const helpers = ['planner-tools.js', 'ui-features.js', 'smart-scheduling.js', 'family-polls.js'];
+  const positions = helpers.map(file => scripts.indexOf(`./assets/${file}`));
+  assert(positions.every(index => index >= 0), 'all planner helper assets must be loaded');
+  assert(positions.every((index, i) => !i || index > positions[i - 1]), 'planner helpers must retain their dependency order, even with other UI scripts between them');
 });

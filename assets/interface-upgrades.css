@@ -1,0 +1,285 @@
+/* Five everyday interface upgrades: family collapse, glance, dates, next up, and mobile dock. */
+#appShell #kidFilters {
+  grid-template-columns: auto minmax(0, 1fr) auto 34px;
+}
+
+#appShell #kidFilters .kids-header .small-btn { grid-column: 3; }
+#appShell #kidFilters .family-strip-toggle {
+  grid-column: 4;
+  grid-row: 1;
+  display: grid;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--muted);
+  background: var(--panel);
+}
+
+#appShell #kidFilters .family-strip-toggle:hover,
+#appShell #kidFilters .family-strip-toggle:focus-visible {
+  border-color: var(--blue-line);
+  color: var(--blue);
+  outline: 2px solid transparent;
+}
+
+#appShell #kidFilters .family-strip-summary {
+  display: none;
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#appShell #kidFilters.is-ui-collapsed .kids-list { display: none; }
+#appShell #kidFilters.is-ui-collapsed .family-strip-summary { display: block; }
+
+.calendar-pulse {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, .75fr);
+  gap: 10px;
+  margin: 0 0 var(--workspace-gap, 14px);
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 4px 18px rgba(31, 49, 86, .06);
+}
+
+#appShell.is-dashboard-view .calendar-pulse { display: none; }
+
+.calendar-pulse-summary,
+.calendar-next-spotlight {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  min-height: 58px;
+  padding: 8px 10px;
+  border-radius: 7px;
+}
+
+.calendar-pulse-summary { background: var(--soft-line); }
+.calendar-pulse-icon,
+.calendar-next-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 7px;
+  color: #fff;
+  background: #246f9d;
+  font-size: 18px;
+  font-weight: 850;
+}
+
+.calendar-pulse-summary > span:last-child,
+.calendar-next-spotlight > span:last-child { min-width: 0; }
+.calendar-pulse small,
+.calendar-pulse strong,
+.calendar-pulse-summary span:last-child > span,
+.calendar-next-spotlight span:last-child > span { display: block; }
+.calendar-pulse small { color: var(--muted); font-size: 10px; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
+.calendar-pulse strong { overflow: hidden; color: var(--ink); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.calendar-pulse-summary span:last-child > span,
+.calendar-next-spotlight span:last-child > span { margin-top: 3px; overflow: hidden; color: var(--muted); font-size: 11px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+
+.calendar-next-spotlight {
+  border: 1px solid var(--blue-line);
+  color: var(--ink);
+  background: var(--blue-soft);
+  text-align: left;
+}
+.calendar-next-spotlight:hover:not(:disabled),
+.calendar-next-spotlight:focus-visible:not(:disabled) { border-color: var(--blue); box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 18%, transparent); outline: none; }
+.calendar-next-spotlight:disabled { cursor: default; opacity: .72; }
+.calendar-next-spotlight:disabled .calendar-next-icon { background: var(--muted); }
+
+.date-ribbon {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 38px;
+  gap: 8px;
+  align-items: stretch;
+  min-width: 0;
+}
+.date-ribbon-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(54px, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+.date-ribbon-arrow,
+.date-ribbon-day {
+  min-height: 52px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--ink);
+  background: var(--panel);
+}
+.date-ribbon-arrow { padding: 0; color: var(--blue); font-size: 23px; font-weight: 800; }
+.date-ribbon-day {
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 6px 4px;
+}
+.date-ribbon-day > span { overflow: hidden; max-width: 100%; color: var(--muted); font-size: 9px; font-weight: 850; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.date-ribbon-day > strong { font-size: 16px; line-height: 1; }
+.date-ribbon-day > i {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  min-width: 17px;
+  height: 17px;
+  place-items: center;
+  padding: 0 4px;
+  border-radius: 9px;
+  color: #fff;
+  background: #397f5d;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 850;
+}
+.date-ribbon-day:hover,
+.date-ribbon-day:focus-visible,
+.date-ribbon-arrow:hover,
+.date-ribbon-arrow:focus-visible { border-color: var(--blue); background: var(--blue-soft); outline: none; }
+.date-ribbon-day.is-today { border-color: #74a990; }
+.date-ribbon-day.is-selected { border-color: var(--blue); color: #fff; background: var(--blue); }
+.date-ribbon-day.is-selected > span { color: #e9f5ff; }
+.date-ribbon-day.is-selected > i { color: #17452f; background: #dff3e7; }
+
+/* The separately developed quick-navigation controls join this surface instead
+   of creating a second stacked toolbar. The richer spotlight owns "next". */
+#appShell .calendar-pulse > .quick-calendar-nav {
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+  margin: 0;
+  padding: 8px 0 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+#appShell .calendar-pulse .quick-next-event { display: none !important; }
+
+.mobile-action-dock { display: none; }
+
+html.dark-mode .calendar-pulse { box-shadow: none; }
+html.dark-mode .calendar-pulse-summary { background: #22323d; }
+html.dark-mode .calendar-next-spotlight { background: #20384b; }
+html.dark-mode .date-ribbon-day.is-selected { color: #102b3d; background: #a9d9fb; }
+html.dark-mode .date-ribbon-day.is-selected > span { color: #25495f; }
+
+@media (max-width: 740px) {
+  #appShell { padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
+  #appShell #kidFilters { grid-template-columns: minmax(0, 1fr) auto 36px; }
+  #appShell #kidFilters .kids-list,
+  #appShell #kidFilters .family-strip-summary { grid-column: 1; }
+  #appShell #kidFilters .kids-header .small-btn { grid-column: 2; }
+  #appShell #kidFilters .family-strip-toggle { grid-column: 3; width: 36px; min-width: 36px; height: 36px; min-height: 36px; }
+
+  .calendar-pulse { grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 8px; }
+  .calendar-next-spotlight { grid-row: 2; }
+  .date-ribbon { grid-row: 3; grid-template-columns: 36px minmax(0, 1fr) 36px; gap: 5px; }
+  .date-ribbon-days { display: flex; gap: 5px; overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-width: none; scroll-snap-type: x proximity; }
+  .date-ribbon-days::-webkit-scrollbar { display: none; }
+  .date-ribbon-day { flex: 0 0 54px; min-height: 56px; scroll-snap-align: center; }
+  .date-ribbon-arrow { min-height: 56px; }
+  #appShell .calendar-pulse > .quick-calendar-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: stretch;
+  }
+  #appShell .calendar-pulse > .quick-calendar-nav:has(.quick-time-field[hidden]) .quick-date-field { grid-column: 1 / -1; }
+  #appShell .calendar-pulse > .quick-calendar-nav .quick-side-toggle { display: none; }
+
+  .mobile-action-dock {
+    position: fixed;
+    right: 10px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: 10px;
+    z-index: 9000;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    padding: 5px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel) 94%, transparent);
+    box-shadow: 0 8px 26px rgba(20, 39, 57, .2);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+  }
+  .mobile-action-dock button {
+    display: grid;
+    min-width: 0;
+    min-height: 52px;
+    place-items: center;
+    align-content: center;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 8px;
+    color: var(--muted);
+    background: transparent;
+    font-size: 10px;
+    font-weight: 800;
+  }
+  .mobile-action-dock button > span:first-child { color: var(--ink); font-size: 18px; line-height: 1; }
+  .mobile-action-dock .dock-search-glyph {
+    position: relative;
+    width: 14px;
+    height: 14px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+  }
+  .mobile-action-dock .dock-search-glyph::after {
+    position: absolute;
+    right: -5px;
+    bottom: -3px;
+    width: 6px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    content: "";
+    transform: rotate(45deg);
+  }
+  .mobile-action-dock button.is-primary { color: #fff; background: #236f9f; }
+  .mobile-action-dock button.is-primary > span:first-child { color: #fff; }
+  .mobile-action-dock button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  /* Keep disclosure sheets above the fixed dock, including their last action. */
+  #appShell .more-actions[open] .more-actions-menu,
+  #appShell .planner-options[open] .planner-options-panel,
+  #appShell .calendar-view-menu[open] .calendar-view-menu-panel {
+    bottom: calc(80px + env(safe-area-inset-bottom));
+    max-height: min(70dvh, calc(100dvh - 112px - env(safe-area-inset-bottom)));
+  }
+  body:has(dialog[open]) .mobile-action-dock { display: none; }
+}
+
+@media (max-width: 360px) {
+  .calendar-pulse-summary,
+  .calendar-next-spotlight { grid-template-columns: 34px minmax(0, 1fr); padding: 7px; }
+  .calendar-pulse-icon,
+  .calendar-next-icon { width: 34px; height: 34px; }
+  .date-ribbon-day { flex-basis: 50px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .date-ribbon-days { scroll-behavior: auto; }
+}

@@ -9810,6 +9810,7 @@
   <link rel="stylesheet" href="./assets/week-calendar.css">
   <link rel="stylesheet" href="./assets/planner-tools.css">
   <link rel="stylesheet" href="./assets/ui-features.css">
+  <link rel="stylesheet" href="./assets/interface-upgrades.css">
   <link rel="stylesheet" href="./assets/smart-scheduling.css?v=2">
   <link rel="stylesheet" href="./assets/family-polls.css?v=1">
   <link rel="stylesheet" href="./assets/smart-planner.css?v=4">
@@ -11423,9 +11424,9 @@
         </label>
         <p class="notification-status" id="notificationStatus" role="status"></p>
         <div class="email-notification-note" id="emailNotificationNote">
-          <span data-i18n="settings.emailNotifications">Email reminders</span>
+          <span data-i18n="settings.emailNotifications">Email summaries</span>
           <p id="emailNotificationStatus" role="status"></p>
-          <button class="small-btn" type="button" id="notificationSignIn" data-i18n="settings.signInForEmail">Sign in to enable</button>
+          <button class="small-btn" type="button" id="notificationSignIn" data-i18n="settings.signInForEmail">Sign in for email summaries</button>
         </div>
       </section>
 
@@ -12088,10 +12089,11 @@
         "settings.notificationsOff": "Notifications are off.",
         "settings.notificationsDenied": "Notifications are blocked in your browser settings.",
         "settings.notificationsUnavailable": "Notifications are unavailable in this browser.",
-        "settings.emailNotifications": "Email reminders",
-        "settings.emailGuest": "Email reminders require a signed-in account. Browser alerts can still work on this device.",
-        "settings.emailSignedIn": "Signed in. Email summaries use your mail app; automatic alerts work while KidsSync is open.",
-        "settings.signInForEmail": "Sign in to enable",
+        "settings.emailNotifications": "Email summaries",
+        "settings.emailGuest": "Sign in to prepare email summaries in your mail app. KidsSync does not send automatic reminder emails.",
+        "settings.emailSignedIn": "Prepare a weekly summary in your mail app. Nothing is sent automatically; automatic reminder emails are not enabled.",
+        "settings.prepareEmail": "Prepare email summary",
+        "settings.signInForEmail": "Sign in for email summaries",
         "calendars.select": "Calendar",
         "calendars.manage": "Manage calendars",
         "calendars.title": "Manage Calendars",
@@ -12115,6 +12117,16 @@
         "sharing.print": "Print schedule",
         "sharing.pdf": "Download PDF",
         "sharing.printOpened": "Print preview opened.",
+        "sharing.printBlocked": "The print window was blocked. Allow pop-ups for KidsSync and try again, or download an .ics or backup file instead.",
+        "sharing.copyManually": "Automatic copying was blocked. Select the text or link, then press Ctrl+C or ⌘C, or use your phone’s Copy action.",
+        "sharing.linkReadyManual": "Sharing link created for {email}. Copy the selected link manually; it has not been sent.",
+        "sharing.emailOpened": "Opening your email app. Nothing is sent automatically. If no app opens, copy the text or link and paste it into your email.",
+        "sharing.shareCompleted": "Sharing completed on this device.",
+        "sharing.shareCancelled": "Sharing was cancelled.",
+        "sharing.memberUpdateFailed": "Could not confirm this access change. Your previous view has been kept. Check your connection and reopen sharing before retrying.",
+        "sharing.memberCacheWarning": "Access was updated online, but the device cache could not be saved. Reopen sharing to refresh it.",
+        "sharing.inviteFailed": "The invitation could not be confirmed. No link is available here. Check your connection and reopen sharing before retrying.",
+        "sharing.refreshFailed": "Could not refresh shared access. The last known list is shown; check your connection and reopen sharing before changing permissions.",
         "sharing.pdfDownloaded": "PDF downloaded.",
         "sharing.pdfFallback": "Print preview opened. Choose Save as PDF in the print menu.",
         "sharing.send": "Send",
@@ -13185,10 +13197,11 @@
         "settings.notificationsOff": "通知已关闭。",
         "settings.notificationsDenied": "通知已在浏览器设置中被阻止。",
         "settings.notificationsUnavailable": "此浏览器不支持通知。",
-        "settings.emailNotifications": "电子邮件提醒",
-        "settings.emailGuest": "电子邮件提醒需要登录账户。浏览器提醒仍可在此设备上使用。",
-        "settings.emailSignedIn": "已登录。邮件摘要会使用你的邮件应用；KidsSync 打开时会发送自动浏览器提醒。",
-        "settings.signInForEmail": "登录后启用",
+        "settings.emailNotifications": "邮件摘要",
+        "settings.emailGuest": "登录后可在邮件应用中准备日程摘要，KidsSync 不会自动发送提醒邮件。",
+        "settings.emailSignedIn": "在邮件应用中准备每周摘要，不会自动发送；尚未启用自动提醒邮件。",
+        "settings.prepareEmail": "准备邮件摘要",
+        "settings.signInForEmail": "登录后使用邮件摘要",
         "calendars.select": "日历",
         "calendars.manage": "管理日历",
         "calendars.title": "管理日历",
@@ -13212,6 +13225,16 @@
         "sharing.print": "打印日程",
         "sharing.pdf": "下载 PDF",
         "sharing.printOpened": "打印预览已打开。",
+        "sharing.printBlocked": "打印窗口被浏览器拦截。请允许 KidsSync 弹出窗口后重试，或改为下载 .ics 日历或备份文件。",
+        "sharing.copyManually": "自动复制被阻止。请选择文字或链接，然后按 Ctrl+C 或 ⌘C，或使用手机的“复制”操作。",
+        "sharing.linkReadyManual": "已为 {email} 创建共享链接。请手动复制选中的链接，尚未发送。",
+        "sharing.emailOpened": "正在打开邮件应用，不会自动发送。如果没有应用打开，请复制文字或链接并粘贴到邮件中。",
+        "sharing.shareCompleted": "已在此设备上完成分享。",
+        "sharing.shareCancelled": "已取消分享。",
+        "sharing.memberUpdateFailed": "无法确认权限更改，已保留原有显示。请检查网络，重新打开共享面板后再试。",
+        "sharing.memberCacheWarning": "线上权限已更新，但无法保存此设备缓存。请重新打开共享面板刷新。",
+        "sharing.inviteFailed": "无法确认邀请，目前没有可用链接。请检查网络，重新打开共享面板后再试。",
+        "sharing.refreshFailed": "无法刷新共享权限，目前显示上次记录。更改权限前，请检查网络并重新打开共享面板。",
         "sharing.pdfDownloaded": "PDF 已下载。",
         "sharing.pdfFallback": "打印预览已打开。请在打印菜单中选择“存储为 PDF”。",
         "sharing.send": "发送",
@@ -14628,11 +14651,14 @@
     }
 
     function openAuthFromPreview(view) {
-      const profileForm = document.getElementById("previewProfileForm");
-      if (!profileForm.reportValidity()) return;
-      const profile = saveFamilyProfile(previewProfileDraft(), { sync: false });
-      const familyName = currentLanguage === "zh" ? `${profile.name}的家庭` : `${profile.name}'s Family`;
-      document.getElementById("signUpFamily").value = familyName;
+      // Existing account holders do not need to create a new family profile.
+      if (view === "signup") {
+        const profileForm = document.getElementById("previewProfileForm");
+        if (!profileForm.reportValidity()) return;
+        const profile = saveFamilyProfile(previewProfileDraft(), { sync: false });
+        const familyName = currentLanguage === "zh" ? `${profile.name}的家庭` : `${profile.name}'s Family`;
+        document.getElementById("signUpFamily").value = familyName;
+      }
       closeDialogsForAccountAccess();
       showAuthScreen(view);
       requestAnimationFrame(() => document.getElementById(view === "signup" ? "signUpEmail" : "signInEmail").focus());
@@ -14680,12 +14706,23 @@
       document.getElementById("guestAuthButton").hidden = Boolean(activeAccount);
       document.getElementById("logoutButton").hidden = !activeAccount;
       document.getElementById("openInvitations").hidden = activeAccount?.provider !== "supabase";
-      const shareButton = document.getElementById("shareSchedule");
-      shareButton.disabled = !activeAccount;
-      shareButton.title = activeAccount ? "" : t("auth.signInToShare");
-      shareButton.setAttribute("aria-disabled", String(!activeAccount));
+      updateShareAction();
       updateCloudAvailability();
       renderCloudSettings();
+    }
+
+    function updateShareAction() {
+      const shareButton = document.getElementById("shareSchedule");
+      shareButton.disabled = false;
+      shareButton.title = activeAccount ? "" : t("auth.signInToShare");
+      shareButton.setAttribute("aria-disabled", "false");
+      shareButton.setAttribute("aria-label", t(activeAccount ? "sharing.share" : "auth.signInToShare"));
+      shareButton.dataset.i18nAria = activeAccount ? "sharing.share" : "auth.signInToShare";
+      const shareLabel = shareButton.querySelector("[data-i18n]");
+      if (shareLabel) {
+        shareLabel.dataset.i18n = activeAccount ? "sharing.share" : "auth.signInToShare";
+        shareLabel.textContent = t(shareLabel.dataset.i18n);
+      }
     }
 
     function showGuestPreview() {
@@ -15339,7 +15376,11 @@
       const emailStatus = document.getElementById("emailNotificationStatus");
       const emailSignIn = document.getElementById("notificationSignIn");
       if (emailStatus) emailStatus.textContent = t(activeAccount ? "settings.emailSignedIn" : "settings.emailGuest");
-      if (emailSignIn) emailSignIn.hidden = Boolean(activeAccount);
+      if (emailSignIn) {
+        emailSignIn.hidden = false;
+        emailSignIn.dataset.i18n = activeAccount ? "settings.prepareEmail" : "settings.signInForEmail";
+        emailSignIn.textContent = t(emailSignIn.dataset.i18n);
+      }
     }
 
     function renderCloudSettings() {
@@ -20070,6 +20111,8 @@
       const other = calendars.slice(1);
       const group = (label, items) => items.length ? `<div class="sidebar-calendar-group"><div class="sidebar-calendar-heading"><span>${escapeHtml(label)}</span>${label === t("calendars.myCalendars") ? `<button type="button" data-sidebar-add-calendar aria-label="${escapeHtml(t("calendars.add"))}" title="${escapeHtml(t("calendars.add"))}">＋</button>` : ""}</div>${items.map(calendar => `<button class="sidebar-calendar-row${calendar.id === currentCalendarId ? " is-selected" : ""}" type="button" data-sidebar-calendar="${escapeHtml(calendar.id)}" aria-pressed="${calendar.id === currentCalendarId}"><span class="sidebar-calendar-check" style="background:${escapeHtml(calendar.color || "#1f6898")}">${calendar.id === currentCalendarId ? "✓" : ""}</span><span class="sidebar-calendar-name">${escapeHtml(calendar.name)}</span><span class="sidebar-calendar-more" aria-hidden="true">⋮</span></button>`).join("")}</div>` : "";
       host.innerHTML = group(t("calendars.myCalendars"), mine) + group(t("calendars.otherCalendars"), other);
+      // The row switches calendars; it is not a second, hidden overflow menu.
+      host.querySelectorAll(".sidebar-calendar-more").forEach(marker => { marker.textContent = "›"; });
       host.querySelectorAll("[data-sidebar-calendar]").forEach(button => button.addEventListener("click", () => {
         switchCalendar(button.dataset.sidebarCalendar);
         document.getElementById("sidebarMenu").open = false;
@@ -20194,12 +20237,19 @@
     }
 
     function openPrintableSchedule() {
-      const printWindow = window.open("", "_blank");
-      if (!printWindow) return false;
-      printWindow.document.open();
-      printWindow.document.write(buildPrintableScheduleHtml());
-      printWindow.document.close();
-      return true;
+      let printWindow;
+      try {
+        printWindow = window.open("", "_blank");
+        if (!printWindow) return false;
+        printWindow.document.open();
+        printWindow.document.write(buildPrintableScheduleHtml());
+        printWindow.document.close();
+        return true;
+      } catch (error) {
+        printWindow?.close();
+        reportClientError(error, "print-preview");
+        return false;
+      }
     }
 
     function exportSchedulePdf() {
@@ -20207,8 +20257,7 @@
       const pdfText = [calendarName, ...state.activities.flatMap(activity => [activity.title, activity.child, activity.location, activity.responsible, activity.notes])].filter(Boolean).join(" ");
       const jsPDF = window.jspdf?.jsPDF;
       if (!jsPDF || /[^\u0000-\u00ff]/.test(pdfText)) {
-        openPrintableSchedule();
-        document.getElementById("shareStatus").textContent = t("sharing.pdfFallback");
+        document.getElementById("shareStatus").textContent = t(openPrintableSchedule() ? "sharing.pdfFallback" : "sharing.printBlocked");
         return;
       }
       try {
@@ -20284,8 +20333,7 @@
         document.getElementById("shareStatus").textContent = t("sharing.pdfDownloaded");
       } catch (error) {
         reportClientError(error, "pdf-export");
-        openPrintableSchedule();
-        document.getElementById("shareStatus").textContent = t("sharing.pdfFallback");
+        document.getElementById("shareStatus").textContent = t(openPrintableSchedule() ? "sharing.pdfFallback" : "sharing.printBlocked");
       }
     }
 
@@ -20469,21 +20517,29 @@
       return ["editor", "commenter", "viewer"].includes(role) ? role : "viewer";
     }
 
+    const memberRequests = new Set();
+
     function memberRoleLabel(role) {
       return t(`sharing.${normalizeMemberRole(role)}`);
     }
 
     async function refreshCloudCalendarMembers() {
       if (!isCalendarOwner()) return;
+      const scope = calendarStorageKey("members");
+      const ownerId = cloudSession.user.id, calendarId = currentCalendarId;
       try {
         const { data, error } = await cloudClient.from("calendar_members")
           .select("id,member_email,status,role,calendar_name,invite_token,invitation_note,created_at")
-          .eq("owner_id", cloudSession.user.id)
-          .eq("calendar_id", currentCalendarId)
+          .eq("owner_id", ownerId)
+          .eq("calendar_id", calendarId)
           .order("created_at", { ascending: true });
-        if (!error && Array.isArray(data)) calendarMembers = data;
+        if (scope === calendarStorageKey("members") && !error && Array.isArray(data)) {
+          calendarMembers = data;
+          return true;
+        }
       } catch {
       }
+      return false;
     }
 
     function renderMemberList() {
@@ -20498,6 +20554,11 @@
           const note = String(member.invitation_note || "").trim();
           return `<div class="calendar-list-row member-access-row"><span class="member-access-identity"><strong>${escapeHtml(member.member_email)}</strong><small>${escapeHtml(statusLabel(member.status))}${note ? ` · ${escapeHtml(note)}` : ""}</small></span><select class="member-role-select" data-member-id="${memberId}" aria-label="${escapeHtml(t("sharing.permission"))}"><option value="viewer"${role === "viewer" ? " selected" : ""}>${escapeHtml(t("sharing.viewer"))}</option><option value="commenter"${role === "commenter" ? " selected" : ""}>${escapeHtml(t("sharing.commenter"))}</option><option value="editor"${role === "editor" ? " selected" : ""}>${escapeHtml(t("sharing.editor"))}</option></select>${member.invite_token && member.status !== "banned" ? `<button class="small-btn invite-link" type="button" data-member-id="${memberId}">${escapeHtml(t("sharing.copyLink"))}</button>` : ""}<button class="small-btn member-status" type="button" data-member-id="${memberId}">${escapeHtml(member.status === "banned" ? t("sharing.unban") : t("sharing.ban"))}</button><button class="danger-btn member-remove" type="button" data-member-id="${memberId}">${escapeHtml(t("sharing.remove"))}</button></div>`;
         }).join("");
+      list.querySelectorAll("[data-member-id]").forEach(control => {
+        const pending = memberRequests.has(`${calendarStorageKey("members")}:${control.dataset.memberId}`);
+        control.disabled = pending;
+        control.setAttribute("aria-busy", String(pending));
+      });
       list.querySelectorAll(".member-role-select").forEach(select => select.addEventListener("change", () => updateMemberRole(select.dataset.memberId, select.value)));
       list.querySelectorAll(".member-status").forEach(button => button.addEventListener("click", () => updateMember(button.dataset.memberId)));
       list.querySelectorAll(".member-remove").forEach(button => button.addEventListener("click", () => removeMember(button.dataset.memberId)));
@@ -20515,21 +20576,24 @@
       return url.href;
     }
 
-    async function copyTextToClipboard(text) {
+    async function copyTextToClipboard(text, fallbackField = null) {
       try {
         await navigator.clipboard.writeText(text);
+        return true;
       } catch {
-        const input = document.createElement("textarea");
-        input.value = text;
-        document.body.appendChild(input);
-        input.select();
-        document.execCommand("copy");
-        input.remove();
+        // A field outside the active modal is inert, and an execCommand failure
+        // is not a successful copy. Leave an existing field selected for manual copy.
+        if (!fallbackField?.isConnected || !fallbackField.getClientRects().length) return false;
+        fallbackField.value = text;
+        fallbackField.focus();
+        fallbackField.select();
+        try { return document.execCommand("copy") === true; } catch { return false; }
       }
     }
 
     async function showGeneratedShareLink(member, { copy = false } = {}) {
       const status = document.getElementById("shareStatus");
+      const scope = calendarStorageKey("members");
       if (!member?.invite_token) {
         status.textContent = t("invitations.linkUnavailable");
         return;
@@ -20544,15 +20608,21 @@
       document.getElementById("generatedShareLink").value = generatedShareDetails.link;
       document.getElementById("generatedShareLinkRow").hidden = false;
       if (copy) {
-        await copyTextToClipboard(generatedShareDetails.link);
-        status.textContent = t("sharing.linkCopied");
+        const link = generatedShareDetails.link;
+        const copied = await copyTextToClipboard(link, document.getElementById("generatedShareLink"));
+        if (scope !== calendarStorageKey("members") || generatedShareDetails?.link !== link) return false;
+        status.textContent = t(copied ? "sharing.linkCopied" : "sharing.copyManually");
+        return copied;
       }
+      return false;
     }
 
     async function copyGeneratedShareLink() {
       if (!generatedShareDetails?.link) return;
-      await copyTextToClipboard(generatedShareDetails.link);
-      document.getElementById("shareStatus").textContent = t("sharing.linkCopied");
+      const scope = calendarStorageKey("members");
+      const link = generatedShareDetails.link;
+      const copied = await copyTextToClipboard(link, document.getElementById("generatedShareLink"));
+      if (scope === calendarStorageKey("members") && generatedShareDetails?.link === link) document.getElementById("shareStatus").textContent = t(copied ? "sharing.linkCopied" : "sharing.copyManually");
     }
 
     function emailGeneratedShareLink() {
@@ -20563,6 +20633,7 @@
         note: generatedShareDetails.note || "",
         link: generatedShareDetails.link
       });
+      document.getElementById("shareStatus").textContent = t("sharing.emailOpened");
       location.href = `mailto:${encodeURIComponent(generatedShareDetails.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     }
 
@@ -20583,78 +20654,95 @@
       const role = normalizeMemberRole(document.getElementById("memberRole").value);
       const note = document.getElementById("memberNote").value.trim().slice(0, 500);
       const calendarName = calendars.find(calendar => calendar.id === currentCalendarId)?.name || t("calendars.default");
-      const member = { id: makeId("local-member"), member_email: email, calendar_name: calendarName, status: "pending", role, invitation_note: note };
-      let inviteCreated = true;
-      calendarMembers = calendarMembers.filter(item => item.member_email !== email);
-      calendarMembers.push(member);
-      if (isCalendarOwner()) {
-        const { data: existing } = await cloudClient.from("calendar_members")
+      const scope = calendarStorageKey("members"), requestKey = `invite:${scope}`;
+      if (memberRequests.has(requestKey)) return;
+      const button = document.getElementById("addMember");
+      const ownerId = cloudSession.user.id, calendarId = currentCalendarId;
+      memberRequests.add(requestKey); button.disabled = true; status.textContent = t("save.syncing");
+      try {
+        const { data: existing, error: lookupError } = await cloudClient.from("calendar_members")
           .select("id")
-          .eq("owner_id", cloudSession.user.id)
-          .eq("calendar_id", currentCalendarId)
+          .eq("owner_id", ownerId)
+          .eq("calendar_id", calendarId)
           .eq("member_email", email)
           .maybeSingle();
+        if (lookupError) throw lookupError;
+        if (scope !== calendarStorageKey("members")) return;
         const request = existing?.id
           ? cloudClient.rpc("update_calendar_member_share", { member_id: existing.id, next_status: "pending", next_role: role, next_note: note })
-          : cloudClient.from("calendar_members").insert({ owner_id: cloudSession.user.id, owner_email: activeAccount.email, calendar_id: currentCalendarId, calendar_name: calendarName, member_email: email, status: "pending", role, invitation_note: note });
+          : cloudClient.from("calendar_members").insert({ owner_id: ownerId, owner_email: activeAccount.email, calendar_id: calendarId, calendar_name: calendarName, member_email: email, status: "pending", role, invitation_note: note });
         const { error } = await request;
-        inviteCreated = !error;
-        if (inviteCreated) await refreshCloudCalendarMembers();
-        else calendarMembers = calendarMembers.filter(item => item !== member);
-      }
-      saveCalendarMembers();
-      renderMemberList();
-      if (inviteCreated) {
+        if (error) throw error;
+        if (scope !== calendarStorageKey("members")) return;
+        const refreshed = await refreshCloudCalendarMembers();
+        if (scope !== calendarStorageKey("members")) return;
+        if (!refreshed) { status.textContent = t("invitations.linkUnavailable"); return; }
+        try { saveCalendarMembers(); } catch (error) { reportClientError(error, "member-cache"); }
+        renderMemberList();
         const savedMember = calendarMembers.find(item => normalizeEmail(item.member_email) === email);
-        await showGeneratedShareLink(savedMember, { copy: true });
+        const copied = await showGeneratedShareLink(savedMember, { copy: true });
+        if (scope !== calendarStorageKey("members")) return;
         status.textContent = savedMember?.invite_token
-          ? t("sharing.linkReady", { email })
+          ? t(copied ? "sharing.linkReady" : "sharing.linkReadyManual", { email })
           : t("invitations.linkUnavailable");
         input.value = "";
         document.getElementById("memberNote").value = "";
         trackProductEvent("Member Invited", { role });
-      } else {
-        status.textContent = t("sharing.unavailable");
+      } catch (error) {
+        reportClientError(error, "member-invite");
+        if (scope === calendarStorageKey("members")) status.textContent = t("sharing.inviteFailed");
+      } finally {
+        memberRequests.delete(requestKey);
+        button.disabled = memberRequests.has(`invite:${calendarStorageKey("members")}`);
+      }
+    }
+
+    async function persistMemberChange(memberId, changes) {
+      const member = calendarMembers.find(item => (item.id || item.member_email) === memberId);
+      if (!member || !isCalendarOwner()) return false;
+      const scope = calendarStorageKey("members"), requestKey = `${scope}:${memberId}`;
+      if (memberRequests.has(requestKey)) return false;
+      const status = document.getElementById("shareStatus"), ownerId = cloudSession.user.id;
+      memberRequests.add(requestKey); renderMemberList(); status.textContent = t("save.syncing");
+      try {
+        if (!cloudClient || !member.id || member.id.startsWith("local-")) throw new Error("Cloud member required");
+        const result = changes.remove
+          ? await cloudClient.from("calendar_members").delete().eq("id", member.id).eq("owner_id", ownerId)
+          : await cloudClient.rpc("update_calendar_member_access", { member_id: member.id, next_status: changes.status || member.status, next_role: normalizeMemberRole(changes.role || member.role) });
+        if (result.error) throw result.error;
+        if (scope !== calendarStorageKey("members")) return false;
+        if (changes.remove) calendarMembers = calendarMembers.filter(item => item.id !== member.id);
+        else {
+          const current = calendarMembers.find(item => item.id === member.id);
+          if (current) Object.assign(current, changes);
+        }
+        let cached = true;
+        try { saveCalendarMembers(); } catch (error) { cached = false; reportClientError(error, "member-cache"); }
+        status.textContent = t(!cached ? "sharing.memberCacheWarning" : changes.role ? "sharing.roleUpdated" : "sharing.memberUpdated");
+        return true;
+      } catch (error) {
+        reportClientError(error, "member-access");
+        if (scope === calendarStorageKey("members")) status.textContent = t("sharing.memberUpdateFailed");
+        return false;
+      } finally {
+        memberRequests.delete(requestKey);
+        if (scope === calendarStorageKey("members")) renderMemberList();
       }
     }
 
     async function updateMember(memberId) {
       const member = calendarMembers.find(item => (item.id || item.member_email) === memberId);
-      if (!member) return;
-      member.status = member.status === "banned" ? "active" : "banned";
-      saveCalendarMembers();
-      if (isCalendarOwner() && member.id && !member.id.startsWith("local-")) await cloudClient.rpc("update_calendar_member_access", { member_id: member.id, next_status: member.status, next_role: normalizeMemberRole(member.role) });
-      renderMemberList();
-      document.getElementById("shareStatus").textContent = t("sharing.memberUpdated");
+      if (member) return persistMemberChange(memberId, { status: member.status === "banned" ? "active" : "banned" });
     }
 
     async function updateMemberRole(memberId, role) {
       const member = calendarMembers.find(item => (item.id || item.member_email) === memberId);
       if (!member || !isCalendarOwner()) return;
-      const previousRole = normalizeMemberRole(member.role);
-      member.role = normalizeMemberRole(role);
-      if (member.id && !member.id.startsWith("local-")) {
-        const { error } = await cloudClient.rpc("update_calendar_member_access", { member_id: member.id, next_status: member.status, next_role: member.role });
-        if (error) {
-          member.role = previousRole;
-          renderMemberList();
-          document.getElementById("shareStatus").textContent = t("sharing.unavailable");
-          return;
-        }
-      }
-      saveCalendarMembers();
-      renderMemberList();
-      document.getElementById("shareStatus").textContent = t("sharing.roleUpdated");
+      return persistMemberChange(memberId, { role: normalizeMemberRole(role) });
     }
 
     async function removeMember(memberId) {
-      const member = calendarMembers.find(item => (item.id || item.member_email) === memberId);
-      if (!member) return;
-      calendarMembers = calendarMembers.filter(item => item !== member);
-      saveCalendarMembers();
-      if (isCalendarOwner() && member.id && !member.id.startsWith("local-")) await cloudClient.from("calendar_members").delete().eq("id", member.id).eq("owner_id", cloudSession.user.id);
-      renderMemberList();
-      document.getElementById("shareStatus").textContent = t("sharing.memberUpdated");
+      return persistMemberChange(memberId, { remove: true });
     }
 
     function invitationOwnerLabel(invitation) {
@@ -21243,7 +21331,16 @@
       const accessPanel = document.getElementById("shareAccessPanel");
       accessPanel.hidden = !isCalendarOwner();
       if (isCalendarOwner()) {
-        Promise.all([refreshCloudCalendarMembers(), refreshOwnerCalendarComments()]).finally(renderMemberList);
+        const scope = calendarStorageKey("members"), status = document.getElementById("shareStatus");
+        const loading = t("save.syncing");
+        status.textContent = loading;
+        Promise.all([refreshCloudCalendarMembers(), refreshOwnerCalendarComments()]).then(([loaded]) => {
+          if (scope === calendarStorageKey("members") && status.textContent === loading)
+            status.textContent = loaded ? "" : t("sharing.refreshFailed");
+        }).catch(error => {
+          reportClientError(error, "share-refresh");
+          if (scope === calendarStorageKey("members")) status.textContent = t("sharing.refreshFailed");
+        }).finally(() => { if (scope === calendarStorageKey("members")) renderMemberList(); });
       } else {
         renderMemberList();
       }
@@ -21261,7 +21358,17 @@
       }) : [t("reminders.empty")];
       const subject = t("sharing.emailSubject", { calendar: calendarName });
       const body = `${t("sharing.emailIntro", { calendar: calendarName })}${lines.join("\n")}`;
+      document.getElementById("shareText").value = body;
+      document.getElementById("shareStatus").textContent = t("sharing.emailOpened");
       window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+
+    function handleEmailSummaryAction() {
+      closeSettingsDialog();
+      if (!activeAccount) { showAuthScreen("signin"); return; }
+      openShareDialog();
+      window.KidsSyncExperience?.selectShareTab("files");
+      emailWeeklySummary();
     }
 
     function renderAll() {
@@ -21286,6 +21393,7 @@
       requestAnimationFrame(resizeCalendarWorkspace);
       window.KidsSyncTools?.refresh();
       window.KidsSyncUI?.refresh();
+      window.KidsSyncInterface?.refresh();
       window.KidsSyncScheduler?.refresh();
       window.KidsSyncSmart?.refresh();
       window.KidsSyncFamily?.refresh();
@@ -21619,7 +21727,7 @@
     document.getElementById("sharedEventDate").addEventListener("change", updateSharedEventDateFields);
     document.getElementById("deleteSharedEvent").addEventListener("click", deleteSharedEvent);
     document.getElementById("printSchedule").addEventListener("click", () => {
-      document.getElementById("shareStatus").textContent = openPrintableSchedule() ? t("sharing.printOpened") : t("sharing.unavailable");
+      document.getElementById("shareStatus").textContent = t(openPrintableSchedule() ? "sharing.printOpened" : "sharing.printBlocked");
     });
     document.getElementById("exportPdf").addEventListener("click", exportSchedulePdf);
     document.getElementById("exportIcs").addEventListener("click", () => {
@@ -21686,15 +21794,11 @@
       if (count) googleImportFileName.textContent = t("googleImport.chooseFile");
     });
     document.getElementById("copySchedule").addEventListener("click", async () => {
-      const text = document.getElementById("shareText").value;
-      try {
-        await navigator.clipboard.writeText(text);
-        document.getElementById("shareStatus").textContent = t("sharing.copied");
-      } catch {
-        document.getElementById("shareText").select();
-        document.execCommand("copy");
-        document.getElementById("shareStatus").textContent = t("sharing.copied");
-      }
+      const field = document.getElementById("shareText"), text = field.value;
+      const scope = scheduleStorageKey("activities");
+      const copied = await copyTextToClipboard(text, field);
+      if (scope === scheduleStorageKey("activities") && document.getElementById("shareDialog").open && field.value === text)
+        document.getElementById("shareStatus").textContent = t(copied ? "sharing.copied" : "sharing.copyManually");
     });
     document.getElementById("emailWeeklySummary").addEventListener("click", emailWeeklySummary);
     document.getElementById("downloadSchedule").addEventListener("click", () => {
@@ -21715,8 +21819,9 @@
       }
       try {
         await navigator.share({ title: "KidsSync schedule", text: "Read-only KidsSync calendar", files: [file] });
+        document.getElementById("shareStatus").textContent = t("sharing.shareCompleted");
       } catch (error) {
-        if (error?.name !== "AbortError") document.getElementById("shareStatus").textContent = t("sharing.unavailable");
+        document.getElementById("shareStatus").textContent = t(error?.name === "AbortError" ? "sharing.shareCancelled" : "sharing.unavailable");
       }
     });
     document.getElementById("openDashboard").addEventListener("click", showDashboardPage);
@@ -21878,10 +21983,7 @@
       openSettingsDialog();
     });
     document.getElementById("cloudSyncAction").addEventListener("click", handleCloudSyncAction);
-    document.getElementById("notificationSignIn").addEventListener("click", () => {
-      closeSettingsDialog();
-      showAuthScreen("signin");
-    });
+    document.getElementById("notificationSignIn").addEventListener("click", handleEmailSummaryAction);
     document.getElementById("closeSettings").addEventListener("click", closeSettingsDialog);
     document.getElementById("doneSettings").addEventListener("click", closeSettingsDialog);
     document.querySelectorAll("[data-appearance-choice]").forEach(choice => {
@@ -22817,6 +22919,7 @@
   <script src="./assets/mobile-agenda.js"></script>
   <script src="./assets/planner-tools.js"></script>
   <script src="./assets/ui-features.js"></script>
+  <script src="./assets/interface-upgrades.js"></script>
   <script src="./assets/smart-scheduling.js?v=4"></script>
   <script src="./assets/family-polls.js?v=2"></script>
   <script src="./assets/experience.js"></script>
