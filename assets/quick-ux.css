@@ -1,0 +1,55 @@
+/* Five small shortcuts for finding and understanding the family schedule. */
+#appShell .quick-calendar-nav {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 var(--workspace-gap, 12px);
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel);
+}
+#appShell.is-dashboard-view .quick-calendar-nav { display: none; }
+#appShell .quick-calendar-nav button,
+#appShell .quick-calendar-nav input,
+#appShell .quick-calendar-nav select {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--ink);
+  background: var(--panel);
+  font: inherit;
+}
+#appShell .quick-calendar-nav button { padding: 6px 12px; cursor: pointer; }
+#appShell .quick-calendar-nav button:hover,
+#appShell .quick-calendar-nav button:focus-visible { border-color: var(--blue); background: var(--blue-soft); }
+#appShell .quick-calendar-nav .quick-next-event {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 230px;
+  min-width: 0;
+  text-align: left;
+}
+#appShell .quick-calendar-nav .quick-next-event[hidden] { display: none; }
+#appShell .quick-next-event > span:first-child { color: var(--blue); font-size: 12px; font-weight: 750; white-space: nowrap; }
+#appShell .quick-next-event strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+#appShell .quick-next-event > span:last-child { margin-left: auto; color: var(--blue); }
+#appShell .quick-calendar-nav label { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; font-weight: 650; white-space: nowrap; }
+#appShell .quick-calendar-nav label[hidden] { display: none; }
+#appShell .quick-calendar-nav label input,
+#appShell .quick-calendar-nav label select { box-sizing: border-box; padding: 4px 8px; font-size: 13px; }
+#appShell .quick-date-field input { width: 145px; }
+#appShell .quick-time-field select { width: 125px; }
+#appShell .quick-calendar-nav .quick-side-toggle { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 12px; font-weight: 650; }
+#appShell .quick-side-toggle[aria-pressed="false"] { color: var(--muted); }
+.member-role-hint { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+@media (max-width: 740px) {
+  #appShell .quick-calendar-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #appShell .quick-calendar-nav .quick-next-event { grid-column: 1 / -1; }
+  #appShell .quick-calendar-nav label { display: grid; gap: 3px; min-width: 0; }
+  #appShell .quick-calendar-nav label input,
+  #appShell .quick-calendar-nav label select { width: 100%; min-width: 0; }
+  #appShell .quick-calendar-nav .quick-side-toggle { grid-column: 1 / -1; justify-content: center; }
+}

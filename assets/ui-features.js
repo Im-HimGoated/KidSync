@@ -136,14 +136,14 @@
     if (next?.getClientRects().length) next.focus({ preventScroll: true });
     else document.getElementById('workspaceQuickAdd').focus({ preventScroll: true });
   }
-  function jumpToMinute(minute) {
+  function jumpToMinute(minute, { focusReturn = true } = {}) {
     const timeline = grid.querySelector('.time-column');
     if (!timeline || !weekSchedule.getClientRects().length) return;
     const top = scrollTopForMinute(minute, timeline.offsetHeight, weekSchedule.clientHeight, weekSchedule.scrollHeight, scheduleStartMinutes, scheduleEndMinutes);
     const reduced = userSettings.reduceMotion || matchMedia('(prefers-reduced-motion: reduce)').matches;
     weekSchedule.scrollTo({ top, left: weekSchedule.scrollLeft, behavior: reduced ? 'auto' : 'smooth' });
     jumpMenu.open = false;
-    jumpMenu.querySelector('summary').focus({ preventScroll: true });
+    if (focusReturn) jumpMenu.querySelector('summary').focus({ preventScroll: true });
   }
   function syncResize() {
     divider.setAttribute('aria-valuenow', String(workspaceLayout.sideWidth));
@@ -237,6 +237,6 @@
     setWidth(event.key === 'Home' ? 220 : event.key === 'End' ? 360 : workspaceLayout.sideWidth + delta, true);
   });
   window.addEventListener('resize', () => { if (matchMedia('(max-width: 900px)').matches) finishDrag(true); clearGuide(); });
-  window.KidsSyncUI = { refresh, renderFilters, syncResize };
+  window.KidsSyncUI = { refresh, renderFilters, syncResize, jumpToMinute };
   refresh();
 })();

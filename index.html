@@ -9815,6 +9815,7 @@
   <link rel="stylesheet" href="./assets/smart-planner.css?v=4">
   <link rel="stylesheet" href="./assets/family-workspace.css">
   <link rel="stylesheet" href="./assets/experience.css">
+  <link rel="stylesheet" href="./assets/quick-ux.css">
   <link rel="stylesheet" href="./assets/mobile.css?v=95">
 </head>
 <body>
@@ -10542,6 +10543,13 @@
       </div>
     </section>
 
+    <nav class="quick-calendar-nav" id="quickCalendarNav" aria-label="Quick calendar navigation">
+      <button type="button" class="quick-next-event" id="quickNextEvent" hidden><span data-quick-text="next">Next event</span><strong id="quickNextEventLabel"></strong><span aria-hidden="true">↗</span></button>
+      <label class="quick-date-field"><span data-quick-text="date">Go to date</span><input id="quickDate" type="date" min="1900-01-01" max="9998-12-31" aria-label="Go to date"></label>
+      <label class="quick-time-field"><span data-quick-text="time">Jump to time</span><select id="quickTime" aria-label="Jump to time"><option value="" selected disabled data-quick-text="chooseTime">Choose time</option><option value="now" data-quick-text="now">Now</option><option value="360" data-quick-text="morning">Morning</option><option value="720" data-quick-text="noon">Noon</option><option value="1080" data-quick-text="evening">Evening</option><option value="0" data-quick-text="midnight">Midnight</option></select></label>
+      <button type="button" class="quick-side-toggle" id="quickSideToggle" aria-controls="calendarSide" aria-pressed="true"><span aria-hidden="true">▣</span><span data-quick-text="hideSide">Hide mini calendar</span></button>
+    </nav>
+
     <div class="calendar-stage">
       <div class="calendar-side-resize" id="calendarSideResize" role="separator" tabindex="0" aria-label="Resize side calendar" aria-orientation="vertical" aria-controls="calendarSide" aria-valuemin="220" aria-valuemax="360" aria-valuenow="260"></div>
       <aside class="mini-calendar" id="calendarSide" aria-label="Mini calendar" data-i18n-aria="miniCalendar.label" aria-describedby="miniCalendarLegend">
@@ -11207,11 +11215,12 @@
         </label>
         <label>
           <span data-i18n="sharing.permission">Permission</span>
-          <select id="memberRole">
+          <select id="memberRole" aria-describedby="memberRoleHint">
             <option value="viewer" data-i18n="sharing.viewer">Viewer</option>
             <option value="commenter" data-i18n="sharing.commenter">Commenter</option>
             <option value="editor" data-i18n="sharing.editor">Editor</option>
           </select>
+          <small id="memberRoleHint" class="member-role-hint" aria-live="polite"></small>
         </label>
         <label class="member-invite-note">
           <span data-i18n="sharing.note">Note (optional)</span>
@@ -15272,6 +15281,7 @@
       updateTripDetailLabels();
       updateTripDateSummary();
       window.KidsSyncExperience?.localize();
+      window.KidsSyncQuick?.localize();
     }
 
     function setLanguage(language) {
@@ -21239,6 +21249,7 @@
       }
       document.getElementById("shareDialog").showModal();
       window.KidsSyncExperience?.openShare(isCalendarOwner());
+      window.KidsSyncQuick?.refresh();
     }
 
     function emailWeeklySummary() {
@@ -21280,6 +21291,7 @@
       window.KidsSyncFamily?.refresh();
       window.KidsSyncExternal?.renderOverlay();
       window.KidsSyncMobile?.refresh();
+      window.KidsSyncQuick?.refresh();
     }
 
     function calendarFocusTimestamp(activity) {
@@ -22808,5 +22820,6 @@
   <script src="./assets/smart-scheduling.js?v=4"></script>
   <script src="./assets/family-polls.js?v=2"></script>
   <script src="./assets/experience.js"></script>
+  <script src="./assets/quick-ux.js"></script>
 </body>
 </html>
