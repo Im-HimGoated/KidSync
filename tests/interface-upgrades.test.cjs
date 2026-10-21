@@ -42,11 +42,11 @@ test('all five upgrades are present, responsive, and connected to the normal ren
   for (const marker of ['family-strip-toggle', 'calendar-pulse-summary', 'date-ribbon', 'calendar-next-spotlight', 'mobile-action-dock']) {
     assert(script.includes(marker) || css.includes(marker), `Missing ${marker}`);
   }
-  assert.match(html, /<link rel="stylesheet" href="\.\/assets\/interface-upgrades\.css">/);
+  const stylesheet = html.match(/<link rel="stylesheet" href="(\.\/assets\/interface-upgrades\.css(?:\?v=\d+)?)">/)[1];
+  const scriptPath = html.match(/<script src="(\.\/assets\/interface-upgrades\.js(?:\?v=\d+)?)"><\/script>/)[1];
   assert.match(html, /window\.KidsSyncInterface\?\.refresh\(\)/);
-  assert.match(html, /<script src="\.\/assets\/interface-upgrades\.js"><\/script>/);
-  assert(worker.includes('"./assets/interface-upgrades.css"'));
-  assert(worker.includes('"./assets/interface-upgrades.js"'));
+  assert(worker.includes(JSON.stringify(stylesheet)));
+  assert(worker.includes(JSON.stringify(scriptPath)));
   assert.match(css, /@media \(max-width: 740px\)[\s\S]*?\.mobile-action-dock \{/);
   assert.match(css, /\.mobile-action-dock button \{[\s\S]*?min-height: 52px/);
   assert.match(css, /\.date-ribbon-days \{[\s\S]*?overflow-x: auto/);

@@ -35,7 +35,7 @@ function entry(id, importance, extra = {}) {
   return { id, title: id, importance, child: "__family__", day: day.key, eventType: "activity", start: "09:00", end: "10:00", ...extra };
 }
 function setup(functions = [], extras = {}) {
-  const ctx = vm.createContext({ t: key => key, currentLanguage: "en", document: { createElement: tag => new Element(tag) }, ...extras });
+  const ctx = vm.createContext({ t: key => key, currentLanguage: "en", document: { createElement: tag => new Element(tag), getElementById: () => new Element() }, ...extras });
   ["eventImportance", "importanceRank", "compareEventImportance", "isHolidayActivity", "compareCalendarEntries", "minutes", "escapeHtml", "isSameDate", "activityStatus", ...functions].forEach(name => vm.runInContext(source(name), ctx));
   return ctx;
 }
@@ -123,6 +123,6 @@ test("Month reserves its first visible event slot for a holiday, then orders by 
   ctx.renderMonth();
   assert.equal(monthGrid.children.length, 42);
   const first = monthGrid.children[0];
-  assert.deepEqual(first.children.slice(1, 4).map(item => item.dataset.occurrenceKey), ["Low holiday", "High activity", "Normal activity"]);
-  assert.equal(first.children[4].className, "month-more");
+  assert.deepEqual(first.children.filter(item => item.dataset.occurrenceKey).map(item => item.dataset.occurrenceKey), ["Low holiday", "High activity", "Normal activity"]);
+  assert(first.children.some(item => item.className === "month-more"));
 });

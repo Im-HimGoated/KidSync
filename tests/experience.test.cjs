@@ -26,7 +26,50 @@ test('dashboard connects its location board and avoids empty zero-value noise', 
   assert.match(html, /const dashboardPanelNames = \["locations", "week", "updates", "upcoming", "past"\]/);
   assert.match(experienceCss, /is-dashboard-empty #dashboardStats/);
   assert.match(experienceCss, /dashboard-map-panel\.is-empty \.dashboard-map-canvas \{ min-height: 190px; \}/);
-  assert.match(html, /state\.activities\.length \? `<span class="today-empty-actions">/);
+  assert.match(html, /id="todayHeading"[^>]*><\/h2><button[^>]*id="todayAddEvent"/);
+  const start = html.indexOf('    function renderToday(');
+  const end = html.indexOf('    function renderCalendarEmptyState(', start);
+  assert(start >= 0 && end > start, 'Day renderer must exist before checking its contents');
+  const dayRenderer = html.slice(start, end);
+  assert.doesNotMatch(dayRenderer, /today-empty-actions/);
+});
+
+test('empty selected days retain a date-specific add action with or without other saved events', () => {
+  const start = html.indexOf('    function renderToday(');
+  const end = html.indexOf('    function renderCalendarEmptyState(', start);
+  assert(start >= 0 && end > start);
+  for (const activities of [[], [{ id: 'another-day', startDate: '2026-10-23' }]]) {
+    const attributes = {};
+    const children = [];
+    const heading = {};
+    const date = new Date(2026, 9, 22);
+    const context = vm.createContext({
+      state: { activities }, selectedDate: date, todayHeading: heading,
+      todayList: { innerHTML: 'stale content', appendChild: element => children.push(element) },
+      document: {
+        getElementById: id => {
+          assert.equal(id, 'todayAddEvent');
+          return { setAttribute: (key, value) => { attributes[key] = value; } };
+        },
+        createElement: tag => ({ tagName: tag, innerHTML: '', className: '' })
+      },
+      formatFullDate: selected => { assert.equal(selected, date); return 'October 22, 2026'; },
+      occurrencesOnDate: selected => { assert.equal(selected, date); return []; },
+      compareCalendarEntries: () => 0,
+      findConflicts: () => new Set(),
+      t: (key, values) => key === 'calendar.addOnDate' ? `Add event on ${values.date}` : 'Nothing scheduled for this day.'
+    });
+    vm.runInContext(html.slice(start, end), context);
+    context.renderToday();
+    assert.equal(heading.textContent, 'October 22, 2026');
+    assert.equal(attributes['aria-label'], 'Add event on October 22, 2026');
+    assert.equal(context.todayList.innerHTML, '');
+    assert.equal(children.length, 1);
+    assert.equal(children[0].className, 'today-empty');
+    assert.match(children[0].innerHTML, /Nothing scheduled for this day\./);
+    assert.doesNotMatch(children[0].innerHTML, /<button/);
+  }
+  assert.match(html, /getElementById\("todayAddEvent"\)\.addEventListener\("click", \(\) => openNewEventForDate\(selectedDate, preferredNewEventChild\(\)\)\)/);
 });
 
 test('sharing uses separate accessible people and file panels', () => {

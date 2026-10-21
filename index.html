@@ -9853,7 +9853,7 @@
   <link rel="stylesheet" href="./assets/week-calendar.css">
   <link rel="stylesheet" href="./assets/planner-tools.css">
   <link rel="stylesheet" href="./assets/ui-features.css">
-  <link rel="stylesheet" href="./assets/interface-upgrades.css">
+  <link rel="stylesheet" href="./assets/interface-upgrades.css?v=3">
   <link rel="stylesheet" href="./assets/smart-scheduling.css?v=2">
   <link rel="stylesheet" href="./assets/family-polls.css?v=1">
   <link rel="stylesheet" href="./assets/smart-planner.css?v=4">
@@ -9862,6 +9862,7 @@
   <link rel="stylesheet" href="./assets/quick-ux.css">
   <link rel="stylesheet" href="./assets/marketing-auth.css?v=2">
   <link rel="stylesheet" href="./assets/micro-motion.css?v=1">
+  <link rel="stylesheet" href="./assets/calendar-ui-refresh.css?v=1">
   <link rel="stylesheet" href="./assets/landing-ux.css?v=1">
   <link rel="stylesheet" href="./assets/welcome-refresh.css?v=1">
   <link rel="stylesheet" href="./assets/mobile.css?v=95">
@@ -9887,8 +9888,8 @@
     window.addEventListener("error", window.dismissAppLoader, { once:true });
   </script>
   <section class="welcome-screen" id="welcomeScreen" aria-labelledby="welcomeHeadline" hidden>
-    <header class="welcome-nav" aria-label="KidsSync navigation" data-i18n-aria="welcome.navigation">
     <a class="welcome-skip-link" href="#welcomeHeadline" data-i18n="welcome.skip">Skip to main content</a>
+    <header class="welcome-nav" aria-label="KidsSync navigation" data-i18n-aria="welcome.navigation">
       <a class="welcome-wordmark" href="#welcomeHeadline" aria-label="KidsSync">
         <span class="welcome-mark" aria-hidden="true"></span>
         <span>Kids<span>Sync</span></span>
@@ -9897,9 +9898,9 @@
         <a class="welcome-nav-link" href="#welcomePreview" data-i18n="welcome.navPreview">Product</a>
         <a class="welcome-nav-link" href="#welcomeHow" data-i18n="welcome.navHow">How it works</a>
         <a class="welcome-nav-link" href="#welcomeAbout" data-i18n="welcome.navAbout">About us</a>
-      </nav>
         <a class="welcome-nav-link" href="#welcomeQuestions" data-i18n="welcome.navQuestions">Questions</a>
         <button class="welcome-menu-signin" type="button" data-welcome-signin data-i18n="welcome.signInAccount">Sign in to your account</button>
+      </nav>
       <div class="welcome-nav-actions">
         <div class="language-switch" role="group" aria-label="Language" data-i18n-aria="aria.language">
           <button class="language-option" type="button" data-language="en" aria-pressed="true">EN</button>
@@ -9908,8 +9909,8 @@
         <button class="welcome-signin-btn" type="button" id="welcomeSignIn" data-i18n="auth.signIn">Sign In</button>
         <button class="welcome-primary-btn" type="button" id="welcomeTryNav" data-i18n="welcome.tryPlanner">Try KidsSync free</button>
       </div>
-    </header>
       <button class="welcome-menu-toggle" id="welcomeMenuToggle" type="button" aria-expanded="false" aria-controls="welcomeSections" aria-label="Explore this page" data-i18n-aria="welcome.explorePage" hidden><span aria-hidden="true">☰</span></button>
+    </header>
 
     <section class="welcome-hero">
       <div class="welcome-hero-inner">
@@ -9923,7 +9924,6 @@
             <a class="welcome-secondary-btn" href="#welcomePreview" data-i18n="welcome.exploreSample">Explore a sample week <span aria-hidden="true">↗</span></a>
           </div>
           <p class="welcome-trial-note" data-i18n="welcome.trialNote">Explore for 10 minutes without an account. Sign in to keep and sync your calendar.</p>
-          <ul class="welcome-capabilities" aria-label="What KidsSync helps families do" data-i18n-aria="welcome.highlights">
           <p class="welcome-returning"><span data-i18n="welcome.alreadyHere">Already have an account?</span> <button type="button" id="welcomeSignInHero" data-i18n="auth.signIn">Sign In</button></p>
         </div>
         <div class="welcome-hero-visual" aria-hidden="true">
@@ -9933,6 +9933,7 @@
       <a class="welcome-scroll-link" href="#welcomePreview" data-i18n="welcome.seeWeek">See a sample family week ↓</a>
     </section>
     <div class="welcome-overview-band">
+          <ul class="welcome-capabilities" aria-label="What KidsSync helps families do" data-i18n-aria="welcome.highlights">
             <li class="welcome-capability">
               <span class="welcome-capability-number" aria-hidden="true">1</span>
               <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityPlan">Plan the week</strong><small data-i18n="welcome.capabilityPlanDetail">Color-coded schedules for every child</small></span>
@@ -10123,7 +10124,6 @@
       </div>
     </section>
 
-    <footer class="welcome-footer">
     <section class="welcome-questions-section" id="welcomeQuestions" aria-labelledby="welcomeQuestionsTitle">
       <div class="welcome-section-inner welcome-questions-layout">
         <div class="welcome-questions-intro"><p class="welcome-section-kicker" data-i18n="welcome.questionsKicker">Before you get started</p><h2 id="welcomeQuestionsTitle" data-i18n="welcome.questionsTitle">A few things worth knowing.</h2><p data-i18n="welcome.questionsBody">Clear expectations, from the first visit to your first shared plan.</p></div>
@@ -10139,10 +10139,11 @@
       <div><p class="welcome-section-kicker" data-i18n="welcome.finalKicker">Less coordinating. More living.</p><h2 id="welcomeFinalTitle" data-i18n="welcome.finalTitle">Make room for a calmer week.</h2><p data-i18n="welcome.finalBody">Start with your family’s next plan. Build the rest at your own pace.</p></div>
       <div class="welcome-final-actions"><button class="welcome-primary-btn" type="button" data-welcome-start data-i18n="welcome.tryPlanner">Try KidsSync free</button><span data-i18n="welcome.finalNote">10-minute preview · No account needed to explore</span></div>
     </section>
+    <footer class="welcome-footer">
       <div class="welcome-wordmark"><span class="welcome-mark" aria-hidden="true"></span><span>Kids<span>Sync</span></span></div>
       <span data-i18n="welcome.footer">A clearer week for every family.</span>
-    </footer>
       <a href="#welcomeHeadline" data-i18n="welcome.backTop">Back to top ↑</a>
+    </footer>
   </section>
 
   <section class="auth-screen" id="authScreen" aria-labelledby="authHeading" hidden>
@@ -10523,7 +10524,7 @@
       </div>
       <div class="schedule-actions">
         <div class="view-switch" role="tablist" aria-label="Calendar view" data-i18n-aria="aria.calendarView">
-          <button class="view-option" type="button" data-view="today" role="tab" aria-selected="false" data-i18n="view.today">Today</button>
+          <button class="view-option" type="button" data-view="today" role="tab" aria-selected="false" data-i18n="view.today">Day</button>
           <button class="view-option is-active" type="button" data-view="week" role="tab" aria-selected="true" data-i18n="view.week">Week</button>
           <button class="view-option" type="button" data-view="four" role="tab" aria-selected="false" data-i18n="view.four">4 days</button>
           <button class="view-option" type="button" data-view="month" role="tab" aria-selected="false" data-i18n="view.month">Month</button>
@@ -10631,7 +10632,7 @@
       <span class="search-empty-icon" aria-hidden="true">⌕</span>
       <div class="search-empty-copy">
         <h2 data-i18n="search.noResultsTitle">No matching events</h2>
-        <p data-i18n="search.noResultsBody">Try another search or clear the active filters.</p>
+        <p data-i18n="search.noResultsBody">Search applies to the dates shown. Try another date or clear the active filters.</p>
       </div>
       <button class="ghost-btn" type="button" id="resetScheduleFilters" data-i18n="search.reset">Clear search and filters</button>
     </section>
@@ -10703,7 +10704,7 @@
         <section class="mobile-agenda calendar-view" id="mobileAgenda" aria-label="Mobile weekly agenda" data-i18n-aria="aria.mobileAgenda"></section>
 
         <section class="today-view calendar-view" id="todayView" aria-label="Daily schedule" data-i18n-aria="aria.dailySchedule" hidden>
-          <div class="view-heading"><h2 id="todayHeading"></h2></div>
+          <div class="view-heading"><h2 id="todayHeading" tabindex="-1"></h2><button class="ghost-btn" type="button" id="todayAddEvent" data-i18n="miniCalendar.addEvent">Add event</button></div>
           <div class="today-list" id="todayList"></div>
         </section>
 
@@ -11582,7 +11583,7 @@
         <label class="setting-row">
           <span data-i18n="settings.defaultView">Default view</span>
           <select id="defaultView">
-            <option value="today" data-i18n="view.today">Today</option>
+            <option value="today" data-i18n="view.today">Day</option>
             <option value="week" data-i18n="view.week">Week</option>
             <option value="four" data-i18n="view.four">4 days</option>
             <option value="month" data-i18n="view.month">Month</option>
@@ -11824,7 +11825,6 @@
         "document.title": "KidsSync | One clear place for the family week",
         "welcome.navigation": "KidsSync navigation",
         "welcome.sections": "Welcome sections",
-        "welcome.navPreview": "Product",
         "welcome.skip": "Skip to main content",
         "welcome.explorePage": "Explore this page",
         "welcome.navQuestions": "Questions",
@@ -11854,6 +11854,7 @@
         "welcome.finalBody": "Start with your family’s next plan. Build the rest at your own pace.",
         "welcome.finalNote": "10-minute preview · No account needed to explore",
         "welcome.backTop": "Back to top ↑",
+        "welcome.navPreview": "Product",
         "welcome.navHow": "How it works",
         "welcome.navAbout": "About us",
         "welcome.tryPlanner": "Try KidsSync free",
@@ -12675,7 +12676,7 @@
         "actions.edit": "Edit",
         "actions.undo": "Undo",
         "actions.dismiss": "Dismiss",
-        "view.today": "Today",
+        "view.today": "Day",
         "view.week": "Week",
         "view.four": "4 days",
         "view.month": "Month",
@@ -12867,6 +12868,9 @@
         "presets.confirmDelete": "Delete preset “{name}”?",
         "presets.confirmExample": "Load the Andrew and Mark preset? This will replace the current kids and schedule.",
         "calendar.empty": "No activities yet.",
+        "calendar.dayEmpty": "Nothing scheduled for this day.",
+        "calendar.openDay": "View {date}",
+        "calendar.addOnDate": "Add event on {date}",
         "calendar.today": "Today",
         "miniCalendar.label": "Mini calendar",
         "miniCalendar.sidebarTitle": "Calendars",
@@ -12906,10 +12910,10 @@
         "today.addToday": "Add event today",
         "search.label": "Search activities",
         "search.shortLabel": "Search",
-        "search.placeholder": "Activities, children, locations, or notes",
+        "search.placeholder": "Search this view by event, child, place, or note",
         "search.clear": "Clear search",
-        "search.noResultsTitle": "No matching events",
-        "search.noResultsBody": "Try another search or clear the active filters.",
+        "search.noResultsTitle": "No events match this view",
+        "search.noResultsBody": "Search applies to the dates shown. Try another date or clear the active filters.",
         "search.reset": "Clear search and filters",
         "feedback.eventCreated": "{title} was added.",
         "feedback.eventUpdated": "{title} was updated.",
@@ -12987,10 +12991,6 @@
         "document.title": "KidsSync | 全家一周安排，清晰同步",
         "welcome.navigation": "KidsSync 导航",
         "welcome.sections": "欢迎页面导航",
-        "welcome.navPreview": "产品",
-        "welcome.navHow": "使用方法",
-        "welcome.navAbout": "关于我们",
-        "welcome.tryPlanner": "免费试用 KidsSync",
         "welcome.skip": "跳至主要内容",
         "welcome.explorePage": "浏览本页",
         "welcome.navQuestions": "常见问题",
@@ -13020,6 +13020,10 @@
         "welcome.finalBody": "从家人的下一个计划开始，按自己的节奏安排其余日程。",
         "welcome.finalNote": "10 分钟体验 · 探索无需账户",
         "welcome.backTop": "返回顶部 ↑",
+        "welcome.navPreview": "产品",
+        "welcome.navHow": "使用方法",
+        "welcome.navAbout": "关于我们",
+        "welcome.tryPlanner": "免费试用 KidsSync",
         "welcome.eyebrow": "为忙碌家长设计的家庭日程",
         "welcome.headline": "真正适合家庭生活的共享日历。",
         "welcome.description": "活动、接送和家庭计划。谁在何时需要去哪里，一眼就能看清。",
@@ -13824,7 +13828,7 @@
         "actions.edit": "编辑",
         "actions.undo": "撤销",
         "actions.dismiss": "关闭",
-        "view.today": "今天",
+        "view.today": "日",
         "view.week": "周",
         "view.four": "4 天",
         "view.month": "月",
@@ -14030,6 +14034,9 @@
         "presets.confirmDelete": "删除预设“{name}”？",
         "presets.confirmExample": "载入 Andrew 和 Mark 示例？这会替换当前的孩子和日程。",
         "calendar.empty": "还没有活动。",
+        "calendar.dayEmpty": "这一天还没有安排。",
+        "calendar.openDay": "查看 {date}",
+        "calendar.addOnDate": "在 {date} 添加活动",
         "calendar.today": "今天",
         "miniCalendar.label": "迷你日历",
         "miniCalendar.sidebarTitle": "日历",
@@ -14069,10 +14076,10 @@
         "today.addToday": "添加今天的活动",
         "search.label": "搜索活动",
         "search.shortLabel": "搜索",
-        "search.placeholder": "活动、孩子、地点或备注",
+        "search.placeholder": "在当前视图搜索活动、孩子、地点或备注",
         "search.clear": "清除搜索",
-        "search.noResultsTitle": "没有匹配的活动",
-        "search.noResultsBody": "请尝试其他关键词，或清除当前筛选条件。",
+        "search.noResultsTitle": "当前视图没有匹配的活动",
+        "search.noResultsBody": "搜索仅适用于当前显示的日期。请尝试其他日期，或清除筛选条件。",
         "search.reset": "清除搜索和筛选",
         "feedback.eventCreated": "已添加“{title}”。",
         "feedback.eventUpdated": "已更新“{title}”。",
@@ -17519,13 +17526,13 @@
         head.innerHTML = `<span class="day-head-label"><span class="day-head-label-row"><span>${dayLabel(day)}</span>${isToday ? `<span class="day-today-badge">${escapeHtml(t("calendar.today"))}</span>` : ""}</span><span class="day-head-date" aria-hidden="true">${date.getDate()}</span></span>${dayActivities.length ? `<span class="day-event-count" aria-label="${escapeHtml(countLabel)}">${dayActivities.length}</span>` : ""}`;
         head.tabIndex = 0;
         head.setAttribute("role", "button");
-        head.setAttribute("aria-label", `${t("actions.addActivity")} — ${formatFullDate(date)}`);
-        head.title = t("actions.addActivity");
-        head.addEventListener("click", () => openNewEventForDate(date, preferredNewEventChild()));
+        head.title = t("calendar.openDay", { date: formatFullDate(date) });
+        head.setAttribute("aria-label", head.title);
+        head.addEventListener("click", () => openCalendarDay(date));
         head.addEventListener("keydown", event => {
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            openNewEventForDate(date, preferredNewEventChild());
+            openCalendarDay(date);
           }
         });
         grid.appendChild(head);
@@ -17817,15 +17824,21 @@
         .sort((first, second) => minutes(first.start) - minutes(second.start) || compareEventImportance(first, second));
       if (!timed.length) return null;
       const now = new Date();
+      const selectedDay = new Date(selectedDate);
+      const today = new Date(now);
+      selectedDay.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+      if (selectedDay < today) return null;
       const nowMinutes = now.getHours() * 60 + now.getMinutes();
       if (isSameDate(selectedDate, now)) {
-        return timed.find(activity => minutes(activity.start) >= nowMinutes) || timed[timed.length - 1];
+        return timed.find(activity => minutes(activity.start) >= nowMinutes) || null;
       }
       return timed[0];
     }
 
     function renderToday() {
       todayHeading.textContent = formatFullDate(selectedDate);
+      document.getElementById("todayAddEvent").setAttribute("aria-label", t("calendar.addOnDate", { date: formatFullDate(selectedDate) }));
       todayList.innerHTML = "";
       const activities = occurrencesOnDate(selectedDate)
         .sort(compareCalendarEntries);
@@ -17836,14 +17849,9 @@
         empty.className = "today-empty";
         empty.innerHTML = `
           <span>
-            <span class="today-event-title">${t("calendar.empty")}</span>
-            <span class="today-event-meta">${formatFullDate(selectedDate)}</span>
-            ${state.activities.length ? `<span class="today-empty-actions">
-              <button class="ghost-btn" type="button">${t("today.addToday")}</button>
-            </span>` : ""}
+            <span class="today-event-title">${t("calendar.dayEmpty")}</span>
           </span>
         `;
-        empty.querySelector("button")?.addEventListener("click", () => openNewEventForDate(selectedDate, FAMILY_CHILD));
         todayList.appendChild(empty);
         return;
       }
@@ -17896,8 +17904,10 @@
     }
 
     function renderSearchEmptyState() {
-      const hasActiveSearch = Boolean(state.searchQuery.trim()) || state.eventFilter !== "all";
-      const hasNoMatches = state.activities.length > 0 && hasActiveSearch && currentPeriodOccurrences().length === 0;
+      const hasActiveSearch = Boolean(state.searchQuery.trim()) || state.eventFilter !== "all"
+        || kidProfiles.some(kid => !state.visibleKids.has(kid.name))
+        || (!state.showWeekends && ["week", "four"].includes(currentView));
+      const hasNoMatches = state.activities.length > 0 && hasActiveSearch && calendarInsightActivities().length === 0;
       searchEmptyState.hidden = !hasNoMatches;
       document.getElementById("appShell").classList.toggle("has-no-search-results", hasNoMatches);
     }
@@ -17905,6 +17915,12 @@
     function resetScheduleFilters() {
       state.searchQuery = "";
       state.eventFilter = "all";
+      state.visibleKids = new Set(kidProfiles.map(kid => kid.name));
+      if (["week", "four"].includes(currentView) && !state.showWeekends) {
+        state.showWeekends = true;
+        userSettings.showWeekends = true;
+        saveSettings();
+      }
       scheduleSearch.value = "";
       conflictCursor = 0;
       travelCursor = 0;
@@ -18160,34 +18176,35 @@
         const conflicts = findConflicts(activities);
         const cell = document.createElement("div");
         const outside = date.getMonth() !== currentMonthStart.getMonth();
-        cell.className = `month-day${outside ? " is-outside" : ""}${isSameDate(date, today) ? " is-today" : ""}`;
+        cell.className = `month-day${outside ? " is-outside" : ""}${isSameDate(date, today) ? " is-today" : ""}${isSameDate(date, selectedDate) ? " is-selected" : ""}`;
 
         const dateButton = document.createElement("button");
         dateButton.type = "button";
         dateButton.className = "month-date";
         dateButton.textContent = date.getDate();
-        dateButton.setAttribute("aria-label", formatFullDate(date));
+        dateButton.setAttribute("aria-label", t("calendar.openDay", { date: formatFullDate(date) }));
+        if (isSameDate(date, today)) dateButton.setAttribute("aria-current", "date");
         if (activities.length) {
           const countLabel = t(activities.length === 1 ? "overview.eventOne" : "overview.events", { count: activities.length });
-          dateButton.setAttribute("aria-label", `${formatFullDate(date)} · ${countLabel}`);
+          dateButton.setAttribute("aria-label", `${t("calendar.openDay", { date: formatFullDate(date) })} · ${countLabel}`);
           const compactCount = document.createElement("span");
           compactCount.className = "month-mobile-summary";
           compactCount.setAttribute("aria-hidden", "true");
           compactCount.textContent = String(activities.length);
           dateButton.appendChild(compactCount);
         }
-        const showSelectedDay = () => {
-          selectedDate = new Date(date);
-          currentWeekStart = getMonday(selectedDate);
-          activateCalendarView("today", true, { remember: false });
-          todayHeading.tabIndex = -1;
-          todayHeading.focus({ preventScroll: true });
-        };
-        dateButton.addEventListener("click", () => {
-          if (matchMedia("(max-width: 740px)").matches) showSelectedDay();
-          else openNewEventForDate(date, preferredNewEventChild());
-        });
+        const showSelectedDay = () => openCalendarDay(date);
+        dateButton.title = t("calendar.openDay", { date: formatFullDate(date) });
+        dateButton.addEventListener("click", showSelectedDay);
         cell.appendChild(dateButton);
+        const addButton = document.createElement("button");
+        addButton.type = "button";
+        addButton.className = "month-add-event";
+        addButton.textContent = "+";
+        addButton.title = t("calendar.addOnDate", { date: formatFullDate(date) });
+        addButton.setAttribute("aria-label", addButton.title);
+        addButton.addEventListener("click", () => openNewEventForDate(date, preferredNewEventChild()));
+        cell.appendChild(addButton);
 
         activities.slice(0, 3).forEach(activity => {
           const colors = eventColors(activity);
@@ -18332,7 +18349,17 @@
       });
     }
 
-    function activateCalendarView(view, preserveDate = false, { remember = true } = {}) {
+    function openCalendarDay(date) {
+      selectedDate = new Date(date);
+      currentWeekStart = getMonday(selectedDate);
+      currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      miniCalendarMonth = new Date(currentMonthStart);
+      showCalendarPage();
+      activateCalendarView("today", true, { remember: false });
+      todayHeading.focus({ preventScroll: true });
+    }
+
+    function activateCalendarView(view, preserveDate = true, { remember = true } = {}) {
       currentView = ["today", "week", "four", "month"].includes(view) ? view : "week";
       if (currentView === "today" && !preserveDate) selectedDate = new Date();
       if (currentView === "week" || currentView === "four") currentWeekStart = getMonday(selectedDate);
@@ -21871,13 +21898,14 @@
         selectedDate = addDays(selectedDate, direction);
       } else if (currentView === "month") {
         currentMonthStart = new Date(currentMonthStart.getFullYear(), currentMonthStart.getMonth() + direction, 1);
-        selectedDate = new Date(currentMonthStart);
+        const lastDay = new Date(currentMonthStart.getFullYear(), currentMonthStart.getMonth() + 1, 0).getDate();
+        selectedDate = new Date(currentMonthStart.getFullYear(), currentMonthStart.getMonth(), Math.min(selectedDate.getDate(), lastDay));
       } else if (currentView === "four") {
         selectedDate = addDays(calendarPeriodStart(), direction * 4);
         currentWeekStart = getMonday(selectedDate);
       } else {
-        currentWeekStart = addDays(currentWeekStart, direction * 7);
-        selectedDate = new Date(currentWeekStart);
+        selectedDate = addDays(selectedDate, direction * 7);
+        currentWeekStart = getMonday(selectedDate);
       }
       miniCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
       renderAll();
@@ -22510,6 +22538,7 @@
       }
     });
     document.getElementById("resetScheduleFilters").addEventListener("click", resetScheduleFilters);
+    document.getElementById("todayAddEvent").addEventListener("click", () => openNewEventForDate(selectedDate, preferredNewEventChild()));
     jumpConflictButton.addEventListener("click", jumpToNextConflict);
     jumpTravelButton.addEventListener("click", jumpToNextTravelWarning);
     document.getElementById("calendarInsightsConflicts").addEventListener("click", () => jumpToCalendarInsightWarning("conflict"));
@@ -23263,12 +23292,12 @@
   <script src="./assets/mobile-agenda.js"></script>
   <script src="./assets/planner-tools.js"></script>
   <script src="./assets/ui-features.js"></script>
-  <script src="./assets/interface-upgrades.js"></script>
+  <script src="./assets/interface-upgrades.js?v=3"></script>
   <script src="./assets/smart-scheduling.js?v=4"></script>
   <script src="./assets/family-polls.js?v=2"></script>
   <script src="./assets/experience.js"></script>
   <script src="./assets/quick-ux.js"></script>
   <script src="./assets/auth-visual-rotation.js?v=1"></script>
+  <script src="./assets/landing-ux.js?v=1"></script>
 </body>
 </html>
-  <script src="./assets/landing-ux.js?v=1"></script>

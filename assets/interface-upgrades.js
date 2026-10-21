@@ -87,13 +87,7 @@
     pulse.addEventListener('click', event => {
       const dateButton = event.target.closest('[data-ribbon-date]');
       if (dateButton) {
-        const date = parseDateKey(dateButton.dataset.ribbonDate);
-        selectedDate = date;
-        currentWeekStart = getMonday(date);
-        currentMonthStart = new Date(date.getFullYear(), date.getMonth(), 1);
-        miniCalendarMonth = new Date(currentMonthStart);
-        showCalendarPage();
-        activateCalendarView('today', true);
+        openCalendarDay(parseDateKey(dateButton.dataset.ribbonDate));
         return;
       }
       const shift = event.target.closest('[data-ribbon-shift]');
@@ -213,6 +207,7 @@
   }
 
   function renderPulse() {
+    document.getElementById('calendarPulse').dataset.view = currentView;
     const insight = calendarInsightSummary();
     document.getElementById('calendarPulseKicker').textContent = tx('summary');
     document.getElementById('calendarPulseRange').textContent = document.getElementById('weekLabel').textContent;

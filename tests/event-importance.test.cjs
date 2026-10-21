@@ -68,6 +68,10 @@ test("next-up stays chronological even when a later important event leads the li
   assert.equal(items[0].id, "later high");
   ctx.selectedDate = new Date(2026, 9, 14);
   assert.equal(ctx.nextUpActivity(items).id, "next low");
+  ctx.selectedDate = new Date(2026, 9, 12);
+  assert.equal(ctx.nextUpActivity(items), null, "Past dates have no next-up event");
+  ctx.selectedDate = new Date(2026, 9, 13);
+  assert.equal(ctx.nextUpActivity([event("already started", "high", "08:00")]), null, "Do not mark the last event as next after its start time");
 });
 
 test("badges are textual, escaped, and absent from normal events", () => {

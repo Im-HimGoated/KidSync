@@ -180,6 +180,33 @@
 
 .mobile-action-dock { display: none; }
 
+/* Date navigation and creation have separate, consistent controls. */
+#appShell .today-view .view-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 16px 18px; }
+#appShell .today-view .view-heading h2 { font-size: clamp(18px, 2vw, 24px); line-height: 1.35; }
+#appShell #todayAddEvent { min-height: 44px; padding: 8px 14px; white-space: nowrap; }
+#appShell .today-empty { margin: 16px; padding: 24px 18px; border: 1px dashed var(--line); background: var(--panel); box-shadow: none; }
+#appShell .today-empty .today-event-title { font-size: 15px; font-weight: 600; }
+#appShell .month-day { position: relative; }
+#appShell .month-day.is-selected:not(.is-today) { background: var(--blue-soft); }
+#appShell .month-add-event {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  min-height: 30px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 21px;
+  line-height: 1;
+}
+#appShell .month-add-event:hover { border-color: var(--blue-line); color: var(--blue); background: var(--blue-soft); box-shadow: none; }
+#appShell .month-add-event:focus-visible, #appShell .month-date:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+
 html.dark-mode .calendar-pulse { box-shadow: none; }
 html.dark-mode .calendar-pulse-summary { background: #22323d; }
 html.dark-mode .calendar-next-spotlight { background: #20384b; }
@@ -187,6 +214,14 @@ html.dark-mode .date-ribbon-day.is-selected { color: #102b3d; background: #a9d9f
 html.dark-mode .date-ribbon-day.is-selected > span { color: #25495f; }
 
 @media (max-width: 740px) {
+  /* Phone week views use an agenda, so a timeline jump would have no effect. */
+  #appShell #calendarPulse > .quick-calendar-nav { display: none; }
+  #appShell #calendarPulse[data-view="today"] .calendar-next-spotlight { display: none; }
+  #appShell .month-add-event { display: none; }
+  #appShell .today-view .view-heading { flex-wrap: nowrap; gap: 8px; padding: 12px; }
+  #appShell .today-view .view-heading h2 { min-width: 0; font-size: 17px; }
+  #appShell .today-view #todayAddEvent { flex: 0 0 44px; width: 44px; padding: 0; font-size: 0; }
+  #appShell .today-view #todayAddEvent::before { content: "+"; font-size: 23px; line-height: 1; }
   #appShell { padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
   #appShell #kidFilters { grid-template-columns: minmax(0, 1fr) auto 44px; }
   #appShell #kidFilters .kids-list,

@@ -1,0 +1,242 @@
+/* Calendar workspace refresh: keep planning controls useful without pushing the week away. */
+
+@media (min-width: 741px) {
+  #appShell .calendar-insights {
+    min-height: 36px;
+    gap: 8px 16px;
+    margin: 0 0 8px;
+    padding: 0 2px 7px;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: transparent;
+  }
+
+  #appShell .calendar-insights-copy h2 { display: none; }
+  #appShell .calendar-insights-copy p,
+  #appShell .calendar-insights-status { font-size: 11px; }
+  #appShell .calendar-insights-warning {
+    min-height: 30px;
+    padding: 4px 8px;
+  }
+
+  #appShell .calendar-pulse {
+    grid-template-columns: minmax(190px, .55fr) minmax(430px, 1.35fr) auto;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 8px;
+    box-shadow: 0 2px 10px rgb(31 49 86 / 5%);
+  }
+
+  #appShell .calendar-pulse-summary { display: none; }
+
+  #appShell .calendar-next-spotlight {
+    grid-column: 1;
+    grid-row: 1;
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 8px;
+    min-height: 54px;
+    padding: 6px 8px;
+  }
+
+  #appShell .calendar-next-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  #appShell .calendar-pulse small { font-size: 9px; }
+  #appShell .calendar-pulse strong { font-size: 13px; }
+
+  #appShell .date-ribbon {
+    grid-column: 2;
+    grid-row: 1;
+    grid-template-columns: 32px minmax(0, 1fr) 32px;
+    gap: 4px;
+  }
+
+  #appShell .date-ribbon-days { gap: 4px; }
+  #appShell .date-ribbon-arrow,
+  #appShell .date-ribbon-day {
+    min-height: 54px;
+    border-radius: 6px;
+  }
+  #appShell .date-ribbon-arrow { font-size: 20px; }
+  #appShell .date-ribbon-day { padding: 5px 3px; }
+  #appShell .date-ribbon-day > strong { font-size: 15px; }
+  #appShell .date-ribbon-day > i {
+    top: 3px;
+    right: 3px;
+    min-width: 15px;
+    height: 15px;
+    padding-inline: 3px;
+    font-size: 8px;
+  }
+
+  #appShell .calendar-pulse > .quick-calendar-nav {
+    grid-column: 3;
+    grid-row: 1;
+    align-items: center;
+    align-content: center;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 6px;
+    min-width: 0;
+    padding: 0;
+    border-top: 0;
+  }
+
+  #appShell .calendar-pulse .quick-date-field { display: none; }
+  #appShell .calendar-pulse .quick-time-field {
+    display: grid;
+    gap: 2px;
+    min-width: 112px;
+    font-size: 9px;
+    line-height: 1.1;
+  }
+  #appShell .calendar-pulse .quick-time-field select {
+    width: 112px;
+    min-height: 36px;
+    padding: 4px 7px;
+    font-size: 12px;
+  }
+  #appShell .calendar-pulse .quick-side-toggle {
+    min-width: 40px;
+    min-height: 40px;
+    justify-content: center;
+    padding: 6px 9px;
+  }
+}
+
+@media (min-width: 741px) and (max-width: 1120px) {
+  #appShell .calendar-pulse {
+    grid-template-columns: minmax(180px, .65fr) minmax(390px, 1.35fr);
+  }
+  #appShell .calendar-pulse > .quick-calendar-nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding-top: 7px;
+    border-top: 1px solid var(--line);
+  }
+}
+
+/* A denser header leaves more room for plans while keeping every date easy to scan. */
+#appShell #weekSchedule {
+  --week-header-height: 68px;
+  --week-all-day-height: 44px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgb(31 49 86 / 5%);
+}
+
+#appShell #weekSchedule .time-head,
+#appShell #weekSchedule .day-head {
+  height: 68px;
+  min-height: 68px;
+}
+
+#appShell #weekSchedule .day-head {
+  gap: 6px;
+  padding: 7px 8px;
+}
+
+#appShell #weekSchedule .day-head-label { gap: 3px; }
+#appShell #weekSchedule .day-head-label-row {
+  gap: 4px;
+  font-size: max(10px, calc(var(--workspace-text-size, 14px) - 4px));
+}
+
+#appShell #weekSchedule .day-head-date {
+  width: 30px;
+  height: 30px;
+  margin-left: -3px;
+  font-size: 23px;
+}
+
+#appShell #weekSchedule .day-head.is-today .day-head-date {
+  color: #fff;
+  background: var(--blue);
+}
+
+#appShell #weekSchedule .day-event-count {
+  align-self: center;
+  margin: 0 0 0 auto;
+}
+
+#appShell #weekSchedule .all-day-head,
+#appShell #weekSchedule .all-day-cell { min-height: 44px; }
+
+/* Event cards read in the same order a parent thinks: activity, time, child, detail. */
+#appShell #weekSchedule .day-column > .event,
+#appShell #weekSchedule .day-column > .event.overlap-offset {
+  padding: 6px 7px;
+  border-color: color-mix(in srgb, var(--event-line) 72%, var(--event-bg));
+  box-shadow: 0 1px 2px rgb(23 42 58 / 8%);
+}
+
+#appShell #weekSchedule .day-column > .event .event-icon {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: block;
+  width: 18px;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 18px;
+  text-align: center;
+  opacity: .88;
+  pointer-events: none;
+}
+
+#appShell #weekSchedule .day-column > .event .event-title {
+  padding-right: 20px;
+  font-weight: 700;
+}
+
+#appShell #weekSchedule .day-column > .event .event-time,
+#appShell #weekSchedule .day-column > .event.overlap-offset .event-time {
+  color: color-mix(in srgb, var(--event-ink) 80%, transparent);
+  font-weight: 650;
+}
+
+#appShell #weekSchedule .day-column > .event .event-child {
+  font-weight: 650;
+  opacity: .86;
+}
+
+#appShell #weekSchedule .day-column > .event .event-detail { opacity: .72; }
+
+#appShell #weekSchedule .day-column > .event.overlap-offset .event-icon,
+#appShell #weekSchedule .day-column > .event.compact-duration .event-icon,
+#appShell #weekSchedule .day-column > .event.very-short .event-icon { display: none; }
+
+#appShell #weekSchedule .day-column > .event.overlap-offset .event-title,
+#appShell #weekSchedule .day-column > .event.compact-duration .event-title,
+#appShell #weekSchedule .day-column > .event.very-short .event-title { padding-right: 0; }
+
+#appShell #weekSchedule .day-column > .event.conflict {
+  border-color: color-mix(in srgb, #c93651 72%, var(--event-bg));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #c93651 55%, transparent), 0 1px 2px rgb(23 42 58 / 8%);
+}
+
+#appShell #weekSchedule .day-column > .event:hover {
+  box-shadow: 0 4px 12px rgb(23 42 58 / 18%);
+}
+
+html.dark-mode #appShell #weekSchedule .day-column > .event {
+  box-shadow: 0 1px 2px rgb(0 0 0 / 24%);
+}
+
+@media (max-width: 740px) {
+  #appShell .calendar-pulse { margin-bottom: 10px; box-shadow: none; }
+  #appShell .agenda-item {
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgb(23 42 58 / 7%);
+  }
+  #appShell .agenda-item:active { background: var(--blue-soft); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #appShell #weekSchedule .day-column > .event { transition: none; }
+}
+
