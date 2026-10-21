@@ -1,0 +1,37 @@
+/* Keep the viewport as the dashboard scroll container so section navigation can stick. */
+body:has(#appShell.is-dashboard-view:not([hidden])) { overflow-x: clip; overflow-y: visible; }
+.sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important; }
+#dashboardPage .dashboard-wayfinding { position: sticky; top: 0; z-index: 75; display: grid; gap: 9px; margin: 18px 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); box-shadow: 0 4px 14px rgb(0 0 0 / 5%); }
+#dashboardPage .dashboard-wayfinding-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#dashboardPage .dashboard-next-plan { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; min-height: 46px; padding: 3px; border: 0; border-radius: 6px; color: var(--ink); background: transparent; text-align: left; box-shadow: none; }
+#dashboardPage .dashboard-next-plan:hover { background: var(--blue-soft); transform: none; }
+#dashboardPage .dashboard-next-icon { display: grid; flex: 0 0 36px; width: 36px; height: 36px; place-items: center; border-radius: 8px; background: var(--blue-soft); color: var(--blue); font-size: 19px; }
+#dashboardPage .dashboard-next-plan > span:nth-child(2) { display: grid; gap: 3px; min-width: 0; }
+#dashboardPage .dashboard-next-plan small { color: var(--blue); font-size: 11px; line-height: 1.4; font-weight: 650; }
+#dashboardPage .dashboard-next-plan strong { overflow: hidden; color: var(--ink); font-size: 14px; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+#dashboardPage .dashboard-next-copy > span { overflow: hidden; color: var(--muted); font-size: 11px; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+#dashboardPage .dashboard-next-plan > span:last-child:not(:nth-child(2)) { margin-left: auto; color: var(--blue); }
+#dashboardPage .dashboard-section-links { display: flex; gap: 6px; overflow-x: auto; max-width: 100%; padding: 2px 1px 5px; overscroll-behavior-x: contain; scrollbar-width: thin; }
+#dashboardPage .dashboard-section-links button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: 0 0 auto; min-height: 36px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: transparent; font-size: 12px; font-weight: 650; white-space: nowrap; box-shadow: none; }
+#dashboardPage .dashboard-section-links button[hidden] { display: none; }
+#dashboardPage .dashboard-section-links button:hover, #dashboardPage .dashboard-section-links button[aria-current] { border-color: var(--blue-line); color: var(--blue); background: var(--blue-soft); transform: none; }
+#dashboardPage .dashboard-section-count { min-width: 19px; padding: 1px 4px; border-radius: 4px; color: var(--blue); background: var(--blue-soft); font-size: 10px; line-height: 16px; text-align: center; }
+#dashboardPage .dashboard-section-count[hidden] { display: none; }
+#dashboardPage .dashboard-section-menu { position: relative; flex: 0 0 auto; }
+#dashboardPage .dashboard-section-menu > summary { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 5px 12px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: var(--panel); font-size: 12px; font-weight: 650; cursor: pointer; list-style: none; }
+#dashboardPage .dashboard-section-menu > summary::after { content: '⌄'; color: var(--blue); }
+#dashboardPage .dashboard-section-menu > summary::-webkit-details-marker { display: none; }
+#dashboardPage .dashboard-section-menu > div { position: absolute; top: calc(100% + 7px); right: 0; z-index: 2; display: grid; gap: 6px; width: 225px; padding: 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); box-shadow: 0 8px 22px rgb(0 0 0 / 12%); }
+#dashboardPage .dashboard-section-menu p { margin: 0 0 5px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+#dashboardPage .dashboard-section-menu button { min-height: 44px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); background: var(--panel); font-size: 13px; text-align: left; }
+#dashboardPage .dashboard-section-menu button:hover { background: var(--blue-soft); transform: none; }
+#dashboardPage .dashboard-wayfinding button:focus-visible, #dashboardPage .dashboard-wayfinding summary:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+#dashboardPage .dashboard-planning-panel { scroll-margin-top: 152px; }
+@media (max-width: 740px) {
+  #dashboardPage .dashboard-wayfinding { gap: 5px; margin: 14px 0; padding: 8px; border-radius: 9px; }
+  #dashboardPage .dashboard-next-plan { gap: 8px; }
+  #dashboardPage .dashboard-next-copy > span { display: none; }
+  #dashboardPage .dashboard-section-menu > summary { min-height: 44px; padding: 5px 9px; }
+  #dashboardPage .dashboard-section-links button { min-height: 44px; }
+  #dashboardPage .dashboard-planning-panel { scroll-margin-top: 150px; }
+}

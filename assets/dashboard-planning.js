@@ -128,10 +128,19 @@
   const panels = new Map();
   const roots = ['dashboardNow', 'dashboardPlanMain', 'dashboardPlanSide', 'dashboardSpecial'].map(id => document.getElementById(id));
   let references = [], referenceScope = '';
+  const panelIcons = {
+    today: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18m-13 5h3"/>',
+    attention: '<path d="m10.3 4-8 14a2 2 0 0 0 1.7 3h16a2 2 0 0 0 1.7-3l-8-14a2 2 0 0 0-3.4 0ZM12 9v5m0 3v.01"/>',
+    outlook: '<path d="M4 20h16M7 16V9m5 7V4m5 12v-5"/>',
+    handoffs: '<circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3m2-17a3 3 0 0 1 0 6m2 4a6 6 0 0 1 2 4v3"/>',
+    priority: '<path d="M5 21V4c5-5 9 5 14 0v11c-5 5-9-5-14 0"/>',
+    prep: '<rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="m9 13 2 2 4-4"/>',
+    special: '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/>'
+  };
   function panel(key, root) {
     const element = document.createElement('details');
     element.open = true; element.className = 'dashboard-planning-panel'; element.dataset.dashboardSection = key;
-    element.innerHTML = `<summary><span><span class="dashboard-planning-eyebrow" data-plan-eyebrow></span><h2 id="dashboardPlan-${key}"></h2><span class="dashboard-planning-subtitle" data-plan-hint></span></span><span class="dashboard-planning-toggle" aria-hidden="true"></span></summary><div class="dashboard-planning-body" data-plan-body></div>`;
+    element.innerHTML = `<summary><span class="dashboard-planning-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false">${panelIcons[key] || ''}</svg></span><span class="dashboard-planning-heading"><span class="dashboard-planning-eyebrow" data-plan-eyebrow></span><h2 id="dashboardPlan-${key}"></h2><span class="dashboard-planning-subtitle" data-plan-hint></span></span><span class="dashboard-planning-toggle" aria-hidden="true"></span></summary><div class="dashboard-planning-body" data-plan-body></div>`;
     root.append(element); panels.set(key, element);
   }
   panel('today', roots[0]); panel('attention', roots[0]);
@@ -179,7 +188,7 @@
   }
   function renderAttention(model) {
     const pairs = findConflictPairs(model.near.filter(event => !isSpan(event)));
-    const conflicts = list(pairs, ([first, second]) => `<article class="dashboard-plan-alert"><span class="dashboard-plan-badge">${esc(text('overlap'))}</span><strong>${esc(activityCompactTitle(first))} + ${esc(activityCompactTitle(second))}</strong><p>${esc(when(first))} · ${esc(displayChild(first))}</p><div class="dashboard-plan-actions"><button type="button" class="small-btn" data-dashboard-event="${ref(first)}">${esc(activityCompactTitle(first))} ↗</button><button type="button" class="small-btn" data-dashboard-event="${ref(second)}">${esc(activityCompactTitle(second))} ↗</button></div></article>`, 2);
+    const conflicts = list(pairs, ([first, second]) => `<article class="dashboard-plan-alert"><span class="dashboard-plan-badge">${esc(text('overlap'))}</span><strong>${esc(activityCompactTitle(first))} + ${esc(activityCompactTitle(second))}</strong><p>${esc(when(first))} · ${esc(displayChild(first))}</p><div class="dashboard-plan-actions"><button type="button" class="small-btn" data-dashboard-event="${ref(first)}" data-dashboard-key="${esc(occurrenceId(first))}">${esc(activityCompactTitle(first))} ↗</button><button type="button" class="small-btn" data-dashboard-event="${ref(second)}" data-dashboard-key="${esc(occurrenceId(second))}">${esc(activityCompactTitle(second))} ↗</button></div></article>`, 2);
     const urgent = list(model.urgent, event => eventRow(event, text('deadline')), 2);
     setPanel('attention', conflicts || urgent ? `${conflicts}${urgent}` : `${empty('good')}<p class="dashboard-plan-note">${esc(text('clearHint'))}</p>`, String(pairs.length + model.urgent.length), model.hasPlans);
   }
@@ -215,6 +224,7 @@
     }
     const snapshot = buildModel(entries, now); references = []; referenceScope = scheduleStorageKey('activities');
     renderToday(snapshot, now); renderAttention(snapshot); renderPreparation(snapshot); renderHandoffs(snapshot); renderSpecial(snapshot, now); renderOutlook(snapshot);
+    window.KidsSyncDashboardUX?.refresh(snapshot);
   }
   function openDate(date, view) {
     selectedDate = new Date(date); showCalendarPage(); setSidebarActive('calendar');
@@ -233,6 +243,6 @@
     else if (button.dataset.dashboardAction === 'find') window.KidsSyncScheduler.open('find');
     else if (button.dataset.dashboardAction === 'quick') window.KidsSyncScheduler.open('quick');
   });
-  window.KidsSyncDashboard = { refresh };
+  window.KidsSyncDashboard = { refresh, engine: pure };
   refresh();
 })();

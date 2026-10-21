@@ -1,0 +1,147 @@
+/* Finishing layer: readable hierarchy, purposeful color, calm surfaces. */
+#appShell {
+  --refine-accent: var(--trust-primary, var(--blue));
+  --refine-tint: color-mix(in srgb, var(--refine-accent) 6%, var(--panel));
+  --refine-edge: color-mix(in srgb, var(--ink) 12%, var(--panel));
+  --refine-shadow: 0 2px 8px color-mix(in srgb, var(--ink) 4%, transparent);
+  --refine-warning: #8a5114;
+  --refine-warning-bg: #fff7e8;
+  --refine-warning-edge: #ebd8b9;
+}
+html.dark-mode #appShell {
+  --refine-warning: #f2cf98;
+  --refine-warning-bg: #332b20;
+  --refine-warning-edge: #685339;
+}
+
+/* Navigation stays compact; selected and focused items are easy to recognize. */
+#appShell > .app-sidebar { border-bottom-color: var(--refine-edge); background: transparent; box-shadow: none; }
+#appShell :is(.sidebar-icon-button, .sidebar-menu > summary, .sidebar-today) { box-shadow: none; }
+#appShell .sidebar-nav { padding: 10px; border-color: var(--refine-edge); }
+#appShell .sidebar-nav-item { min-height: 44px; padding-inline: 12px; border-radius: 9px; font-size: 14px; line-height: 1.4; }
+#appShell .sidebar-nav-item.is-active { color: var(--refine-accent); background: var(--refine-tint); box-shadow: inset 3px 0 0 var(--refine-accent); }
+#appShell .sidebar-nav-icon { font-size: 19px; }
+#appShell .sidebar-calendar-heading { color: var(--muted); }
+#appShell .sidebar-calendar-row { border-radius: 8px; }
+#appShell .sidebar-calendar-row:hover { background: var(--refine-tint); }
+#appShell :is(.sidebar-nav-item, .sidebar-calendar-row, .sidebar-icon-button):focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* Generous dashboard gutters do not widen the calendar or make its toolbar taller. */
+#dashboardPage { max-width: 1480px; margin-inline: auto; padding: 4px 12px 28px; }
+#dashboardPage .dashboard-page-header { align-items: center; gap: 20px; padding: 22px 0; border-bottom: 0; }
+#dashboardPage .dashboard-page-kicker { margin-bottom: 7px; color: var(--refine-accent); font-size: 10px; font-weight: 750; letter-spacing: .12em; }
+#dashboardPage .dashboard-page-header h1 { font-size: clamp(25px, 2.4vw, 34px); font-weight: 750; line-height: 1.2; letter-spacing: -.035em; text-wrap: balance; }
+#dashboardPage .dashboard-greeting { margin-top: 7px; font-size: 14px; line-height: 1.6; }
+#dashboardPage .dashboard-page-actions { gap: 8px; }
+#dashboardPage .dashboard-page-actions button { min-height: 44px; border-radius: 9px; }
+#dashboardPage .dashboard-page-actions .ghost-btn { background: var(--panel); }
+#dashboardPage .dashboard-wayfinding { margin: 0 0 18px; border-color: var(--refine-edge); border-radius: 12px; box-shadow: var(--refine-shadow); }
+#dashboardPage .dashboard-section-links button { border-color: transparent; background: var(--soft-line); }
+#dashboardPage .dashboard-section-links button[aria-current] { color: var(--refine-accent); background: var(--refine-tint); border-color: color-mix(in srgb, var(--refine-accent) 25%, var(--panel)); }
+#dashboardPage .dashboard-now-grid { margin-top: 0; gap: 18px; }
+#dashboardPage :is(.dashboard-panel, .dashboard-planning-panel) { border-color: var(--refine-edge); border-radius: 14px; box-shadow: var(--refine-shadow); }
+#dashboardPage .dashboard-planning-panel > summary { justify-content: flex-start; gap: 12px; min-height: 88px; padding: 18px 20px; }
+#dashboardPage .dashboard-planning-heading { flex: 1; min-width: 0; }
+#dashboardPage .dashboard-planning-symbol { display: grid; flex: 0 0 40px; width: 40px; height: 40px; place-items: center; border: 1px solid color-mix(in srgb, var(--refine-accent) 14%, var(--panel)); border-radius: 12px; color: var(--refine-accent); background: var(--refine-tint); }
+#dashboardPage .dashboard-planning-symbol svg { width: 21px; height: 21px; }
+#dashboardPage .dashboard-planning-panel h2 { margin: 2px 0 4px; font-size: 18px; font-weight: 700; }
+#dashboardPage .dashboard-planning-subtitle { font-size: 12px; line-height: 1.6; }
+#dashboardPage .dashboard-planning-eyebrow { color: var(--refine-accent); font-size: 10px; font-weight: 700; }
+#dashboardPage .dashboard-planning-toggle { margin-left: auto; width: 32px; height: 32px; border: 0; border-radius: 8px; color: var(--muted); background: var(--soft-line); }
+#dashboardPage .dashboard-planning-toggle::before { font-size: 18px; font-weight: 450; }
+#dashboardPage .dashboard-planning-body { padding: 0 20px 16px; }
+#dashboardPage [data-dashboard-section="today"] { border-color: color-mix(in srgb, var(--refine-accent) 32%, var(--panel)); }
+#dashboardPage [data-dashboard-section="today"] > summary { background: var(--refine-tint); }
+#dashboardPage .dashboard-plan-scope { margin: 12px 0 10px; font-size: 11px; }
+#dashboardPage .dashboard-plan-progress { margin-bottom: 6px; }
+#dashboardPage .dashboard-plan-progress progress { height: 6px; border-radius: 999px; accent-color: var(--refine-accent); }
+#dashboardPage .dashboard-plan-progress progress::-webkit-progress-value { background: var(--refine-accent); }
+#dashboardPage .dashboard-plan-event { gap: 12px; min-height: 84px; padding: 16px 4px; }
+#dashboardPage .dashboard-plan-icon { width: 38px; height: 38px; flex-basis: 38px; background: var(--refine-tint); border: 1px solid var(--soft-line); }
+#dashboardPage .dashboard-plan-copy { grid-template-columns: minmax(0, 1fr) auto; gap: 3px 12px; }
+#dashboardPage .dashboard-plan-copy > strong { grid-column: 1; font-size: 14px; font-weight: 700; }
+#dashboardPage .dashboard-plan-copy > span { grid-column: 1 / -1; }
+#dashboardPage .dashboard-plan-copy > span:nth-child(2) { color: var(--ink); font-variant-numeric: tabular-nums; }
+#dashboardPage .dashboard-plan-copy > .dashboard-plan-badge { grid-column: 2; grid-row: 1; max-width: 180px; color: var(--refine-accent); background: var(--refine-tint); border-radius: 999px; padding: 3px 9px; font-size: 10px; line-height: 1.5; }
+#dashboardPage .dashboard-plan-chevron { margin-top: 3px; font-size: 14px; }
+#dashboardPage .dashboard-plan-actions { gap: 8px; padding-top: 14px; }
+#dashboardPage .dashboard-plan-actions button { min-height: 44px; padding-inline: 12px; border-radius: 8px; }
+#dashboardPage .dashboard-planning-more > summary { color: var(--refine-accent); }
+#dashboardPage .dashboard-planning-empty { padding: 22px 0 14px; }
+
+/* Warm color distinguishes actionable alerts from informational cards. */
+#dashboardPage [data-dashboard-section="attention"] .dashboard-planning-symbol,
+#dashboardPage .dashboard-plan-alert > .dashboard-plan-badge { border-color: var(--refine-warning-edge); color: var(--refine-warning); background: var(--refine-warning-bg); }
+#dashboardPage [data-dashboard-section="attention"] .dashboard-planning-eyebrow { color: var(--refine-warning); }
+#dashboardPage .dashboard-plan-alert { margin-top: 16px; padding: 14px; border: 1px solid var(--refine-warning-edge); border-radius: 10px; background: color-mix(in srgb, var(--refine-warning-bg) 55%, var(--panel)); }
+#dashboardPage .dashboard-plan-alert:last-child { margin-bottom: 4px; }
+#dashboardPage .dashboard-plan-alert p { margin-bottom: 0; }
+
+/* Tabular numbers and quiet bars make workload easier to compare. */
+#dashboardPage .dashboard-stats { gap: 12px; margin: 18px 0; }
+#dashboardPage .dashboard-stat { min-width: 0; padding: 16px 18px; border: 1px solid var(--refine-edge); border-radius: 12px; box-shadow: none; }
+#dashboardPage .dashboard-stat > span { color: var(--muted); font-size: 12px; }
+#dashboardPage .dashboard-stat > strong { margin-top: 6px; font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+#dashboardPage .dashboard-stat:first-child { border-top: 3px solid var(--refine-accent); padding-top: 14px; }
+#dashboardPage .dashboard-panel-heading { padding: 18px 20px; }
+#dashboardPage .dashboard-panel-heading h2 { font-size: 18px; }
+#dashboardPage .dashboard-outlook-week { padding: 16px 12px; border-color: var(--refine-edge); border-radius: 10px; background: var(--refine-tint); }
+#dashboardPage .dashboard-outlook-week > strong { font-size: 30px; font-variant-numeric: tabular-nums; }
+#dashboardPage .dashboard-outlook-meter { height: 4px; }
+#dashboardPage .dashboard-outlook-meter i { background: var(--refine-accent); }
+#dashboardPage .dashboard-event-date { border-radius: 9px; box-shadow: none; }
+#dashboardPage .dashboard-event-time { color: var(--ink); font-weight: 600; }
+#dashboardPage .dashboard-event-relative { color: var(--refine-accent); font-weight: 600; }
+#dashboardPage .dashboard-timeline-item { padding: 15px 20px; }
+#dashboardPage :is(button, summary):focus-visible { outline: 2px solid var(--blue); outline-offset: -3px; }
+
+/* The existing event steps retain their behavior and gain consistent readable fields. */
+:is(#activityDialog, #settingsDialog, #sidebarHelpDialog) { border-color: var(--line); border-radius: 16px; box-shadow: 0 24px 80px color-mix(in srgb, var(--ink) 22%, transparent); }
+:is(#activityDialog, #settingsDialog, #sidebarHelpDialog)::backdrop { background: rgb(12 28 42 / 48%); }
+#activityDialog :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="color"]) { border-radius: 9px; }
+#activityDialog :is(input, select, textarea):focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+#activityDialog .event-step-navigation button[aria-current="step"] { font-weight: 750; }
+
+@media (hover: hover) and (pointer: fine) {
+  #dashboardPage .dashboard-planning-panel > summary:hover { background: var(--refine-tint); }
+  #dashboardPage .dashboard-plan-event:hover { background: var(--refine-tint); }
+  #dashboardPage .dashboard-outlook-week:hover { border-color: var(--refine-accent); }
+}
+@media (max-width: 980px) {
+  #dashboardPage .dashboard-page-header { align-items: flex-start; flex-wrap: wrap; }
+  #dashboardPage .dashboard-page-actions { justify-content: flex-start; }
+}
+@media (max-width: 740px) {
+  #appShell.is-dashboard-view .mobile-action-dock { display: none; }
+  #appShell #dashboardPage { padding: 0 0 24px; }
+  #appShell #dashboardPage .dashboard-page-header { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 16px 0 18px; }
+  #appShell #dashboardPage .dashboard-page-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; max-width: none; gap: 8px; }
+  #appShell #dashboardPage .dashboard-page-actions button { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; width: auto; min-width: 0; min-height: 44px; padding: 10px 8px; }
+  #appShell #dashboardPage .dashboard-page-actions button > span:last-child { position: static; width: auto; height: auto; overflow: visible; clip: auto; clip-path: none; font-size: 12px; line-height: 1.4; white-space: normal; }
+  #appShell #dashboardPage .dashboard-panel { border: 1px solid var(--refine-edge); border-radius: 14px; background: var(--panel); }
+  #appShell #dashboardPage .dashboard-panel-heading { padding: 16px 14px; border-bottom: 1px solid var(--line); }
+  #appShell #dashboardPage .dashboard-week-body { padding: 14px; }
+  #appShell #dashboardPage .dashboard-feed-item { padding-inline: 14px; }
+  #appShell #dashboardPage .dashboard-timeline-item { padding-inline: 14px; }
+  #appShell #dashboardPage .dashboard-stats { gap: 10px; }
+  #appShell #dashboardPage .dashboard-stat { border-radius: 12px; }
+  #dashboardPage .dashboard-now-grid, #dashboardPage .dashboard-planning-stack { gap: 14px; }
+  #dashboardPage .dashboard-planning-panel > summary { gap: 10px; min-height: 84px; padding: 16px 14px; }
+  #dashboardPage .dashboard-planning-symbol { width: 34px; height: 34px; flex-basis: 34px; border-radius: 10px; }
+  #dashboardPage .dashboard-planning-symbol svg { width: 19px; height: 19px; }
+  #dashboardPage .dashboard-planning-panel h2 { font-size: 17px; }
+  #dashboardPage .dashboard-planning-subtitle { font-size: 11px; }
+  #dashboardPage .dashboard-planning-body { padding: 0 14px 14px; }
+  #dashboardPage .dashboard-plan-event { gap: 10px; padding-block: 14px; }
+  #dashboardPage .dashboard-plan-copy { display: flex; flex-direction: column; align-items: flex-start; }
+  #dashboardPage .dashboard-plan-copy > .dashboard-plan-badge { margin-top: 2px; max-width: 100%; }
+  #dashboardPage .dashboard-stat { padding: 14px; }
+  #dashboardPage .dashboard-stat:first-child { padding-top: 12px; }
+  #dashboardPage .dashboard-timeline-item { padding-inline: 14px; }
+  #dashboardPage .dashboard-plan-actions button { flex: 1 1 auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #dashboardPage :is(button, summary), #appShell .sidebar-nav-item { transition: none; }
+}
+html.reduce-motion #dashboardPage :is(button, summary),
+html.reduce-motion #appShell .sidebar-nav-item { transition: none; }

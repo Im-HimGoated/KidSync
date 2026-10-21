@@ -8154,6 +8154,9 @@
       .sidebar-date-picker { position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
       .sidebar-spacer { flex:1 1 auto; min-width:8px; }
       .sidebar-tools { display:flex; align-items:center; gap:2px; }
+      .sidebar-help-button { display:inline-flex; flex:0 0 auto; width:auto; padding:0 11px; gap:6px; border-radius:8px; font-size:14px; }
+      .sidebar-help-button > span[aria-hidden="true"] { font-size:19px; line-height:1; }
+      .sidebar-help-label { font-size:12px; font-weight:850; line-height:1; }
       .sidebar-search-glyph { position:relative; width:18px; height:18px; border:3px solid currentColor; border-radius:50%; }
       .sidebar-search-glyph::after { content:""; position:absolute; right:-7px; bottom:-4px; width:8px; height:3px; border-radius:999px; background:currentColor; transform:rotate(45deg); transform-origin:left center; }
       .sidebar-nav { position:fixed; top:var(--sidebar-nav-top,68px); left:var(--sidebar-nav-left,8px); z-index:80; display:grid; align-content:start; gap:4px; width:min(232px,calc(100vw - 16px)); max-height:calc(100vh - 76px); max-height:var(--sidebar-nav-max-height,calc(100dvh - 76px)); overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; margin:0; padding:8px; border:1px solid var(--line); border-radius:10px; background:var(--panel); box-shadow:0 20px 46px rgba(19,47,67,.2); }
@@ -8199,6 +8202,15 @@
       .sidebar-help-grid article { padding:14px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
       .sidebar-help-grid strong { display:block; color:var(--ink); font-size:13px; }
       .sidebar-help-grid p { margin:6px 0 0; color:var(--muted); font-size:12px; line-height:1.45; }
+      .sidebar-help-questions { margin-top:22px; }
+      .sidebar-help-questions h3 { margin:0 0 9px; color:var(--ink); font-size:15px; }
+      .sidebar-help-question-list { display:grid; gap:8px; }
+      .sidebar-help-question-list details { border:1px solid var(--line); border-radius:8px; background:var(--panel); }
+      .sidebar-help-question-list summary { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:44px; padding:10px 12px; color:var(--ink); cursor:pointer; font-size:13px; font-weight:800; list-style:none; }
+      .sidebar-help-question-list summary::-webkit-details-marker { display:none; }
+      .sidebar-help-question-list summary::after { content:"+"; flex:0 0 auto; color:var(--blue); font-size:20px; line-height:1; }
+      .sidebar-help-question-list details[open] summary::after { content:"−"; }
+      .sidebar-help-question-list p { margin:0; padding:0 12px 12px; color:var(--muted); font-size:12px; line-height:1.5; }
       .email-notification-note { display:grid; gap:5px; margin-top:12px; padding:11px 12px; border:1px solid var(--line); border-radius:12px; color:var(--ink); background:var(--panel); font-size:12px; font-weight:850; }
       .email-notification-note p { margin:0; color:var(--muted); font-size:11px; font-weight:650; line-height:1.45; }
       .email-notification-note .small-btn { justify-self:start; }
@@ -8224,6 +8236,8 @@
         .sidebar-date-controls { grid-column:1 / -1; grid-row:2; display:grid; grid-template-columns:auto 44px 44px minmax(0,1fr); gap:5px; width:100%; padding-top:7px; border-top:1px solid var(--soft-line); }
         .sidebar-period-button { width:100%; min-width:0; margin:0; font-size:16px; }
         .sidebar-tooltip::after { display:none; }
+        .sidebar-help-button { width:44px; min-width:44px; padding:0; border-radius:50%; }
+        .sidebar-help-label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
         .sidebar-help-grid { grid-template-columns:1fr; }
         .toolbar-leading { grid-template-columns:minmax(0,1fr) auto; }
         .calendar-workspace { grid-column:1; width:auto; height:50px; }
@@ -9815,7 +9829,9 @@
   <link rel="stylesheet" href="./assets/landing-ux.css?v=1">
   <link rel="stylesheet" href="./assets/welcome-refresh.css?v=1">
   <link rel="stylesheet" href="./assets/calendar-ux.css?v=1">
-  <link rel="stylesheet" href="./assets/dashboard-planning.css?v=1">
+  <link rel="stylesheet" href="./assets/dashboard-planning.css?v=2">
+  <link rel="stylesheet" href="./assets/dashboard-navigation.css?v=1">
+  <link rel="stylesheet" href="./assets/ui-refinement.css?v=1">
   <link rel="stylesheet" href="./assets/mobile.css?v=95">
 </head>
 <body>
@@ -10289,6 +10305,8 @@
           <button class="sidebar-nav-item" type="button" data-sidebar-action="lists" aria-label="Lists" data-i18n-aria="sidebar.lists"><span class="sidebar-nav-icon" aria-hidden="true">☷</span><span data-i18n="sidebar.lists">Lists</span></button>
           <button class="sidebar-nav-item" type="button" data-sidebar-action="holidays" aria-label="Holidays" data-i18n-aria="sidebar.holidays"><span class="sidebar-nav-icon" aria-hidden="true">☘</span><span data-i18n="sidebar.holidays">Holidays</span></button>
           <button class="sidebar-nav-item" type="button" data-sidebar-action="special-days" aria-label="Special days" data-i18n-aria="sidebar.specialDays"><span class="sidebar-nav-icon" aria-hidden="true">★</span><span data-i18n="sidebar.specialDays">Special days</span></button>
+          <button class="sidebar-nav-item" type="button" data-sidebar-action="help" aria-label="Help" data-i18n-aria="sidebar.help"><span class="sidebar-nav-icon" aria-hidden="true">?</span><span data-i18n="sidebar.help">Help</span></button>
+          <button class="sidebar-nav-item" type="button" data-sidebar-action="settings" aria-label="Settings" data-i18n-aria="sidebar.settings"><span class="sidebar-nav-icon" aria-hidden="true">⚙</span><span data-i18n="sidebar.settings">Settings</span></button>
           <div class="sidebar-calendar-switcher" id="sidebarCalendarSwitcher"></div>
         </nav>
       </details>
@@ -10308,7 +10326,7 @@
       <span class="sidebar-spacer" aria-hidden="true"></span>
       <div class="sidebar-tools">
         <button class="sidebar-icon-button sidebar-tooltip" type="button" id="focusScheduleSearch" aria-label="Search schedule" title="Search schedule" data-tooltip="Search schedule" data-i18n-aria="search.label" data-i18n-title="search.label" data-i18n-tooltip="search.label"><span class="sidebar-search-glyph" aria-hidden="true"></span></button>
-        <button class="sidebar-icon-button sidebar-tooltip" type="button" data-sidebar-action="help" aria-label="Help" title="Help" data-tooltip="Help" data-i18n-aria="sidebar.help" data-i18n-title="sidebar.help" data-i18n-tooltip="sidebar.help"><span aria-hidden="true">?</span></button>
+        <button class="sidebar-icon-button sidebar-help-button sidebar-tooltip" type="button" data-sidebar-action="help" aria-label="Help" title="Help" data-tooltip="Help" data-i18n-aria="sidebar.help" data-i18n-title="sidebar.help" data-i18n-tooltip="sidebar.help"><span aria-hidden="true">?</span><span class="sidebar-help-label" data-i18n="sidebar.help">Help</span></button>
         <button class="sidebar-icon-button sidebar-tooltip sidebar-tooltip-right" type="button" id="openSettings" aria-label="Settings" title="Settings" data-tooltip="Settings" data-i18n-aria="settings.open" data-i18n-title="settings.open" data-i18n-tooltip="settings.open"><span aria-hidden="true">⚙</span></button>
       </div>
       <div class="account-bar" id="calendarAccount" aria-label="Family account" data-i18n-aria="auth.familyAccount">
@@ -11693,6 +11711,15 @@
     <div class="modal-header"><div><p class="eyebrow" data-i18n="sidebar.help">Help</p><h2 data-i18n="sidebar.helpTitle">How KidsSync works</h2></div><button class="close-btn" type="button" id="closeSidebarHelp" aria-label="Close" data-i18n-aria="aria.close">×</button></div>
     <div class="sidebar-help-body">
       <p class="dialog-intro" data-i18n="sidebar.helpIntro">A few quick ways to move through your family week.</p>
+      <section class="sidebar-help-questions" aria-labelledby="sidebarHelpQuestionsTitle">
+        <h3 id="sidebarHelpQuestionsTitle" data-i18n="sidebar.questionsTitle">Common questions</h3>
+        <div class="sidebar-help-question-list">
+          <details><summary data-i18n="sidebar.questionAdd">How do I add an event?</summary><p data-i18n="sidebar.answerAdd">Select Add event, or choose an open time in the calendar.</p></details>
+          <details><summary data-i18n="sidebar.questionEdit">How do I edit or delete an event?</summary><p data-i18n="sidebar.answerEdit">Select the event, then use Edit or Delete in its details.</p></details>
+          <details><summary data-i18n="sidebar.questionSave">How is my schedule saved?</summary><p data-i18n="sidebar.answerSave">Guest schedules stay on this device. Sign in to sync your family calendar across devices.</p></details>
+          <details><summary data-i18n="sidebar.questionShare">How do I share a calendar?</summary><p data-i18n="sidebar.answerShare">Sign in, select Share, then choose viewer, commenter, or editor access.</p></details>
+        </div>
+      </section>
       <div class="sidebar-help-grid">
         <article><strong data-i18n="sidebar.helpClickTitle">Click a time</strong><p data-i18n="sidebar.helpClickBody">Click any open hour to start an event there.</p></article>
         <article><strong data-i18n="sidebar.helpDayTitle">Click a day</strong><p data-i18n="sidebar.helpDayBody">Click a day header or date to open an event with that day already selected.</p></article>
@@ -11917,6 +11944,15 @@
         "sidebar.synced": "Your family week, in one place",
         "sidebar.helpTitle": "How KidsSync works",
         "sidebar.helpIntro": "A few quick ways to move through your family week.",
+        "sidebar.questionsTitle": "Common questions",
+        "sidebar.questionAdd": "How do I add an event?",
+        "sidebar.answerAdd": "Select Add event, or choose an open time in the calendar.",
+        "sidebar.questionEdit": "How do I edit or delete an event?",
+        "sidebar.answerEdit": "Select the event, then use Edit or Delete in its details.",
+        "sidebar.questionSave": "How is my schedule saved?",
+        "sidebar.answerSave": "Guest schedules stay on this device. Sign in to sync your family calendar across devices.",
+        "sidebar.questionShare": "How do I share a calendar?",
+        "sidebar.answerShare": "Sign in, select Share, then choose viewer, commenter, or editor access.",
         "shortcuts.open": "Keyboard shortcuts",
         "shortcuts.title": "Keyboard shortcuts",
         "shortcuts.intro": "These work while the calendar is open and you are not typing in a field.",
@@ -13055,6 +13091,15 @@
         "sidebar.synced": "把家庭一周安排放在一起",
         "sidebar.helpTitle": "KidsSync 使用方法",
         "sidebar.helpIntro": "几种快速安排家庭一周的方法。",
+        "sidebar.questionsTitle": "常见问题",
+        "sidebar.questionAdd": "如何添加活动？",
+        "sidebar.answerAdd": "选择“添加活动”，或点击日历中的空闲时间。",
+        "sidebar.questionEdit": "如何编辑或删除活动？",
+        "sidebar.answerEdit": "选择该活动，然后在详情中使用“编辑”或“删除”。",
+        "sidebar.questionSave": "我的日程如何保存？",
+        "sidebar.answerSave": "访客日程保存在此设备上。登录后可在不同设备间同步家庭日历。",
+        "sidebar.questionShare": "如何共享日历？",
+        "sidebar.answerShare": "登录后选择“共享”，再选择查看者、评论者或编辑者权限。",
         "shortcuts.open": "键盘快捷键",
         "shortcuts.title": "键盘快捷键",
         "shortcuts.intro": "打开日历且未在输入框中输入时可以使用这些快捷键。",
@@ -23098,7 +23143,8 @@
   <script src="./assets/auth-visual-rotation.js?v=1"></script>
   <script src="./assets/landing-ux.js?v=1"></script>
   <script src="./assets/calendar-ux.js?v=1"></script>
-  <script src="./assets/dashboard-planning.js?v=1"></script>
+  <script src="./assets/dashboard-planning.js?v=2"></script>
+  <script src="./assets/dashboard-navigation.js?v=1"></script>
   <script src="./assets/live-sync.js?v=2"></script>
 </body>
 </html>

@@ -1,16 +1,19 @@
-const CACHE_NAME = "kidssync-shell-v131";
+const CACHE_NAME = "kidssync-shell-v133";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./assets/ui-polish.css",
+  "./assets/ui-refinement.css?v=1",
   "./assets/marketing-auth.css?v=3",
   "./assets/landing-ux.css?v=1",
   "./assets/welcome-refresh.css?v=1",
   "./assets/landing-ux.js?v=1",
   "./assets/calendar-ux.css?v=1",
   "./assets/calendar-ux.js?v=1",
-  "./assets/dashboard-planning.css?v=1",
-  "./assets/dashboard-planning.js?v=1",
+  "./assets/dashboard-planning.css?v=2",
+  "./assets/dashboard-planning.js?v=2",
+  "./assets/dashboard-navigation.css?v=1",
+  "./assets/dashboard-navigation.js?v=1",
   "./assets/live-sync.js?v=2",
   "./assets/micro-motion.css?v=1",
   "./assets/mobile.css?v=95",
