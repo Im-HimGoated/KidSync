@@ -8,6 +8,7 @@ const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
 const experience = fs.readFileSync(path.join(root, 'assets/experience.js'), 'utf8');
+const experienceCss = fs.readFileSync(path.join(root, 'assets/experience.css'), 'utf8');
 
 test('first-run and navigation keep direct actions without blocking appearance setup', () => {
   assert.match(html, /id="dashboardStart"[\s\S]*id="dashboardStartEvent"[\s\S]*id="dashboardStartChild"/);
@@ -15,6 +16,17 @@ test('first-run and navigation keep direct actions without blocking appearance s
   assert.doesNotMatch(html, /setTimeout\(maybeShowAppearancePrompt/);
   assert.match(html, /calendarZoom: 0\.75/);
   assert.match(html, /Math\.max\(520, window\.innerHeight - calendarMain\.getBoundingClientRect\(\)\.top/);
+});
+
+test('dashboard connects its location board and avoids empty zero-value noise', () => {
+  assert.match(html, /class="dashboard-panel dashboard-map-panel"[\s\S]*id="dashboardMapPins"[\s\S]*id="dashboardLocationList"/);
+  assert.match(html, /function renderDashboardMap\(activities\)/);
+  assert.match(html, /renderDashboardMap\(locationActivities\)/);
+  assert.match(html, /classList\.toggle\("is-dashboard-empty", isEmpty\)/);
+  assert.match(html, /const dashboardPanelNames = \["locations", "week", "updates", "upcoming", "past"\]/);
+  assert.match(experienceCss, /is-dashboard-empty #dashboardStats/);
+  assert.match(experienceCss, /dashboard-map-panel\.is-empty \.dashboard-map-canvas \{ min-height: 190px; \}/);
+  assert.match(html, /state\.activities\.length \? `<span class="today-empty-actions">/);
 });
 
 test('sharing uses separate accessible people and file panels', () => {

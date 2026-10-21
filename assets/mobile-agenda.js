@@ -3,7 +3,7 @@
   document.getElementById('calendarInsights').after(button);
   let next=null;
   function refresh(){
-    if(!matchMedia('(max-width: 740px)').matches){button.hidden=true;return;}
+    if(!matchMedia('(max-width: 740px)').matches||document.getElementById('calendarNextSpotlight')){button.hidden=true;next=null;return;}
     const now=new Date(), options=[];
     for(let offset=0;offset<14;offset++){
       const date=addDays(now,offset),day=dateKey(date);

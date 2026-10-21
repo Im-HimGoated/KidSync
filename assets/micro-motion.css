@@ -1,0 +1,73 @@
+/* Short, one-time transitions across the welcome, account, and planner screens. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.reduce-motion) {
+    --motion-quick: 140ms;
+    --motion-soft: 220ms;
+    --motion-ease: cubic-bezier(.2, .7, .2, 1);
+  }
+
+  html:not(.reduce-motion) .welcome-screen:not([hidden]) .welcome-hero-copy > :is(.welcome-eyebrow, .welcome-hero-brand, h1, .welcome-hero-description, .welcome-hero-actions, .welcome-trial-note, .welcome-capabilities) {
+    animation: ks-rise-in 420ms var(--motion-ease) both;
+  }
+  html:not(.reduce-motion) .welcome-screen:not([hidden]) .welcome-hero-copy > h1 { animation-delay: 45ms; }
+  html:not(.reduce-motion) .welcome-screen:not([hidden]) .welcome-hero-copy > .welcome-hero-description { animation-delay: 85ms; }
+  html:not(.reduce-motion) .welcome-screen:not([hidden]) .welcome-hero-copy > :is(.welcome-hero-actions, .welcome-trial-note, .welcome-capabilities) { animation-delay: 120ms; }
+  html:not(.reduce-motion) .welcome-screen:not([hidden]) .welcome-hero-visual { animation: ks-rise-in 520ms var(--motion-ease) 90ms both; }
+  html:not(.reduce-motion) .auth-screen:not([hidden]) .auth-shell { animation: ks-rise-in 300ms var(--motion-ease) both; }
+  html:not(.reduce-motion) .auth-form:not([hidden]) { animation: ks-fade-in 210ms ease-out both; }
+  html:not(.reduce-motion) #dashboardPage:not([hidden]) :is(.dashboard-page-header, .dashboard-start, .dashboard-panel, .dashboard-stat) {
+    animation: ks-rise-in 280ms var(--motion-ease) both;
+  }
+  html:not(.reduce-motion) #dashboardPage:not([hidden]) .dashboard-panel:nth-child(2) { animation-delay: 45ms; }
+  html:not(.reduce-motion) #dashboardPage:not([hidden]) .dashboard-panel:nth-child(3) { animation-delay: 80ms; }
+
+  html:not(.reduce-motion) :is(.welcome-nav-link, .welcome-demo-event, .welcome-detail-item, .auth-tab, .auth-password-toggle, .auth-form input) {
+    transition: color var(--motion-soft) ease, background-color var(--motion-soft) ease, border-color var(--motion-soft) ease, box-shadow var(--motion-soft) ease, transform var(--motion-soft) var(--motion-ease);
+  }
+  html:not(.reduce-motion) #appShell :is(.sidebar-nav-item, .sidebar-icon-button, .sidebar-today, .sidebar-period-button, .view-option, .language-option, .mini-calendar-day, .mini-calendar-tool, .calendar-view-menu > summary, .dashboard-collapse, .event-details-actions button, .share-tabs button) {
+    transition: color var(--motion-quick) ease, background-color var(--motion-quick) ease, border-color var(--motion-quick) ease, box-shadow var(--motion-soft) ease, transform var(--motion-quick) var(--motion-ease);
+  }
+  html:not(.reduce-motion) #appShell :is(.dashboard-stat, .dashboard-feed-item, .dashboard-timeline-item, .agenda-item, .today-event, .month-event, .all-day-event, .mini-calendar-tool) {
+    transition: background-color var(--motion-soft) ease, border-color var(--motion-soft) ease, box-shadow var(--motion-soft) ease, transform var(--motion-soft) var(--motion-ease);
+  }
+  html:not(.reduce-motion) #appShell .day-head {
+    transition: background-color var(--motion-quick) ease, border-color var(--motion-quick) ease, box-shadow var(--motion-quick) ease;
+  }
+  html:not(.reduce-motion) :is(.save-status, .undo-toast, .auth-cloud-note) {
+    transition: background-color var(--motion-soft) ease, border-color var(--motion-soft) ease, color var(--motion-soft) ease, box-shadow var(--motion-soft) ease;
+  }
+  html:not(.reduce-motion) dialog :is(.activity-list-item, .lists-summary-item, .map-category, .map-result-card, .calendar-list-row, .reminder-item) {
+    transition: background-color var(--motion-soft) ease, border-color var(--motion-soft) ease, box-shadow var(--motion-soft) ease, transform var(--motion-soft) var(--motion-ease);
+  }
+
+  html:not(.reduce-motion) :is(.sidebar-menu[open] .sidebar-nav, .calendar-view-menu[open] .calendar-view-menu-panel, .more-actions[open] .more-actions-menu, .workspace-panel-menu[open] .workspace-panel-popover) {
+    animation: ks-menu-in 170ms var(--motion-ease) both;
+    transform-origin: top right;
+  }
+  html:not(.reduce-motion) dialog[open] { animation: ks-fade-in 180ms ease-out both; }
+  html:not(.reduce-motion) dialog[open]::backdrop { animation: ks-fade-in 180ms ease-out both; }
+
+  @media (hover: hover) and (pointer: fine) {
+    html:not(.reduce-motion) .welcome-demo-event:hover,
+    html:not(.reduce-motion) .welcome-detail-item:hover { transform: translateY(-2px); }
+    html:not(.reduce-motion) #appShell .sidebar-nav-item:hover .sidebar-nav-icon { transform: scale(1.08); }
+    html:not(.reduce-motion) #appShell .sidebar-nav-icon { transition: transform var(--motion-quick) var(--motion-ease); }
+    html:not(.reduce-motion) #appShell :is(.dashboard-stat, .mini-calendar-tool):hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgb(20 52 68 / 9%); }
+    html:not(.reduce-motion) #appShell :is(.dashboard-feed-item, .dashboard-timeline-item, .agenda-item, .today-event, .month-event, .all-day-event):hover { transform: translateY(-1px); }
+    html:not(.reduce-motion) #appShell .mini-calendar-day:not(.is-selected):hover { transform: scale(1.08); }
+    html:not(.reduce-motion) dialog :is(.activity-list-item, .lists-summary-item, .map-category):hover { transform: translateY(-2px); }
+  }
+
+  @keyframes ks-rise-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes ks-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes ks-menu-in {
+    from { opacity: 0; transform: translateY(-4px) scale(.99); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+}

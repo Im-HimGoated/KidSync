@@ -1,8 +1,10 @@
-const CACHE_NAME = "kidssync-shell-v113";
+const CACHE_NAME = "kidssync-shell-v118";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./assets/ui-polish.css",
+  "./assets/marketing-auth.css?v=2",
+  "./assets/micro-motion.css?v=1",
   "./assets/mobile.css?v=95",
   "./assets/calendar-extras.css",
   "./assets/calendar-insights.css",
@@ -15,6 +17,7 @@ const APP_SHELL = [
   "./assets/experience.js",
   "./assets/quick-ux.css",
   "./assets/quick-ux.js",
+  "./assets/auth-visual-rotation.js?v=1",
   "./assets/family-workspace.css",
   "./assets/family-coordination.js",
   "./assets/reschedule-review.js",
@@ -31,9 +34,11 @@ const APP_SHELL = [
   "./assets/family-polls.css?v=1",
   "./assets/family-polls.js?v=2",
   "./manifest.json",
-  "./assets/kidssync-family-table-v2.png",
+  "./assets/kidssync-app-icon.svg",
+  "./assets/kidssync-app-icon-192.png",
+  "./assets/kidssync-app-icon-512.png",
   "./assets/kidssync-family-hero.jpg",
-  "./assets/kidssync-auth-family.png",
+  "./assets/kidssync-auth-family-signin.jpg",
   "./assets/jspdf.umd.min.js",
   "./assets/lucide.min.js"
 ];

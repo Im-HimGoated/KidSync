@@ -82,6 +82,8 @@
         <button class="date-ribbon-arrow" type="button" data-ribbon-shift="7" aria-label="Next seven days" title="Next seven days">›</button>
       </nav>`;
     document.getElementById('calendarInsights').after(pulse);
+    const previousNextCommitment = document.getElementById('mobileNextCommitment');
+    if (previousNextCommitment) previousNextCommitment.hidden = true;
     pulse.addEventListener('click', event => {
       const dateButton = event.target.closest('[data-ribbon-date]');
       if (dateButton) {
@@ -230,6 +232,8 @@
       : '';
     spotlight.disabled = !highlightedEvent;
     spotlight.setAttribute('aria-label', highlightedEvent ? `${tx('openNext')}: ${activityCompactTitle(highlightedEvent)}` : tx('noUpcoming'));
+    const previousNextCommitment = document.getElementById('mobileNextCommitment');
+    if (previousNextCommitment) previousNextCommitment.hidden = true;
     renderRibbon();
   }
 

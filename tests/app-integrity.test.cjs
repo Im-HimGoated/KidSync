@@ -21,7 +21,27 @@ test('all local markup assets, offline shell entries and manifest icons exist', 
   const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
   for (const match of worker.split('];', 1)[0].matchAll(/"(\.\/[^\"]*)"/g)) assert(fs.existsSync(path.join(root, match[1].split('?')[0])), match[1]);
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8'));
-  for (const icon of manifest.icons) assert(fs.existsSync(path.join(root, icon.src)), icon.src);
+  for (const icon of manifest.icons) {
+    const iconPath = path.join(root, icon.src);
+    assert(fs.existsSync(iconPath), icon.src);
+    if (icon.type === 'image/png') {
+      const png = fs.readFileSync(iconPath);
+      const width = png.readUInt32BE(16);
+      const height = png.readUInt32BE(20);
+      assert.equal(width, height, `${icon.src} must be square`);
+      assert.equal(`${width}x${height}`, icon.sizes, `${icon.src} size metadata`);
+    }
+  }
+  assert.match(markup, /rel="icon"[^>]+kidssync-app-icon\.svg/);
+});
+
+test('calendar management uses inline rename and delete confirmation', () => {
+  const start = html.indexOf('    function renderCalendarList()');
+  const end = html.indexOf('    function openCalendarDialog()', start);
+  const source = html.slice(start, end);
+  assert.match(source, /calendar-inline-form/);
+  assert.match(source, /calendar-delete-confirmation/);
+  assert.doesNotMatch(source, /window\.(?:prompt|alert|confirm)/);
 });
 
 test('English and Chinese cover every static translation and literal lookup', () => {

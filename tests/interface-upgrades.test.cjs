@@ -8,6 +8,7 @@ const { ribbonDateKeys, normalizeInterfacePreferences, summaryCopy } = require('
 const html = readFileSync(resolve(__dirname, '../index.html'), 'utf8');
 const css = readFileSync(resolve(__dirname, '../assets/interface-upgrades.css'), 'utf8');
 const script = readFileSync(resolve(__dirname, '../assets/interface-upgrades.js'), 'utf8');
+const mobileAgenda = readFileSync(resolve(__dirname, '../assets/mobile-agenda.js'), 'utf8');
 const worker = readFileSync(resolve(__dirname, '../sw.js'), 'utf8');
 
 test('interface preferences use a compact first-run default but honor an explicit saved choice', () => {
@@ -58,4 +59,15 @@ test('the interface layer only reads calendar events and keeps labels bilingual'
   const dictionarySource = script.slice(script.indexOf('  const words ='), script.indexOf('  const tx =')) + '\nwords';
   const words = vm.runInNewContext(dictionarySource);
   assert.deepEqual(Object.keys(words.en).sort(), Object.keys(words.zh).sort());
+});
+
+test('mobile calendar removes duplicated summaries while keeping direct navigation', () => {
+  assert.match(css, /@media \(max-width: 740px\)[\s\S]*?\.calendar-pulse-summary \{ display: none; \}/);
+  assert.match(css, /\.quick-date-field \{ display: none; \}/);
+  assert.match(css, /\.quick-calendar-nav:has\(\.quick-time-field\[hidden\]\) \{ display: none; \}/);
+  assert.match(css, /#appShell\.is-calendar-empty \.calendar-pulse/);
+  assert.match(css, /#appShell\.is-calendar-empty \.empty-actions button \{ min-height: 44px; \}/);
+  assert.match(script, /previousNextCommitment\.hidden = true/);
+  assert.match(mobileAgenda, /document\.getElementById\('calendarNextSpotlight'\)/);
+  assert.match(css, /\.family-strip-toggle \{ grid-column: 3; width: 44px;[^}]*min-height: 44px;/);
 });

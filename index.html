@@ -9,7 +9,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="manifest" href="./manifest.json">
-  <link rel="apple-touch-icon" href="./assets/kidssync-family-table-v2.png">
+  <link rel="icon" type="image/svg+xml" href="./assets/kidssync-app-icon.svg">
+  <link rel="apple-touch-icon" href="./assets/kidssync-app-icon-192.png">
   <!-- Hero photo by Mikhail Nilov via Pexels, photo 8121121. -->
   <link rel="preload" as="image" href="./assets/kidssync-family-hero.jpg">
   <style>
@@ -2689,6 +2690,42 @@
 
     .calendar-list-row strong { flex: 1; }
 
+    .calendar-list-row.is-editing,
+    .calendar-list-row.is-confirming {
+      align-items: stretch;
+      background: #f8fbfd;
+    }
+
+    .calendar-inline-form,
+    .calendar-delete-confirmation {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 8px;
+      width: 100%;
+      align-items: center;
+    }
+
+    .calendar-inline-form input {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .calendar-delete-copy {
+      min-width: 0;
+    }
+
+    .calendar-delete-copy strong,
+    .calendar-delete-copy small {
+      display: block;
+    }
+
+    .calendar-delete-copy small {
+      margin-top: 3px;
+      color: var(--muted);
+      font-weight: 650;
+      line-height: 1.35;
+    }
+
     .calendar-color-dot { display: inline-block; width: 10px; height: 10px; margin-right: 7px; border-radius: 50%; vertical-align: 1px; }
 
     .share-copy {
@@ -4637,6 +4674,12 @@
       .transfer-tools { display: grid; grid-template-columns: 1fr; }
       .calendar-list-row { flex-wrap: wrap; }
       .calendar-list-row strong { min-width: 100%; }
+      .calendar-inline-form,
+      .calendar-delete-confirmation { grid-template-columns: 1fr 1fr; }
+      .calendar-inline-form input,
+      .calendar-delete-copy { grid-column: 1 / -1; }
+      .calendar-inline-form button,
+      .calendar-delete-confirmation button { width: 100%; min-height: 44px; }
       .member-invite-grid { grid-template-columns: 1fr; }
       .member-invite-grid .ghost-btn { width: 100%; }
       .member-invite-note, .member-invite-actions { grid-column: auto; }
@@ -9817,6 +9860,8 @@
   <link rel="stylesheet" href="./assets/family-workspace.css">
   <link rel="stylesheet" href="./assets/experience.css">
   <link rel="stylesheet" href="./assets/quick-ux.css">
+  <link rel="stylesheet" href="./assets/marketing-auth.css?v=2">
+  <link rel="stylesheet" href="./assets/micro-motion.css?v=1">
   <link rel="stylesheet" href="./assets/mobile.css?v=95">
 </head>
 <body>
@@ -9839,7 +9884,7 @@
     window.setTimeout(window.dismissAppLoader, 6000);
     window.addEventListener("error", window.dismissAppLoader, { once:true });
   </script>
-  <section class="welcome-screen" id="welcomeScreen" aria-labelledby="welcomeBrand" hidden>
+  <section class="welcome-screen" id="welcomeScreen" aria-labelledby="welcomeHeadline" hidden>
     <header class="welcome-nav" aria-label="KidsSync navigation" data-i18n-aria="welcome.navigation">
       <div class="welcome-wordmark" aria-label="KidsSync">
         <span class="welcome-mark" aria-hidden="true"></span>
@@ -9864,8 +9909,8 @@
       <div class="welcome-hero-inner">
         <div class="welcome-hero-copy">
           <p class="welcome-eyebrow" data-i18n="welcome.eyebrow">Family scheduling for busy parents</p>
-          <h1 id="welcomeBrand">Kids<span>Sync</span></h1>
-          <h2 data-i18n="welcome.headline">The family calendar built for real life.</h2>
+          <p class="welcome-hero-brand" id="welcomeBrand" aria-label="KidsSync">Kids<span>Sync</span></p>
+          <h1 id="welcomeHeadline" data-i18n="welcome.headline">The family calendar built for real life.</h1>
           <p class="welcome-hero-description" data-i18n="welcome.description">Give every child a clear, color-coded schedule. KidsSync keeps activities, pickups, birthdays, deadlines, and family plans together, and flags conflicts before they become problems.</p>
           <div class="welcome-hero-actions">
             <button class="welcome-primary-btn" type="button" id="welcomeTryHero" data-i18n="welcome.tryPlanner">Try KidsSync free</button>
@@ -9886,6 +9931,15 @@
               <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityShare">Share the plan</strong><small data-i18n="welcome.capabilityShareDetail">Sync, print, or export for caregivers</small></span>
             </li>
           </ul>
+        </div>
+        <div class="welcome-hero-visual" aria-hidden="true">
+          <img src="./assets/kidssync-family-hero.jpg" alt="" decoding="async" fetchpriority="high">
+          <div class="welcome-hero-plan">
+            <div class="welcome-hero-plan-head"><span data-i18n="welcome.sampleWeek">Sample week · September 7–11</span><span class="welcome-hero-plan-dots"><i></i><i></i><i></i></span></div>
+            <div class="welcome-hero-plan-row"><span class="welcome-hero-plan-day" data-i18n="day.monday">Monday</span><strong data-i18n="welcome.eventPiano">Piano · Maya</strong><span>3:15</span></div>
+            <div class="welcome-hero-plan-row"><span class="welcome-hero-plan-day" data-i18n="day.tuesday">Tuesday</span><strong data-i18n="welcome.eventRobotics">Robotics · Maya</strong><span>5:00</span></div>
+            <div class="welcome-hero-plan-row"><span class="welcome-hero-plan-day" data-i18n="day.wednesday">Wednesday</span><strong data-i18n="welcome.eventDinner">Family dinner</strong><span>6:00</span></div>
+          </div>
         </div>
       </div>
       <a class="welcome-scroll-link" href="#welcomePreview" data-i18n="welcome.seeWeek">See a sample family week ↓</a>
@@ -10072,6 +10126,7 @@
             <button class="language-option" type="button" data-language="zh" aria-pressed="false">中文</button>
           </div>
         </div>
+        <button class="auth-back-btn auth-back-top" type="button" id="backToWelcome" data-i18n="welcome.back">Back to welcome page</button>
 
         <div class="auth-panel">
           <p class="auth-eyebrow" data-i18n="auth.eyebrow">Your family week, in one place</p>
@@ -10089,10 +10144,10 @@
               <span data-i18n="auth.email">Email</span>
               <input id="signInEmail" type="email" autocomplete="email" required>
             </label>
-            <label>
-              <span data-i18n="auth.password">Password</span>
-              <input id="signInPassword" type="password" autocomplete="current-password" required>
-            </label>
+            <div class="auth-field">
+              <label for="signInPassword" data-i18n="auth.password">Password</label>
+              <div class="auth-password-wrap"><input id="signInPassword" type="password" autocomplete="current-password" required><button class="auth-password-toggle" type="button" data-password-toggle="signInPassword" data-i18n="auth.showPassword" data-i18n-aria="auth.showPasswordLabel" aria-controls="signInPassword" aria-label="Show password" aria-pressed="false">Show</button></div>
+            </div>
             <button class="auth-link-btn" type="button" id="forgotPassword" data-i18n="auth.forgotPassword">Forgot password?</button>
             <p class="auth-error" id="signInError" role="alert"></p>
             <button class="auth-submit" type="submit" data-i18n="auth.submitSignIn">Sign In</button>
@@ -10110,14 +10165,8 @@
           </form>
 
           <form class="auth-form" id="passwordUpdateForm" hidden>
-            <label>
-              <span data-i18n="auth.newPassword">New password</span>
-              <input id="passwordUpdateValue" type="password" autocomplete="new-password" minlength="8" required>
-            </label>
-            <label>
-              <span data-i18n="auth.confirmPassword">Confirm password</span>
-              <input id="passwordUpdateConfirm" type="password" autocomplete="new-password" minlength="8" required>
-            </label>
+            <div class="auth-field"><label for="passwordUpdateValue" data-i18n="auth.newPassword">New password</label><div class="auth-password-wrap"><input id="passwordUpdateValue" type="password" autocomplete="new-password" minlength="8" required><button class="auth-password-toggle" type="button" data-password-toggle="passwordUpdateValue" data-i18n="auth.showPassword" data-i18n-aria="auth.showPasswordLabel" aria-controls="passwordUpdateValue" aria-label="Show password" aria-pressed="false">Show</button></div></div>
+            <div class="auth-field"><label for="passwordUpdateConfirm" data-i18n="auth.confirmPassword">Confirm password</label><div class="auth-password-wrap"><input id="passwordUpdateConfirm" type="password" autocomplete="new-password" minlength="8" required><button class="auth-password-toggle" type="button" data-password-toggle="passwordUpdateConfirm" data-i18n="auth.showPassword" data-i18n-aria="auth.showPasswordLabel" aria-controls="passwordUpdateConfirm" aria-label="Show password" aria-pressed="false">Show</button></div></div>
             <p class="auth-help" data-i18n="auth.passwordHelp">Use at least 8 characters.</p>
             <p class="auth-error" id="passwordUpdateStatus" role="alert"></p>
             <button class="auth-submit" type="submit" data-i18n="auth.updatePassword">Update Password</button>
@@ -10132,38 +10181,43 @@
               <span data-i18n="auth.email">Email</span>
               <input id="signUpEmail" type="email" autocomplete="email" required>
             </label>
-            <label>
-              <span data-i18n="auth.password">Password</span>
-              <input id="signUpPassword" type="password" autocomplete="new-password" minlength="8" required>
-            </label>
+            <div class="auth-field"><label for="signUpPassword" data-i18n="auth.password">Password</label><div class="auth-password-wrap"><input id="signUpPassword" type="password" autocomplete="new-password" minlength="8" required><button class="auth-password-toggle" type="button" data-password-toggle="signUpPassword" data-i18n="auth.showPassword" data-i18n-aria="auth.showPasswordLabel" aria-controls="signUpPassword" aria-label="Show password" aria-pressed="false">Show</button></div></div>
             <p class="auth-help" data-i18n="auth.passwordHelp">Use at least 8 characters.</p>
-            <label>
-              <span data-i18n="auth.confirmPassword">Confirm password</span>
-              <input id="signUpConfirm" type="password" autocomplete="new-password" minlength="8" required>
-            </label>
+            <div class="auth-field"><label for="signUpConfirm" data-i18n="auth.confirmPassword">Confirm password</label><div class="auth-password-wrap"><input id="signUpConfirm" type="password" autocomplete="new-password" minlength="8" required><button class="auth-password-toggle" type="button" data-password-toggle="signUpConfirm" data-i18n="auth.showPassword" data-i18n-aria="auth.showPasswordLabel" aria-controls="signUpConfirm" aria-label="Show password" aria-pressed="false">Show</button></div></div>
             <p class="auth-error" id="signUpError" role="alert"></p>
             <button class="auth-submit" type="submit" data-i18n="auth.submitCreate">Create Family Account</button>
           </form>
 
           <button class="auth-preview-btn" type="button" id="continuePreview" data-i18n="auth.continuePreview">Continue without signing in</button>
-          <button class="auth-back-btn" type="button" id="backToWelcome" data-i18n="welcome.back">Back to welcome page</button>
           <p class="auth-cloud-note" id="authCloudNote" role="status"></p>
         </div>
       </div>
 
-      <aside class="auth-visual" aria-label="A family planning their week" data-i18n-aria="auth.visualLabel">
-        <img src="./assets/kidssync-auth-family.png" alt="" loading="lazy" decoding="async">
+      <aside class="auth-visual" id="authVisual" aria-label="A family planning their week" data-i18n-aria="auth.visualLabel">
+        <div class="auth-visual-media" aria-hidden="true">
+          <img class="auth-visual-image is-active" src="./assets/kidssync-auth-family-signin.jpg" alt="" loading="lazy" decoding="async">
+          <img class="auth-visual-image" alt="" loading="lazy" decoding="async">
+        </div>
         <div class="auth-visual-shade" aria-hidden="true"></div>
         <div class="auth-visual-copy">
-          <span class="auth-visual-kicker" data-i18n="auth.visualKicker">A calmer family week</span>
-          <strong data-i18n="auth.visualTitle">Plans everyone can follow.</strong>
-          <p data-i18n="auth.visualBody">School, activities, pickups, and family time stay clear and connected.</p>
+          <span class="auth-visual-kicker" id="authVisualKicker" data-i18n="auth.visualKicker">A calmer family week</span>
+          <strong id="authVisualTitle" data-i18n="auth.visualTitle">Plans everyone can follow.</strong>
+          <p id="authVisualBody" data-i18n="auth.visualBody">School, activities, pickups, and family time stay clear and connected.</p>
         </div>
         <div class="auth-schedule-card" aria-hidden="true">
           <div class="auth-schedule-heading"><span data-i18n="auth.visualToday">Today</span><b>3</b></div>
           <div class="auth-schedule-item"><i class="blue">3:15</i><span data-i18n="auth.visualSchool">School pickup</span></div>
           <div class="auth-schedule-item"><i class="green">4:30</i><span data-i18n="auth.visualSoccer">Soccer practice</span></div>
           <div class="auth-schedule-item"><i class="coral">6:15</i><span data-i18n="auth.visualDinner">Family dinner</span></div>
+        </div>
+        <div class="auth-visual-controls" role="group" aria-label="Family photo gallery" data-i18n-aria="auth.visualGallery">
+          <div class="auth-visual-dots">
+            <button class="auth-visual-dot is-active" type="button" data-auth-visual-index="0" aria-pressed="true" aria-label="Show family planning photo" title="Show family planning photo" data-i18n-aria="auth.visualSlideOne" data-i18n-title="auth.visualSlideOne"></button>
+            <button class="auth-visual-dot" type="button" data-auth-visual-index="1" aria-pressed="false" aria-label="Show school-day planning photo" title="Show school-day planning photo" data-i18n-aria="auth.visualSlideTwo" data-i18n-title="auth.visualSlideTwo"></button>
+            <button class="auth-visual-dot" type="button" data-auth-visual-index="2" aria-pressed="false" aria-label="Show shared family planning photo" title="Show shared family planning photo" data-i18n-aria="auth.visualSlideThree" data-i18n-title="auth.visualSlideThree"></button>
+            <button class="auth-visual-dot" type="button" data-auth-visual-index="3" aria-pressed="false" aria-label="Show family routine photo" title="Show family routine photo" data-i18n-aria="auth.visualSlideFour" data-i18n-title="auth.visualSlideFour"></button>
+          </div>
+          <button class="auth-visual-pause" type="button" id="authVisualPause" aria-pressed="false" aria-label="Pause changing photos" title="Pause changing photos" data-i18n-aria="auth.pausePhotos" data-i18n-title="auth.pausePhotos"><span aria-hidden="true"></span></button>
         </div>
       </aside>
     </div>
@@ -10249,12 +10303,12 @@
           <span class="sidebar-menu-glyph" aria-hidden="true"><i></i><i></i><i></i></span>
         </summary>
         <nav class="sidebar-nav" aria-label="Planner sections" data-i18n-aria="sidebar.sections">
-          <button class="sidebar-nav-item is-active" type="button" data-sidebar-action="dashboard" aria-current="page"><span class="sidebar-nav-icon" aria-hidden="true">▦</span><span data-i18n="sidebar.dashboard">Dashboard</span></button>
-          <button class="sidebar-nav-item" type="button" data-sidebar-action="calendar"><span class="sidebar-nav-icon" aria-hidden="true">▣</span><span data-i18n="sidebar.calendar">Calendar</span></button>
-          <button class="sidebar-nav-item" type="button" data-sidebar-action="lists"><span class="sidebar-nav-icon" aria-hidden="true">☷</span><span data-i18n="sidebar.lists">Lists</span></button>
-          <button class="sidebar-nav-item" type="button" data-sidebar-action="holidays"><span class="sidebar-nav-icon" aria-hidden="true">☘</span><span data-i18n="sidebar.holidays">Holidays</span></button>
-          <button class="sidebar-nav-item" type="button" data-sidebar-action="special-days"><span class="sidebar-nav-icon" aria-hidden="true">★</span><span data-i18n="sidebar.specialDays">Special days</span></button>
-          <button class="sidebar-nav-item" type="button" data-sidebar-action="map"><span class="sidebar-nav-icon" aria-hidden="true">⌖</span><span data-i18n="sidebar.map">Map</span></button>
+          <button class="sidebar-nav-item is-active" type="button" data-sidebar-action="dashboard" aria-current="page" aria-label="Dashboard" data-i18n-aria="sidebar.dashboard"><span class="sidebar-nav-icon" aria-hidden="true">▦</span><span data-i18n="sidebar.dashboard">Dashboard</span></button>
+          <button class="sidebar-nav-item" type="button" data-sidebar-action="calendar" aria-label="Calendar" data-i18n-aria="sidebar.calendar"><span class="sidebar-nav-icon" aria-hidden="true">▣</span><span data-i18n="sidebar.calendar">Calendar</span></button>
+          <button class="sidebar-nav-item" type="button" data-sidebar-action="lists" aria-label="Lists" data-i18n-aria="sidebar.lists"><span class="sidebar-nav-icon" aria-hidden="true">☷</span><span data-i18n="sidebar.lists">Lists</span></button>
+          <button class="sidebar-nav-item" type="button" data-sidebar-action="holidays" aria-label="Holidays" data-i18n-aria="sidebar.holidays"><span class="sidebar-nav-icon" aria-hidden="true">☘</span><span data-i18n="sidebar.holidays">Holidays</span></button>
+          <button class="sidebar-nav-item" type="button" data-sidebar-action="special-days" aria-label="Special days" data-i18n-aria="sidebar.specialDays"><span class="sidebar-nav-icon" aria-hidden="true">★</span><span data-i18n="sidebar.specialDays">Special days</span></button>
+          <button class="sidebar-nav-item" type="button" data-sidebar-action="map" aria-label="Map" data-i18n-aria="sidebar.map"><span class="sidebar-nav-icon" aria-hidden="true">⌖</span><span data-i18n="sidebar.map">Map</span></button>
           <div class="sidebar-calendar-switcher" id="sidebarCalendarSwitcher"></div>
         </nav>
       </details>
@@ -10325,6 +10379,27 @@
 
       <div class="dashboard-page-grid">
         <div class="dashboard-main-column">
+          <section class="dashboard-panel dashboard-map-panel" aria-labelledby="dashboardMapTitle">
+            <div class="dashboard-panel-heading">
+              <div>
+                <p class="dashboard-panel-kicker" data-i18n="dashboard.locationKicker">Where everyone is headed</p>
+                <h2 id="dashboardMapTitle" data-i18n="dashboard.mapTitle">Family map</h2>
+                <p data-i18n="dashboard.mapNote">See the places connected to your next family activities.</p>
+              </div>
+            </div>
+            <div class="dashboard-map-canvas" id="dashboardMapCanvas" role="group" aria-label="Upcoming activity locations" data-i18n-aria="dashboard.mapAria">
+              <span class="dashboard-map-road road-one" aria-hidden="true"></span>
+              <span class="dashboard-map-road road-two" aria-hidden="true"></span>
+              <span class="dashboard-map-road road-three" aria-hidden="true"></span>
+              <div class="dashboard-map-pins" id="dashboardMapPins"></div>
+              <div class="dashboard-map-empty" id="dashboardMapEmpty">
+                <span aria-hidden="true">⌖</span>
+                <strong data-i18n="dashboard.noLocations">Add a location to an event to see it here.</strong>
+              </div>
+            </div>
+            <div class="dashboard-location-list" id="dashboardLocationList" aria-label="Upcoming activity locations" data-i18n-aria="dashboard.mapAria"></div>
+          </section>
+
           <section class="dashboard-panel dashboard-week-panel" aria-labelledby="dashboardWeekTitle">
             <div class="dashboard-panel-heading">
               <div>
@@ -11903,11 +11978,33 @@
         "auth.visualSchool": "School pickup",
         "auth.visualSoccer": "Soccer practice",
         "auth.visualDinner": "Family dinner",
+        "auth.visualGallery": "Family photo gallery",
+        "auth.visualSlideOne": "Show family planning photo",
+        "auth.visualSlideTwo": "Show school-day planning photo",
+        "auth.visualSlideThree": "Show shared family planning photo",
+        "auth.visualSlideFour": "Show family routine photo",
+        "auth.pausePhotos": "Pause changing photos",
+        "auth.playPhotos": "Resume changing photos",
+        "auth.visualEntryKicker": "Ready before the rush",
+        "auth.visualEntryTitle": "One plan from school pickup to bedtime.",
+        "auth.visualEntryBody": "Keep the handoffs, bags, practices, and reminders where everyone can find them.",
+        "auth.visualParkKicker": "Everyone sees the plan",
+        "auth.visualParkTitle": "Keep every caregiver on the same page.",
+        "auth.visualParkBody": "Share what is next without passing schedules through texts and screenshots.",
+        "auth.visualTableKicker": "Built for real routines",
+        "auth.visualTableTitle": "Make room for activities and family time.",
+        "auth.visualTableBody": "See the busy moments clearly and protect the time your family wants together.",
         "auth.access": "Account access",
         "auth.signIn": "Sign In",
         "auth.createAccount": "Create Account",
         "auth.email": "Email",
         "auth.password": "Password",
+        "auth.showPassword": "Show",
+        "auth.hidePassword": "Hide",
+        "auth.showPasswordLabel": "Show password",
+        "auth.hidePasswordLabel": "Hide password",
+        "auth.signupTitle": "Start your family calendar",
+        "auth.signupPrompt": "Create an account to save and share plans across devices.",
         "auth.familyName": "Family name",
         "auth.confirmPassword": "Confirm password",
         "auth.passwordHelp": "Use at least 8 characters.",
@@ -12104,6 +12201,10 @@
         "calendars.icon": "Icon",
         "calendars.rename": "Rename",
         "calendars.delete": "Delete",
+        "calendars.saveName": "Save name",
+        "calendars.cancel": "Cancel",
+        "calendars.renameLabel": "Calendar name",
+        "calendars.deleteWarning": "Events in this calendar will be removed from this device.",
         "calendars.default": "Family",
         "calendars.minimum": "Keep at least one calendar.",
         "calendars.confirmDelete": "Delete calendar “{name}” and its schedule?",
@@ -13011,11 +13112,33 @@
         "auth.visualSchool": "放学接送",
         "auth.visualSoccer": "足球训练",
         "auth.visualDinner": "家庭晚餐",
+        "auth.visualGallery": "家庭照片展示",
+        "auth.visualSlideOne": "显示家庭安排照片",
+        "auth.visualSlideTwo": "显示上学日安排照片",
+        "auth.visualSlideThree": "显示全家共享安排照片",
+        "auth.visualSlideFour": "显示家庭日常照片",
+        "auth.pausePhotos": "暂停切换照片",
+        "auth.playPhotos": "继续切换照片",
+        "auth.visualEntryKicker": "忙碌开始前，先准备好",
+        "auth.visualEntryTitle": "从放学接送到睡前，一个计划全都安排好。",
+        "auth.visualEntryBody": "把交接、书包、训练和提醒放在全家都能找到的地方。",
+        "auth.visualParkKicker": "全家都看得到计划",
+        "auth.visualParkTitle": "让每位照护者都掌握同一份安排。",
+        "auth.visualParkBody": "不用再通过短信和截图来回传递下一项安排。",
+        "auth.visualTableKicker": "为真实家庭日常而设计",
+        "auth.visualTableTitle": "为活动留好位置，也为家人留出时间。",
+        "auth.visualTableBody": "看清最忙的时刻，也守住全家想一起度过的时间。",
         "auth.access": "账户访问",
         "auth.signIn": "登录",
         "auth.createAccount": "创建账户",
         "auth.email": "电子邮箱",
         "auth.password": "密码",
+        "auth.showPassword": "显示",
+        "auth.hidePassword": "隐藏",
+        "auth.showPasswordLabel": "显示密码",
+        "auth.hidePasswordLabel": "隐藏密码",
+        "auth.signupTitle": "开始创建家庭日历",
+        "auth.signupPrompt": "创建账户，在不同设备上保存和分享家庭安排。",
         "auth.familyName": "家庭名称",
         "auth.confirmPassword": "确认密码",
         "auth.passwordHelp": "请使用至少 8 个字符。",
@@ -13212,6 +13335,10 @@
         "calendars.icon": "图标",
         "calendars.rename": "重命名",
         "calendars.delete": "删除",
+        "calendars.saveName": "保存名称",
+        "calendars.cancel": "取消",
+        "calendars.renameLabel": "日历名称",
+        "calendars.deleteWarning": "此设备上该日历中的活动将被删除。",
         "calendars.default": "家庭",
         "calendars.minimum": "至少保留一个日历。",
         "calendars.confirmDelete": "删除日历“{name}”及其中的日程吗？",
@@ -14305,8 +14432,8 @@
       document.getElementById("signInError").textContent = "";
       document.getElementById("signUpError").textContent = "";
       document.getElementById("signUpError").classList.remove("is-success");
-      const headingKey = selectedView === "forgot" ? "auth.resetTitle" : selectedView === "update" ? "auth.updateTitle" : "auth.welcome";
-      const promptKey = selectedView === "forgot" ? "auth.resetPrompt" : selectedView === "update" ? "auth.updatePrompt" : (previewRequiresSignup ? "auth.previewCompletePrompt" : "auth.prompt");
+      const headingKey = selectedView === "forgot" ? "auth.resetTitle" : selectedView === "update" ? "auth.updateTitle" : selectedView === "signup" ? "auth.signupTitle" : "auth.welcome";
+      const promptKey = selectedView === "forgot" ? "auth.resetPrompt" : selectedView === "update" ? "auth.updatePrompt" : (previewRequiresSignup ? "auth.previewCompletePrompt" : selectedView === "signup" ? "auth.signupPrompt" : "auth.prompt");
       const heading = document.getElementById("authHeading");
       const prompt = document.getElementById("authPrompt");
       heading.dataset.i18n = headingKey;
@@ -17624,12 +17751,12 @@
           <span>
             <span class="today-event-title">${t("calendar.empty")}</span>
             <span class="today-event-meta">${formatFullDate(selectedDate)}</span>
-            <span class="today-empty-actions">
+            ${state.activities.length ? `<span class="today-empty-actions">
               <button class="ghost-btn" type="button">${t("today.addToday")}</button>
-            </span>
+            </span>` : ""}
           </span>
         `;
-        empty.querySelector("button").addEventListener("click", () => openNewEventForDate(selectedDate, FAMILY_CHILD));
+        empty.querySelector("button")?.addEventListener("click", () => openNewEventForDate(selectedDate, FAMILY_CHILD));
         todayList.appendChild(empty);
         return;
       }
@@ -17777,6 +17904,10 @@
 
     function renderCalendarInsights() {
       const summary = calendarInsightSummary();
+      const hasNarrowedScope = Boolean(state.searchQuery.trim()) || state.eventFilter !== "all"
+        || kidProfiles.some(kid => !state.visibleKids.has(kid.name));
+      const hasActionableWarning = summary.conflictCount > 0 || summary.travelCount > 0;
+      document.getElementById("calendarInsights").hidden = !hasActionableWarning && !hasNarrowedScope;
       document.getElementById("calendarInsightsCount").textContent = t(summary.count === 1 ? "insights.eventOne" : "insights.events", { count: summary.count });
       document.getElementById("calendarInsightsScope").textContent = summary.scope;
       document.getElementById("calendarInsightsScope").dataset.filtered = String(kidProfiles.some(kid => !state.visibleKids.has(kid.name)));
@@ -19876,15 +20007,76 @@
       }).join("") : `<p class="dashboard-empty">${escapeHtml(t("empty.body"))}</p>`;
     }
 
+    function openDashboardActivity(activity) {
+      const date = parseDateKey(activity.occurrenceDate || activity.startDate);
+      selectedDate = new Date(date);
+      currentWeekStart = getMonday(selectedDate);
+      currentMonthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      miniCalendarMonth = new Date(currentMonthStart);
+      showCalendarPage();
+      setSidebarActive("calendar");
+      openDialog(activity);
+    }
+
+    function renderDashboardMap(activities) {
+      const canvas = document.getElementById("dashboardMapCanvas");
+      const pins = document.getElementById("dashboardMapPins");
+      const empty = document.getElementById("dashboardMapEmpty");
+      const locations = document.getElementById("dashboardLocationList");
+      const positions = [[22, 31], [51, 43], [78, 27], [31, 73], [66, 76], [88, 61]];
+      pins.replaceChildren();
+      locations.replaceChildren();
+      empty.hidden = activities.length > 0;
+      canvas.closest(".dashboard-map-panel").classList.toggle("is-empty", activities.length === 0);
+      locations.hidden = activities.length === 0;
+
+      activities.forEach((activity, index) => {
+        const date = parseDateKey(activity.occurrenceDate || activity.startDate);
+        const title = activityCompactTitle(activity);
+        const label = `${title} · ${activity.location} · ${formatShortDate(date)}`;
+        const [x, y] = positions[index % positions.length];
+        const pin = document.createElement("button");
+        pin.type = "button";
+        pin.className = "dashboard-map-pin";
+        pin.style.setProperty("--pin-x", `${x}%`);
+        pin.style.setProperty("--pin-y", `${y}%`);
+        pin.setAttribute("aria-label", label);
+        pin.title = label;
+        pin.innerHTML = `<span class="dashboard-map-pin-icon" aria-hidden="true">${escapeHtml(displayIcon(activity))}</span><span class="dashboard-map-pin-copy">${escapeHtml(activity.location)}</span>`;
+        pin.addEventListener("click", () => openDashboardActivity(activity));
+        pins.appendChild(pin);
+
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "dashboard-location-chip";
+        chip.setAttribute("aria-label", label);
+        chip.innerHTML = `<span aria-hidden="true">${escapeHtml(displayIcon(activity))}</span><span>${escapeHtml(activity.location)}</span>`;
+        chip.addEventListener("click", () => openDashboardActivity(activity));
+        locations.appendChild(chip);
+      });
+    }
+
     function renderDashboard() {
-      document.getElementById("dashboardStart").hidden = state.activities.length > 0;
+      const isEmpty = state.activities.length === 0;
+      document.getElementById("dashboardStart").hidden = !isEmpty;
+      document.getElementById("appShell").classList.toggle("is-dashboard-empty", isEmpty);
       const profile = loadFamilyProfile();
       const accountName = profile.name || activeAccount?.email?.split("@")[0] || "there";
       document.getElementById("dashboardGreeting").textContent = activeAccount ? t("dashboard.greeting", { name: accountName }) : t("dashboard.greetingGuest");
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const historyStart = addDays(today, -90);
-      const upcoming = upcomingOccurrences(90).slice(0, 8);
+      const allUpcoming = upcomingOccurrences(90);
+      const upcoming = allUpcoming.slice(0, 8);
+      const seenLocations = new Set();
+      const locationActivities = allUpcoming.filter(activity => {
+        const location = String(activity.location || "").trim();
+        const key = location.toLocaleLowerCase();
+        if (!location || seenLocations.has(key)) return false;
+        seenLocations.add(key);
+        return true;
+      }).slice(0, 6);
+      renderDashboardMap(locationActivities);
       const past = activityOccurrencesBetween(historyStart, today)
         .filter(activity => occurrenceEndDateTime(activity)?.getTime() < now.getTime())
         .sort((first, second) => occurrenceEndDateTime(second) - occurrenceEndDateTime(first))
@@ -20133,38 +20325,81 @@
       renderSidebarCalendarSwitcher();
     }
 
+    let calendarRowAction = null;
+
     function renderCalendarList() {
       const list = document.getElementById("calendarList");
       if (!list) return;
-      list.innerHTML = calendars.map(calendar => `
-        <div class="calendar-list-row" data-calendar-id="${escapeHtml(calendar.id)}">
-          <strong><span class="calendar-color-dot" style="background:${escapeHtml(calendar.color || "#2f7fd3")}"></span>${escapeHtml(calendar.icon || "📅")} ${escapeHtml(calendar.name)}${calendar.id === currentCalendarId ? " · Current" : ""}</strong>
-          <button class="small-btn rename-calendar" type="button" data-calendar-id="${escapeHtml(calendar.id)}">${escapeHtml(t("calendars.rename"))}</button>
-          <button class="danger-btn delete-calendar" type="button" data-calendar-id="${escapeHtml(calendar.id)}">${escapeHtml(t("calendars.delete"))}</button>
-        </div>`).join("");
+      list.innerHTML = calendars.map(calendar => {
+        const isRenaming = calendarRowAction?.type === "rename" && calendarRowAction.id === calendar.id;
+        const isDeleting = calendarRowAction?.type === "delete" && calendarRowAction.id === calendar.id;
+        if (isRenaming) return `
+          <div class="calendar-list-row is-editing" data-calendar-id="${escapeHtml(calendar.id)}">
+            <form class="calendar-inline-form" data-calendar-rename-form="${escapeHtml(calendar.id)}">
+              <input class="calendar-inline-name" type="text" maxlength="40" value="${escapeHtml(calendar.name)}" aria-label="${escapeHtml(t("calendars.renameLabel"))}" required>
+              <button class="small-btn" type="submit">${escapeHtml(t("calendars.saveName"))}</button>
+              <button class="ghost-btn cancel-calendar-action" type="button">${escapeHtml(t("calendars.cancel"))}</button>
+            </form>
+          </div>`;
+        if (isDeleting) return `
+          <div class="calendar-list-row is-confirming" data-calendar-id="${escapeHtml(calendar.id)}">
+            <div class="calendar-delete-confirmation">
+              <span class="calendar-delete-copy"><strong>${escapeHtml(t("calendars.confirmDelete", { name: calendar.name }))}</strong><small>${escapeHtml(t("calendars.deleteWarning"))}</small></span>
+              <button class="danger-btn confirm-delete-calendar" type="button" data-calendar-id="${escapeHtml(calendar.id)}">${escapeHtml(t("calendars.delete"))}</button>
+              <button class="ghost-btn cancel-calendar-action" type="button">${escapeHtml(t("calendars.cancel"))}</button>
+            </div>
+          </div>`;
+        return `
+          <div class="calendar-list-row" data-calendar-id="${escapeHtml(calendar.id)}">
+            <strong><span class="calendar-color-dot" style="background:${escapeHtml(calendar.color || "#2f7fd3")}"></span>${escapeHtml(calendar.icon || "📅")} ${escapeHtml(calendar.name)}${calendar.id === currentCalendarId ? " · Current" : ""}</strong>
+            <button class="small-btn rename-calendar" type="button" data-calendar-id="${escapeHtml(calendar.id)}">${escapeHtml(t("calendars.rename"))}</button>
+            <button class="danger-btn delete-calendar" type="button" data-calendar-id="${escapeHtml(calendar.id)}">${escapeHtml(t("calendars.delete"))}</button>
+          </div>`;
+      }).join("");
       list.querySelectorAll(".rename-calendar").forEach(button => button.addEventListener("click", () => {
         const calendar = calendars.find(item => item.id === button.dataset.calendarId);
-      const name = window.prompt(t("calendars.newName"), calendar?.name || "");
-        if (!calendar || !name?.trim()) return;
-        calendar.name = name.trim().slice(0, 40);
+        if (!calendar) return;
+        calendarRowAction = { type: "rename", id: calendar.id };
+        renderCalendarList();
+        list.querySelector(".calendar-inline-name")?.focus();
+      }));
+      list.querySelectorAll(".delete-calendar").forEach(button => button.addEventListener("click", () => {
+        if (calendars.length === 1) { showFeedbackToast(t("calendars.minimum")); return; }
+        const calendar = calendars.find(item => item.id === button.dataset.calendarId);
+        if (!calendar) return;
+        calendarRowAction = { type: "delete", id: calendar.id };
+        renderCalendarList();
+      }));
+      list.querySelectorAll("[data-calendar-rename-form]").forEach(form => form.addEventListener("submit", event => {
+        event.preventDefault();
+        const calendar = calendars.find(item => item.id === form.dataset.calendarRenameForm);
+        const name = form.querySelector(".calendar-inline-name")?.value.trim();
+        if (!calendar || !name) return;
+        calendar.name = name.slice(0, 40);
+        calendarRowAction = null;
         saveCalendars();
         renderCalendarSelector();
         renderCalendarList();
       }));
-      list.querySelectorAll(".delete-calendar").forEach(button => button.addEventListener("click", () => {
-        if (calendars.length === 1) { window.alert(t("calendars.minimum")); return; }
+      list.querySelectorAll(".confirm-delete-calendar").forEach(button => button.addEventListener("click", () => {
         const calendar = calendars.find(item => item.id === button.dataset.calendarId);
-        if (!calendar || !window.confirm(t("calendars.confirmDelete", { name: calendar.name }))) return;
+        if (!calendar) return;
         calendars = calendars.filter(item => item.id !== calendar.id);
         ["kids", "activities", "presets", "history", "settings", "view", "members"].forEach(name => localStorage.removeItem(calendarStorageKey(name, calendar.id)));
         if (currentCalendarId === calendar.id) switchCalendar(calendars[0].id);
+        calendarRowAction = null;
         saveCalendars();
         renderCalendarSelector();
+        renderCalendarList();
+      }));
+      list.querySelectorAll(".cancel-calendar-action").forEach(button => button.addEventListener("click", () => {
+        calendarRowAction = null;
         renderCalendarList();
       }));
     }
 
     function openCalendarDialog() {
+      calendarRowAction = null;
       renderCalendarList();
       document.getElementById("calendarDialog").showModal();
     }
@@ -21573,6 +21808,21 @@
     document.querySelectorAll("[data-auth-view]").forEach(button => {
       button.addEventListener("click", () => setAuthView(button.dataset.authView));
     });
+    document.querySelectorAll("[data-password-toggle]").forEach(button => {
+      button.addEventListener("click", () => {
+        const input = document.getElementById(button.dataset.passwordToggle);
+        const visible = input.type === "password";
+        input.type = visible ? "text" : "password";
+        const key = visible ? "auth.hidePassword" : "auth.showPassword";
+        const ariaKey = visible ? "auth.hidePasswordLabel" : "auth.showPasswordLabel";
+        button.dataset.i18n = key;
+        button.dataset.i18nAria = ariaKey;
+        button.textContent = t(key);
+        button.setAttribute("aria-label", t(ariaKey));
+        button.setAttribute("aria-pressed", String(visible));
+        input.focus();
+      });
+    });
     ["welcomeTryNav", "welcomeTryHero", "welcomeTryPreview", "welcomeTryHow"].forEach(id => {
       document.getElementById(id).addEventListener("click", showGuestPreview);
     });
@@ -22293,7 +22543,7 @@
     }
     let workspaceLayout = loadWorkspaceLayout();
     const hiddenWorkspacePanels = new Set(workspaceLayout.hiddenPanels);
-    const dashboardPanelNames = ["week", "updates", "upcoming", "past"];
+    const dashboardPanelNames = ["locations", "week", "updates", "upcoming", "past"];
     const layoutDialog = document.getElementById("layoutDialog");
     document.getElementById("dashboardPage").before(document.getElementById("workspaceVisibility"));
 
@@ -22924,5 +23174,6 @@
   <script src="./assets/family-polls.js?v=2"></script>
   <script src="./assets/experience.js"></script>
   <script src="./assets/quick-ux.js"></script>
+  <script src="./assets/auth-visual-rotation.js?v=1"></script>
 </body>
 </html>
