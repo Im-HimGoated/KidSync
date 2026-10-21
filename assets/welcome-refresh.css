@@ -1,0 +1,149 @@
+/* All overrides stay inside the welcome page, never the calendar workspace. */
+#welcomeScreen { color-scheme: light; color: #203c46; background: #fff; --text: #203c46; --muted: #526970; --line: #dce7e8; }
+#welcomeScreen *, #welcomeScreen *::before, #welcomeScreen *::after { letter-spacing: 0; }
+#welcomeScreen :is(button, a):focus-visible { outline: 3px solid #007bba; outline-offset: 4px; }
+#welcomeScreen :is(button, a) { touch-action: manipulation; }
+#welcomeScreen .welcome-nav { position: relative; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; min-height: 80px; padding: 16px max(24px, calc((100% - 1200px) / 2)); background: #fff; border-bottom: 1px solid #dce7e8; box-shadow: none; }
+#welcomeScreen .welcome-wordmark { color: #24576d; font-size: 25px; }
+#welcomeScreen .welcome-wordmark > span > span { color: #28734f; }
+#welcomeScreen .welcome-nav-center { gap: 8px; }
+#welcomeScreen .welcome-nav-link { min-height: 44px; display: inline-flex; align-items: center; color: #405960; font-size: 14px; }
+#welcomeScreen .welcome-nav-actions { gap: 12px; }
+#welcomeScreen :is(.welcome-primary-btn, .welcome-secondary-btn, .welcome-signin-btn) { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 6px; padding: 12px 20px; font-size: 14px; line-height: 1.4; white-space: normal; }
+#welcomeScreen .welcome-primary-btn { color: #fff; background: #176b96; border: 1px solid #176b96; box-shadow: none; }
+#welcomeScreen .welcome-primary-btn:hover { background: #115373; border-color: #115373; }
+#welcomeScreen .welcome-signin-btn { color: #24576d; background: transparent; }
+#welcomeScreen .language-switch { background: #f0f5f5; border: 1px solid #d3e0e2; border-radius: 6px; }
+#welcomeScreen .language-option { color: #405960; min-height: 44px; }
+#welcomeScreen .language-option[aria-pressed="true"] { color: #fff; background: #176b96; }
+#welcomeScreen .welcome-hero { position: relative; isolation: isolate; background: #174d44; min-height: 0; overflow: hidden; }
+#welcomeScreen .welcome-hero::before { display: none; }
+#welcomeScreen .welcome-hero-inner { position: static; display: flex; align-items: center; width: min(1200px, calc(100% - 48px)); min-height: min(640px, calc(100svh - 180px)); margin: 0 auto; padding: 48px 0 88px; }
+#welcomeScreen .welcome-hero-copy { position: relative; z-index: 1; max-width: 540px; width: 100%; }
+#welcomeScreen .welcome-hero-visual { position: absolute; z-index: -1; inset: 0; height: 100%; width: 100%; min-height: 0; max-height: none; border: 0; border-radius: 0; box-shadow: none; }
+#welcomeScreen .welcome-hero-visual > img { width: 100%; height: 100%; object-fit: cover; object-position: center 55%; }
+#welcomeScreen .welcome-hero-visual::after { inset: 0; background: rgba(5,30,25,.66); }
+#welcomeScreen .welcome-eyebrow { color: #d5f0e1; font-size: 13px; font-weight: 700; margin: 0 0 18px; text-transform: none; }
+#welcomeScreen .welcome-hero h1 { display: block; max-width: none; color: #fff; margin: 0 0 18px; font-size: 72px; line-height: 1.05; }
+#welcomeScreen .welcome-hero-brand span { color: inherit; }
+#welcomeScreen #welcomeBrand > span { color: #a1e3bf; }
+#welcomeScreen .welcome-hero-tagline { margin: 0; max-width: 22ch; color: #fff; font-size: 32px; line-height: 1.22; font-weight: 750; text-wrap: balance; }
+#welcomeScreen .welcome-hero-description { margin: 18px 0 0; max-width: 40ch; color: #f0f6f3; font-size: 17px; line-height: 1.6; }
+#welcomeScreen .welcome-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+#welcomeScreen .welcome-hero-actions .welcome-primary-btn { background: #fff; color: #164f44; border-color: #fff; }
+#welcomeScreen .welcome-hero-actions .welcome-primary-btn:hover { background: #e4f4ec; }
+#welcomeScreen .welcome-secondary-btn { background: transparent; color: #fff; border: 1px solid #afc8c0; text-decoration: none; }
+#welcomeScreen .welcome-secondary-btn:hover { background: rgba(255,255,255,.12); }
+#welcomeScreen .welcome-trial-note { max-width: 48ch; margin: 14px 0 0; color: #dfebe5; font-size: 12px; line-height: 1.6; }
+#welcomeScreen .welcome-returning { margin: 8px 0 0; color: #dfebe5; font-size: 12px; }
+#welcomeScreen .welcome-returning button { color: #fff; background: transparent; border: 0; min-height: 44px; text-decoration: underline; padding: 8px; }
+#welcomeScreen .welcome-scroll-link { position: absolute; bottom: 18px; left: max(24px, calc((100% - 1200px) / 2)); transform: none; color: #fff; font-size: 13px; padding-block: 10px; min-height: 44px; }
+#welcomeScreen .welcome-overview-band { background: #f0f7f4; border-bottom: 1px solid #d8e7e0; }
+#welcomeScreen .welcome-capabilities { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; width: min(1200px, calc(100% - 48px)); max-width: none; margin: 0 auto; padding: 26px 0; list-style: none; border: 0; }
+#welcomeScreen .welcome-capability { display: flex; gap: 14px; align-items: flex-start; padding: 0; min-width: 0; border: 0; }
+#welcomeScreen .welcome-capability-number { background: transparent; color: #28734f; width: auto; height: auto; padding-top: 2px; font-size: 13px; }
+#welcomeScreen .welcome-capability-copy { display: grid; gap: 5px; }
+#welcomeScreen .welcome-capability-copy strong { color: #244c40; font-size: 15px; }
+#welcomeScreen .welcome-capability-copy small { color: #4f685f; font-size: 12px; line-height: 1.5; }
+#welcomeScreen :is(.welcome-section-inner, .welcome-about-inner) { width: min(1200px, calc(100% - 48px)); padding: 72px 0; }
+#welcomeScreen :is(.welcome-preview-section, .welcome-how-section, .welcome-about-section) { border-radius: 0; margin: 0; border: 0; background: #fff; scroll-margin-top: 20px; }
+#welcomeScreen .welcome-section-kicker { color: #28734f; font-size: 12px; font-weight: 750; }
+#welcomeScreen :is(.welcome-section-heading h2, .welcome-details-copy h2, .welcome-about-copy h2) { color: #203c46; font-size: 34px; line-height: 1.2; text-wrap: balance; }
+#welcomeScreen :is(.welcome-section-heading > p, .welcome-details-copy > p:last-child, .welcome-about-copy > p:last-of-type) { color: #526970; font-size: 15px; line-height: 1.7; }
+#welcomeScreen .welcome-section-heading { gap: 36px; margin-bottom: 32px; }
+#welcomeScreen .welcome-product-window { border: 1px solid #cddde1; border-radius: 8px; box-shadow: 0 12px 36px rgba(32,60,70,.07); background: #fff; }
+#welcomeScreen .welcome-product-toolbar { background: #f5f9fa; color: #203c46; padding: 20px 24px; gap: 16px; border-bottom: 1px solid #dce7e8; }
+#welcomeScreen .welcome-preview-week { color: #526970; font-size: 13px; }
+#welcomeScreen .welcome-week-preview { min-width: 0; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+#welcomeScreen .welcome-preview-day { min-width: 0; min-height: 250px; padding: 16px 12px; background: #fff; border-color: #e1e9ec; }
+#welcomeScreen .welcome-preview-day h3 { background: none; color: #405960; text-align: left; padding: 0 0 16px; min-height: 0; font-size: 13px; }
+#welcomeScreen .welcome-demo-event { padding: 12px 10px; min-height: 74px; height: auto; border-radius: 5px; box-shadow: none; font-size: 12px; line-height: 1.5; }
+#welcomeScreen .welcome-demo-event strong { font-size: 13px; overflow-wrap: anywhere; }
+#welcomeScreen .welcome-preview-action { padding: 20px 24px; background: #f5f9fa; color: #405960; border-top: 1px solid #dce7e8; gap: 20px; }
+#welcomeScreen .welcome-benefits { gap: 28px; margin-top: 48px; }
+#welcomeScreen :is(.welcome-benefit, .welcome-how-step, .welcome-about-point) { background: transparent; border: 0; border-radius: 0; box-shadow: none; transform: none; }
+#welcomeScreen .welcome-benefit { padding: 0; }
+#welcomeScreen :is(.welcome-benefit h3, .welcome-how-step h3, .welcome-about-point h3) { color: #203c46; font-size: 17px; line-height: 1.4; }
+#welcomeScreen :is(.welcome-benefit p, .welcome-how-step p, .welcome-about-point p, .welcome-detail-item dd) { color: #526970; font-size: 14px; line-height: 1.7; }
+#welcomeScreen .welcome-details { margin-top: 56px; padding-top: 48px; border-top: 1px solid #dce7e8; gap: 48px; }
+#welcomeScreen .welcome-detail-item { border-color: #dce7e8; }
+#welcomeScreen .welcome-detail-item dt { color: #24576d; }
+#welcomeScreen .welcome-how-section { background: #f2f7f8; }
+#welcomeScreen .welcome-how-grid { gap: 24px; }
+#welcomeScreen .welcome-how-step { padding: 20px 0 0; border-top: 2px solid #c4dade; }
+#welcomeScreen .welcome-how-step-top { margin-bottom: 24px; }
+#welcomeScreen .welcome-how-number { color: #28734f; }
+#welcomeScreen .welcome-how-action { background: transparent; color: #526970; border-color: #d3e1e4; }
+#welcomeScreen .welcome-about-section::before, #welcomeScreen .welcome-about-copy h2::after { display: none; }
+#welcomeScreen .welcome-about-inner { gap: 64px; }
+#welcomeScreen .welcome-about-copy .welcome-section-kicker { background: transparent; padding: 0; border: 0; }
+#welcomeScreen .welcome-about-points { gap: 0; }
+#welcomeScreen .welcome-about-point { padding: 20px 0; border-bottom: 1px solid #dce7e8; }
+#welcomeScreen .welcome-about-point > span { color: #28734f; background: #edf7f1; border: 0; box-shadow: none; animation: none; }
+#welcomeScreen .welcome-footer { color: #526970; background: #f5f9fa; border-top: 1px solid #dce7e8; padding: 28px max(24px, calc((100% - 1200px) / 2)); }
+#welcomeScreen .welcome-questions-section { padding: 0; }
+#welcomeScreen :is(.welcome-questions-intro h2, .welcome-final-cta h2) { font-size: 34px; letter-spacing: 0; }
+#welcomeScreen .welcome-final-cta { width: 100%; margin: 0; padding: 48px max(24px, calc((100% - 1200px) / 2)); border: 0; border-radius: 0; background: #edf6f1; }
+@media (min-width: 1600px) { #welcomeScreen .welcome-hero-inner { min-height: 680px; } }
+@media (max-width: 1050px) {
+  #welcomeScreen .welcome-nav-center { display: none; }
+  #welcomeScreen.welcome-menu-open .welcome-nav-center { display: grid; z-index: 10; }
+  #welcomeScreen .welcome-hero h1 { font-size: 64px; }
+  #welcomeScreen .welcome-hero-tagline { font-size: 30px; }
+  #welcomeScreen .welcome-how-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  #welcomeScreen .welcome-nav { min-height: 72px; padding: 12px 16px; gap: 8px; }
+  #welcomeScreen .welcome-wordmark { gap: 7px; font-size: 20px; }
+  #welcomeScreen .welcome-mark { width: 28px; height: 28px; }
+  #welcomeScreen .welcome-nav-actions { gap: 4px; }
+  #welcomeScreen .welcome-nav .language-switch { width: 80px; min-width: 80px; height: 46px; }
+  #welcomeScreen .welcome-nav .language-option { min-height: 44px; font-size: 12px; }
+  #welcomeScreen .welcome-nav .welcome-signin-btn { min-height: 44px; padding: 8px; font-size: 12px; }
+  #welcomeScreen .welcome-menu-toggle:not([hidden]) { width: 44px; height: 44px; }
+  #welcomeScreen .welcome-nav-actions .welcome-primary-btn { display: none; }
+  #welcomeScreen .welcome-hero-inner { width: calc(100% - 40px); min-height: 570px; padding: 38px 0 86px; }
+  #welcomeScreen .welcome-hero-visual > img { object-position: 62% center; }
+  #welcomeScreen .welcome-hero-visual::after { background: rgba(5,30,25,.73); }
+  #welcomeScreen .welcome-hero h1 { font-size: 54px; }
+  #welcomeScreen .welcome-hero-tagline { font-size: 28px; }
+  #welcomeScreen .welcome-hero-description { font-size: 15px; }
+  #welcomeScreen .welcome-eyebrow { font-size: 12px; }
+  #welcomeScreen .welcome-hero-actions { gap: 10px; margin-top: 22px; }
+  #welcomeScreen .welcome-hero-actions > :is(button, a) { flex: 1 1 180px; }
+  #welcomeScreen .welcome-scroll-link { left: 20px; bottom: 18px; }
+  #welcomeScreen .welcome-capabilities { width: calc(100% - 40px); grid-template-columns: 1fr; gap: 18px; padding: 24px 0; }
+  #welcomeScreen .welcome-capability-copy { gap: 3px; }
+  #welcomeScreen :is(.welcome-section-inner, .welcome-about-inner) { width: calc(100% - 40px); padding: 44px 0; }
+  #welcomeScreen :is(.welcome-section-heading, .welcome-details, .welcome-about-inner) { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  #welcomeScreen :is(.welcome-section-heading h2, .welcome-details-copy h2, .welcome-about-copy h2) { font-size: 27px; }
+  #welcomeScreen .welcome-product-toolbar { flex-wrap: wrap; padding: 16px; gap: 12px; }
+  #welcomeScreen .welcome-preview-week { flex-basis: 100%; order: 3; }
+  #welcomeScreen .welcome-swipe-hint { display: none; }
+  #welcomeScreen .welcome-week-preview { grid-template-columns: minmax(0, 1fr); }
+  #welcomeScreen .welcome-preview-day { min-height: 0; border: 0; border-bottom: 1px solid #dce7e8; padding: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  #welcomeScreen .welcome-preview-day h3 { grid-column: 1 / -1; padding: 0; margin: 0 0 2px; }
+  #welcomeScreen .welcome-demo-event { margin: 0; }
+  #welcomeScreen .welcome-preview-action { display: grid; padding: 16px; }
+  #welcomeScreen .welcome-preview-action button { width: 100%; }
+  #welcomeScreen .welcome-benefits { grid-template-columns: minmax(0, 1fr); gap: 28px; margin-top: 32px; }
+  #welcomeScreen .welcome-details { margin-top: 36px; padding-top: 32px; }
+  #welcomeScreen .welcome-how-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  #welcomeScreen .welcome-how-step-top { margin-bottom: 16px; }
+  #welcomeScreen .welcome-footer { align-items: flex-start; gap: 16px; padding: 24px 20px; }
+  #welcomeScreen :is(.welcome-questions-intro h2, .welcome-final-cta h2) { font-size: 27px; }
+  #welcomeScreen .welcome-final-cta { padding: 36px 20px; }
+}
+@media (max-width: 359px) {
+  #welcomeScreen .welcome-nav { padding-inline: 12px; }
+  #welcomeScreen .welcome-nav .welcome-signin-btn { display: none; }
+  #welcomeScreen .welcome-wordmark { font-size: 18px; }
+  #welcomeScreen .welcome-mark { width: 24px; height: 24px; }
+  #welcomeScreen .welcome-hero h1 { font-size: 48px; }
+  #welcomeScreen .welcome-hero-tagline { font-size: 26px; }
+  #welcomeScreen .welcome-hero-inner { min-height: 600px; }
+  #welcomeScreen .welcome-capability-copy small { display: block; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #welcomeScreen *, #welcomeScreen *::before, #welcomeScreen *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

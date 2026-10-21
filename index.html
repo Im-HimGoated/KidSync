@@ -9862,6 +9862,8 @@
   <link rel="stylesheet" href="./assets/quick-ux.css">
   <link rel="stylesheet" href="./assets/marketing-auth.css?v=2">
   <link rel="stylesheet" href="./assets/micro-motion.css?v=1">
+  <link rel="stylesheet" href="./assets/landing-ux.css?v=1">
+  <link rel="stylesheet" href="./assets/welcome-refresh.css?v=1">
   <link rel="stylesheet" href="./assets/mobile.css?v=95">
 </head>
 <body>
@@ -9886,15 +9888,18 @@
   </script>
   <section class="welcome-screen" id="welcomeScreen" aria-labelledby="welcomeHeadline" hidden>
     <header class="welcome-nav" aria-label="KidsSync navigation" data-i18n-aria="welcome.navigation">
-      <div class="welcome-wordmark" aria-label="KidsSync">
+    <a class="welcome-skip-link" href="#welcomeHeadline" data-i18n="welcome.skip">Skip to main content</a>
+      <a class="welcome-wordmark" href="#welcomeHeadline" aria-label="KidsSync">
         <span class="welcome-mark" aria-hidden="true"></span>
         <span>Kids<span>Sync</span></span>
-      </div>
-      <nav class="welcome-nav-center" aria-label="Welcome sections" data-i18n-aria="welcome.sections">
+      </a>
+      <nav class="welcome-nav-center" id="welcomeSections" aria-label="Welcome sections" data-i18n-aria="welcome.sections">
         <a class="welcome-nav-link" href="#welcomePreview" data-i18n="welcome.navPreview">Product</a>
         <a class="welcome-nav-link" href="#welcomeHow" data-i18n="welcome.navHow">How it works</a>
         <a class="welcome-nav-link" href="#welcomeAbout" data-i18n="welcome.navAbout">About us</a>
       </nav>
+        <a class="welcome-nav-link" href="#welcomeQuestions" data-i18n="welcome.navQuestions">Questions</a>
+        <button class="welcome-menu-signin" type="button" data-welcome-signin data-i18n="welcome.signInAccount">Sign in to your account</button>
       <div class="welcome-nav-actions">
         <div class="language-switch" role="group" aria-label="Language" data-i18n-aria="aria.language">
           <button class="language-option" type="button" data-language="en" aria-pressed="true">EN</button>
@@ -9904,46 +9909,44 @@
         <button class="welcome-primary-btn" type="button" id="welcomeTryNav" data-i18n="welcome.tryPlanner">Try KidsSync free</button>
       </div>
     </header>
+      <button class="welcome-menu-toggle" id="welcomeMenuToggle" type="button" aria-expanded="false" aria-controls="welcomeSections" aria-label="Explore this page" data-i18n-aria="welcome.explorePage" hidden><span aria-hidden="true">☰</span></button>
 
     <section class="welcome-hero">
       <div class="welcome-hero-inner">
         <div class="welcome-hero-copy">
           <p class="welcome-eyebrow" data-i18n="welcome.eyebrow">Family scheduling for busy parents</p>
-          <p class="welcome-hero-brand" id="welcomeBrand" aria-label="KidsSync">Kids<span>Sync</span></p>
-          <h1 id="welcomeHeadline" data-i18n="welcome.headline">The family calendar built for real life.</h1>
-          <p class="welcome-hero-description" data-i18n="welcome.description">Give every child a clear, color-coded schedule. KidsSync keeps activities, pickups, birthdays, deadlines, and family plans together, and flags conflicts before they become problems.</p>
+          <h1 class="welcome-hero-brand" id="welcomeHeadline" tabindex="-1"><span id="welcomeBrand" aria-label="KidsSync">Kids<span>Sync</span></span></h1>
+          <p class="welcome-hero-tagline" data-i18n="welcome.headline">The family calendar built for real life.</p>
+          <p class="welcome-hero-description" data-i18n="welcome.description">Activities, pickups, and family plans. One clear view of who needs to be where—and when.</p>
           <div class="welcome-hero-actions">
             <button class="welcome-primary-btn" type="button" id="welcomeTryHero" data-i18n="welcome.tryPlanner">Try KidsSync free</button>
-            <button class="welcome-secondary-btn" type="button" id="welcomeSignInHero" data-i18n="welcome.signInAccount">Sign in to your account</button>
+            <a class="welcome-secondary-btn" href="#welcomePreview" data-i18n="welcome.exploreSample">Explore a sample week <span aria-hidden="true">↗</span></a>
           </div>
           <p class="welcome-trial-note" data-i18n="welcome.trialNote">Explore for 10 minutes without an account. Sign in to keep and sync your calendar.</p>
           <ul class="welcome-capabilities" aria-label="What KidsSync helps families do" data-i18n-aria="welcome.highlights">
-            <li class="welcome-capability">
-              <span class="welcome-capability-number" aria-hidden="true">01</span>
-              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityPlan">Plan the week</strong><small data-i18n="welcome.capabilityPlanDetail">Color-coded schedules for every child</small></span>
-            </li>
-            <li class="welcome-capability">
-              <span class="welcome-capability-number" aria-hidden="true">02</span>
-              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityConflicts">Catch conflicts</strong><small data-i18n="welcome.capabilityConflictsDetail">See overlaps before plans collide</small></span>
-            </li>
-            <li class="welcome-capability">
-              <span class="welcome-capability-number" aria-hidden="true">03</span>
-              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityShare">Share the plan</strong><small data-i18n="welcome.capabilityShareDetail">Sync, print, or export for caregivers</small></span>
-            </li>
-          </ul>
+          <p class="welcome-returning"><span data-i18n="welcome.alreadyHere">Already have an account?</span> <button type="button" id="welcomeSignInHero" data-i18n="auth.signIn">Sign In</button></p>
         </div>
         <div class="welcome-hero-visual" aria-hidden="true">
-          <img src="./assets/kidssync-family-hero.jpg" alt="" decoding="async" fetchpriority="high">
-          <div class="welcome-hero-plan">
-            <div class="welcome-hero-plan-head"><span data-i18n="welcome.sampleWeek">Sample week · September 7–11</span><span class="welcome-hero-plan-dots"><i></i><i></i><i></i></span></div>
-            <div class="welcome-hero-plan-row"><span class="welcome-hero-plan-day" data-i18n="day.monday">Monday</span><strong data-i18n="welcome.eventPiano">Piano · Maya</strong><span>3:15</span></div>
-            <div class="welcome-hero-plan-row"><span class="welcome-hero-plan-day" data-i18n="day.tuesday">Tuesday</span><strong data-i18n="welcome.eventRobotics">Robotics · Maya</strong><span>5:00</span></div>
-            <div class="welcome-hero-plan-row"><span class="welcome-hero-plan-day" data-i18n="day.wednesday">Wednesday</span><strong data-i18n="welcome.eventDinner">Family dinner</strong><span>6:00</span></div>
-          </div>
+          <img src="./assets/kidssync-family-hero.jpg" alt="" decoding="async" fetchpriority="high" width="1920" height="1281">
         </div>
       </div>
       <a class="welcome-scroll-link" href="#welcomePreview" data-i18n="welcome.seeWeek">See a sample family week ↓</a>
     </section>
+    <div class="welcome-overview-band">
+            <li class="welcome-capability">
+              <span class="welcome-capability-number" aria-hidden="true">1</span>
+              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityPlan">Plan the week</strong><small data-i18n="welcome.capabilityPlanDetail">Color-coded schedules for every child</small></span>
+            </li>
+            <li class="welcome-capability">
+              <span class="welcome-capability-number" aria-hidden="true">2</span>
+              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityConflicts">Catch conflicts</strong><small data-i18n="welcome.capabilityConflictsDetail">See overlaps before plans collide</small></span>
+            </li>
+            <li class="welcome-capability">
+              <span class="welcome-capability-number" aria-hidden="true">3</span>
+              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityShare">Share the plan</strong><small data-i18n="welcome.capabilityShareDetail">Sync, print, or export for caregivers</small></span>
+            </li>
+          </ul>
+    </div>
 
     <section class="welcome-preview-section" id="welcomePreview">
       <div class="welcome-section-inner">
@@ -9959,38 +9962,48 @@
           <div class="welcome-product-toolbar">
             <div class="welcome-preview-brand">Kids<span>Sync</span></div>
             <div class="welcome-preview-week" data-i18n="welcome.sampleWeek">Sample week · September 7–11</div>
-            <div class="welcome-preview-legend">
-              <span><i style="background:#2f7fd3"></i><span data-i18n="welcome.sampleMaya">Maya</span></span>
-              <span><i style="background:#3f9444"></i><span data-i18n="welcome.sampleTheo">Theo</span></span>
-              <span><i style="background:#d95f50"></i><span data-i18n="welcome.sampleFamily">Family</span></span>
+          </div>
+          <div class="welcome-sample-tools">
+            <div><span class="welcome-sample-label" data-i18n="welcome.sampleInteractive">Try the family filters</span><p data-i18n="welcome.sampleSafe">Just an example. Your own schedule starts separately.</p></div>
+            <div class="welcome-sample-filters" role="group" aria-label="Filter the sample week" data-i18n-aria="welcome.sampleFilters">
+              <button type="button" data-sample-person="all" aria-pressed="true" data-i18n="welcome.sampleEveryone">Everyone</button>
+              <button type="button" data-sample-person="maya" aria-pressed="false"><i class="sample-dot-maya" aria-hidden="true"></i><span data-i18n="welcome.sampleMaya">Maya</span></button>
+              <button type="button" data-sample-person="theo" aria-pressed="false"><i class="sample-dot-theo" aria-hidden="true"></i><span data-i18n="welcome.sampleTheo">Theo</span></button>
+              <button type="button" data-sample-person="family" aria-pressed="false"><i class="sample-dot-family" aria-hidden="true"></i><span data-i18n="welcome.sampleFamily">Family</span></button>
             </div>
           </div>
-          <div class="welcome-preview-scroll">
+          <div class="welcome-sample-meta"><p id="welcomeSampleCount" role="status" aria-live="polite"></p></div>
+          <div class="welcome-preview-scroll" tabindex="0" role="region" aria-label="Example family plans by weekday" data-i18n-aria="welcome.sampleScroll">
             <div class="welcome-week-preview">
               <div class="welcome-preview-day">
                 <h3 data-i18n="day.monday">Monday</h3>
-                <div class="welcome-demo-event blue"><span>3:15–4:00</span><strong>🎹 <span data-i18n="welcome.eventPiano">Piano · Maya</span></strong></div>
-                <div class="welcome-demo-event green"><span>4:30–6:00</span><strong>⚽ <span data-i18n="welcome.eventSoccer">Soccer · Theo</span></strong></div>
+                <div class="welcome-demo-event blue" data-sample-owner="maya"><span>3:15–4:00</span><strong>🎹 <span data-i18n="welcome.eventPiano">Piano · Maya</span></strong></div>
+                <div class="welcome-demo-event green" data-sample-owner="theo"><span>4:30–6:00</span><strong>⚽ <span data-i18n="welcome.eventSoccer">Soccer · Theo</span></strong></div>
+                <p class="welcome-sample-empty" data-i18n="welcome.sampleEmpty" hidden>No plans for this person</p>
               </div>
               <div class="welcome-preview-day">
                 <h3 data-i18n="day.tuesday">Tuesday</h3>
-                <div class="welcome-demo-event gold"><span>3:30–4:15</span><strong>📚 <span data-i18n="welcome.eventHomework">Homework block</span></strong></div>
-                <div class="welcome-demo-event blue"><span>5:00–6:00</span><strong>🤖 <span data-i18n="welcome.eventRobotics">Robotics · Maya</span></strong></div>
+                <div class="welcome-demo-event gold" data-sample-owner="family"><span>3:30–4:15</span><strong>📚 <span data-i18n="welcome.eventHomework">Homework block</span></strong></div>
+                <div class="welcome-demo-event blue" data-sample-owner="maya"><span>5:00–6:00</span><strong>🤖 <span data-i18n="welcome.eventRobotics">Robotics · Maya</span></strong></div>
+                <p class="welcome-sample-empty" data-i18n="welcome.sampleEmpty" hidden>No plans for this person</p>
               </div>
               <div class="welcome-preview-day">
                 <h3 data-i18n="day.wednesday">Wednesday</h3>
-                <div class="welcome-demo-event green"><span>3:00–3:30</span><strong>🦷 <span data-i18n="welcome.eventDentist">Dentist · Theo</span></strong></div>
-                <div class="welcome-demo-event coral"><span>6:00–7:00</span><strong>🍽️ <span data-i18n="welcome.eventDinner">Family dinner</span></strong></div>
+                <div class="welcome-demo-event green" data-sample-owner="theo"><span>3:00–3:30</span><strong>🦷 <span data-i18n="welcome.eventDentist">Dentist · Theo</span></strong></div>
+                <div class="welcome-demo-event coral" data-sample-owner="family"><span>6:00–7:00</span><strong>🍽️ <span data-i18n="welcome.eventDinner">Family dinner</span></strong></div>
+                <p class="welcome-sample-empty" data-i18n="welcome.sampleEmpty" hidden>No plans for this person</p>
               </div>
               <div class="welcome-preview-day">
                 <h3 data-i18n="day.thursday">Thursday</h3>
-                <div class="welcome-demo-event blue"><span>4:00–5:00</span><strong>🎨 <span data-i18n="welcome.eventArt">Art club · Maya</span></strong></div>
-                <div class="welcome-demo-event green"><span>5:15–6:00</span><strong>🏊 <span data-i18n="welcome.eventSwim">Swim · Theo</span></strong></div>
+                <div class="welcome-demo-event blue" data-sample-owner="maya"><span>4:00–5:00</span><strong>🎨 <span data-i18n="welcome.eventArt">Art club · Maya</span></strong></div>
+                <div class="welcome-demo-event green" data-sample-owner="theo"><span>5:15–6:00</span><strong>🏊 <span data-i18n="welcome.eventSwim">Swim · Theo</span></strong></div>
+                <p class="welcome-sample-empty" data-i18n="welcome.sampleEmpty" hidden>No plans for this person</p>
               </div>
               <div class="welcome-preview-day">
                 <h3 data-i18n="day.friday">Friday</h3>
-                <div class="welcome-demo-event gold"><span>3:30–4:00</span><strong>📖 <span data-i18n="welcome.eventReading">Reading time</span></strong></div>
-                <div class="welcome-demo-event coral"><span>5:30–7:30</span><strong>🎬 <span data-i18n="welcome.eventMovie">Family movie night</span></strong></div>
+                <div class="welcome-demo-event gold" data-sample-owner="family"><span>3:30–4:00</span><strong>📖 <span data-i18n="welcome.eventReading">Reading time</span></strong></div>
+                <div class="welcome-demo-event coral" data-sample-owner="family"><span>5:30–7:30</span><strong>🎬 <span data-i18n="welcome.eventMovie">Family movie night</span></strong></div>
+                <p class="welcome-sample-empty" data-i18n="welcome.sampleEmpty" hidden>No plans for this person</p>
               </div>
             </div>
           </div>
@@ -10058,22 +10071,22 @@
 
         <ol class="welcome-how-grid">
           <li class="welcome-how-step">
-            <div class="welcome-how-step-top"><span class="welcome-how-number">01</span><span class="welcome-how-icon" aria-hidden="true">◎</span></div>
+            <div class="welcome-how-step-top"><span class="welcome-how-number">1</span><span class="welcome-how-icon" aria-hidden="true">◎</span></div>
             <h3 data-i18n="welcome.howOneTitle">Add your family</h3>
             <p data-i18n="welcome.howOneBody">Name each child and choose a color so everyone is easy to spot at a glance.</p>
           </li>
           <li class="welcome-how-step">
-            <div class="welcome-how-step-top"><span class="welcome-how-number">02</span><span class="welcome-how-icon" aria-hidden="true">＋</span></div>
+            <div class="welcome-how-step-top"><span class="welcome-how-number">2</span><span class="welcome-how-icon" aria-hidden="true">＋</span></div>
             <h3 data-i18n="welcome.howTwoTitle">Build the week</h3>
             <p data-i18n="welcome.howTwoBody">Add activities, pickups, birthdays, and holidays. Set repeating plans once and let KidsSync carry them forward.</p>
           </li>
           <li class="welcome-how-step">
-            <div class="welcome-how-step-top"><span class="welcome-how-number">03</span><span class="welcome-how-icon" aria-hidden="true">!</span></div>
+            <div class="welcome-how-step-top"><span class="welcome-how-number">3</span><span class="welcome-how-icon" aria-hidden="true">!</span></div>
             <h3 data-i18n="welcome.howThreeTitle">Handle conflicts</h3>
             <p data-i18n="welcome.howThreeBody">See overlapping events side by side, then adjust the plan before the rush.</p>
           </li>
           <li class="welcome-how-step">
-            <div class="welcome-how-step-top"><span class="welcome-how-number">04</span><span class="welcome-how-icon" aria-hidden="true">↗</span></div>
+            <div class="welcome-how-step-top"><span class="welcome-how-number">4</span><span class="welcome-how-icon" aria-hidden="true">↗</span></div>
             <h3 data-i18n="welcome.howFourTitle">Keep it with you</h3>
             <p data-i18n="welcome.howFourBody">Sign in to save your schedule and open the same family week from your phone or computer.</p>
           </li>
@@ -10111,9 +10124,25 @@
     </section>
 
     <footer class="welcome-footer">
+    <section class="welcome-questions-section" id="welcomeQuestions" aria-labelledby="welcomeQuestionsTitle">
+      <div class="welcome-section-inner welcome-questions-layout">
+        <div class="welcome-questions-intro"><p class="welcome-section-kicker" data-i18n="welcome.questionsKicker">Before you get started</p><h2 id="welcomeQuestionsTitle" data-i18n="welcome.questionsTitle">A few things worth knowing.</h2><p data-i18n="welcome.questionsBody">Clear expectations, from the first visit to your first shared plan.</p></div>
+        <div class="welcome-questions-list">
+          <details><summary data-i18n="welcome.questionTrial">Can I try it without an account?</summary><p data-i18n="welcome.answerTrial">Yes. Explore the planner for 10 minutes without signing in. Then sign in or create an account to keep using the schedule and sync it across devices. This sample does not start the timer.</p></details>
+          <details><summary data-i18n="welcome.questionSharing">How does sharing work?</summary><p data-i18n="welcome.answerSharing">Sign in to invite people to your calendar. Choose editor, commenter, or viewer access. The owner manages invitations and permissions; the landing-page sample is never shared.</p></details>
+          <details><summary data-i18n="welcome.questionPhone">Can I use it on my phone?</summary><p data-i18n="welcome.answerPhone">Yes. The planner adapts to your phone. After a visit online, offline support can show previously saved schedules; new shared changes need a connection.</p></details>
+          <details><summary data-i18n="welcome.questionMaps">Do I need to connect other services?</summary><p data-i18n="welcome.answerMaps">No connection is needed to explore. Shared calendars require sign-in. Google or Outlook calendar connections require provider setup, and nearby-place searches can open Google or Apple Maps.</p></details>
+        </div>
+      </div>
+    </section>
+    <section class="welcome-final-cta" aria-labelledby="welcomeFinalTitle">
+      <div><p class="welcome-section-kicker" data-i18n="welcome.finalKicker">Less coordinating. More living.</p><h2 id="welcomeFinalTitle" data-i18n="welcome.finalTitle">Make room for a calmer week.</h2><p data-i18n="welcome.finalBody">Start with your family’s next plan. Build the rest at your own pace.</p></div>
+      <div class="welcome-final-actions"><button class="welcome-primary-btn" type="button" data-welcome-start data-i18n="welcome.tryPlanner">Try KidsSync free</button><span data-i18n="welcome.finalNote">10-minute preview · No account needed to explore</span></div>
+    </section>
       <div class="welcome-wordmark"><span class="welcome-mark" aria-hidden="true"></span><span>Kids<span>Sync</span></span></div>
       <span data-i18n="welcome.footer">A clearer week for every family.</span>
     </footer>
+      <a href="#welcomeHeadline" data-i18n="welcome.backTop">Back to top ↑</a>
   </section>
 
   <section class="auth-screen" id="authScreen" aria-labelledby="authHeading" hidden>
@@ -11796,12 +11825,41 @@
         "welcome.navigation": "KidsSync navigation",
         "welcome.sections": "Welcome sections",
         "welcome.navPreview": "Product",
+        "welcome.skip": "Skip to main content",
+        "welcome.explorePage": "Explore this page",
+        "welcome.navQuestions": "Questions",
+        "welcome.exploreSample": "Explore a sample week ↗",
+        "welcome.alreadyHere": "Already have an account?",
+        "welcome.sampleInteractive": "Try the family filters",
+        "welcome.sampleSafe": "Just an example. Your own schedule starts separately.",
+        "welcome.sampleFilters": "Filter the sample week",
+        "welcome.sampleEveryone": "Everyone",
+        "welcome.sampleCount": "{count} example plans shown",
+        "welcome.sampleEmpty": "No plans for this person",
+        "welcome.sampleSwipe": "Scroll sideways to explore the week →",
+        "welcome.sampleScroll": "Example family plans by weekday",
+        "welcome.questionsKicker": "Before you get started",
+        "welcome.questionsTitle": "A few things worth knowing.",
+        "welcome.questionsBody": "Clear expectations, from the first visit to your first shared plan.",
+        "welcome.questionTrial": "Can I try it without an account?",
+        "welcome.answerTrial": "Yes. Explore the planner for 10 minutes without signing in. Then sign in or create an account to keep using the schedule and sync it across devices. This sample does not start the timer.",
+        "welcome.questionSharing": "How does sharing work?",
+        "welcome.answerSharing": "Sign in to invite people to your calendar. Choose editor, commenter, or viewer access. The owner manages invitations and permissions; the landing-page sample is never shared.",
+        "welcome.questionPhone": "Can I use it on my phone?",
+        "welcome.answerPhone": "Yes. The planner adapts to your phone. After a visit online, offline support can show previously saved schedules; new shared changes need a connection.",
+        "welcome.questionMaps": "Do I need to connect other services?",
+        "welcome.answerMaps": "No connection is needed to explore. Shared calendars require sign-in. Google or Outlook calendar connections require provider setup, and nearby-place searches can open Google or Apple Maps.",
+        "welcome.finalKicker": "Less coordinating. More living.",
+        "welcome.finalTitle": "Make room for a calmer week.",
+        "welcome.finalBody": "Start with your family’s next plan. Build the rest at your own pace.",
+        "welcome.finalNote": "10-minute preview · No account needed to explore",
+        "welcome.backTop": "Back to top ↑",
         "welcome.navHow": "How it works",
         "welcome.navAbout": "About us",
         "welcome.tryPlanner": "Try KidsSync free",
         "welcome.eyebrow": "Family scheduling for busy parents",
         "welcome.headline": "The family calendar built for real life.",
-        "welcome.description": "Give every child a clear, color-coded schedule. KidsSync keeps activities, pickups, birthdays, deadlines, and family plans together, and flags conflicts before they become problems.",
+        "welcome.description": "Activities, pickups, and family plans. One clear view of who needs to be where—and when.",
         "welcome.signInAccount": "Sign in to your account",
         "welcome.highlights": "What KidsSync helps families do",
         "welcome.trialNote": "Explore for 10 minutes without an account. Sign in to keep and sync your calendar.",
@@ -12933,9 +12991,38 @@
         "welcome.navHow": "使用方法",
         "welcome.navAbout": "关于我们",
         "welcome.tryPlanner": "免费试用 KidsSync",
+        "welcome.skip": "跳至主要内容",
+        "welcome.explorePage": "浏览本页",
+        "welcome.navQuestions": "常见问题",
+        "welcome.exploreSample": "探索示例一周 ↗",
+        "welcome.alreadyHere": "已有账户？",
+        "welcome.sampleInteractive": "试试按家庭成员筛选",
+        "welcome.sampleSafe": "这只是示例。你的家庭日程会单独创建。",
+        "welcome.sampleFilters": "筛选示例日程",
+        "welcome.sampleEveryone": "所有人",
+        "welcome.sampleCount": "显示 {count} 项示例安排",
+        "welcome.sampleEmpty": "此人当天没有安排",
+        "welcome.sampleSwipe": "左右滑动，查看整周 →",
+        "welcome.sampleScroll": "按工作日展示的家庭示例计划",
+        "welcome.questionsKicker": "开始之前",
+        "welcome.questionsTitle": "你可能想先了解这些。",
+        "welcome.questionsBody": "从初次体验到共享计划，每一步都有清楚的说明。",
+        "welcome.questionTrial": "没有账户可以试用吗？",
+        "welcome.answerTrial": "可以。无需登录即可体验日程工具 10 分钟。之后请登录或创建账户，继续使用并跨设备同步。浏览本页示例不会启动试用计时。",
+        "welcome.questionSharing": "如何共享日程？",
+        "welcome.answerSharing": "登录后即可邀请他人加入日历，并选择编辑者、评论者或查看者权限。所有者管理邀请和权限；首页示例不会被共享。",
+        "welcome.questionPhone": "可以在手机上使用吗？",
+        "welcome.answerPhone": "可以。日程工具会适应手机屏幕。在线访问后，离线功能可显示之前保存的日程；获取新的共享更改需要联网。",
+        "welcome.questionMaps": "必须连接其他服务吗？",
+        "welcome.answerMaps": "探索体验不需要连接其他服务。共享日历需要登录；连接 Google 或 Outlook 日历需要配置服务。附近地点搜索可以在 Google 地图或 Apple 地图中打开。",
+        "welcome.finalKicker": "少一点协调，多一点生活。",
+        "welcome.finalTitle": "让下一周更从容。",
+        "welcome.finalBody": "从家人的下一个计划开始，按自己的节奏安排其余日程。",
+        "welcome.finalNote": "10 分钟体验 · 探索无需账户",
+        "welcome.backTop": "返回顶部 ↑",
         "welcome.eyebrow": "为忙碌家长设计的家庭日程",
         "welcome.headline": "真正适合家庭生活的共享日历。",
-        "welcome.description": "为每个孩子建立清晰的彩色日程。KidsSync 把活动、接送、生日、截止日期和家庭计划放在一起，并提前提醒时间冲突。",
+        "welcome.description": "活动、接送和家庭计划。谁在何时需要去哪里，一眼就能看清。",
         "welcome.signInAccount": "登录你的账户",
         "welcome.highlights": "KidsSync 能帮助家庭完成什么",
         "welcome.trialNote": "无需账户即可体验 10 分钟。登录后即可保存并在不同设备上同步日历。",
@@ -23184,3 +23271,4 @@
   <script src="./assets/auth-visual-rotation.js?v=1"></script>
 </body>
 </html>
+  <script src="./assets/landing-ux.js?v=1"></script>
