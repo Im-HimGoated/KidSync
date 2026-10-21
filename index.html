@@ -20335,11 +20335,11 @@
         const isDeleting = calendarRowAction?.type === "delete" && calendarRowAction.id === calendar.id;
         if (isRenaming) return `
           <div class="calendar-list-row is-editing" data-calendar-id="${escapeHtml(calendar.id)}">
-            <form class="calendar-inline-form" data-calendar-rename-form="${escapeHtml(calendar.id)}">
+            <div class="calendar-inline-form" data-calendar-rename-form="${escapeHtml(calendar.id)}">
               <input class="calendar-inline-name" type="text" maxlength="40" value="${escapeHtml(calendar.name)}" aria-label="${escapeHtml(t("calendars.renameLabel"))}" required>
-              <button class="small-btn" type="submit">${escapeHtml(t("calendars.saveName"))}</button>
+              <button class="small-btn save-calendar-name" type="button">${escapeHtml(t("calendars.saveName"))}</button>
               <button class="ghost-btn cancel-calendar-action" type="button">${escapeHtml(t("calendars.cancel"))}</button>
-            </form>
+            </div>
           </div>`;
         if (isDeleting) return `
           <div class="calendar-list-row is-confirming" data-calendar-id="${escapeHtml(calendar.id)}">
@@ -20370,17 +20370,24 @@
         calendarRowAction = { type: "delete", id: calendar.id };
         renderCalendarList();
       }));
-      list.querySelectorAll("[data-calendar-rename-form]").forEach(form => form.addEventListener("submit", event => {
-        event.preventDefault();
-        const calendar = calendars.find(item => item.id === form.dataset.calendarRenameForm);
-        const name = form.querySelector(".calendar-inline-name")?.value.trim();
-        if (!calendar || !name) return;
-        calendar.name = name.slice(0, 40);
-        calendarRowAction = null;
-        saveCalendars();
-        renderCalendarSelector();
-        renderCalendarList();
-      }));
+      list.querySelectorAll("[data-calendar-rename-form]").forEach(form => {
+        const saveName = () => {
+          const calendar = calendars.find(item => item.id === form.dataset.calendarRenameForm);
+          const name = form.querySelector(".calendar-inline-name")?.value.trim();
+          if (!calendar || !name) return;
+          calendar.name = name.slice(0, 40);
+          calendarRowAction = null;
+          saveCalendars();
+          renderCalendarSelector();
+          renderCalendarList();
+        };
+        form.querySelector(".save-calendar-name")?.addEventListener("click", saveName);
+        form.querySelector(".calendar-inline-name")?.addEventListener("keydown", event => {
+          if (event.key !== "Enter") return;
+          event.preventDefault();
+          saveName();
+        });
+      });
       list.querySelectorAll(".confirm-delete-calendar").forEach(button => button.addEventListener("click", () => {
         const calendar = calendars.find(item => item.id === button.dataset.calendarId);
         if (!calendar) return;

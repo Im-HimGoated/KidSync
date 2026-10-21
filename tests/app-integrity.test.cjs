@@ -41,6 +41,7 @@ test('calendar management uses inline rename and delete confirmation', () => {
   const source = html.slice(start, end);
   assert.match(source, /calendar-inline-form/);
   assert.match(source, /calendar-delete-confirmation/);
+  assert.doesNotMatch(source, /<form class="calendar-inline-form"/);
   assert.doesNotMatch(source, /window\.(?:prompt|alert|confirm)/);
 });
 

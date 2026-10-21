@@ -1,4 +1,4 @@
-const CACHE_NAME = "kidssync-shell-v118";
+const CACHE_NAME = "kidssync-shell-v119";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -42,6 +42,11 @@ const APP_SHELL = [
   "./assets/jspdf.umd.min.js",
   "./assets/lucide.min.js"
 ];
+const LAZY_ASSETS = [
+  "./assets/kidssync-family-entryway-signin.jpg",
+  "./assets/kidssync-family-park-signin.jpg",
+  "./assets/kidssync-family-table-signin.jpg"
+];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
@@ -70,7 +75,8 @@ self.addEventListener("fetch", event => {
   const rootPath = new URL("./", self.registration.scope).pathname;
   const isAppPage = requestUrl.pathname === rootPath || requestUrl.pathname === `${rootPath}index.html`;
   const isShellAsset = APP_SHELL.some(path => new URL(path, self.registration.scope).pathname === requestUrl.pathname);
-  if (!isAppPage && !isShellAsset) return;
+  const isLazyAsset = LAZY_ASSETS.some(path => new URL(path, self.registration.scope).pathname === requestUrl.pathname);
+  if (!isAppPage && !isShellAsset && !isLazyAsset) return;
 
   // Check the network first so a deployed update is visible on the next load.
   // Only fall back to the cached app page for an actual app navigation.

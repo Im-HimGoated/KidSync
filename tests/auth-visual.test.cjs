@@ -27,9 +27,14 @@ test('photo rotation respects visibility, motion preferences, and offline delive
   assert.match(script, /function prepareNextSlide\(\)/);
   assert.match(script, /if \(!canRotate\(\)\) return;\s+prepareNextSlide\(\)/);
   for (const asset of ['./assets/auth-visual-rotation.js?v=1', './assets/kidssync-auth-family-signin.jpg']) assert(worker.includes(`"${asset}"`), asset);
+  const shell = worker.slice(worker.indexOf('const APP_SHELL'), worker.indexOf('const LAZY_ASSETS'));
+  const lazy = worker.slice(worker.indexOf('const LAZY_ASSETS'), worker.indexOf('self.addEventListener("install"'));
   for (const asset of [
     './assets/kidssync-family-entryway-signin.jpg',
     './assets/kidssync-family-park-signin.jpg',
     './assets/kidssync-family-table-signin.jpg'
-  ]) assert(!worker.includes(`"${asset}"`), `${asset} should load only when sign-in is visible`);
+  ]) {
+    assert(!shell.includes(`"${asset}"`), `${asset} should not be precached`);
+    assert(lazy.includes(`"${asset}"`), `${asset} should be cached after it is viewed`);
+  }
 });
