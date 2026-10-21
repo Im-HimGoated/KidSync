@@ -16175,14 +16175,20 @@
       }
     }
 
-    function applyCloudSnapshot(snapshot) {
+    function applyCloudSnapshot(snapshot, { preserveView = false } = {}) {
       if (!snapshot || typeof snapshot !== "object") return;
       const snapshotProfile = snapshot.profile;
+      const localCalendarId = currentCalendarId;
+      const localView = currentView;
+      const visibleKids = new Set(state.visibleKids);
+      const allKidsVisible = kidProfiles.every(kid => visibleKids.has(kid.name));
       cloudHydrating = true;
       try {
         if (Array.isArray(snapshot.calendars) && snapshot.calendars.length && snapshot.calendarData) {
           calendars = snapshot.calendars.filter(calendar => calendar?.id && calendar?.name);
-          currentCalendarId = snapshot.activeCalendarId && calendars.some(calendar => calendar.id === snapshot.activeCalendarId)
+          currentCalendarId = preserveView && calendars.some(calendar => calendar.id === localCalendarId)
+            ? localCalendarId
+            : snapshot.activeCalendarId && calendars.some(calendar => calendar.id === snapshot.activeCalendarId)
             ? snapshot.activeCalendarId
             : calendars[0].id;
           localStorage.setItem(baseScheduleStorageKey(CALENDARS_STORAGE_NAME), JSON.stringify(calendars));
@@ -16205,7 +16211,7 @@
           localStorage.setItem(scheduleStorageKey("kids"), JSON.stringify(kidProfiles));
         }
         kids = buildKids(kidProfiles);
-        state.visibleKids = new Set(kidProfiles.map(kid => kid.name));
+        state.visibleKids = new Set(kidProfiles.filter(kid => !preserveView || allKidsVisible || visibleKids.has(kid.name)).map(kid => kid.name));
 
         if (Array.isArray(snapshot.activities)) {
           state.activities = snapshot.activities.map(activity => ({ ...activity }));
@@ -16228,7 +16234,10 @@
           userSettings = loadSettings();
           state.showWeekends = userSettings.showWeekends;
         }
-        if (["today", "week", "four", "month"].includes(snapshot.view)) {
+        if (preserveView) {
+          currentView = localView;
+          localStorage.setItem(scheduleStorageKey("view"), currentView);
+        } else if (["today", "week", "four", "month"].includes(snapshot.view)) {
           currentView = snapshot.view;
           localStorage.setItem(scheduleStorageKey("view"), currentView);
         } else {
@@ -16240,28 +16249,34 @@
         updateAccountIdentity();
         populateFormOptions();
         renderAll();
-        scheduleSmartCalendarFocus({ currentTime: true });
+        if (!preserveView) scheduleSmartCalendarFocus({ currentTime: true });
         startNotificationChecks();
       } finally {
         cloudHydrating = false;
       }
     }
 
-    async function hydrateCloudSchedule() {
+    async function hydrateCloudSchedule({ live = false } = {}) {
       if (!cloudClient || !cloudSession || activeAccount?.provider !== "supabase") return false;
+      if (live && (cloudSyncBusy || hasPendingCloudSave() || window.KidsSyncLiveSync?.isEditing())) return false;
       if (hasPendingCloudSave()) return flushCloudSave();
       if (!navigator.onLine) {
         setCloudSaveState("offline");
         return false;
       }
 
-      setCloudSaveState("syncing");
+      const requestedUserId = cloudSession.user.id;
+      const requestedVersion = localStorage.getItem(cloudUpdatedKey());
+      if (!live) setCloudSaveState("syncing");
       try {
         const { data, error } = await cloudClient
           .from("family_schedules")
           .select("schedule, updated_at")
-          .eq("user_id", cloudSession.user.id)
+          .eq("user_id", requestedUserId)
           .maybeSingle();
+        if (cloudSession?.user.id !== requestedUserId || activeAccount?.provider !== "supabase") return false;
+        if (live && (cloudSyncBusy || hasPendingCloudSave() || window.KidsSyncLiveSync?.isEditing()
+          || localStorage.getItem(cloudUpdatedKey()) !== requestedVersion)) return false;
         if (error) throw error;
         if (!data) {
           markCloudSavePending();
@@ -16271,11 +16286,11 @@
         const localUpdatedAt = localStorage.getItem(cloudUpdatedKey());
         let receivedRemoteUpdate = false;
         if (!localUpdatedAt || localUpdatedAt !== data.updated_at) {
-          applyCloudSnapshot(data.schedule);
+          applyCloudSnapshot(data.schedule, { preserveView: live });
           localStorage.setItem(cloudUpdatedKey(), data.updated_at);
           receivedRemoteUpdate = true;
         }
-        if (receivedRemoteUpdate) window.setTimeout(openWelcomeBackIfNeeded, 300);
+        if (receivedRemoteUpdate && !live) window.setTimeout(openWelcomeBackIfNeeded, 300);
         setCloudSaveState("cloud");
         return true;
       } catch (syncError) {
@@ -16331,6 +16346,7 @@
         cloudSession = session;
         updateAccountIdentity();
         await hydrateCloudSchedule();
+        window.KidsSyncLiveSync?.start();
         await refreshInvitations();
         queueWeeklySummary(500);
       } catch (syncError) {
@@ -22863,6 +22879,7 @@
     window.addEventListener("online", () => {
       if (activeAccount?.provider !== "supabase" || !cloudSession) return;
       if (hasPendingCloudSave()) flushCloudSave();
+      else if (window.KidsSyncLiveSync) window.KidsSyncLiveSync.refresh();
       else hydrateCloudSchedule();
       refreshInvitations();
     });
@@ -22874,7 +22891,10 @@
       if (!activeAccount && guestPreviewTimer) guestPreviewLastTick = Date.now();
       if (activeAccount?.provider !== "supabase" || !cloudSession) return;
       if (hasPendingCloudSave()) flushCloudSave();
-      else if (!document.hidden) hydrateCloudSchedule();
+      else if (!document.hidden) {
+        if (window.KidsSyncLiveSync) window.KidsSyncLiveSync.refresh();
+        else hydrateCloudSchedule();
+      }
       if (!document.hidden) refreshInvitations();
     });
 
@@ -23073,5 +23093,6 @@
   <script src="./assets/landing-ux.js?v=1"></script>
   <script src="./assets/calendar-ux.js?v=1"></script>
   <script src="./assets/dashboard-planning.js?v=1"></script>
+  <script src="./assets/live-sync.js?v=1"></script>
 </body>
 </html>

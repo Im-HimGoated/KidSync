@@ -79,5 +79,5 @@ test('occasional workspace tools move out of the planning path without becoming 
   assert.match(css, /#workspaceVisibility:not\(:has\(#calendarContextBar:not\(\[hidden\]\)\)\)/);
   assert.match(css, /#appShell:not\(\.mobile-calendar-tools-open\) #calendarSide \{ display: none; \}/);
   assert.match(css, /#appShell\.mobile-calendar-tools-open #calendarSide \{ display: block; \}/);
-  assert.match(worker, /kidssync-shell-v128/);
+  assert.match(worker, /const CACHE_NAME = "kidssync-shell-v\d+"/);
 });
