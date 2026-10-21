@@ -137,8 +137,10 @@
     catch { return personalStore(null); }
   }
   function writeHelpers(value) {
-    try { localStorage.setItem(scheduleStorageKey('planner-helpers'), JSON.stringify(personalStore(value))); return true; }
+    try { localStorage.setItem(scheduleStorageKey('planner-helpers'), JSON.stringify(personalStore(value))); }
     catch { return false; }
+    try { window.KidsSyncDashboardActions?.refreshPersonal(); } catch { /* A view refresh must not misreport a successful save. */ }
+    return true;
   }
   function localize() {
     document.querySelectorAll('[data-tools-text]').forEach(element => { element.textContent = tx(element.dataset.toolsText); });
@@ -307,6 +309,30 @@
       status(`${tx('copyDone', { date: formatShortDate(localDate(input.value)) })}${conflict ? ` ${tx('conflict')}` : ''}`);
     }
   });
-  window.KidsSyncTools = { attach, copySummary, refresh() { localize(); if (hub.open) renderHub(); } };
+  function setFavorite(event, enabled, expectedScope) {
+    if (expectedScope !== scheduleStorageKey('planner-helpers') || (typeof event?.id !== 'string' || !event.id || event.id.length > 200)) return false;
+    const helpers = readHelpers();
+    helpers.favorites = helpers.favorites.filter(id => id !== event.id);
+    if (enabled) helpers.favorites.unshift(event.id);
+    if (!writeHelpers(helpers)) return false;
+    if (currentAttachment() && attachment.event.id === event.id) {
+      const button = document.getElementById('favoriteEvent');
+      button.textContent = tx(enabled ? 'favorited' : 'favorite');
+      button.setAttribute('aria-pressed', String(enabled));
+    }
+    return true;
+  }
+  function setPacked(event, item, enabled, expectedScope) {
+    if (expectedScope !== scheduleStorageKey('planner-helpers') || !packingItems(event?.items).includes(item)) return false;
+    const helpers = readHelpers(), key = packingKey(event, dateKey(selectedDate));
+    if (key.length > 300 || item.length > 200) return false;
+    const packed = new Set(helpers.packed[key] || []);
+    if (enabled) packed.add(item); else packed.delete(item);
+    delete helpers.packed[key]; helpers.packed[key] = [...packed];
+    if (!writeHelpers(helpers)) return false;
+    if (currentAttachment() && attachment.packingKey === key && attachment.items.length) updatePacking();
+    return true;
+  }
+  window.KidsSyncTools = { attach, copySummary, engine: pure, getPersonalState: readHelpers, setFavorite, setPacked, refresh() { localize(); if (hub.open) renderHub(); } };
   localize();
 })();

@@ -214,3 +214,46 @@ test('planner helper dictionaries match and integration keeps the main toolbar u
   assert(positions.every(index => index >= 0), 'all planner helper assets must be loaded');
   assert(positions.every((index, i) => !i || index > positions[i - 1]), 'planner helpers must retain their dependency order, even with other UI scripts between them');
 });
+
+test('dashboard favorite and packing APIs share event-sheet data and reject stale calendar writes', () => {
+  const f = fixture(); f.attach();
+  const api = f.context.window.KidsSyncTools;
+  const item = { ...f.activity, occurrenceDate: '2026-10-15' };
+  assert(api.setFavorite(item, true, 'account1:family:planner-helpers'));
+  assert.deepEqual(Array.from(api.getPersonalState().favorites), ['a']);
+  assert.equal(f.node('favoriteEvent')['aria-pressed'], 'true');
+  assert(api.setPacked(item, 'Water', true, 'account1:family:planner-helpers'));
+  assert.deepEqual(Array.from(api.getPersonalState().packed['a:2026-10-15']), ['Water']);
+  assert.equal(f.node('eventPackingProgress').textContent, '1 of 2 packed');
+  assert.equal(api.setPacked(item, 'not listed', true, 'account1:family:planner-helpers'), false);
+  f.context.scope = 'account2:family';
+  assert.equal(api.setFavorite(item, false, 'account1:family:planner-helpers'), false);
+  assert.equal(api.setPacked(item, 'Water', false, 'account1:family:planner-helpers'), false);
+  assert.deepEqual(JSON.parse(f.storage.get('account1:family:planner-helpers')).favorites, ['a']);
+});
+test('failed dashboard helper saves retain the saved pin and packing state', () => {
+  const f = fixture(); f.attach(); const api = f.context.window.KidsSyncTools;
+  const item = { ...f.activity, occurrenceDate: '2026-10-15' };
+  api.setFavorite(item, true, 'account1:family:planner-helpers');
+  api.setPacked(item, 'Water', true, 'account1:family:planner-helpers');
+  f.failWrite(true);
+  assert.equal(api.setFavorite(item, false, 'account1:family:planner-helpers'), false);
+  assert.equal(api.setPacked(item, 'Water', false, 'account1:family:planner-helpers'), false);
+  assert.deepEqual(Array.from(api.getPersonalState().favorites), ['a']);
+  assert.deepEqual(Array.from(api.getPersonalState().packed['a:2026-10-15']), ['Water']);
+});
+test('repeating events keep separate packing progress while multi-day trips share one checklist', () => {
+  const f = fixture(); const api = f.context.window.KidsSyncTools, scope = 'account1:family:planner-helpers';
+  api.setPacked({ ...f.activity, occurrenceDate: '2026-10-15' }, 'Water', true, scope);
+  assert.equal(api.getPersonalState().packed['a:2026-10-22'], undefined);
+  const trip = { ...f.activity, id: 'trip', eventType: 'trip', startDate: '2026-10-15', endDate: '2026-10-17', occurrenceDate: '2026-10-16' };
+  api.setPacked(trip, 'Water', true, scope);
+  assert.deepEqual(Array.from(api.getPersonalState().packed['trip:2026-10-15']), ['Water']);
+});
+test('an optional dashboard refresh error cannot turn a saved favorite into a reported failure', () => {
+  const f = fixture(), api = f.context.window.KidsSyncTools;
+  f.context.window.KidsSyncDashboardActions = { refreshPersonal() { throw Error('view unavailable'); } };
+  assert.equal(api.setFavorite(f.activity, true, 'account1:family:planner-helpers'), true);
+  assert.deepEqual(Array.from(api.getPersonalState().favorites), ['a']);
+  assert.equal(api.setFavorite({ ...f.activity, id: 'x'.repeat(201) }, true, 'account1:family:planner-helpers'), false);
+});

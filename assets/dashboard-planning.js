@@ -73,7 +73,9 @@
       });
       return { start, end: plusDays(end, -1), count: uniqueEvents(events).length, minutes: daily.reduce((total, day) => total + day.minutes, 0), daily };
     });
-    return { todayEvents, todayRemaining, todayFinished, near, priorities, urgent, prep, handoffs: [...handoffs.values()], unassigned, special, weeks,
+    const upcoming = chronological(valid.filter(event => (event.occurrenceDate || event.startDate) >= todayKey && eventBounds(event).end > now));
+    const tomorrowEvents = chronological(valid.filter(event => (event.occurrenceDate || event.startDate) === dateKeyFor(plusDays(today, 1))));
+    return { todayEvents, todayRemaining, todayFinished, upcoming, tomorrowEvents, near, priorities, urgent, prep, handoffs: [...handoffs.values()], unassigned, special, weeks,
       hasPlans: valid.some(event => !event.isBuiltInHoliday), occupiedToday: occupiedMinutes(todayEvents) };
   }
   const pure = { localDay, dateKeyFor, plusDays, clock, eventBounds, occurrenceId, uniqueEvents, occupiedMinutes, buildModel };
@@ -194,7 +196,7 @@
   }
   function renderPreparation(model) {
     setPanel('priority', model.priorities.length ? list(model.priorities, event => eventRow(event, text(event.importance === 'high' ? 'important' : 'deadline')), 3) : empty('priorityEmpty', 'priorityEmptyHint'), planCount(model.priorities.length), model.hasPlans);
-    const prep = list(model.prep, event => `<article class="dashboard-prep-item"><strong>${esc(activityCompactTitle(event))}</strong><p>${esc(when(event))} · ${esc(displayChild(event))}</p>${event.items ? `<p class="dashboard-prep-detail"><b>${esc(text('bring'))}</b> ${esc(event.items)}</p>` : ''}${event.notes ? `<p class="dashboard-prep-detail"><b>${esc(text('notes'))}</b> ${esc(event.notes)}</p>` : ''}<button class="small-btn" type="button" data-dashboard-event="${ref(event)}" data-dashboard-key="${esc(occurrenceId(event))}">${esc(text('checklist'))} ↗</button></article>`, 2);
+    const prep = list(model.prep, event => `<article class="dashboard-prep-item"><strong>${esc(activityCompactTitle(event))}</strong><p>${esc(when(event))} · ${esc(displayChild(event))}</p>${event.items ? window.KidsSyncDashboardActions ? window.KidsSyncDashboardActions.renderPacking(event) : `<p class="dashboard-prep-detail"><b>${esc(text('bring'))}</b> ${esc(event.items)}</p>` : ''}${event.notes ? `<p class="dashboard-prep-detail"><b>${esc(text('notes'))}</b> ${esc(event.notes)}</p>` : ''}<button class="small-btn" type="button" data-dashboard-event="${ref(event)}" data-dashboard-key="${esc(occurrenceId(event))}">${esc(text('checklist'))} ↗</button></article>`, 2);
     setPanel('prep', prep ? `${prep}<p class="dashboard-plan-note">${esc(text('prepFooter'))}</p>` : empty('prepEmpty', 'prepEmptyHint'), planCount(model.prep.length), model.hasPlans);
   }
   function renderHandoffs(model) {
@@ -225,6 +227,7 @@
     const snapshot = buildModel(entries, now); references = []; referenceScope = scheduleStorageKey('activities');
     renderToday(snapshot, now); renderAttention(snapshot); renderPreparation(snapshot); renderHandoffs(snapshot); renderSpecial(snapshot, now); renderOutlook(snapshot);
     window.KidsSyncDashboardUX?.refresh(snapshot);
+    window.KidsSyncDashboardActions?.refresh(snapshot);
   }
   function openDate(date, view) {
     selectedDate = new Date(date); showCalendarPage(); setSidebarActive('calendar');
