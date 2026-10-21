@@ -189,7 +189,7 @@ function renderHarness() {
     updateCurrentTimeMarkers: () => hooks.now++, suppressEventClickUntil: 0,
     preferredNewEventChild: () => 'Family', openNewEventForDate: () => {}, openNewEventAtTime: () => {}
   });
-  vm.runInContext(['eventImportanceLabel', 'eventImportanceBadge', 'isHolidayActivity', 'renderGrid'].map(productionFunction).join('\n'), c);
+  vm.runInContext(['dateKey', 'eventImportanceLabel', 'eventImportanceBadge', 'isHolidayActivity', 'renderGrid'].map(productionFunction).join('\n'), c);
   return { c, grid, hooks, timed, activities, days };
 }
 

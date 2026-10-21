@@ -9865,6 +9865,7 @@
   <link rel="stylesheet" href="./assets/calendar-ui-refresh.css?v=1">
   <link rel="stylesheet" href="./assets/landing-ux.css?v=1">
   <link rel="stylesheet" href="./assets/welcome-refresh.css?v=1">
+  <link rel="stylesheet" href="./assets/calendar-ux.css?v=1">
   <link rel="stylesheet" href="./assets/mobile.css?v=95">
 </head>
 <body>
@@ -10798,6 +10799,12 @@
       <p class="visual-note" data-visual-text="intro">Make the planner easier to read without changing your events.</p>
       <label class="visual-setting" for="uiContrast"><span><strong data-visual-text="contrast">High contrast</strong><small id="uiContrastHint" data-visual-text="contrastHint">Stronger text, borders, and keyboard focus in light and dark modes.</small></span><input id="uiContrast" type="checkbox" aria-describedby="uiContrastHint"></label>
       <label class="visual-setting" for="uiGuides"><span><strong data-visual-text="guides">Time-slot hover guide</strong><small id="uiGuidesHint" data-visual-text="guideHint">On a computer, point at an empty time slot to preview its time. Click to add an event.</small></span><input id="uiGuides" type="checkbox" aria-describedby="uiGuidesHint" checked></label>
+      <fieldset class="calendar-ux-settings">
+        <legend data-calendar-ux-text="local">Saved for this calendar on this device.</legend>
+        <label class="visual-setting" for="calendarDimFinished"><span><strong data-calendar-ux-text="dim">Dim finished events</strong><small id="calendarDimFinishedHint" data-calendar-ux-text="dimHint">Keep past plans visible with less emphasis. Focus or hover to read them at full contrast.</small></span><input id="calendarDimFinished" type="checkbox" aria-describedby="calendarDimFinishedHint"></label>
+        <label class="visual-setting" for="calendarHideCancelled"><span><strong data-calendar-ux-text="cancelled">Hide cancelled events</strong><small id="calendarHideCancelledHint" data-calendar-ux-text="cancelledHint">Remove cancelled events from calendar views and counts. Your saved events stay in history.</small></span><input id="calendarHideCancelled" type="checkbox" aria-describedby="calendarHideCancelledHint"></label>
+        <p id="calendarUXStatus" role="status" aria-live="polite"></p>
+      </fieldset>
       <div class="visual-preview"><small data-visual-text="preview">Preview</small><div class="visual-preview-card"><strong data-visual-text="sample">Family activity</strong><span data-visual-text="sampleMeta">4:30 PM · Andrew</span></div></div>
       <p class="visual-note visual-resize-note" data-visual-text="resizeNote">Drag the edge beside the side calendar to resize it. Keyboard users can focus the divider and use arrow keys.</p>
       <p id="visualPreferencesStatus" role="status" aria-live="polite"></p>
@@ -16966,7 +16973,8 @@
       const external = typeof window !== "undefined" && window.KidsSyncExternal
         ? window.KidsSyncExternal.eventsOn(date).filter(activity => (ignoreSearch || activityMatchesSearch(activity)) && (ignoreFilter || activityMatchesEventFilter(activity)))
           .map(activity => ({ ...activity, day: day.key, occurrenceDate: dateKey(date), spanPosition: activitySpanPosition(activity, date) })) : [];
-      return [...activities, ...holidays, ...external];
+      const entries = [...activities, ...holidays, ...external];
+      return typeof window !== "undefined" && window.KidsSyncCalendarUX ? window.KidsSyncCalendarUX.filterOccurrences(entries) : entries;
     }
 
     function weekOccurrences(options = {}) {
@@ -17523,6 +17531,7 @@
         const countLabel = t(dayActivities.length === 1 ? "overview.eventOne" : "overview.events", { count: dayActivities.length });
         const head = document.createElement("div");
         head.className = `day-head ${day.theme}${isToday ? " is-today" : ""}`;
+        head.dataset.calendarDate = dateKey(date);
         head.innerHTML = `<span class="day-head-label"><span class="day-head-label-row"><span>${dayLabel(day)}</span>${isToday ? `<span class="day-today-badge">${escapeHtml(t("calendar.today"))}</span>` : ""}</span><span class="day-head-date" aria-hidden="true">${date.getDate()}</span></span>${dayActivities.length ? `<span class="day-event-count" aria-label="${escapeHtml(countLabel)}">${dayActivities.length}</span>` : ""}`;
         head.tabIndex = 0;
         head.setAttribute("role", "button");
@@ -17695,6 +17704,7 @@
     }
 
     function updateCurrentTimeMarkers() {
+      if (typeof window !== "undefined") window.KidsSyncCalendarUX?.refreshFinished();
       const now = new Date();
       const today = dateKey(now);
       if (today !== lastCalendarToday) {
@@ -17728,6 +17738,7 @@
         const countLabel = t(items.length === 1 ? "overview.eventOne" : "overview.events", { count: items.length });
         const card = document.createElement("article");
         card.className = `day-card${isToday ? " is-today" : ""}${items.length ? "" : " is-empty"}`;
+        card.dataset.calendarDate = dateKey(date);
         card.innerHTML = `<h2 class="agenda-day-heading"><span>${day.weather} ${dayLabel(day)} · ${formatShortDate(date)}</span>${isToday ? `<span class="day-today-badge">${escapeHtml(t("calendar.today"))}</span>` : ""}${items.length ? `<span class="day-event-count" aria-label="${escapeHtml(countLabel)}">${items.length}</span>` : ""}</h2><div class="agenda-list"></div>`;
         const list = card.querySelector(".agenda-list");
 
@@ -17907,12 +17918,14 @@
       const hasActiveSearch = Boolean(state.searchQuery.trim()) || state.eventFilter !== "all"
         || kidProfiles.some(kid => !state.visibleKids.has(kid.name))
         || (!state.showWeekends && ["week", "four"].includes(currentView));
-      const hasNoMatches = state.activities.length > 0 && hasActiveSearch && calendarInsightActivities().length === 0;
+      const hasHiddenCancelled = typeof window !== "undefined" && window.KidsSyncCalendarUX?.hasHiddenFilter();
+      const hasNoMatches = state.activities.length > 0 && (hasActiveSearch || hasHiddenCancelled) && calendarInsightActivities().length === 0;
       searchEmptyState.hidden = !hasNoMatches;
       document.getElementById("appShell").classList.toggle("has-no-search-results", hasNoMatches);
     }
 
     function resetScheduleFilters() {
+      if (typeof window !== "undefined") window.KidsSyncCalendarUX?.resetHiddenFilter();
       state.searchQuery = "";
       state.eventFilter = "all";
       state.visibleKids = new Set(kidProfiles.map(kid => kid.name));
@@ -19715,6 +19728,7 @@
     }
 
     function bindCalendarEventActions(element, activity, suppressDraggedClick = false) {
+      if (typeof window !== "undefined") window.KidsSyncCalendarUX?.decorateEvent(element, activity);
       element.dataset.importance = eventImportance(activity);
       element.setAttribute("aria-label", [activityTitle(activity), eventTimeText(activity), displayChild(activity), eventImportanceLabel(activity), activityStatusLabel(activity)].filter(Boolean).join(" · "));
       element.addEventListener("pointerenter", event => {
@@ -21756,6 +21770,7 @@
       window.KidsSyncExternal?.renderOverlay();
       window.KidsSyncMobile?.refresh();
       window.KidsSyncQuick?.refresh();
+      window.KidsSyncCalendarUX?.refresh();
     }
 
     function calendarFocusTimestamp(activity) {
@@ -23299,5 +23314,6 @@
   <script src="./assets/quick-ux.js"></script>
   <script src="./assets/auth-visual-rotation.js?v=1"></script>
   <script src="./assets/landing-ux.js?v=1"></script>
+  <script src="./assets/calendar-ux.js?v=1"></script>
 </body>
 </html>

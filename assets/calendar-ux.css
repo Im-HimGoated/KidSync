@@ -1,0 +1,23 @@
+/* Five everyday helpers, integrated with the existing calendar controls. */
+.calendar-navigation-history { display: flex; gap: 6px; align-items: center; margin: 0 0 8px; }
+.calendar-navigation-history[hidden], #appShell.is-dashboard-view .calendar-navigation-history { display: none; }
+.calendar-navigation-history button { min-height: 36px; padding: 4px 11px; border: 1px solid var(--line); border-radius: 7px; color: var(--blue); background: var(--panel); font-size: 12px; font-weight: 650; }
+.calendar-navigation-history button:disabled { color: var(--muted); opacity: .55; cursor: default; }
+.calendar-navigation-history button:not(:disabled):hover { border-color: var(--blue-line); background: var(--blue-soft); box-shadow: none; }
+#appShell #weekSchedule .day-head .calendar-day-load { position: absolute; right: 6px; bottom: 5px; max-width: calc(100% - 12px); overflow: hidden; color: var(--muted); font-size: 10px; font-weight: 600; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+#appShell .agenda-day-heading .calendar-day-load { grid-column: 1 / -1; display: block; color: var(--muted); font-size: 11px; font-weight: 500; }
+#appShell #todayHeading .calendar-day-load { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; font-weight: 500; }
+#appShell.calendar-dim-finished .calendar-event-finished { opacity: .62; }
+#appShell.calendar-dim-finished .calendar-event-finished:hover,
+#appShell.calendar-dim-finished .calendar-event-finished:focus-visible { opacity: 1; }
+#appShell .calendar-keyboard-slot { position: absolute; left: 2px; right: 2px; z-index: 50; min-height: 24px; padding: 2px 5px; border: 2px solid var(--blue); border-radius: 4px; color: var(--ink); background: color-mix(in srgb, var(--panel) 90%, var(--blue)); box-shadow: 0 0 0 2px var(--panel); font-size: 11px; font-weight: 750; line-height: 16px; pointer-events: none; }
+#appShell .calendar-keyboard-hint { display: none; margin: 6px 2px; color: var(--muted); font-size: 11px; }
+#appShell #weekSchedule:focus-visible + .calendar-keyboard-hint { display: block; }
+.calendar-ux-settings { margin: 18px 0 0; padding: 16px 0 0; border: 0; border-top: 1px solid var(--line); }
+.calendar-ux-settings legend { padding: 0; color: var(--muted); font-size: 12px; }
+#calendarUXStatus { min-height: 0; margin: 8px 0; color: var(--muted); font-size: 12px; }
+.calendar-navigation-history button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+@media (max-width: 740px) {
+  .calendar-navigation-history button { min-height: 44px; }
+  #appShell .calendar-keyboard-hint { display: none !important; }
+}

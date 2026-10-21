@@ -120,6 +120,7 @@
     requestAnimationFrame(resizeCalendarWorkspace);
   }
   function removeFilter(entry) {
+    if (!entry) window.KidsSyncCalendarUX?.resetHiddenFilter();
     if (!entry || entry.kind === 'category') state.eventFilter = 'all';
     if (!entry || entry.kind === 'search') { state.searchQuery = ''; scheduleSearch.value = ''; }
     if (!entry) state.visibleKids = new Set(kidProfiles.map(profile => profile.name));

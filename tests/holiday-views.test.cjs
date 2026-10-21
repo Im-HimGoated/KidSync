@@ -36,7 +36,7 @@ function entry(id, importance, extra = {}) {
 }
 function setup(functions = [], extras = {}) {
   const ctx = vm.createContext({ t: key => key, currentLanguage: "en", document: { createElement: tag => new Element(tag), getElementById: () => new Element() }, ...extras });
-  ["eventImportance", "importanceRank", "compareEventImportance", "isHolidayActivity", "compareCalendarEntries", "minutes", "escapeHtml", "isSameDate", "activityStatus", ...functions].forEach(name => vm.runInContext(source(name), ctx));
+  ["dateKey", "eventImportance", "importanceRank", "compareEventImportance", "isHolidayActivity", "compareCalendarEntries", "minutes", "escapeHtml", "isSameDate", "activityStatus", ...functions].forEach(name => vm.runInContext(source(name), ctx));
   return ctx;
 }
 function sample() {
