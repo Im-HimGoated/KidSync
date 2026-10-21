@@ -57,10 +57,6 @@
 #appShell.is-dashboard-view.is-dashboard-empty .dashboard-main-column { display: block; }
 #appShell.is-dashboard-view.is-dashboard-empty .dashboard-side-column { grid-template-columns: minmax(0, 1fr); }
 
-#appShell .dashboard-map-panel.is-empty .dashboard-map-canvas { min-height: 190px; }
-#appShell .dashboard-map-panel.is-empty .dashboard-location-list { display: none; }
-#appShell .dashboard-location-list[hidden] { display: none; }
-
 .share-tabs { display: flex; gap: 5px; margin: 0 20px 18px; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft-line); }
 .share-dialog-intro { margin: 0 20px 16px; color: var(--muted); line-height: 1.45; }
 .share-tabs button { flex: 1; min-height: 42px; padding: 8px 12px; border: 0; border-radius: 7px; color: var(--muted); background: transparent; font: inherit; font-weight: 700; cursor: pointer; }
@@ -74,7 +70,6 @@
   #appShell .dashboard-start-actions { width: 100%; }
   #appShell .dashboard-start-actions button { flex: 1 1 150px; }
   #appShell.is-dashboard-view.is-dashboard-empty .dashboard-page-grid { grid-template-columns: minmax(0, 1fr); }
-  #appShell .dashboard-location-chip { min-height: 44px; }
 }
 @media (prefers-reduced-motion: reduce) {
   #appShell .more-actions-group > summary::after { transition: none; }

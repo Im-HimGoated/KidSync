@@ -189,14 +189,14 @@
   dialog .close-btn, .command-palette-close { flex: 0 0 44px; width: 44px; height: 44px; min-height: 44px; }
   dialog form { min-width: 0; padding: 14px; }
   dialog :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
-  #appShell .calendar-search input, .auth-form input, .map-search-row input { min-height: 44px; font-size: 16px; max-width: 100%; }
+  #appShell .calendar-search input, .auth-form input { min-height: 44px; font-size: 16px; max-width: 100%; }
   dialog :is(.field-grid, .recurring-options-grid, .member-invite-grid, .settings-grid, .kid-editor-row) { grid-template-columns: minmax(0, 1fr); min-width: 0; }
   .settings-dialog .setting-row:has(select) { align-items: stretch; flex-direction: column; gap: 8px; }
   .settings-dialog .setting-row select { width: 100%; }
   .remove-kid { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
   .remove-kid-label { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
   dialog :is(label, fieldset, .left-actions, .right-actions) { min-width: 0; }
-  dialog :is(.primary-btn, .ghost-btn, .danger-btn, .small-btn, .map-category, .event-attendee-option) { min-height: 44px; }
+  dialog :is(.primary-btn, .ghost-btn, .danger-btn, .small-btn, .event-attendee-option) { min-height: 44px; }
   #activityDialog #activityForm .form-actions {
     position: sticky;
     z-index: 12;
@@ -229,10 +229,7 @@
   .layout-panel-settings { margin: 0; padding: 0; border: 0; min-width: 0; }
   .layout-panel-settings legend { padding: 0; margin-bottom: 8px; color: var(--ink); font-weight: 650; font-size: 14px; }
   .layout-panel-settings .layout-setting-row { min-height: 44px; }
-  .map-body, .dashboard-body, .reminders-body { padding: 14px; }
-  .map-search-row { grid-template-columns: minmax(0, 1fr); }
-  .map-result-actions { grid-column: 1 / -1; justify-content: stretch; }
-  .map-result-actions > * { flex: 1 1 120px; min-height: 44px; }
+  .dashboard-body, .reminders-body { padding: 14px; }
   .auth-visual { min-height: 150px; }
   .auth-schedule-card { display: none; }
   .auth-form-side { padding: 24px 18px; }

@@ -41,14 +41,16 @@
       today: 'Today', openDay: 'Open {date}: {count}', noEvents: 'no events', oneEvent: '1 event', events: '{count} events',
       nextUp: 'Next event', noUpcoming: 'No upcoming events', openNext: 'Open next event',
       collapseFamily: 'Collapse child filters', expandFamily: 'Expand child filters', familySummary: '{visible} of {total} shown',
-      dock: 'Quick calendar actions', search: 'Search', add: 'Add', more: 'More'
+      dock: 'Quick calendar actions', search: 'Search', add: 'Add', more: 'More',
+      workspace: 'Workspace', dateTools: 'Dates & calendar tools', openDateTools: 'Open dates and calendar tools'
     },
     zh: {
       summary: '当前视图', ribbon: '快速日期导航', previous: '前七天', next: '后七天',
       today: '今天', openDay: '打开 {date}：{count}', noEvents: '无日程', oneEvent: '1 个日程', events: '{count} 个日程',
       nextUp: '下一个日程', noUpcoming: '没有即将开始的日程', openNext: '打开下一个日程',
       collapseFamily: '收起孩子筛选', expandFamily: '展开孩子筛选', familySummary: '显示 {visible}/{total}',
-      dock: '日历快捷操作', search: '搜索', add: '添加', more: '更多'
+      dock: '日历快捷操作', search: '搜索', add: '添加', more: '更多',
+      workspace: '工作区', dateTools: '日期与日历工具', openDateTools: '打开日期与日历工具'
     }
   };
   const tx = (key, values = {}) => (words[currentLanguage] || words.en)[key].replace(/\{(\w+)\}/g, (_, name) => String(values[name] ?? ''));
@@ -143,6 +145,81 @@
         summary.focus({ preventScroll: true });
       }
     });
+  }
+
+  function syncWorkspaceMenuTools() {
+    const group = document.querySelector('.interface-workspace-tools');
+    if (!group) return;
+    group.querySelector(':scope > summary').textContent = tx('workspace');
+    const dateTools = group.querySelector('[data-interface-date-tools]');
+    dateTools.querySelector('span:last-child').textContent = tx('dateTools');
+    dateTools.setAttribute('aria-label', tx('openDateTools'));
+    dateTools.title = tx('openDateTools');
+    group.querySelectorAll('[data-interface-panel]').forEach(proxy => {
+      const source = document.querySelector(`[data-panel-toggle="${proxy.dataset.interfacePanel}"]`);
+      if (!source) return;
+      const visible = source.getAttribute('aria-expanded') === 'true';
+      proxy.setAttribute('aria-expanded', String(visible));
+      proxy.setAttribute('aria-label', source.getAttribute('aria-label') || source.textContent.trim());
+      proxy.title = source.title;
+      proxy.querySelector('span:first-child').textContent = visible ? '✓' : '';
+      proxy.querySelector('span:last-child').textContent = source.children[1]?.textContent || source.textContent.trim();
+    });
+  }
+
+  function createWorkspaceMenuTools() {
+    if (document.querySelector('.interface-workspace-tools')) return;
+    const menu = document.querySelector('#moreActions > .more-actions-menu');
+    const panelSources = [...document.querySelectorAll('#workspacePanelMenu [data-panel-toggle]')];
+    if (!menu || !panelSources.length) return;
+    const group = document.createElement('details');
+    group.className = 'more-actions-group interface-workspace-tools';
+    group.innerHTML = `<summary>${tx('workspace')}</summary><div></div>`;
+    const contents = group.querySelector('div');
+    const dateTools = document.createElement('button');
+    dateTools.type = 'button';
+    dateTools.className = 'ghost-btn mobile-calendar-tools-launch';
+    dateTools.dataset.interfaceDateTools = '';
+    dateTools.innerHTML = '<span aria-hidden="true">▦</span><span></span>';
+    contents.append(dateTools);
+
+    panelSources.forEach(source => {
+      const proxy = document.createElement('button');
+      proxy.type = 'button';
+      proxy.className = 'ghost-btn interface-panel-toggle';
+      proxy.dataset.interfacePanel = source.dataset.panelToggle;
+      proxy.innerHTML = '<span aria-hidden="true"></span><span></span>';
+      proxy.addEventListener('click', () => source.click());
+      source.addEventListener('click', () => requestAnimationFrame(syncWorkspaceMenuTools));
+      contents.append(proxy);
+    });
+
+    const viewGroup = [...menu.querySelectorAll(':scope > .more-actions-group')][1];
+    if (viewGroup) viewGroup.after(group);
+    else menu.append(group);
+
+    const compactQuery = matchMedia('(max-width: 740px)');
+    const disclosure = document.getElementById('calendarSideDisclosure');
+    dateTools.addEventListener('click', () => {
+      if (hiddenWorkspacePanels.has('side')) {
+        hiddenWorkspacePanels.delete('side');
+        applyWorkspaceVisibility(false);
+      }
+      document.getElementById('moreActions').open = false;
+      document.getElementById('appShell').classList.add('mobile-calendar-tools-open');
+      disclosure.open = true;
+      requestAnimationFrame(() => {
+        document.getElementById('calendarSide').scrollIntoView({ block: 'start', behavior: userSettings.reduceMotion ? 'auto' : 'smooth' });
+        disclosure.querySelector('summary').focus({ preventScroll: true });
+      });
+    });
+    disclosure.addEventListener('toggle', () => {
+      if (!disclosure.open) document.getElementById('appShell').classList.remove('mobile-calendar-tools-open');
+    });
+    compactQuery.addEventListener('change', event => {
+      if (!event.matches) document.getElementById('appShell').classList.remove('mobile-calendar-tools-open');
+    });
+    syncWorkspaceMenuTools();
   }
 
   function applyFamilyStrip() {
@@ -241,9 +318,11 @@
   function refresh() {
     createPulse();
     createMobileDock();
+    createWorkspaceMenuTools();
     applyFamilyStrip();
     renderPulse();
     localizeDock();
+    syncWorkspaceMenuTools();
   }
 
   window.addEventListener('storage', event => {

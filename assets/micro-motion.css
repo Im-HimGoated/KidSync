@@ -36,7 +36,7 @@
   html:not(.reduce-motion) :is(.save-status, .undo-toast, .auth-cloud-note) {
     transition: background-color var(--motion-soft) ease, border-color var(--motion-soft) ease, color var(--motion-soft) ease, box-shadow var(--motion-soft) ease;
   }
-  html:not(.reduce-motion) dialog :is(.activity-list-item, .lists-summary-item, .map-category, .map-result-card, .calendar-list-row, .reminder-item) {
+  html:not(.reduce-motion) dialog :is(.activity-list-item, .lists-summary-item, .calendar-list-row, .reminder-item) {
     transition: background-color var(--motion-soft) ease, border-color var(--motion-soft) ease, box-shadow var(--motion-soft) ease, transform var(--motion-soft) var(--motion-ease);
   }
 
@@ -55,7 +55,7 @@
     html:not(.reduce-motion) #appShell :is(.dashboard-stat, .mini-calendar-tool):hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgb(20 52 68 / 9%); }
     html:not(.reduce-motion) #appShell :is(.dashboard-feed-item, .dashboard-timeline-item, .agenda-item, .today-event, .month-event, .all-day-event):hover { transform: translateY(-1px); }
     html:not(.reduce-motion) #appShell .mini-calendar-day:not(.is-selected):hover { transform: scale(1.08); }
-    html:not(.reduce-motion) dialog :is(.activity-list-item, .lists-summary-item, .map-category):hover { transform: translateY(-2px); }
+    html:not(.reduce-motion) dialog :is(.activity-list-item, .lists-summary-item):hover { transform: translateY(-2px); }
   }
 
   @keyframes ks-rise-in {

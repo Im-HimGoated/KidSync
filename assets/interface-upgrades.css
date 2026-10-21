@@ -180,6 +180,37 @@
 
 .mobile-action-dock { display: none; }
 
+/* Occasional layout controls belong in More, not in a permanent row above the calendar. */
+.interface-workspace-tools .interface-panel-toggle,
+.interface-workspace-tools .mobile-calendar-tools-launch {
+  align-items: center;
+  gap: 9px;
+}
+.interface-workspace-tools .interface-panel-toggle > span:first-child {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: #fff;
+  background: var(--green);
+  font-size: 12px;
+}
+.interface-workspace-tools .interface-panel-toggle[aria-expanded="false"] > span:first-child {
+  color: transparent;
+  background: transparent;
+}
+.mobile-calendar-tools-launch { display: none; }
+
+@media (min-width: 741px) {
+  #appShell:not(.has-minimized-panels):not(.is-dashboard-view)
+  #workspaceVisibility:not(:has(#calendarContextBar:not([hidden]))) {
+    display: none;
+  }
+  #appShell.is-dashboard-view #workspaceVisibility { display: none; }
+}
+
 /* Date navigation and creation have separate, consistent controls. */
 #appShell .today-view .view-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 16px 18px; }
 #appShell .today-view .view-heading h2 { font-size: clamp(18px, 2vw, 24px); line-height: 1.35; }
@@ -217,6 +248,11 @@ html.dark-mode .date-ribbon-day.is-selected > span { color: #25495f; }
   /* Phone week views use an agenda, so a timeline jump would have no effect. */
   #appShell #calendarPulse > .quick-calendar-nav { display: none; }
   #appShell #calendarPulse[data-view="today"] .calendar-next-spotlight { display: none; }
+  #appShell:not(.mobile-calendar-tools-open) #calendarSide { display: none; }
+  #appShell:not(.mobile-calendar-tools-open) .calendar-stage-main { grid-row: 1; }
+  #appShell.mobile-calendar-tools-open #calendarSide { display: block; }
+  #appShell.mobile-calendar-tools-open .calendar-stage-main { grid-row: 2; }
+  #appShell .mobile-calendar-tools-launch { display: flex; }
   #appShell .month-add-event { display: none; }
   #appShell .today-view .view-heading { flex-wrap: nowrap; gap: 8px; padding: 12px; }
   #appShell .today-view .view-heading h2 { min-width: 0; font-size: 17px; }

@@ -71,3 +71,13 @@ test('mobile calendar removes duplicated summaries while keeping direct navigati
   assert.match(mobileAgenda, /document\.getElementById\('calendarNextSpotlight'\)/);
   assert.match(css, /\.family-strip-toggle \{ grid-column: 3; width: 44px;[^}]*min-height: 44px;/);
 });
+
+test('occasional workspace tools move out of the planning path without becoming inaccessible', () => {
+  assert.match(script, /interface-workspace-tools/);
+  assert.match(script, /data-interface-panel/);
+  assert.match(script, /source\.click\(\)/);
+  assert.match(css, /#workspaceVisibility:not\(:has\(#calendarContextBar:not\(\[hidden\]\)\)\)/);
+  assert.match(css, /#appShell:not\(\.mobile-calendar-tools-open\) #calendarSide \{ display: none; \}/);
+  assert.match(css, /#appShell\.mobile-calendar-tools-open #calendarSide \{ display: block; \}/);
+  assert.match(worker, /kidssync-shell-v128/);
+});

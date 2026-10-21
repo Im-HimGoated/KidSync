@@ -425,3 +425,39 @@ html.dark-mode .auth-cloud-note { border-color: #e0e9ed; color: #667b88; }
   .auth-visual-dot { transition: none; }
   .auth-visual-pause { display: none; }
 }
+
+/* Keep account access compact and intentional on phones. */
+@media (max-width: 520px) {
+  .auth-screen .auth-shell { min-height: 100svh; }
+  .auth-screen .auth-form-side { padding: 14px 18px 18px; }
+  .auth-screen .auth-brand { min-height: 38px; margin-bottom: 0; }
+  .auth-screen .auth-back-top { min-height: 32px; margin-bottom: 5px; }
+  .auth-screen .auth-panel { width: 100%; margin: 0; }
+  .auth-screen .auth-eyebrow { margin-bottom: 4px; font-size: 10px; }
+  .auth-screen .auth-panel h1 { font-size: 28px; line-height: 1.15; }
+  .auth-screen .auth-prompt { margin: 5px 0 11px; font-size: 13px; line-height: 1.4; }
+  .auth-screen .auth-tabs { margin-bottom: 11px; }
+  .auth-screen .auth-tab { min-height: 38px; }
+  .auth-screen .auth-form,
+  .auth-screen #signUpForm { gap: 8px; }
+  .auth-screen .auth-form label,
+  .auth-screen .auth-field > label { margin-bottom: 4px; font-size: 12px; }
+  .auth-screen .auth-form label:has(input) { margin-bottom: 0; }
+  .auth-screen .auth-form input,
+  .auth-screen .auth-password-wrap input { min-height: 44px; padding-block: 8px; }
+  .auth-screen .auth-link-btn { min-height: 32px; }
+  .auth-screen .auth-error:empty,
+  .auth-screen .auth-cloud-note:empty,
+  .auth-screen .auth-cloud-note[hidden] { display: none !important; }
+  .auth-screen .auth-submit { min-height: 46px; }
+  .auth-screen .auth-preview-btn {
+    min-height: 42px;
+    margin-top: 9px;
+    border-color: #c4d4dc;
+    color: #365d74;
+    background: #f7fafb;
+    box-shadow: none;
+  }
+  .auth-screen .auth-cloud-note { margin-top: 9px; padding-top: 8px; }
+  .auth-screen .auth-visual { min-height: 154px; }
+}

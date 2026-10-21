@@ -18,14 +18,14 @@ test('first-run and navigation keep direct actions without blocking appearance s
   assert.match(html, /Math\.max\(520, window\.innerHeight - calendarMain\.getBoundingClientRect\(\)\.top/);
 });
 
-test('dashboard connects its location board and avoids empty zero-value noise', () => {
-  assert.match(html, /class="dashboard-panel dashboard-map-panel"[\s\S]*id="dashboardMapPins"[\s\S]*id="dashboardLocationList"/);
-  assert.match(html, /function renderDashboardMap\(activities\)/);
-  assert.match(html, /renderDashboardMap\(locationActivities\)/);
+test('dashboard stays task-focused after map discovery is removed', () => {
+  assert.doesNotMatch(html, /dashboard-map|mapDialog|data-sidebar-action="map"/);
+  assert.doesNotMatch(html, /renderDashboardMap|openMapDialog|KidsSyncMap/);
   assert.match(html, /classList\.toggle\("is-dashboard-empty", isEmpty\)/);
-  assert.match(html, /const dashboardPanelNames = \["locations", "week", "updates", "upcoming", "past"\]/);
+  assert.match(html, /const dashboardPanelNames = \["week", "updates", "upcoming", "past"\]/);
   assert.match(experienceCss, /is-dashboard-empty #dashboardStats/);
-  assert.match(experienceCss, /dashboard-map-panel\.is-empty \.dashboard-map-canvas \{ min-height: 190px; \}/);
+  assert.doesNotMatch(experienceCss, /dashboard-map|dashboard-location/);
+  assert.doesNotMatch(worker, /map-discovery|place-search/);
   assert.match(html, /id="todayHeading"[^>]*><\/h2><button[^>]*id="todayAddEvent"/);
   const start = html.indexOf('    function renderToday(');
   const end = html.indexOf('    function renderCalendarEmptyState(', start);

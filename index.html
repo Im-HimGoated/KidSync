@@ -3084,28 +3084,7 @@
     .dashboard-overview-grid .dashboard-section { padding:16px; border:1px solid var(--line); border-radius:12px; background:var(--panel); }
     .dashboard-section-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
     .dashboard-section-heading .dashboard-section-note { margin-bottom:0; }
-    .map-dialog { width:min(900px,calc(100% - 24px)); max-height:min(92vh,900px); }
-    .map-body { padding:20px; }
-    .map-search-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; margin-top:16px; }
-    .map-search-row input { min-width:0; min-height:42px; padding:0 12px; border:1px solid var(--line); border-radius:9px; color:var(--ink); background:var(--panel); font:inherit; }
-    .map-category-row { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0; }
-    .map-category { min-height:36px; padding:0 12px; border:1px solid var(--line); border-radius:999px; color:var(--ink); background:var(--panel); font-size:13px; font-weight:800; }
-    .map-category:hover, .map-category.is-selected { border-color:var(--blue-line); color:#174f73; background:var(--blue-soft); }
-    .map-result-card { display:grid; grid-template-columns:42px minmax(0,1fr) auto; align-items:center; gap:12px; padding:16px; border:1px solid var(--line); border-radius:12px; background:var(--panel); }
-    .map-result-icon { display:grid; width:38px; height:38px; place-items:center; border-radius:12px; color:#fff; background:var(--blue); font-size:22px; }
-    .map-result-card strong { display:block; color:var(--ink); font-size:15px; }
-    .map-result-card p { margin:4px 0 0; color:var(--muted); font-size:12px; line-height:1.4; }
-    .map-location-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:10px; }
-    .map-location-row span { color:var(--muted); font-size:12px; }
-    .map-live-view { display:grid; min-height:340px; place-items:center; overflow:hidden; border:1px solid var(--line); border-radius:12px; background:var(--panel); }
-    .map-live-view.is-unconfigured { min-height:100px; }
-    .map-live-view iframe { display:block; width:100%; height:340px; border:0; }
-    .map-live-view iframe[hidden] { display:none; }
-    .map-live-empty { max-width:420px; padding:24px; color:var(--muted); text-align:center; line-height:1.5; }
-    .map-results { margin-top:12px; }
-    .map-result-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
-    html.dark-mode .map-category:hover, html.dark-mode .map-category.is-selected { color:#b8dbff; background:#213541; }
-    @media (max-width:700px) { .dashboard-overview-grid { grid-template-columns:1fr; } .dashboard-section-heading { flex-direction:column; } .map-result-card { grid-template-columns:36px minmax(0,1fr); } .map-result-actions { grid-column:2; justify-content:flex-start; } .map-live-view:not(.is-unconfigured), .map-live-view iframe { min-height:280px; height:280px; } }
+    @media (max-width:700px) { .dashboard-overview-grid { grid-template-columns:1fr; } .dashboard-section-heading { flex-direction:column; } }
     .dashboard-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
     .dashboard-stat { min-width: 0; padding: 18px; border-right: 1px solid var(--line); background: var(--panel); }
     .dashboard-stat:last-child { border-right: 0; }
@@ -9085,26 +9064,6 @@
       .dashboard-panel-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:18px 20px; border-bottom:1px solid var(--line); }
       .dashboard-panel-heading h2 { margin:0; color:var(--ink); font-size:18px; line-height:1.2; letter-spacing:0; }
       .dashboard-panel-heading p:not(.dashboard-panel-kicker) { margin:5px 0 0; color:var(--muted); font-size:12px; font-weight:700; line-height:1.45; }
-      .dashboard-map-canvas { position:relative; min-height:360px; overflow:hidden; isolation:isolate; background:#e7f0e8; }
-      .dashboard-map-canvas::before { content:""; position:absolute; inset:0; z-index:-3; background-image:linear-gradient(90deg,transparent 24%,rgba(112,157,119,.14) 25%,rgba(112,157,119,.14) 26%,transparent 27%,transparent 71%,rgba(112,157,119,.12) 72%,rgba(112,157,119,.12) 74%,transparent 75%),linear-gradient(0deg,transparent 18%,rgba(112,157,119,.13) 19%,rgba(112,157,119,.13) 21%,transparent 22%,transparent 69%,rgba(112,157,119,.12) 70%,rgba(112,157,119,.12) 72%,transparent 73%); background-size:190px 150px; }
-      .dashboard-map-canvas::after { content:""; position:absolute; inset:9% 8%; z-index:-2; border:18px solid #c7e2e7; border-radius:45% 18% 38% 24%; transform:rotate(-8deg); opacity:.9; }
-      .dashboard-map-road { position:absolute; z-index:-1; height:30px; border:7px solid rgba(255,255,255,.95); border-inline:0; background:#d4dce0; box-shadow:0 0 0 1px rgba(126,145,152,.2); }
-      .dashboard-map-road.road-one { width:130%; top:42%; left:-14%; transform:rotate(-9deg); }
-      .dashboard-map-road.road-two { width:105%; top:58%; left:22%; transform:rotate(57deg); }
-      .dashboard-map-road.road-three { width:78%; top:17%; left:-8%; transform:rotate(31deg); }
-      .dashboard-map-pins { position:absolute; inset:0; }
-      .dashboard-map-pin { position:absolute; left:var(--pin-x); top:var(--pin-y); max-width:min(220px,42%); display:flex; align-items:center; gap:7px; padding:7px 10px 7px 7px; border:1px solid rgba(31,91,74,.28); border-radius:8px; color:#173f33; background:rgba(255,255,255,.96); box-shadow:0 7px 18px rgba(22,59,49,.18); font-size:11px; font-weight:850; text-align:left; transform:translate(-50%,-100%); }
-      .dashboard-map-pin::after { content:""; position:absolute; left:20px; bottom:-7px; width:12px; height:12px; border-right:1px solid rgba(31,91,74,.28); border-bottom:1px solid rgba(31,91,74,.28); background:#fff; transform:rotate(45deg); }
-      .dashboard-map-pin:hover, .dashboard-map-pin:focus-visible { border-color:#2f7654; background:#fff; outline:3px solid rgba(47,118,84,.2); transform:translate(-50%,-100%); }
-      .dashboard-map-pin-icon { position:relative; z-index:1; display:grid; flex:0 0 29px; width:29px; height:29px; place-items:center; border-radius:50%; color:#fff; background:#2877a7; font-size:16px; }
-      .dashboard-map-pin-copy { position:relative; z-index:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-      .dashboard-map-empty { position:absolute; inset:0; display:grid; align-content:center; justify-items:center; gap:10px; padding:30px; color:#426153; background:rgba(236,245,238,.82); text-align:center; }
-      .dashboard-map-empty[hidden] { display:none; }
-      .dashboard-map-empty span { display:grid; width:46px; height:46px; place-items:center; border-radius:50%; color:#fff; background:#2f7654; font-size:24px; }
-      .dashboard-map-empty strong { max-width:280px; font-size:13px; }
-      .dashboard-location-list { display:flex; gap:8px; overflow:auto; padding:12px 16px; border-top:1px solid var(--line); scrollbar-width:thin; }
-      .dashboard-location-chip { flex:0 0 auto; display:inline-flex; align-items:center; gap:6px; min-height:32px; padding:0 10px; border:1px solid var(--line); border-radius:7px; color:var(--ink); background:transparent; font-size:11px; font-weight:800; }
-      .dashboard-location-chip:hover, .dashboard-location-chip:focus-visible { border-color:#73a894; background:#ecf5ef; outline:none; transform:none; }
       .dashboard-timeline, .dashboard-feed { display:grid; }
       .dashboard-timeline-item { width:100%; display:grid; grid-template-columns:48px minmax(0,1fr); gap:12px; align-items:center; min-height:82px; padding:12px 16px; border:0; border-bottom:1px solid var(--line); color:var(--ink); background:transparent; text-align:left; }
       .dashboard-timeline-item:last-child { border-bottom:0; }
@@ -9127,13 +9086,6 @@
       .dashboard-feed-time { color:#2f7654; font-size:10px; font-weight:900; white-space:nowrap; }
       .dashboard-empty { display:grid; min-height:120px; place-items:center; margin:0; padding:22px; color:var(--muted); font-size:12px; font-weight:750; text-align:center; }
       html.dark-mode .dashboard-panel, html.dark-mode .dashboard-stat { background:#1b2a34; }
-      html.dark-mode .dashboard-map-canvas { background:#233d36; }
-      html.dark-mode .dashboard-map-canvas::before { opacity:.42; }
-      html.dark-mode .dashboard-map-canvas::after { border-color:#27515b; }
-      html.dark-mode .dashboard-map-road { border-color:#30414b; background:#68747c; }
-      html.dark-mode .dashboard-map-pin { border-color:#59766b; color:#e8f4ed; background:#1c302a; }
-      html.dark-mode .dashboard-map-pin::after { border-color:#59766b; background:#1c302a; }
-      html.dark-mode .dashboard-location-chip:hover, html.dark-mode .dashboard-location-chip:focus-visible { background:#244438; }
       html.dark-mode .dashboard-event-time { color:#b8dbff; }
       html.dark-mode .dashboard-event-relative, html.dark-mode .dashboard-feed-time { color:#9fd3b6; }
       @media (max-width:980px) {
@@ -9150,7 +9102,6 @@
         .dashboard-page .dashboard-stat:nth-child(2) { border-right:0; }
         .dashboard-page .dashboard-stat:nth-child(-n+2) { border-bottom:1px solid var(--line); }
         .dashboard-side-column { grid-template-columns:minmax(0,1fr); }
-        .dashboard-map-canvas { min-height:310px; }
       }
       @media (max-width:440px) {
         .dashboard-page-header { gap:12px; }
@@ -9159,8 +9110,6 @@
         .dashboard-page-actions button { width:46px; }
         .dashboard-page-actions button:last-child { width:97px; }
         .dashboard-panel-heading { padding:15px; }
-        .dashboard-map-canvas { min-height:270px; }
-        .dashboard-map-pin { max-width:48%; padding-right:8px; }
         .dashboard-feed-item { grid-template-columns:38px minmax(0,1fr); padding:13px 15px; }
         .dashboard-feed-icon { width:38px; height:38px; }
         .dashboard-feed-time { grid-column:2; justify-self:start; }
@@ -9853,19 +9802,20 @@
   <link rel="stylesheet" href="./assets/week-calendar.css">
   <link rel="stylesheet" href="./assets/planner-tools.css">
   <link rel="stylesheet" href="./assets/ui-features.css">
-  <link rel="stylesheet" href="./assets/interface-upgrades.css?v=3">
+  <link rel="stylesheet" href="./assets/interface-upgrades.css?v=4">
   <link rel="stylesheet" href="./assets/smart-scheduling.css?v=2">
   <link rel="stylesheet" href="./assets/family-polls.css?v=1">
   <link rel="stylesheet" href="./assets/smart-planner.css?v=4">
   <link rel="stylesheet" href="./assets/family-workspace.css">
   <link rel="stylesheet" href="./assets/experience.css">
   <link rel="stylesheet" href="./assets/quick-ux.css">
-  <link rel="stylesheet" href="./assets/marketing-auth.css?v=2">
+  <link rel="stylesheet" href="./assets/marketing-auth.css?v=3">
   <link rel="stylesheet" href="./assets/micro-motion.css?v=1">
   <link rel="stylesheet" href="./assets/calendar-ui-refresh.css?v=1">
   <link rel="stylesheet" href="./assets/landing-ux.css?v=1">
   <link rel="stylesheet" href="./assets/welcome-refresh.css?v=1">
   <link rel="stylesheet" href="./assets/calendar-ux.css?v=1">
+  <link rel="stylesheet" href="./assets/dashboard-planning.css?v=1">
   <link rel="stylesheet" href="./assets/mobile.css?v=95">
 </head>
 <body>
@@ -10119,7 +10069,7 @@
           </div>
           <div class="welcome-about-point">
             <span>3</span>
-            <div><h3 data-i18n="welcome.aboutThreeTitle">Find what’s nearby</h3><p data-i18n="welcome.aboutThreeBody">Use Map to discover restaurants, parks, activities, and other useful places close to your family.</p></div>
+            <div><h3 data-i18n="welcome.aboutThreeTitle">Make handoffs easier</h3><p data-i18n="welcome.aboutThreeBody">Keep pickup adults, locations, packing lists, and notes attached to each plan.</p></div>
           </div>
         </div>
       </div>
@@ -10132,7 +10082,7 @@
           <details><summary data-i18n="welcome.questionTrial">Can I try it without an account?</summary><p data-i18n="welcome.answerTrial">Yes. Explore the planner for 10 minutes without signing in. Then sign in or create an account to keep using the schedule and sync it across devices. This sample does not start the timer.</p></details>
           <details><summary data-i18n="welcome.questionSharing">How does sharing work?</summary><p data-i18n="welcome.answerSharing">Sign in to invite people to your calendar. Choose editor, commenter, or viewer access. The owner manages invitations and permissions; the landing-page sample is never shared.</p></details>
           <details><summary data-i18n="welcome.questionPhone">Can I use it on my phone?</summary><p data-i18n="welcome.answerPhone">Yes. The planner adapts to your phone. After a visit online, offline support can show previously saved schedules; new shared changes need a connection.</p></details>
-          <details><summary data-i18n="welcome.questionMaps">Do I need to connect other services?</summary><p data-i18n="welcome.answerMaps">No connection is needed to explore. Shared calendars require sign-in. Google or Outlook calendar connections require provider setup, and nearby-place searches can open Google or Apple Maps.</p></details>
+          <details><summary data-i18n="welcome.questionConnections">Do I need to connect other services?</summary><p data-i18n="welcome.answerConnections">No. You can use the planner without connecting another service. Shared calendars require sign-in, while Google or Outlook imports require provider setup.</p></details>
         </div>
       </div>
     </section>
@@ -10339,7 +10289,6 @@
           <button class="sidebar-nav-item" type="button" data-sidebar-action="lists" aria-label="Lists" data-i18n-aria="sidebar.lists"><span class="sidebar-nav-icon" aria-hidden="true">☷</span><span data-i18n="sidebar.lists">Lists</span></button>
           <button class="sidebar-nav-item" type="button" data-sidebar-action="holidays" aria-label="Holidays" data-i18n-aria="sidebar.holidays"><span class="sidebar-nav-icon" aria-hidden="true">☘</span><span data-i18n="sidebar.holidays">Holidays</span></button>
           <button class="sidebar-nav-item" type="button" data-sidebar-action="special-days" aria-label="Special days" data-i18n-aria="sidebar.specialDays"><span class="sidebar-nav-icon" aria-hidden="true">★</span><span data-i18n="sidebar.specialDays">Special days</span></button>
-          <button class="sidebar-nav-item" type="button" data-sidebar-action="map" aria-label="Map" data-i18n-aria="sidebar.map"><span class="sidebar-nav-icon" aria-hidden="true">⌖</span><span data-i18n="sidebar.map">Map</span></button>
           <div class="sidebar-calendar-switcher" id="sidebarCalendarSwitcher"></div>
         </nav>
       </details>
@@ -10406,31 +10355,12 @@
         </div>
       </section>
 
+      <div id="dashboardNow" class="dashboard-now-grid"></div>
       <div class="dashboard-stats" id="dashboardStats"></div>
 
       <div class="dashboard-page-grid">
         <div class="dashboard-main-column">
-          <section class="dashboard-panel dashboard-map-panel" aria-labelledby="dashboardMapTitle">
-            <div class="dashboard-panel-heading">
-              <div>
-                <p class="dashboard-panel-kicker" data-i18n="dashboard.locationKicker">Where everyone is headed</p>
-                <h2 id="dashboardMapTitle" data-i18n="dashboard.mapTitle">Family map</h2>
-                <p data-i18n="dashboard.mapNote">See the places connected to your next family activities.</p>
-              </div>
-            </div>
-            <div class="dashboard-map-canvas" id="dashboardMapCanvas" role="group" aria-label="Upcoming activity locations" data-i18n-aria="dashboard.mapAria">
-              <span class="dashboard-map-road road-one" aria-hidden="true"></span>
-              <span class="dashboard-map-road road-two" aria-hidden="true"></span>
-              <span class="dashboard-map-road road-three" aria-hidden="true"></span>
-              <div class="dashboard-map-pins" id="dashboardMapPins"></div>
-              <div class="dashboard-map-empty" id="dashboardMapEmpty">
-                <span aria-hidden="true">⌖</span>
-                <strong data-i18n="dashboard.noLocations">Add a location to an event to see it here.</strong>
-              </div>
-            </div>
-            <div class="dashboard-location-list" id="dashboardLocationList" aria-label="Upcoming activity locations" data-i18n-aria="dashboard.mapAria"></div>
-          </section>
-
+          <div id="dashboardPlanMain" class="dashboard-planning-stack"></div>
           <section class="dashboard-panel dashboard-week-panel" aria-labelledby="dashboardWeekTitle">
             <div class="dashboard-panel-heading">
               <div>
@@ -10459,6 +10389,7 @@
         </div>
 
         <aside class="dashboard-side-column" aria-label="Activity timeline" data-i18n-aria="dashboard.timelineAria">
+          <div id="dashboardPlanSide" class="dashboard-planning-stack"></div>
           <section class="dashboard-panel dashboard-timeline-panel" aria-labelledby="dashboardUpcomingTitle">
             <div class="dashboard-panel-heading">
               <div>
@@ -10470,6 +10401,7 @@
             <div class="dashboard-timeline" id="dashboardUpcoming"></div>
           </section>
 
+          <div id="dashboardSpecial" class="dashboard-planning-stack"></div>
           <section class="dashboard-panel dashboard-timeline-panel dashboard-past-panel" aria-labelledby="dashboardPastTitle">
             <div class="dashboard-panel-heading">
               <div>
@@ -11647,28 +11579,6 @@
     </div>
   </dialog>
 
-  <dialog class="map-dialog" id="mapDialog">
-    <div class="modal-header">
-      <div><p class="eyebrow" data-i18n="map.eyebrow">Explore nearby</p><h2 data-i18n="map.title">Family map</h2></div>
-      <button class="close-btn" type="button" id="closeMap" aria-label="Close" data-i18n-aria="aria.close">×</button>
-    </div>
-    <div class="map-body">
-      <p class="dialog-intro" data-i18n="map.intro">Find restaurants, parks, activities, and useful places for your family.</p>
-      <div class="map-search-row"><input id="mapSearch" type="search" autocomplete="off" data-i18n-placeholder="map.searchPlaceholder" placeholder="Search nearby places"><button class="primary-btn" type="button" id="mapSearchButton" data-i18n="map.search">Search</button></div>
-      <div class="map-location-row"><button class="small-btn" type="button" id="mapUseLocation" data-i18n="map.useLocation">Use my location</button><span id="mapLocationStatus" role="status" data-i18n="map.locationOptional">Location is optional. Map apps can find places near you.</span></div>
-      <div class="map-category-row" role="group" aria-label="Nearby place categories">
-        <button class="map-category is-selected" type="button" data-map-category="restaurants" data-i18n="map.restaurants">Restaurants</button>
-        <button class="map-category" type="button" data-map-category="family activities" data-i18n="map.activities">Activities</button>
-        <button class="map-category" type="button" data-map-category="entertainment" data-i18n="map.entertainment">Entertainment</button>
-        <button class="map-category" type="button" data-map-category="parks" data-i18n="map.parks">Parks</button>
-        <button class="map-category" type="button" data-map-category="libraries" data-i18n="map.libraries">Libraries</button>
-        <button class="map-category" type="button" data-map-category="cafes" data-i18n="map.cafes">Cafes</button>
-      </div>
-      <div class="map-live-view"><iframe id="mapLiveFrame" title="Nearby places on Google Maps" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" hidden></iframe><p class="map-live-empty" id="mapLiveEmpty" data-i18n="map.setupNeeded">Live map preview needs a Google Maps Embed API key. You can still search in Google or Apple Maps below.</p></div>
-      <div class="map-results" id="mapResults"></div>
-    </div>
-  </dialog>
-
   <dialog class="insights-dialog" id="remindersDialog">
     <div class="modal-header">
       <h2 data-i18n="reminders.title">Reminders</h2>
@@ -11854,8 +11764,8 @@
         "welcome.answerSharing": "Sign in to invite people to your calendar. Choose editor, commenter, or viewer access. The owner manages invitations and permissions; the landing-page sample is never shared.",
         "welcome.questionPhone": "Can I use it on my phone?",
         "welcome.answerPhone": "Yes. The planner adapts to your phone. After a visit online, offline support can show previously saved schedules; new shared changes need a connection.",
-        "welcome.questionMaps": "Do I need to connect other services?",
-        "welcome.answerMaps": "No connection is needed to explore. Shared calendars require sign-in. Google or Outlook calendar connections require provider setup, and nearby-place searches can open Google or Apple Maps.",
+        "welcome.questionConnections": "Do I need to connect other services?",
+        "welcome.answerConnections": "No. You can use the planner without connecting another service. Shared calendars require sign-in, while Google or Outlook imports require provider setup.",
         "welcome.finalKicker": "Less coordinating. More living.",
         "welcome.finalTitle": "Make room for a calmer week.",
         "welcome.finalBody": "Start with your family’s next plan. Build the rest at your own pace.",
@@ -11938,8 +11848,8 @@
         "welcome.aboutOneBody": "The Dashboard brings upcoming events, holidays, and family updates into one calm view.",
         "welcome.aboutTwoTitle": "Stay in sync",
         "welcome.aboutTwoBody": "Shared calendars show what changed, who changed it, and what your family needs to know next.",
-        "welcome.aboutThreeTitle": "Find what’s nearby",
-        "welcome.aboutThreeBody": "Use Map to discover restaurants, parks, activities, and other useful places close to your family.",
+        "welcome.aboutThreeTitle": "Make handoffs easier",
+        "welcome.aboutThreeBody": "Keep pickup adults, locations, packing lists, and notes attached to each plan.",
         "welcome.footer": "A clearer week for every family.",
         "welcome.back": "Back to welcome page",
         "aria.overview": "Family schedule overview",
@@ -12002,7 +11912,6 @@
         "sidebar.lists": "Lists",
         "sidebar.holidays": "Holidays",
         "sidebar.specialDays": "Special days",
-        "sidebar.map": "Map",
         "sidebar.help": "Help",
         "sidebar.settings": "Settings",
         "sidebar.synced": "Your family week, in one place",
@@ -12535,12 +12444,6 @@
         "dashboard.upcomingTitle": "Upcoming events",
         "dashboard.upcomingNote": "The next activities and important dates.",
         "dashboard.openCalendar": "Open calendar",
-        "dashboard.locationKicker": "Where everyone is headed",
-        "dashboard.mapTitle": "Family map",
-        "dashboard.mapNote": "See the places connected to your next family activities.",
-        "dashboard.openMap": "Explore map",
-        "dashboard.mapAria": "Upcoming activity locations",
-        "dashboard.noLocations": "Add a location to an event to see it here.",
         "dashboard.activityKicker": "Family activity",
         "dashboard.updatesTitle": "Recent updates",
         "dashboard.updatesNote": "Changes and recently completed activities, with live timestamps.",
@@ -12552,6 +12455,7 @@
         "dashboard.timelineAria": "Activity timeline",
         "dashboard.happened": "Happened {time}",
         "dashboard.ends": "Ends {time}",
+        "dashboard.begins": "Begins {time}",
         "time.justNow": "just now",
         "time.minuteAgo": "1 minute ago",
         "time.minutesAgo": "{count} minutes ago",
@@ -12625,28 +12529,6 @@
         "weeklySummary.upcomingNote": "Your next five plans",
         "weeklySummary.noEvents": "Nothing else is scheduled for this week.",
         "weeklySummary.viewCalendar": "View this week",
-        "map.eyebrow": "Explore nearby",
-        "map.title": "Family map",
-        "map.intro": "Find restaurants, parks, activities, and useful places for your family.",
-        "map.searchPlaceholder": "Search nearby places",
-        "map.search": "Search",
-        "map.restaurants": "Restaurants",
-        "map.activities": "Activities",
-        "map.entertainment": "Entertainment",
-        "map.parks": "Parks",
-        "map.libraries": "Libraries",
-        "map.cafes": "Cafes",
-        "map.open": "Open in Maps",
-        "map.searching": "Search for {query} nearby",
-        "map.google": "Google Maps",
-        "map.apple": "Apple Maps",
-        "map.useLocation": "Use my location",
-        "map.locationOptional": "Location is optional. Map apps can find places near you.",
-        "map.locating": "Finding your location…",
-        "map.locationReady": "Showing places near your location.",
-        "map.locationUnavailable": "Location unavailable. You can still search in a map app.",
-        "map.setupNeeded": "Live map preview needs a Google Maps Embed API key. You can still search in Google or Apple Maps below.",
-        "map.resultsNote": "Browse live places, hours, reviews, and directions in your map app.",
         "versions.open": "Version history",
         "versions.title": "Version history",
         "versions.intro": "{calendar} · latest 20 saved versions",
@@ -13020,8 +12902,8 @@
         "welcome.answerSharing": "登录后即可邀请他人加入日历，并选择编辑者、评论者或查看者权限。所有者管理邀请和权限；首页示例不会被共享。",
         "welcome.questionPhone": "可以在手机上使用吗？",
         "welcome.answerPhone": "可以。日程工具会适应手机屏幕。在线访问后，离线功能可显示之前保存的日程；获取新的共享更改需要联网。",
-        "welcome.questionMaps": "必须连接其他服务吗？",
-        "welcome.answerMaps": "探索体验不需要连接其他服务。共享日历需要登录；连接 Google 或 Outlook 日历需要配置服务。附近地点搜索可以在 Google 地图或 Apple 地图中打开。",
+        "welcome.questionConnections": "必须连接其他服务吗？",
+        "welcome.answerConnections": "不需要。无需连接其他服务即可使用日程工具。共享日历需要登录；导入 Google 或 Outlook 日历需要配置服务。",
         "welcome.finalKicker": "少一点协调，多一点生活。",
         "welcome.finalTitle": "让下一周更从容。",
         "welcome.finalBody": "从家人的下一个计划开始，按自己的节奏安排其余日程。",
@@ -13104,8 +12986,8 @@
         "welcome.aboutOneBody": "家庭概览把即将到来的活动、节假日和家庭更新放在一个清晰的视图里。",
         "welcome.aboutTwoTitle": "保持同步",
         "welcome.aboutTwoBody": "共享日历会显示发生了什么更改、由谁更改，以及家人下一步需要知道什么。",
-        "welcome.aboutThreeTitle": "发现附近地点",
-        "welcome.aboutThreeBody": "使用地图查找附近的餐厅、公园、活动和其他适合家人的地点。",
+        "welcome.aboutThreeTitle": "让交接更轻松",
+        "welcome.aboutThreeBody": "把接送负责人、地点、携带物品和备注都放在每项安排里。",
         "welcome.footer": "让每个家庭的一周更清晰。",
         "welcome.back": "返回欢迎页面",
         "aria.overview": "家庭日程概览",
@@ -13168,7 +13050,6 @@
         "sidebar.lists": "列表",
         "sidebar.holidays": "节假日",
         "sidebar.specialDays": "特别日子",
-        "sidebar.map": "地图",
         "sidebar.help": "帮助",
         "sidebar.settings": "设置",
         "sidebar.synced": "把家庭一周安排放在一起",
@@ -13687,12 +13568,6 @@
         "dashboard.upcomingTitle": "即将发生的事件",
         "dashboard.upcomingNote": "接下来的活动和重要日期。",
         "dashboard.openCalendar": "打开日历",
-        "dashboard.locationKicker": "大家接下来要去的地方",
-        "dashboard.mapTitle": "家庭地图",
-        "dashboard.mapNote": "查看与近期家庭活动相关的地点。",
-        "dashboard.openMap": "探索地图",
-        "dashboard.mapAria": "即将进行的活动地点",
-        "dashboard.noLocations": "为事件添加地点后，它会显示在这里。",
         "dashboard.activityKicker": "家庭动态",
         "dashboard.updatesTitle": "最近更新",
         "dashboard.updatesNote": "查看更改和最近完成的活动，并显示实时相对时间。",
@@ -13703,7 +13578,8 @@
         "dashboard.noPast": "过去 90 天没有已完成的活动。",
         "dashboard.timelineAria": "活动时间线",
         "dashboard.happened": "发生于{time}",
-        "dashboard.ends": "结束于{time}",
+        "dashboard.ends": "{time}结束",
+        "dashboard.begins": "{time}开始",
         "time.justNow": "刚刚",
         "time.minuteAgo": "1 分钟前",
         "time.minutesAgo": "{count} 分钟前",
@@ -13777,28 +13653,6 @@
         "weeklySummary.upcomingNote": "接下来的五项安排",
         "weeklySummary.noEvents": "本周没有其他安排。",
         "weeklySummary.viewCalendar": "查看本周",
-        "map.eyebrow": "探索附近",
-        "map.title": "家庭地图",
-        "map.intro": "查找适合家人的餐厅、公园、活动和实用地点。",
-        "map.searchPlaceholder": "搜索附近地点",
-        "map.search": "搜索",
-        "map.restaurants": "餐厅",
-        "map.activities": "活动",
-        "map.entertainment": "娱乐",
-        "map.parks": "公园",
-        "map.libraries": "图书馆",
-        "map.cafes": "咖啡馆",
-        "map.open": "在地图中打开",
-        "map.searching": "搜索附近的{query}",
-        "map.google": "谷歌地图",
-        "map.apple": "苹果地图",
-        "map.useLocation": "使用我的位置",
-        "map.locationOptional": "位置可选。地图应用可查找你附近的地点。",
-        "map.locating": "正在查找你的位置…",
-        "map.locationReady": "正在显示你附近的地点。",
-        "map.locationUnavailable": "无法获取位置。你仍可在地图应用中搜索。",
-        "map.setupNeeded": "实时地图预览需要 Google Maps Embed API 密钥。你仍可在下方打开谷歌或苹果地图搜索。",
-        "map.resultsNote": "在地图应用中查看实时地点、营业时间、评价和路线。",
         "versions.open": "版本历史",
         "versions.title": "版本历史",
         "versions.intro": "{calendar} · 最近保存的 20 个版本",
@@ -14546,7 +14400,8 @@
     function updateCloudAvailability() {
       const note = document.getElementById("authCloudNote");
       if (!note) return;
-      note.textContent = t(cloudConfigured ? "auth.cloudReady" : "auth.cloudSetup");
+      note.hidden = cloudConfigured;
+      note.textContent = cloudConfigured ? "" : t("auth.cloudSetup");
       note.classList.toggle("is-error", !cloudConfigured);
     }
 
@@ -15421,7 +15276,6 @@
     const settingsDialog = document.getElementById("settingsDialog");
     const appearanceDialog = document.getElementById("appearanceDialog");
     const dashboardPage = document.getElementById("dashboardPage");
-    const mapDialog = document.getElementById("mapDialog");
     const remindersDialog = document.getElementById("remindersDialog");
     const listsDialog = document.getElementById("listsDialog");
     const activityHistoryDialog = document.getElementById("activityHistoryDialog");
@@ -15785,11 +15639,6 @@
       document.getElementById("sidebarMenu").open = false;
       if (action === "dashboard") {
         showDashboardPage();
-        return;
-      }
-      if (action === "map") {
-        setSidebarActive(action);
-        openMapDialog();
         return;
       }
       if (action === "lists") {
@@ -16959,15 +16808,15 @@
       return eventImportance(activity) === "high" || ["deadline", "birthday", "holiday"].includes(eventType);
     }
 
-    function occurrencesOnDate(date, { ignoreSearch = false, ignoreFilter = false } = {}) {
+    function occurrencesOnDate(date, { ignoreSearch = false, ignoreFilter = false, ignoreChildren = false } = {}) {
       const day = days[(date.getDay() + 6) % 7];
       const activities = state.activities
-        .filter(activity => activity.child === FAMILY_CHILD || state.visibleKids.has(activity.child))
+        .filter(activity => ignoreChildren || activity.child === FAMILY_CHILD || state.visibleKids.has(activity.child))
         .filter(activity => ignoreSearch || activityMatchesSearch(activity))
         .filter(activity => ignoreFilter || activityMatchesEventFilter(activity))
         .filter(activity => activityOccursOn(activity, date))
         .map(activity => ({ ...activity, day: day.key, occurrenceDate: dateKey(date), spanPosition: activitySpanPosition(activity, date) }));
-      const holidays = activityMatchesEventFilter({ eventType: "holiday" })
+      const holidays = (ignoreFilter || activityMatchesEventFilter({ eventType: "holiday" }))
         ? builtInHolidayActivities(date).filter(activity => ignoreSearch || activityMatchesSearch(activity))
         : [];
       const external = typeof window !== "undefined" && window.KidsSyncExternal
@@ -17704,6 +17553,7 @@
     }
 
     function updateCurrentTimeMarkers() {
+      if (typeof window !== "undefined") window.KidsSyncDashboard?.refresh();
       if (typeof window !== "undefined") window.KidsSyncCalendarUX?.refreshFinished();
       const now = new Date();
       const today = dateKey(now);
@@ -20009,11 +19859,11 @@
       undoDeleteTimer = window.setTimeout(dismissUndoToast, 2500);
     }
 
-    function upcomingOccurrences(dayCount = 7) {
+    function upcomingOccurrences(dayCount = 7, { ignoreFilter = false, ignoreChildren = false } = {}) {
       const now = new Date();
       const todaySerial = dateSerial(now);
       const seenSpans = new Set();
-      return Array.from({ length: dayCount }, (_, index) => occurrencesOnDate(addDays(now, index), { ignoreSearch: true }))
+      return Array.from({ length: dayCount }, (_, index) => occurrencesOnDate(addDays(now, index), { ignoreSearch: true, ignoreFilter, ignoreChildren }))
         .flat()
         .filter(activity => activityStatus(activity) !== "cancelled")
         .filter(activity => {
@@ -20062,8 +19912,11 @@
       const month = date.toLocaleDateString(locale, { month: "short" });
       const day = date.toLocaleDateString(locale, { day: "numeric" });
       const time = activityDateRangeText(activity) || (activity.allDay ? t("calendar.allDay") : formatTimeLabel(minutes(activity.start)));
-      const relativeTarget = past || activity.allDay ? occurrenceEndDateTime(activity) : occurrenceDateTime(activity);
+      const startsAt = occurrenceDateTime(activity);
+      const hasBegun = startsAt && startsAt.getTime() <= Date.now();
+      const relativeTarget = past || hasBegun ? occurrenceEndDateTime(activity) : startsAt;
       const relative = formatRelativeTime(relativeTarget);
+      const relativeKey = past ? "dashboard.happened" : hasBegun ? "dashboard.ends" : "dashboard.begins";
       const meta = [displayChild(activity), activity.location].filter(Boolean).join(" · ");
       const colors = eventColors(activity);
       const button = document.createElement("button");
@@ -20076,7 +19929,7 @@
           <strong>${escapeHtml(`${displayIcon(activity)} ${activityCompactTitle(activity)}`)}</strong>
           <span class="dashboard-event-time">${escapeHtml(time)}</span>
           <span class="dashboard-event-meta">${escapeHtml(meta || formatShortDate(date))}</span>
-          <span class="dashboard-event-relative">${escapeHtml(t(past ? "dashboard.happened" : "dashboard.ends", { time: relative }))}</span>
+          <span class="dashboard-event-relative">${escapeHtml(t(relativeKey, { time: relative }))}</span>
         </span>
       `;
       button.addEventListener("click", () => {
@@ -20146,44 +19999,6 @@
       openDialog(activity);
     }
 
-    function renderDashboardMap(activities) {
-      const canvas = document.getElementById("dashboardMapCanvas");
-      const pins = document.getElementById("dashboardMapPins");
-      const empty = document.getElementById("dashboardMapEmpty");
-      const locations = document.getElementById("dashboardLocationList");
-      const positions = [[22, 31], [51, 43], [78, 27], [31, 73], [66, 76], [88, 61]];
-      pins.replaceChildren();
-      locations.replaceChildren();
-      empty.hidden = activities.length > 0;
-      canvas.closest(".dashboard-map-panel").classList.toggle("is-empty", activities.length === 0);
-      locations.hidden = activities.length === 0;
-
-      activities.forEach((activity, index) => {
-        const date = parseDateKey(activity.occurrenceDate || activity.startDate);
-        const title = activityCompactTitle(activity);
-        const label = `${title} · ${activity.location} · ${formatShortDate(date)}`;
-        const [x, y] = positions[index % positions.length];
-        const pin = document.createElement("button");
-        pin.type = "button";
-        pin.className = "dashboard-map-pin";
-        pin.style.setProperty("--pin-x", `${x}%`);
-        pin.style.setProperty("--pin-y", `${y}%`);
-        pin.setAttribute("aria-label", label);
-        pin.title = label;
-        pin.innerHTML = `<span class="dashboard-map-pin-icon" aria-hidden="true">${escapeHtml(displayIcon(activity))}</span><span class="dashboard-map-pin-copy">${escapeHtml(activity.location)}</span>`;
-        pin.addEventListener("click", () => openDashboardActivity(activity));
-        pins.appendChild(pin);
-
-        const chip = document.createElement("button");
-        chip.type = "button";
-        chip.className = "dashboard-location-chip";
-        chip.setAttribute("aria-label", label);
-        chip.innerHTML = `<span aria-hidden="true">${escapeHtml(displayIcon(activity))}</span><span>${escapeHtml(activity.location)}</span>`;
-        chip.addEventListener("click", () => openDashboardActivity(activity));
-        locations.appendChild(chip);
-      });
-    }
-
     function renderDashboard() {
       const isEmpty = state.activities.length === 0;
       document.getElementById("dashboardStart").hidden = !isEmpty;
@@ -20194,17 +20009,8 @@
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const historyStart = addDays(today, -90);
-      const allUpcoming = upcomingOccurrences(90);
+      const allUpcoming = upcomingOccurrences(90, { ignoreFilter: true, ignoreChildren: true });
       const upcoming = allUpcoming.slice(0, 8);
-      const seenLocations = new Set();
-      const locationActivities = allUpcoming.filter(activity => {
-        const location = String(activity.location || "").trim();
-        const key = location.toLocaleLowerCase();
-        if (!location || seenLocations.has(key)) return false;
-        seenLocations.add(key);
-        return true;
-      }).slice(0, 6);
-      renderDashboardMap(locationActivities);
       const past = activityOccurrencesBetween(historyStart, today)
         .filter(activity => occurrenceEndDateTime(activity)?.getTime() < now.getTime())
         .sort((first, second) => occurrenceEndDateTime(second) - occurrenceEndDateTime(first))
@@ -20246,13 +20052,13 @@
       const monday = getMonday(now);
       const dayLoads = days.map((day, index) => {
         const date = addDays(monday, index);
-        const events = occurrencesOnDate(date, { ignoreSearch: true, ignoreFilter: true })
+        const events = occurrencesOnDate(date, { ignoreSearch: true, ignoreFilter: true, ignoreChildren: true })
           .filter(activity => activityStatus(activity) !== "cancelled");
         return { day, date, events, count: events.length, duration: events.reduce((total, activity) => total + eventDurationMinutes(activity), 0) };
       });
       const week = dayLoads.flatMap(item => item.events);
       const conflicts = findConflictPairs(week).length;
-      const deadlines = upcomingOccurrences(30).filter(activity => activity.eventType === "deadline");
+      const deadlines = upcomingOccurrences(30, { ignoreFilter: true, ignoreChildren: true }).filter(activity => activity.eventType === "deadline");
       const busiest = dayLoads.reduce((current, item) => item.count > current.count || (item.count === current.count && item.duration > current.duration) ? item : current, dayLoads[0]);
       const busiestLabel = busiest?.count
         ? busiest.date.toLocaleDateString(currentLanguage === "zh" ? "zh-CN" : "en-US", { weekday: "short" })
@@ -20267,6 +20073,7 @@
       document.getElementById("dashboardStats").innerHTML = stats
         .map(([key, value]) => `<div class="dashboard-stat"><span>${escapeHtml(t(key))}</span><strong>${escapeHtml(value)}</strong></div>`)
         .join("");
+      window.KidsSyncDashboard?.refresh();
     }
 
     function reminderLeadLabel() {
@@ -20390,33 +20197,6 @@
     function openListsDialog() {
       renderActivityLists();
       listsDialog.showModal();
-    }
-
-    let mapCoordinates = null;
-    let mapSearchIsExact = false;
-    function renderMapResults(query = "restaurants", exact = false) {
-      const cleanQuery = String(query || "restaurants").trim().slice(0, 150) || "family activities";
-      mapSearchIsExact = exact;
-      const coordinates = mapCoordinates ? `${mapCoordinates.latitude.toFixed(5)},${mapCoordinates.longitude.toFixed(5)}` : "";
-      const searchQuery = exact ? cleanQuery : `${cleanQuery} near ${coordinates || "me"}`;
-      const encodedQuery = encodeURIComponent(searchQuery);
-      const googleUrl = `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`;
-      const appleUrl = `https://maps.apple.com/?q=${encodeURIComponent(cleanQuery)}${coordinates ? `&near=${encodeURIComponent(coordinates)}` : ""}`;
-      const embedKey = String(window.KIDSSYNC_GOOGLE_MAPS?.embedApiKey || "").trim();
-      const frame = document.getElementById("mapLiveFrame");
-      const empty = document.getElementById("mapLiveEmpty");
-      frame.hidden = !embedKey;
-      empty.hidden = Boolean(embedKey);
-      frame.parentElement.classList.toggle("is-unconfigured", !embedKey);
-      frame.src = embedKey ? `https://www.google.com/maps/embed/v1/search?key=${encodeURIComponent(embedKey)}&q=${encodedQuery}` : "about:blank";
-      document.getElementById("mapResults").innerHTML = `<div class="map-result-card"><span class="map-result-icon" aria-hidden="true">⌖</span><div><strong>${escapeHtml(t("map.searching", { query: cleanQuery }))}</strong><p>${escapeHtml(t("map.resultsNote"))}</p></div><div class="map-result-actions"><a class="small-btn" href="${googleUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(t("map.google"))}</a><a class="small-btn" href="${appleUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(t("map.apple"))}</a></div></div>`;
-    }
-
-    function openMapDialog() {
-      document.getElementById("mapSearch").value = "";
-      document.querySelectorAll("[data-map-category]").forEach(button => button.classList.toggle("is-selected", button.dataset.mapCategory === "restaurants"));
-      renderMapResults("restaurants");
-      mapDialog.showModal();
     }
 
     function openRemindersDialog() {
@@ -22288,29 +22068,6 @@
     document.addEventListener("keydown", event => {
       if (event.key === "Escape" && !eventDetailsDialog.open) hideEventPeek();
     });
-    document.getElementById("closeMap").addEventListener("click", () => mapDialog.close());
-    document.getElementById("mapSearchButton").addEventListener("click", () => renderMapResults(document.getElementById("mapSearch").value));
-    document.getElementById("mapUseLocation").addEventListener("click", () => {
-      const status = document.getElementById("mapLocationStatus");
-      if (!navigator.geolocation) {
-        status.textContent = t("map.locationUnavailable");
-        return;
-      }
-      status.textContent = t("map.locating");
-      navigator.geolocation.getCurrentPosition(position => {
-        mapCoordinates = { latitude: position.coords.latitude, longitude: position.coords.longitude };
-        status.textContent = t("map.locationReady");
-        renderMapResults(document.getElementById("mapSearch").value || "restaurants", mapSearchIsExact);
-      }, () => { status.textContent = t("map.locationUnavailable"); }, { timeout: 10000, maximumAge: 300000 });
-    });
-    document.getElementById("mapSearch").addEventListener("keydown", event => {
-      if (event.key === "Enter") renderMapResults(event.currentTarget.value);
-    });
-    document.querySelectorAll("[data-map-category]").forEach(button => button.addEventListener("click", () => {
-      document.querySelectorAll("[data-map-category]").forEach(item => item.classList.toggle("is-selected", item === button));
-      document.getElementById("mapSearch").value = button.dataset.mapCategory;
-      renderMapResults(button.dataset.mapCategory);
-    }));
     document.getElementById("openReminders").addEventListener("click", openRemindersDialog);
     document.getElementById("openWeeklySummary").addEventListener("click", () => {
       document.getElementById("moreActions").open = false;
@@ -22319,7 +22076,6 @@
     document.getElementById("closeReminders").addEventListener("click", () => remindersDialog.close());
     document.getElementById("closeLists").addEventListener("click", () => listsDialog.close());
     listsDialog.addEventListener("close", () => setSidebarActive(dashboardPage.hidden ? "calendar" : "dashboard"));
-    mapDialog.addEventListener("close", () => setSidebarActive(dashboardPage.hidden ? "calendar" : "dashboard"));
     document.getElementById("openActivityHistory").addEventListener("click", () => {
       document.getElementById("moreActions").open = false;
       renderActivityHistory();
@@ -22520,6 +22276,7 @@
     });
     document.addEventListener("keydown", event => {
       const target = event.target;
+      if (typeof event.key !== "string") return;
       const isTyping = target instanceof HTMLElement && target.matches("input, textarea, select, [contenteditable='true']");
       const shell = document.getElementById("appShell");
       const shortcutView = { d: "today", w: "week", x: "four", m: "month" }[event.key.toLowerCase()];
@@ -22681,7 +22438,7 @@
     }
     let workspaceLayout = loadWorkspaceLayout();
     const hiddenWorkspacePanels = new Set(workspaceLayout.hiddenPanels);
-    const dashboardPanelNames = ["locations", "week", "updates", "upcoming", "past"];
+    const dashboardPanelNames = ["week", "updates", "upcoming", "past"];
     const layoutDialog = document.getElementById("layoutDialog");
     document.getElementById("dashboardPage").before(document.getElementById("workspaceVisibility"));
 
@@ -23307,7 +23064,7 @@
   <script src="./assets/mobile-agenda.js"></script>
   <script src="./assets/planner-tools.js"></script>
   <script src="./assets/ui-features.js"></script>
-  <script src="./assets/interface-upgrades.js?v=3"></script>
+  <script src="./assets/interface-upgrades.js?v=4"></script>
   <script src="./assets/smart-scheduling.js?v=4"></script>
   <script src="./assets/family-polls.js?v=2"></script>
   <script src="./assets/experience.js"></script>
@@ -23315,5 +23072,6 @@
   <script src="./assets/auth-visual-rotation.js?v=1"></script>
   <script src="./assets/landing-ux.js?v=1"></script>
   <script src="./assets/calendar-ux.js?v=1"></script>
+  <script src="./assets/dashboard-planning.js?v=1"></script>
 </body>
 </html>

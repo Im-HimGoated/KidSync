@@ -38,3 +38,13 @@ test('photo rotation respects visibility, motion preferences, and offline delive
     assert(lazy.includes(`"${asset}"`), `${asset} should be cached after it is viewed`);
   }
 });
+
+test('mobile account access stays compact and hides empty cloud status', () => {
+  assert.match(css, /@media \(max-width: 520px\)[\s\S]*\.auth-screen \.auth-form-side \{ padding: 14px 18px 18px; \}/);
+  assert.match(css, /\.auth-screen \.auth-link-btn \{ min-height: 32px; \}/);
+  assert.match(css, /\.auth-screen \.auth-preview-btn \{[\s\S]*min-height: 42px;[\s\S]*background: #f7fafb;/);
+  assert.match(css, /\.auth-screen \.auth-cloud-note\[hidden\] \{ display: none !important; \}/);
+  assert.match(html, /note\.hidden = cloudConfigured;\s+note\.textContent = cloudConfigured \? "" : t\("auth\.cloudSetup"\);/);
+  assert.match(html, /marketing-auth\.css\?v=3/);
+  assert.match(worker, /marketing-auth\.css\?v=3/);
+});
