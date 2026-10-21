@@ -6,6 +6,7 @@
   let reading = false;
   let requested = false;
   let generation = 0;
+  let appliedVersion = null;
 
   function isEditing() {
     return Boolean(document.querySelector('dialog[open]'));
@@ -58,6 +59,7 @@
     userId = null;
     requested = false;
     reading = false;
+    appliedVersion = null;
     if (channel) {
       const previous = channel;
       channel = null;
@@ -99,6 +101,10 @@
     if (event === 'SIGNED_OUT' || event === 'USER_DELETED') stop();
     else if (['SIGNED_IN', 'TOKEN_REFRESHED'].includes(event)) window.setTimeout(start, 0);
   });
-  window.KidsSyncLiveSync = { start, stop, isEditing, refresh: requestRefresh };
+  window.KidsSyncLiveSync = {
+    start, stop, isEditing, refresh: requestRefresh,
+    version: () => appliedVersion,
+    rememberVersion: value => { appliedVersion = value; }
+  };
   start();
 })();

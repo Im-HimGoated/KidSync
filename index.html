@@ -16158,7 +16158,10 @@
         if (localStorage.getItem(pendingKey) === pendingVersion) {
           localStorage.removeItem(pendingKey);
         }
-        if (data?.updated_at) localStorage.setItem(cloudUpdatedKey(), data.updated_at);
+        if (data?.updated_at) {
+          localStorage.setItem(cloudUpdatedKey(), data.updated_at);
+          window.KidsSyncLiveSync?.rememberVersion?.(data.updated_at);
+        }
         syncSucceeded = true;
         setCloudSaveState(hasPendingCloudSave() ? "syncing" : "cloud");
         return true;
@@ -16283,7 +16286,9 @@
           return flushCloudSave();
         }
 
-        const localUpdatedAt = localStorage.getItem(cloudUpdatedKey());
+        const localUpdatedAt = live && window.KidsSyncLiveSync?.version
+          ? window.KidsSyncLiveSync.version()
+          : localStorage.getItem(cloudUpdatedKey());
         let receivedRemoteUpdate = false;
         if (!localUpdatedAt || localUpdatedAt !== data.updated_at) {
           applyCloudSnapshot(data.schedule, { preserveView: live });
@@ -16291,6 +16296,7 @@
           receivedRemoteUpdate = true;
         }
         if (receivedRemoteUpdate && !live) window.setTimeout(openWelcomeBackIfNeeded, 300);
+        window.KidsSyncLiveSync?.rememberVersion?.(data.updated_at);
         setCloudSaveState("cloud");
         return true;
       } catch (syncError) {
@@ -23093,6 +23099,6 @@
   <script src="./assets/landing-ux.js?v=1"></script>
   <script src="./assets/calendar-ux.js?v=1"></script>
   <script src="./assets/dashboard-planning.js?v=1"></script>
-  <script src="./assets/live-sync.js?v=1"></script>
+  <script src="./assets/live-sync.js?v=2"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-const CACHE_NAME = "kidssync-shell-v129";
+const CACHE_NAME = "kidssync-shell-v131";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -11,7 +11,7 @@ const APP_SHELL = [
   "./assets/calendar-ux.js?v=1",
   "./assets/dashboard-planning.css?v=1",
   "./assets/dashboard-planning.js?v=1",
-  "./assets/live-sync.js?v=1",
+  "./assets/live-sync.js?v=2",
   "./assets/micro-motion.css?v=1",
   "./assets/mobile.css?v=95",
   "./assets/calendar-ui-refresh.css?v=1",

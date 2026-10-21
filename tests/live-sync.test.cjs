@@ -179,6 +179,23 @@ test('live hydration asks the snapshot renderer to preserve local navigation', a
   assert.equal(f.applied[0].options.preserveView, true);
 });
 
+test('another tab updating shared localStorage does not hide a live database change', async () => {
+  const f = reader();
+  f.stored.set('updated', 'remote-version');
+  let appliedVersion = 'older-in-memory-version';
+  f.ctx.window.KidsSyncLiveSync.version = () => appliedVersion;
+  f.ctx.window.KidsSyncLiveSync.rememberVersion = value => { appliedVersion = value; };
+  const pending = f.ctx.hydrateCloudSchedule({ live: true });
+  f.finish();
+  assert.equal(await pending, true);
+  assert.equal(f.applied.length, 1);
+  assert.equal(appliedVersion, 'remote-version');
+  const unchanged = f.ctx.hydrateCloudSchedule({ live: true });
+  f.finish();
+  await unchanged;
+  assert.equal(f.applied.length, 1, 'The same version does not re-render twice');
+});
+
 test('live snapshots keep the selected calendar, view and child filters', () => {
   const storage = new Map();
   let focusCalls = 0;
@@ -212,8 +229,8 @@ test('live snapshots keep the selected calendar, view and child filters', () => 
 test('live sync is initialized after authentication, bundled offline, and has an idempotent publication migration', () => {
   assert.match(html, /await hydrateCloudSchedule\(\);\s+window.KidsSyncLiveSync\?\.start\(\)/);
   assert.match(html, /else if \(!document.hidden\) \{\s+if \(window.KidsSyncLiveSync\) window.KidsSyncLiveSync.refresh\(\)/);
-  assert(html.includes('./assets/live-sync.js?v=1'));
-  assert(fs.readFileSync(path.join(root, 'sw.js'), 'utf8').includes('./assets/live-sync.js?v=1'));
+  assert(html.includes('./assets/live-sync.js?v=2'));
+  assert(fs.readFileSync(path.join(root, 'sw.js'), 'utf8').includes('./assets/live-sync.js?v=2'));
   const sql = fs.readFileSync(path.join(root, 'supabase/live-sync.sql'), 'utf8');
   assert.match(sql, /pg_publication_tables/);
   assert.match(sql, /alter publication supabase_realtime add table public.family_schedules/);
