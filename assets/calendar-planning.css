@@ -1,0 +1,44 @@
+#calendarPlanning { width: min(900px, calc(100vw - 32px)); max-height: min(850px, calc(100dvh - 32px)); padding: 0; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: auto; }
+#calendarPlanning::backdrop { background: rgb(10 25 36 / .5); backdrop-filter: blur(3px); }
+#calendarPlanning header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 24px 10px; }
+#calendarPlanning h2 { margin: 0; font-size: 22px; }
+#calendarPlanning h3 { margin: 0 0 8px; font-size: 16px; }
+#calendarPlanning .cp-scope { padding: 0 24px; margin: 0 0 16px; color: var(--muted); font-size: 12px; }
+#calendarPlanning .cp-tabs { display: flex; gap: 6px; padding: 0 24px 14px; overflow-x: auto; border-bottom: 1px solid var(--line); }
+#calendarPlanning button { min-height: 40px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); font-size: 13px; font-weight: 650; white-space: normal; }
+#calendarPlanning .cp-tabs button { flex: 0 0 auto; }
+#calendarPlanning button:hover { background: var(--blue-soft); border-color: var(--blue-line); box-shadow: none; }
+#calendarPlanning .cp-tabs button[aria-pressed="true"], #calendarPlanning .primary-btn { background: var(--blue); color: white; border-color: var(--blue); }
+#calendarPlanning button:focus-visible, #calendarPlanning input:focus-visible, #calendarPlanning textarea:focus-visible, #calendarPlanning select:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+#calendarPlanning .cp-body { padding: 20px 24px; }
+#calendarPlanning [hidden] { display: none !important; }
+#calendarPlanning form, #calendarPlanning .cp-fields { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+#calendarPlanning label { display: grid; gap: 7px; min-width: 0; color: var(--ink); font-size: 13px; font-weight: 600; }
+#calendarPlanning label.cp-wide { flex-basis: 100%; }
+#calendarPlanning input, #calendarPlanning select, #calendarPlanning textarea { box-sizing: border-box; min-width: 0; max-width: 100%; min-height: 42px; padding: 10px; color: var(--ink); background: var(--page, var(--panel)); border: 1px solid var(--line); border-radius: 8px; font: inherit; }
+#calendarPlanning textarea { width: 100%; resize: vertical; line-height: 1.6; }
+#calendarPlanning .cp-hint { color: var(--muted); font-size: 12px; line-height: 1.6; }
+#calendarPlanning .cp-event, #calendarPlanning .cp-gap { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+#calendarPlanning .cp-event > button:first-child { display: grid; gap: 5px; flex: 1; min-width: 0; text-align: left; border-color: transparent; background: transparent; overflow-wrap: anywhere; }
+#calendarPlanning .cp-event span { color: var(--muted); font-size: 12px; font-weight: 400; }
+#calendarPlanning .cp-gap > strong { flex: 1; font-size: 14px; }
+#calendarPlanning .cp-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 22px; }
+#calendarPlanning .cp-comparison > section { min-width: 0; padding: 14px; border: 1px solid var(--line); border-radius: 12px; }
+#calendarPlanning .cp-comparison .cp-event { flex-wrap: wrap; }
+#calendarPlanning .cp-comparison .cp-event > button:first-child { flex-basis: 100%; }
+#calendarPlanning .cp-note { margin: 16px 0; }
+#calendarPlanning .cp-check { display: flex; align-items: center; gap: 9px; }
+#calendarPlanning .cp-check input { width: 18px; min-height: 18px; }
+#cpStatus, #cpNoteStatus, #cpFound { font-size: 13px; line-height: 1.5; }
+@media (max-width: 740px) {
+  #calendarPlanning { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); border-radius: 12px; }
+  #calendarPlanning header, #calendarPlanning .cp-body { padding: 16px; }
+  #calendarPlanning .cp-scope { padding: 0 16px; }
+  #calendarPlanning .cp-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 0 16px 12px; overflow: visible; }
+  #calendarPlanning button { min-height: 44px; }
+  #calendarPlanning form > label, #calendarPlanning .cp-fields > label { flex: 1 1 135px; }
+  #calendarPlanning input, #calendarPlanning select, #calendarPlanning textarea { font-size: 16px; width: 100%; }
+  #calendarPlanning .cp-check input { width: 18px; }
+  #calendarPlanning .cp-comparison { grid-template-columns: 1fr; }
+  #calendarPlanning .cp-event > button[data-cp-day] { flex-shrink: 0; max-width: 92px; }
+}
