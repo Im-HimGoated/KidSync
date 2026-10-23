@@ -1,9 +1,5 @@
-// This publishable browser key is safe to include in the deployed site.
-// Never put a Supabase service-role key here.
-window.KIDSSYNC_SUPABASE = {
-  url: "https://zddlukukrjdeoeofocud.supabase.co",
-  publishableKey: "sb_publishable_22Z9BZSp10yJKSEEtrXJkw_RcWdVySZ"
-};
+// Supabase settings live in shared/backend/config.js for web and React Native.
+// Never put a Supabase service-role key in either client.
 
 // Optional: paste the Loader Script URL from Sentry's JavaScript project
 // settings. Leave blank to retain only scrubbed session diagnostics.

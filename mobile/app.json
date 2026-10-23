@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "KidsSync",
+    "slug": "kidssync",
+    "version": "0.1.0",
+    "orientation": "default",
+    "userInterfaceStyle": "light",
+    "icon": "../assets/kidssync-app-icon-512.png",
+    "ios": { "supportsTablet": true },
+    "android": {},
+    "plugins": []
+  }
+}
