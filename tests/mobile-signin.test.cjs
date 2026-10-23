@@ -75,6 +75,6 @@ test('sign-in uses bundled family imagery and keeps existing auth/sync ownership
   assert.match(app, /<SignInScreen language=\{language\}/);
   assert.match(app, /signInHelpers.authenticate\(supabase, email, password\)/);
   assert.match(app, /signInHelpers.requestPasswordReset\(supabase, email\)/);
-  assert.equal((app.match(/if \(authRequest.current\)/g) || []).length, 2);
+  assert.equal((app.match(/if \(authRequest.current\)/g) || []).length, 3);
   assert.doesNotMatch(screen, /createClient|\.signInWithPassword\(|\.resetPasswordForEmail\(/);
 });

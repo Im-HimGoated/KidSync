@@ -8,7 +8,7 @@ export const onboardingCopy = {
     eyebrow: 'MAKE IT YOURS', step: 'of 5', back: 'Back', next: 'Continue', skip: 'Skip this question', why: 'Why these questions?',
     explanation: 'These optional answers save how you prefer to plan. You can review and edit each answer before saving. Calendar views and notifications are being added separately.',
     review: 'Review your preferences', reviewIntro: 'A quick check before you continue.', reviewAction: 'Review my choices', edit: 'Edit', editLabel: 'Edit {name}', saveAnswer: 'Save answer', cancel: 'Cancel',
-    save: 'Save & continue', saving: 'Saving…', note: 'Next: sign in. Your answers stay on this device and are saved separately for your account.', draftFailed: 'Draft could not be saved on this device. Keep this screen open and try Save & continue when finished.', failed: 'Could not save your choices. Your answers are still here. Please try again.',
+    save: 'Save & continue', saving: 'Saving…', note: 'Next: create your account, or sign in. Your answers stay saved on this device.', draftFailed: 'Draft could not be saved on this device. Keep this screen open and try Save & continue when finished.', failed: 'Could not save your choices. Your answers are still here. Please try again.',
     labels: ['Planning for', 'Opening view', 'Week starts on', 'Hours shown first', 'Default reminder'],
     questions: [
       ['Who are you planning for?', 'You can add family names later.', [['myself', 'Just me', 'A little more room for my plans.'], ['children', 'My children', 'School, activities and the in-between.'], ['family', 'The whole family', 'One place for everyone’s week.']]],
@@ -22,7 +22,7 @@ export const onboardingCopy = {
     eyebrow: '个性化设置', step: '/ 5', back: '返回', next: '继续', skip: '跳过此问题', why: '为什么需要这些问题？',
     explanation: '这些可选答案记录你的日程偏好。保存前，你可以核对和编辑每个答案。日历视图和通知功能将另外添加。',
     review: '核对你的偏好', reviewIntro: '继续之前，快速核对一下。', reviewAction: '核对我的选择', edit: '编辑', editLabel: '编辑{name}', saveAnswer: '保存答案', cancel: '取消',
-    save: '保存并继续', saving: '正在保存…', note: '下一步：登录。答案保存在此设备上，并为你的账户单独保存。', draftFailed: '无法在此设备上保存草稿。请保持页面打开，完成后尝试保存并继续。', failed: '无法保存选择。答案仍保留在此，请重试。',
+    save: '保存并继续', saving: '正在保存…', note: '下一步：创建账户或登录。答案会保留在此设备上。', draftFailed: '无法在此设备上保存草稿。请保持页面打开，完成后尝试保存并继续。', failed: '无法保存选择。答案仍保留在此，请重试。',
     labels: ['为谁安排', '默认视图', '每周开始于', '优先显示时段', '默认提醒'],
     questions: [
       ['你想为谁安排日程？', '以后可以添加家人的姓名。', [['myself', '我自己', '给自己的计划留些空间。'], ['children', '我的孩子', '学校、活动及日常安排。'], ['family', '全家人', '一起安排每个人的一周。']]],

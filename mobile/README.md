@@ -6,7 +6,7 @@ from the working website. It is not a full port of the web calendar yet.
 ## Available Now
 
 - Compact native welcome screen with family imagery, English/Chinese support,
-  sign-in, and explicitly labeled links to web account creation and exploration.
+  native account creation, sign-in, and an explicitly labeled link to explore the website.
 - Signed-in sessions skip the welcome screen; sign-in has a back-to-welcome action.
 - Welcome leads with family-specific copy and includes a display-only three-day
   calendar preview with date columns, an all-day row, time grid, the website's
@@ -22,8 +22,9 @@ from the working website. It is not a full port of the web calendar yet.
 For a browser preview while Xcode is unavailable, run `npx pnpm@11.25.0 web`
 from `mobile/`. This renders the React Native UI through React Native Web; it
 does not replace simulator or physical-device testing. Get started opens five native guided preference questions, followed by an editable
-review. Unfinished drafts resume at the same question after reopening setup. Save & continue keeps the choices on this device and opens sign-in. After
-that sign-in, choices are attached to the account’s own AsyncStorage key. Returning
+review. Unfinished drafts resume at the same question after reopening setup. Save & continue keeps the choices on this device and opens Create account, with
+Sign in fixed at the bottom for existing users. Review returns to the saved answers.
+Once authenticated, choices are attached to the account’s own AsyncStorage key. Returning
 users can still sign in directly. The Settings menu remains a design prototype.
 These preferences do not write to Supabase or sync to other devices. The native
 calendar is still a read-only activity preview; day/week/month views and scheduled
@@ -91,8 +92,14 @@ credentials, and add development/release build profiles for your Expo account.
 They are intentionally not invented here. Generated native projects and signing
 files are excluded from Git.
 
-Account creation currently opens the existing HTTPS website. Native password
-recovery requests an email whose link completes on that website. Native
+Account creation uses the existing Supabase email/password accounts directly in
+the native app. The form validates email, matching passwords, and the same eight-character
+minimum as the website; server password rules still apply. If verification is required,
+the app shows Check your email and clears password fields. The confirmation link
+opens the existing production HTTPS website; return to the app and sign in afterward.
+Reviewed answers remain saved through that handoff. Accounts with an immediate
+session enter the authenticated app. Native password recovery requests an email
+whose link completes on that website. Native
 email/OAuth callbacks are **not configured**. Before adding them, register a
 verified app link or custom scheme on both platforms, allowlist that redirect
 in the same Supabase project's Auth settings, and implement callback/session

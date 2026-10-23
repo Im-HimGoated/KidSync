@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator, AppState, FlatList, Image,
-  Linking, Pressable, StyleSheet, Text, View
+  Linking, Platform, Pressable, StyleSheet, Text, View
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from './lib/supabase';
 import schedules from '../../shared/backend/schedules';
 import WelcomeScreen from './screens/WelcomeScreen';
 import SignInScreen, { signInCopy } from './screens/SignInScreen';
+import SignUpScreen, { signUpCopy } from './screens/SignUpScreen';
+import signUpHelpers from './lib/sign-up';
 import signInHelpers from './lib/sign-in';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import OnboardingScreen from './screens/OnboardingScreen';
@@ -108,12 +110,18 @@ function Workspace() {
   async function beginSignIn() {
     try { setPendingSetup(await preferenceStore.readPending()); }
     catch { setPendingSetup(null); }
-    setError(''); setEntryScreen('signin');
+    setPassword(''); setError(''); setEntryScreen('signin');
+  }
+
+  async function beginCreateAccount() {
+    try { setPendingSetup(await preferenceStore.readPending()); }
+    catch { setPendingSetup(null); }
+    setPassword(''); setError(''); setEntryScreen('signup');
   }
 
   async function completeSetup(answers) {
     await preferenceStore.savePending(answers);
-    setPendingSetup(answers); setError(''); setEntryScreen('signin');
+    setPendingSetup(answers); setPassword(''); setError(''); setEntryScreen('signup');
   }
 
   useEffect(() => {
@@ -163,6 +171,18 @@ function Workspace() {
     finally { authRequest.current = false; setBusy(false); }
   }
 
+  async function createAccount(newPassword, confirmation) {
+    if (authRequest.current) return null;
+    authRequest.current = true;
+    setBusy(true); setError('');
+    try {
+      return await signUpHelpers.createAccount(supabase, email, newPassword, confirmation);
+    } catch (authError) {
+      setError(signUpCopy[language][signUpHelpers.signUpErrorKey(authError)]);
+      return null;
+    } finally { authRequest.current = false; setBusy(false); }
+  }
+
   async function recoverPassword() {
     if (authRequest.current) return false;
     authRequest.current = true;
@@ -203,11 +223,14 @@ function Workspace() {
       <WelcomeScreen language={language} onSignIn={beginSignIn}
         onGetStarted={beginSetup} onOpenWebsite={openWebsite} error={error} /> : !session && entryScreen === 'onboarding' ?
       <OnboardingScreen language={language} initialDraft={onboardingInitial} onDraftChange={preferenceStore.saveDraft} onComplete={completeSetup}
-        onBack={() => setEntryScreen('welcome')} /> : !session ?
+        onBack={() => setEntryScreen('welcome')} /> : !session && entryScreen === 'signup' ?
+      <SignUpScreen language={language} email={email} hasPreferences={!!pendingSetup} busy={busy} error={error}
+        onEmailChange={value => { setEmail(value); setError(''); }} onCreateAccount={createAccount}
+        onSignIn={beginSignIn} onBack={pendingSetup ? beginSetup : beginSignIn} /> : !session ?
       <SignInScreen language={language} email={email} password={password} busy={busy} error={error}
         onEmailChange={value => { setEmail(value); setError(''); }}
         onPasswordChange={value => { setPassword(value); setError(''); }}
-        onSignIn={signIn} onGetStarted={beginSetup} onOpenWebsite={openWebsite} onRecover={recoverPassword}
+        onSignIn={signIn} onCreateAccount={beginCreateAccount} onGetStarted={beginSetup} onOpenWebsite={openWebsite} onRecover={recoverPassword}
         onBack={() => { setError(''); setPassword(''); setEntryScreen('welcome'); }} /> : <View style={styles.content}>
         <View style={styles.header}>
           <View style={styles.flex}>
@@ -244,11 +267,15 @@ function Workspace() {
 }
 
 export default function App() {
-  return <SafeAreaProvider><Workspace /></SafeAreaProvider>;
+  return <SafeAreaProvider style={styles.previewCanvas}><Workspace /></SafeAreaProvider>;
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: '#f7fafb' },
+  // Keep browser previews at a phone width; native screens use the full device width.
+  previewCanvas: Platform.select({ web: { backgroundColor: '#e8eef1' }, default: {} }),
+  page: { flex: 1, backgroundColor: '#f7fafb', ...Platform.select({
+    web: { width: '100%', maxWidth: 390, alignSelf: 'center' }
+  }) },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, gap: 12, flexWrap: 'wrap' },
   brand: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   logo: { width: 36, height: 36 },

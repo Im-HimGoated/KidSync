@@ -14,7 +14,7 @@ export const signInCopy = {
     emailRequired: 'Enter your email address.', emailInvalid: 'Enter a valid email address.',
     passwordRequired: 'Enter your password.', show: 'Show password', hide: 'Hide password',
     back: 'Back to welcome', forgot: 'Forgot password?', newHere: 'New to KidsSync?',
-    getStarted: 'Get started', createAccount: 'Create an account on the website', explore: 'Explore the web calendar',
+    getStarted: 'Get started', createAccount: 'Create account', explore: 'Explore the web calendar',
     opensWebsite: 'Opens the KidsSync website', footer: 'One family. One shared week.',
     sendingReset: 'Sending reset link…', resetSent: 'Reset link sent. Check your email to continue on the KidsSync website.',
     invalidCredentials: 'The email or password is incorrect.', emailNotConfirmed: 'Confirm your email address before signing in.',
@@ -28,7 +28,7 @@ export const signInCopy = {
     emailRequired: '\u8bf7\u8f93\u5165\u90ae\u7bb1\u5730\u5740\u3002', emailInvalid: '\u8bf7\u8f93\u5165\u6709\u6548\u7684\u90ae\u7bb1\u5730\u5740\u3002',
     passwordRequired: '\u8bf7\u8f93\u5165\u5bc6\u7801\u3002', show: '\u663e\u793a\u5bc6\u7801', hide: '\u9690\u85cf\u5bc6\u7801',
     back: '\u8fd4\u56de\u6b22\u8fce\u9875', forgot: '\u5fd8\u8bb0\u5bc6\u7801\uff1f', newHere: '\u521d\u6b21\u4f7f\u7528 KidsSync\uff1f',
-    getStarted: '\u5f00\u59cb\u4f7f\u7528', createAccount: '在网站上创建账户', explore: '\u6d4f\u89c8\u7f51\u9875\u65e5\u5386',
+    getStarted: '\u5f00\u59cb\u4f7f\u7528', createAccount: '创建账户', explore: '\u6d4f\u89c8\u7f51\u9875\u65e5\u5386',
     opensWebsite: '\u6253\u5f00 KidsSync \u7f51\u7ad9', footer: '\u4e00\u4e2a\u5bb6\uff0c\u4e00\u8d77\u5b89\u6392\u6bcf\u4e00\u5468\u3002',
     sendingReset: '\u6b63\u5728\u53d1\u9001\u91cd\u7f6e\u94fe\u63a5\u2026', resetSent: '\u91cd\u7f6e\u94fe\u63a5\u5df2\u53d1\u9001\u3002\u8bf7\u67e5\u6536\u90ae\u4ef6\uff0c\u5728 KidsSync \u7f51\u7ad9\u7ee7\u7eed\u3002',
     invalidCredentials: '\u90ae\u7bb1\u6216\u5bc6\u7801\u4e0d\u6b63\u786e\u3002', emailNotConfirmed: '\u8bf7\u5148\u786e\u8ba4\u90ae\u7bb1\u5730\u5740\uff0c\u518d\u767b\u5f55\u3002',
@@ -39,7 +39,7 @@ export const signInCopy = {
 
 export default function SignInScreen({
   language, email, password, onEmailChange, onPasswordChange, onSignIn,
-  onBack, onGetStarted, onOpenWebsite, onRecover, busy, error
+  onBack, onGetStarted, onCreateAccount, onOpenWebsite, onRecover, busy, error
 }) {
   const t = signInCopy[language] || signInCopy.en;
   const emailRef = useRef(null);
@@ -139,8 +139,8 @@ export default function SignInScreen({
               <Text style={styles.linkStrong}>{t.getStarted}</Text>
             </Pressable>
           </View>
-          <Pressable accessibilityRole="link" accessibilityHint={t.opensWebsite} onPress={onOpenWebsite} disabled={busy} style={styles.explore}>
-            <Text style={styles.link}>{t.createAccount}</Text><ExternalLink size={14} color="#17649b" aria-hidden={true} />
+          <Pressable accessibilityRole="button" onPress={onCreateAccount} disabled={busy} style={styles.explore}>
+            <Text style={styles.link}>{t.createAccount}</Text>
           </Pressable>
           <View style={styles.footer}>
             <Pressable accessibilityRole="link" onPress={onOpenWebsite} disabled={busy} style={styles.explore}>
