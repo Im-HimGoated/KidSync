@@ -9827,7 +9827,7 @@
   <link rel="stylesheet" href="./assets/micro-motion.css?v=1">
   <link rel="stylesheet" href="./assets/calendar-ui-refresh.css?v=1">
   <link rel="stylesheet" href="./assets/landing-ux.css?v=1">
-  <link rel="stylesheet" href="./assets/welcome-refresh.css?v=1">
+  <link rel="stylesheet" href="./assets/welcome-refresh.css?v=4">
   <link rel="stylesheet" href="./assets/calendar-ux.css?v=1">
   <link rel="stylesheet" href="./assets/dashboard-planning.css?v=2">
   <link rel="stylesheet" href="./assets/dashboard-navigation.css?v=1">
@@ -9876,7 +9876,7 @@
           <button class="language-option" type="button" data-language="zh" aria-pressed="false">中文</button>
         </div>
         <button class="welcome-signin-btn" type="button" id="welcomeSignIn" data-i18n="auth.signIn">Sign In</button>
-        <button class="welcome-primary-btn" type="button" id="welcomeTryNav" data-i18n="welcome.tryPlanner">Try KidsSync free</button>
+        <button class="welcome-primary-btn" type="button" id="welcomeTryNav" data-i18n="welcome.tryPlanner">Start free preview</button>
       </div>
       <button class="welcome-menu-toggle" id="welcomeMenuToggle" type="button" aria-expanded="false" aria-controls="welcomeSections" aria-label="Explore this page" data-i18n-aria="welcome.explorePage" hidden><span aria-hidden="true">☰</span></button>
     </header>
@@ -9885,21 +9885,29 @@
       <div class="welcome-hero-inner">
         <div class="welcome-hero-copy">
           <p class="welcome-eyebrow" data-i18n="welcome.eyebrow">Family scheduling for busy parents</p>
-          <h1 class="welcome-hero-brand" id="welcomeHeadline" tabindex="-1"><span id="welcomeBrand" aria-label="KidsSync">Kids<span>Sync</span></span></h1>
-          <p class="welcome-hero-tagline" data-i18n="welcome.headline">The family calendar built for real life.</p>
-          <p class="welcome-hero-description" data-i18n="welcome.description">Activities, pickups, and family plans. One clear view of who needs to be where—and when.</p>
+          <h1 class="welcome-hero-tagline" id="welcomeHeadline" tabindex="-1" data-i18n="welcome.headline">One family calendar for real life.</h1>
+          <p class="welcome-hero-description" data-i18n="welcome.description">Keep activities, pickups, school dates, trips, and family plans in one shared week. Spot conflicts early and make handoffs easier.</p>
           <div class="welcome-hero-actions">
-            <button class="welcome-primary-btn" type="button" id="welcomeTryHero" data-i18n="welcome.tryPlanner">Try KidsSync free</button>
-            <a class="welcome-secondary-btn" href="#welcomePreview" data-i18n="welcome.exploreSample">Explore a sample week <span aria-hidden="true">↗</span></a>
+            <button class="welcome-primary-btn" type="button" id="welcomeTryHero" data-i18n="welcome.tryPlanner">Start free preview</button>
+            <a class="welcome-secondary-btn" href="#welcomeHow" data-i18n="welcome.seeHow">See how it works ↓</a>
           </div>
-          <p class="welcome-trial-note" data-i18n="welcome.trialNote">Explore for 10 minutes without an account. Sign in to keep and sync your calendar.</p>
-          <p class="welcome-returning"><span data-i18n="welcome.alreadyHere">Already have an account?</span> <button type="button" id="welcomeSignInHero" data-i18n="auth.signIn">Sign In</button></p>
+          <ul class="welcome-trial-note welcome-trial-points" aria-label="Preview details" data-i18n-aria="welcome.previewDetails">
+            <li data-i18n="welcome.previewNoAccount">No account needed</li>
+            <li data-i18n="welcome.previewBlank">Starts with a blank calendar</li>
+            <li data-i18n="welcome.previewSave">Sign in only to save and sync</li>
+          </ul>
+          <p class="welcome-returning"><span data-i18n="welcome.alreadyHere">Already have a calendar?</span> <button type="button" id="welcomeSignInHero" data-i18n="auth.signIn">Sign In</button></p>
         </div>
-        <div class="welcome-hero-visual" aria-hidden="true">
+        <div class="welcome-hero-visual">
           <img src="./assets/kidssync-family-hero.jpg" alt="" decoding="async" fetchpriority="high" width="1920" height="1281">
+          <a class="welcome-hero-peek" href="#welcomePreview" aria-label="Explore these example family plans" data-i18n-aria="welcome.heroPeekAria">
+            <span class="welcome-peek-heading"><span class="welcome-peek-dot" aria-hidden="true"></span><strong data-i18n="welcome.heroPeekTitle">One clear plan.</strong><span aria-hidden="true">↓</span></span>
+            <span class="welcome-peek-note" data-i18n="welcome.heroPeekNote">A glimpse of the sample week</span>
+            <span class="welcome-peek-event"><span class="welcome-peek-icon" aria-hidden="true">🎹</span><strong data-i18n="welcome.eventPiano">Piano · Maya</strong><span>3:15–4:00</span></span>
+            <span class="welcome-peek-event"><span class="welcome-peek-icon" aria-hidden="true">⚽</span><strong data-i18n="welcome.eventSoccer">Soccer · Theo</strong><span>4:30–6:00</span></span>
+          </a>
         </div>
       </div>
-      <a class="welcome-scroll-link" href="#welcomePreview" data-i18n="welcome.seeWeek">See a sample family week ↓</a>
     </section>
     <div class="welcome-overview-band">
           <ul class="welcome-capabilities" aria-label="What KidsSync helps families do" data-i18n-aria="welcome.highlights">
@@ -9978,8 +9986,8 @@
             </div>
           </div>
           <div class="welcome-preview-action">
-            <span data-i18n="welcome.previewActionCopy">Open the real planner, rename the kids, and shape the week your way.</span>
-            <button class="welcome-primary-btn" type="button" id="welcomeTryPreview" data-i18n="welcome.openPlanner">Open the planner</button>
+            <span data-i18n="welcome.previewActionCopy">Your calendar starts blank. Add your own kids and plans when you open the planner.</span>
+            <button class="welcome-primary-btn" type="button" id="welcomeTryPreview" data-i18n="welcome.openPlanner">Start with a blank calendar</button>
           </div>
         </div>
 
@@ -10063,8 +10071,8 @@
         </ol>
 
         <div class="welcome-how-action">
-          <span data-i18n="welcome.howActionCopy">No account is required to try the planner.</span>
-          <button class="welcome-primary-btn" type="button" id="welcomeTryHow" data-i18n="welcome.tryNow">Try it now</button>
+          <span data-i18n="welcome.howActionCopy">Your preview starts blank and does not require an account.</span>
+          <button class="welcome-primary-btn" type="button" id="welcomeTryHow" data-i18n="welcome.tryNow">Start free preview</button>
         </div>
       </div>
     </section>
@@ -10106,7 +10114,7 @@
     </section>
     <section class="welcome-final-cta" aria-labelledby="welcomeFinalTitle">
       <div><p class="welcome-section-kicker" data-i18n="welcome.finalKicker">Less coordinating. More living.</p><h2 id="welcomeFinalTitle" data-i18n="welcome.finalTitle">Make room for a calmer week.</h2><p data-i18n="welcome.finalBody">Start with your family’s next plan. Build the rest at your own pace.</p></div>
-      <div class="welcome-final-actions"><button class="welcome-primary-btn" type="button" data-welcome-start data-i18n="welcome.tryPlanner">Try KidsSync free</button><span data-i18n="welcome.finalNote">10-minute preview · No account needed to explore</span></div>
+      <div class="welcome-final-actions"><button class="welcome-primary-btn" type="button" data-welcome-start data-i18n="welcome.tryPlanner">Start free preview</button><span data-i18n="welcome.finalNote">Starts blank · No account needed · Sign in to save</span></div>
     </section>
     <footer class="welcome-footer">
       <div class="welcome-wordmark"><span class="welcome-mark" aria-hidden="true"></span><span>Kids<span>Sync</span></span></div>
@@ -11774,8 +11782,13 @@
         "welcome.skip": "Skip to main content",
         "welcome.explorePage": "Explore this page",
         "welcome.navQuestions": "Questions",
-        "welcome.exploreSample": "Explore a sample week ↗",
-        "welcome.alreadyHere": "Already have an account?",
+        "welcome.exploreSample": "Explore a sample week",
+        "welcome.seeHow": "See how it works ↓",
+        "welcome.alreadyHere": "Already have a calendar?",
+        "welcome.previewDetails": "Preview details",
+        "welcome.previewNoAccount": "No account needed",
+        "welcome.previewBlank": "Starts with a blank calendar",
+        "welcome.previewSave": "Sign in only to save and sync",
         "welcome.sampleInteractive": "Try the family filters",
         "welcome.sampleSafe": "Just an example. Your own schedule starts separately.",
         "welcome.sampleFilters": "Filter the sample week",
@@ -11798,15 +11811,18 @@
         "welcome.finalKicker": "Less coordinating. More living.",
         "welcome.finalTitle": "Make room for a calmer week.",
         "welcome.finalBody": "Start with your family’s next plan. Build the rest at your own pace.",
-        "welcome.finalNote": "10-minute preview · No account needed to explore",
+        "welcome.finalNote": "Starts blank · No account needed · Sign in to save",
         "welcome.backTop": "Back to top ↑",
         "welcome.navPreview": "Product",
         "welcome.navHow": "How it works",
         "welcome.navAbout": "About us",
-        "welcome.tryPlanner": "Try KidsSync free",
+        "welcome.tryPlanner": "Start free preview",
         "welcome.eyebrow": "Family scheduling for busy parents",
-        "welcome.headline": "The family calendar built for real life.",
-        "welcome.description": "Activities, pickups, and family plans. One clear view of who needs to be where—and when.",
+        "welcome.headline": "One family calendar for real life.",
+        "welcome.heroPeekTitle": "One clear plan.",
+        "welcome.heroPeekNote": "A glimpse of the sample week",
+        "welcome.heroPeekAria": "Explore these example family plans",
+        "welcome.description": "Keep activities, pickups, school dates, trips, and family plans in one shared week. Spot conflicts early and make handoffs easier.",
         "welcome.signInAccount": "Sign in to your account",
         "welcome.highlights": "What KidsSync helps families do",
         "welcome.trialNote": "Explore for 10 minutes without an account. Sign in to keep and sync your calendar.",
@@ -11838,8 +11854,8 @@
         "welcome.eventSwim": "Swim · Theo",
         "welcome.eventReading": "Reading time",
         "welcome.eventMovie": "Family movie night",
-        "welcome.previewActionCopy": "Open the real planner, rename the kids, and shape the week your way.",
-        "welcome.openPlanner": "Open the planner",
+        "welcome.previewActionCopy": "Your calendar starts blank. Add your own kids and plans when you open the planner.",
+        "welcome.openPlanner": "Start with a blank calendar",
         "welcome.benefitOneTitle": "One shared view",
         "welcome.benefitOneBody": "School, activities, birthdays, holidays, and routines stay together instead of scattered across apps.",
         "welcome.benefitTwoTitle": "Catch conflicts early",
@@ -11868,8 +11884,8 @@
         "welcome.howThreeBody": "See overlapping events side by side, then adjust the plan before the rush.",
         "welcome.howFourTitle": "Keep it with you",
         "welcome.howFourBody": "Sign in to save your schedule and open the same family week from your phone or computer.",
-        "welcome.howActionCopy": "No account is required to try the planner.",
-        "welcome.tryNow": "Try it now",
+        "welcome.howActionCopy": "Your preview starts blank and does not require an account.",
+        "welcome.tryNow": "Start free preview",
         "welcome.aboutKicker": "Why we built KidsSync",
         "welcome.aboutTitle": "Family organization should feel lighter.",
         "welcome.aboutBody": "KidsSync is designed for parents who carry dozens of small commitments in their heads. We turn those moving pieces into a week the whole family can understand.",
@@ -12921,8 +12937,13 @@
         "welcome.skip": "跳至主要内容",
         "welcome.explorePage": "浏览本页",
         "welcome.navQuestions": "常见问题",
-        "welcome.exploreSample": "探索示例一周 ↗",
-        "welcome.alreadyHere": "已有账户？",
+        "welcome.exploreSample": "探索示例一周",
+        "welcome.seeHow": "查看使用方法 ↓",
+        "welcome.alreadyHere": "已有日历？",
+        "welcome.previewDetails": "体验说明",
+        "welcome.previewNoAccount": "无需账户",
+        "welcome.previewBlank": "从空白日历开始",
+        "welcome.previewSave": "仅在保存和同步时需要登录",
         "welcome.sampleInteractive": "试试按家庭成员筛选",
         "welcome.sampleSafe": "这只是示例。你的家庭日程会单独创建。",
         "welcome.sampleFilters": "筛选示例日程",
@@ -12945,15 +12966,18 @@
         "welcome.finalKicker": "少一点协调，多一点生活。",
         "welcome.finalTitle": "让下一周更从容。",
         "welcome.finalBody": "从家人的下一个计划开始，按自己的节奏安排其余日程。",
-        "welcome.finalNote": "10 分钟体验 · 探索无需账户",
+        "welcome.finalNote": "从空白日历开始 · 无需账户 · 登录后保存",
         "welcome.backTop": "返回顶部 ↑",
         "welcome.navPreview": "产品",
         "welcome.navHow": "使用方法",
         "welcome.navAbout": "关于我们",
-        "welcome.tryPlanner": "免费试用 KidsSync",
+        "welcome.tryPlanner": "开始免费体验",
         "welcome.eyebrow": "为忙碌家长设计的家庭日程",
-        "welcome.headline": "真正适合家庭生活的共享日历。",
-        "welcome.description": "活动、接送和家庭计划。谁在何时需要去哪里，一眼就能看清。",
+        "welcome.headline": "一个真正适合家庭生活的日历。",
+        "welcome.heroPeekTitle": "一份清晰的家庭安排。",
+        "welcome.heroPeekNote": "示例周计划一览",
+        "welcome.heroPeekAria": "查看这些家庭日程示例",
+        "welcome.description": "把活动、接送、学校日期、旅行和家庭计划放进同一周。提前发现冲突，让交接更轻松。",
         "welcome.signInAccount": "登录你的账户",
         "welcome.highlights": "KidsSync 能帮助家庭完成什么",
         "welcome.trialNote": "无需账户即可体验 10 分钟。登录后即可保存并在不同设备上同步日历。",
@@ -12985,8 +13009,8 @@
         "welcome.eventSwim": "游泳 · 西奥",
         "welcome.eventReading": "阅读时间",
         "welcome.eventMovie": "家庭电影之夜",
-        "welcome.previewActionCopy": "打开真正的日程表，自定义孩子姓名，安排属于你们的一周。",
-        "welcome.openPlanner": "打开日程表",
+        "welcome.previewActionCopy": "你的日历会从空白开始。打开后添加自己的孩子和计划。",
+        "welcome.openPlanner": "从空白日历开始",
         "welcome.benefitOneTitle": "一个共享视图",
         "welcome.benefitOneBody": "上学、活动、生日、节日和日常安排放在一起，不再散落在不同应用中。",
         "welcome.benefitTwoTitle": "提前发现冲突",
@@ -13015,8 +13039,8 @@
         "welcome.howThreeBody": "并排查看重叠活动，在忙乱之前调整计划。",
         "welcome.howFourTitle": "随时查看",
         "welcome.howFourBody": "登录后保存日程，并可在手机或电脑上打开同一个家庭周计划。",
-        "welcome.howActionCopy": "无需账户即可试用日程表。",
-        "welcome.tryNow": "立即试用",
+        "welcome.howActionCopy": "体验从空白日历开始，无需账户。",
+        "welcome.tryNow": "开始免费体验",
         "welcome.aboutKicker": "我们为什么打造 KidsSync",
         "welcome.aboutTitle": "家庭安排，本该更轻松。",
         "welcome.aboutBody": "KidsSync 为每天在脑中记着无数小安排的家长而设计。我们把这些不断变化的事项，整理成全家都能看懂的一周。",
