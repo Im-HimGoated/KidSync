@@ -8,8 +8,12 @@ from the working website. It is not a full port of the web calendar yet.
 - Compact native welcome screen with family imagery, English/Chinese support,
   sign-in, and explicitly labeled links to web account creation and exploration.
 - Signed-in sessions skip the welcome screen; sign-in has a back-to-welcome action.
-- Welcome includes a display-only three-day calendar preview with date columns,
-  an all-day row, time grid and the website's event palettes; bottom-aligned entry actions and
+- Welcome leads with family-specific copy and includes a display-only three-day
+  calendar preview with date columns, an all-day row, time grid, the website's
+  event palettes, and an example pickup adult and packing note. Get started and
+  Sign in stay below the scrolling content, with a clear optional-setup hint.
+  Short screens use a smaller photo/grid; larger text remains scrollable.
+  The welcome screen also includes
   three distinct outdoor, school and sports photos rotating every eight seconds.
   Sign-in uses a separate homework photo. Rotation pauses in
   the background, when requested, or with reduced motion enabled. A manual next

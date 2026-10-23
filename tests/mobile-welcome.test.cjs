@@ -92,6 +92,25 @@ test('family photo rotation pauses for accessibility, app backgrounding and user
   for (const file of paths) assert.ok(fs.existsSync(path.resolve(root, 'mobile/src/screens', file)));
 });
 
+test('mobile welcome explains family-specific benefits and keeps entry actions outside the scroll', () => {
+  const literal = welcome.match(/export const welcomeCopy = (\{[^]*?\n\});/)[1];
+  const copy = vm.runInNewContext(`(${literal})`);
+  assert.equal(copy.en.tagline, 'Every kid. Every pickup.');
+  assert.equal(copy.zh.tagline, '每个孩子，每次接送。');
+  assert.equal(copy.en.headlineAccent, 'One clear plan.');
+  assert(welcome.indexOf('</ScrollView>') < welcome.indexOf('<View style={styles.actionBar}>'));
+  assert.match(welcome, /actionBar: \{ flexShrink: 0/);
+  assert.match(welcome, /useWindowDimensions\(\)/);
+  assert.match(welcome, /height < 760 && fontScale <= 1\.25/);
+  assert.match(welcome, /<CalendarPreview language=\{language\} compact=\{compact\} showHandoff/);
+  assert.match(welcome, /accessible=\{false\} resizeMode="cover"/);
+  assert.match(welcome, /accessibilityHint=\{t\.photoDescriptions\[photoIndex\]\}/);
+  assert.match(welcome, /setupHint\}>[\s\S]*t\.setupHint/);
+  assert.match(preview, /showHandoff && <View/);
+  assert.match(preview, /styles\.handoffLabel\}>\{t\.pickup\}/);
+  assert.match(preview, /styles\.handoffLabel\}>\{t\.bring\}/);
+});
+
 test('mobile welcome and sign-in use four genuinely different image files', () => {
   const signIn = fs.readFileSync(path.join(root, 'mobile/src/screens/SignInScreen.js'), 'utf8');
   const imagePaths = [...welcome.matchAll(/require\('([^']+\.jpg)'\)/g), ...signIn.matchAll(/require\('([^']+\.jpg)'\)/g)]

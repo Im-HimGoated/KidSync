@@ -29,7 +29,7 @@ export const welcomeCopy = {
   },
   zh: {
     heading: '\u6b22\u8fce\u4f7f\u7528 KidsSync',
-    tagline: '\u7559\u70b9\u65f6\u95f4\uff0c\u966a\u4f34\u5bb6\u4eba\u3002',
+    tagline: '每个孩子，每次接送。',
     headlineAccent: '一份清晰的安排。',
     description: '活动、接送人、携带物品。让这些小细节，帮全家一起安排好生活。',
     setupHint: '下一步：几个可跳过的设置问题',
