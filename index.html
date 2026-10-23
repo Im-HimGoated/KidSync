@@ -9827,7 +9827,7 @@
   <link rel="stylesheet" href="./assets/micro-motion.css?v=1">
   <link rel="stylesheet" href="./assets/calendar-ui-refresh.css?v=1">
   <link rel="stylesheet" href="./assets/landing-ux.css?v=1">
-  <link rel="stylesheet" href="./assets/welcome-refresh.css?v=4">
+  <link rel="stylesheet" href="./assets/welcome-refresh.css?v=5">
   <link rel="stylesheet" href="./assets/calendar-ux.css?v=1">
   <link rel="stylesheet" href="./assets/dashboard-planning.css?v=2">
   <link rel="stylesheet" href="./assets/dashboard-navigation.css?v=1">
@@ -9884,12 +9884,12 @@
     <section class="welcome-hero">
       <div class="welcome-hero-inner">
         <div class="welcome-hero-copy">
-          <p class="welcome-eyebrow" data-i18n="welcome.eyebrow">Family scheduling for busy parents</p>
-          <h1 class="welcome-hero-tagline" id="welcomeHeadline" tabindex="-1" data-i18n="welcome.headline">One family calendar for real life.</h1>
-          <p class="welcome-hero-description" data-i18n="welcome.description">Keep activities, pickups, school dates, trips, and family plans in one shared week. Spot conflicts early and make handoffs easier.</p>
+          <p class="welcome-eyebrow" data-i18n="welcome.eyebrow">A calendar built around family life</p>
+          <h1 class="welcome-hero-tagline" id="welcomeHeadline" tabindex="-1"><span data-i18n="welcome.headline">Every kid. Every pickup.</span><span class="welcome-headline-accent" data-i18n="welcome.headlineAccent">One clear plan.</span></h1>
+          <p class="welcome-hero-description" data-i18n="welcome.description">A time on a calendar is only half the plan. Keep each child’s activities, the pickup adult, and what to bring together—so the next person has the whole picture.</p>
           <div class="welcome-hero-actions">
             <button class="welcome-primary-btn" type="button" id="welcomeTryHero" data-i18n="welcome.tryPlanner">Start free preview</button>
-            <a class="welcome-secondary-btn" href="#welcomeHow" data-i18n="welcome.seeHow">See how it works ↓</a>
+            <a class="welcome-secondary-btn" href="#welcomePreview" data-i18n="welcome.exploreSample">See KidsSync in action ↓</a>
           </div>
           <ul class="welcome-trial-note welcome-trial-points" aria-label="Preview details" data-i18n-aria="welcome.previewDetails">
             <li data-i18n="welcome.previewNoAccount">No account needed</li>
@@ -9899,13 +9899,24 @@
           <p class="welcome-returning"><span data-i18n="welcome.alreadyHere">Already have a calendar?</span> <button type="button" id="welcomeSignInHero" data-i18n="auth.signIn">Sign In</button></p>
         </div>
         <div class="welcome-hero-visual">
-          <img src="./assets/kidssync-family-hero.jpg" alt="" decoding="async" fetchpriority="high" width="1920" height="1281">
-          <a class="welcome-hero-peek" href="#welcomePreview" aria-label="Explore these example family plans" data-i18n-aria="welcome.heroPeekAria">
-            <span class="welcome-peek-heading"><span class="welcome-peek-dot" aria-hidden="true"></span><strong data-i18n="welcome.heroPeekTitle">One clear plan.</strong><span aria-hidden="true">↓</span></span>
-            <span class="welcome-peek-note" data-i18n="welcome.heroPeekNote">A glimpse of the sample week</span>
-            <span class="welcome-peek-event"><span class="welcome-peek-icon" aria-hidden="true">🎹</span><strong data-i18n="welcome.eventPiano">Piano · Maya</strong><span>3:15–4:00</span></span>
-            <span class="welcome-peek-event"><span class="welcome-peek-icon" aria-hidden="true">⚽</span><strong data-i18n="welcome.eventSoccer">Soccer · Theo</strong><span>4:30–6:00</span></span>
-          </a>
+          <section class="welcome-hero-peek" aria-labelledby="welcomeExampleTitle">
+            <div class="welcome-board-topline"><span class="welcome-board-brand"><span class="welcome-peek-dot" aria-hidden="true"></span>KidsSync</span><span class="welcome-example-badge" data-i18n="welcome.heroExample">Example family plans</span></div>
+            <div class="welcome-board-heading"><div><p data-i18n="welcome.heroDay">Monday · After school</p><h2 id="welcomeExampleTitle" data-i18n="welcome.heroPlanTitle">The little details. Handled.</h2></div><img class="welcome-board-photo" src="./assets/kidssync-family-hero.jpg" alt="" decoding="async" fetchpriority="high" width="1920" height="1281"></div>
+            <div class="welcome-family-lanes">
+              <article class="welcome-family-lane welcome-lane-maya">
+                <div class="welcome-lane-person"><span class="welcome-person-avatar" aria-hidden="true">M</span><strong data-i18n="welcome.sampleMaya">Maya</strong></div>
+                <div class="welcome-lane-event"><span class="welcome-lane-time" data-i18n="welcome.heroPianoTime">3:15–4:00 PM</span><h3 data-i18n="welcome.heroPiano">Piano lesson</h3><p class="welcome-lane-place"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span data-i18n="welcome.heroStudio">Music studio</span></p></div>
+                <dl class="welcome-handoff-details"><div><dt data-i18n="welcome.heroPickup">Pickup</dt><dd data-i18n="welcome.heroAlex">Alex</dd></div><div><dt data-i18n="welcome.heroBring">Bring</dt><dd data-i18n="welcome.heroMusicBook">Music book</dd></div></dl>
+              </article>
+              <article class="welcome-family-lane welcome-lane-theo">
+                <div class="welcome-lane-person"><span class="welcome-person-avatar" aria-hidden="true">T</span><strong data-i18n="welcome.sampleTheo">Theo</strong></div>
+                <div class="welcome-lane-event"><span class="welcome-lane-time" data-i18n="welcome.heroSoccerTime">3:30–4:30 PM</span><h3 data-i18n="welcome.heroSoccer">Soccer practice</h3><p class="welcome-lane-place"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span data-i18n="welcome.heroPark">Riverside Park</span></p></div>
+                <dl class="welcome-handoff-details"><div><dt data-i18n="welcome.heroPickup">Pickup</dt><dd data-i18n="welcome.heroJordan">Jordan</dd></div><div><dt data-i18n="welcome.heroBring">Bring</dt><dd data-i18n="welcome.heroSoccerKit">Water + cleats</dd></div></dl>
+              </article>
+            </div>
+            <div class="welcome-conflict-example"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><div><strong data-i18n="welcome.heroConflictTitle">Same afternoon. Different kids.</strong><span data-i18n="welcome.heroConflictBody">Overlapping times don’t always mean a double booking.</span></div></div>
+            <a class="welcome-board-link" href="#welcomePreview"><span data-i18n="welcome.heroExplore">Explore the sample week</span><span aria-hidden="true">↗</span></a>
+          </section>
         </div>
       </div>
     </section>
@@ -9913,15 +9924,15 @@
           <ul class="welcome-capabilities" aria-label="What KidsSync helps families do" data-i18n-aria="welcome.highlights">
             <li class="welcome-capability">
               <span class="welcome-capability-number" aria-hidden="true">1</span>
-              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityPlan">Plan the week</strong><small data-i18n="welcome.capabilityPlanDetail">Color-coded schedules for every child</small></span>
+              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityPlan">Each kid has their own color</strong><small data-i18n="welcome.capabilityPlanDetail">Their plans stay distinct. Your week stays together.</small></span>
             </li>
             <li class="welcome-capability">
               <span class="welcome-capability-number" aria-hidden="true">2</span>
-              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityConflicts">Catch conflicts</strong><small data-i18n="welcome.capabilityConflictsDetail">See overlaps before plans collide</small></span>
+              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityConflicts">Conflicts that make sense</strong><small data-i18n="welcome.capabilityConflictsDetail">Spot double bookings for the same person.</small></span>
             </li>
             <li class="welcome-capability">
               <span class="welcome-capability-number" aria-hidden="true">3</span>
-              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityShare">Share the plan</strong><small data-i18n="welcome.capabilityShareDetail">Sync, print, or export for caregivers</small></span>
+              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityShare">Ready for the next caregiver</strong><small data-i18n="welcome.capabilityShareDetail">Pickup adults, places, and packing notes—not just a time.</small></span>
             </li>
           </ul>
     </div>
@@ -11782,7 +11793,7 @@
         "welcome.skip": "Skip to main content",
         "welcome.explorePage": "Explore this page",
         "welcome.navQuestions": "Questions",
-        "welcome.exploreSample": "Explore a sample week",
+        "welcome.exploreSample": "See KidsSync in action ↓",
         "welcome.seeHow": "See how it works ↓",
         "welcome.alreadyHere": "Already have a calendar?",
         "welcome.previewDetails": "Preview details",
@@ -11817,21 +11828,40 @@
         "welcome.navHow": "How it works",
         "welcome.navAbout": "About us",
         "welcome.tryPlanner": "Start free preview",
-        "welcome.eyebrow": "Family scheduling for busy parents",
-        "welcome.headline": "One family calendar for real life.",
+        "welcome.eyebrow": "A calendar built around family life",
+        "welcome.headline": "Every kid. Every pickup.",
+        "welcome.headlineAccent": "One clear plan.",
+        "welcome.heroExample": "Example family plans",
+        "welcome.heroDay": "Monday · After school",
+        "welcome.heroPlanTitle": "The little details. Handled.",
+        "welcome.heroPiano": "Piano lesson",
+        "welcome.heroPianoTime": "3:15–4:00 PM",
+        "welcome.heroStudio": "Music studio",
+        "welcome.heroPickup": "Pickup",
+        "welcome.heroBring": "Bring",
+        "welcome.heroAlex": "Alex",
+        "welcome.heroMusicBook": "Music book",
+        "welcome.heroSoccer": "Soccer practice",
+        "welcome.heroSoccerTime": "3:30–4:30 PM",
+        "welcome.heroPark": "Riverside Park",
+        "welcome.heroJordan": "Jordan",
+        "welcome.heroSoccerKit": "Water + cleats",
+        "welcome.heroConflictTitle": "Same afternoon. Different kids.",
+        "welcome.heroConflictBody": "Overlapping times don’t always mean a double booking.",
+        "welcome.heroExplore": "Explore the sample week",
         "welcome.heroPeekTitle": "One clear plan.",
         "welcome.heroPeekNote": "A glimpse of the sample week",
         "welcome.heroPeekAria": "Explore these example family plans",
-        "welcome.description": "Keep activities, pickups, school dates, trips, and family plans in one shared week. Spot conflicts early and make handoffs easier.",
+        "welcome.description": "A time on a calendar is only half the plan. Keep each child’s activities, the pickup adult, and what to bring together—so the next person has the whole picture.",
         "welcome.signInAccount": "Sign in to your account",
         "welcome.highlights": "What KidsSync helps families do",
         "welcome.trialNote": "Explore for 10 minutes without an account. Sign in to keep and sync your calendar.",
-        "welcome.capabilityPlan": "Plan the week",
-        "welcome.capabilityPlanDetail": "Color-coded schedules for every child",
-        "welcome.capabilityConflicts": "Catch conflicts",
-        "welcome.capabilityConflictsDetail": "See overlaps before plans collide",
-        "welcome.capabilityShare": "Share the plan",
-        "welcome.capabilityShareDetail": "Sync, print, or export for caregivers",
+        "welcome.capabilityPlan": "Each kid has their own color",
+        "welcome.capabilityPlanDetail": "Their plans stay distinct. Your week stays together.",
+        "welcome.capabilityConflicts": "Conflicts that make sense",
+        "welcome.capabilityConflictsDetail": "Spot double bookings for the same person.",
+        "welcome.capabilityShare": "Ready for the next caregiver",
+        "welcome.capabilityShareDetail": "Pickup adults, places, and packing notes—not just a time.",
         "welcome.proofPreview": "Preview without an account",
         "welcome.proofDevices": "Made for phones and computers",
         "welcome.proofLanguages": "English and Chinese",
@@ -12937,7 +12967,7 @@
         "welcome.skip": "跳至主要内容",
         "welcome.explorePage": "浏览本页",
         "welcome.navQuestions": "常见问题",
-        "welcome.exploreSample": "探索示例一周",
+        "welcome.exploreSample": "看看 KidsSync 如何安排 ↓",
         "welcome.seeHow": "查看使用方法 ↓",
         "welcome.alreadyHere": "已有日历？",
         "welcome.previewDetails": "体验说明",
@@ -12972,21 +13002,40 @@
         "welcome.navHow": "使用方法",
         "welcome.navAbout": "关于我们",
         "welcome.tryPlanner": "开始免费体验",
-        "welcome.eyebrow": "为忙碌家长设计的家庭日程",
-        "welcome.headline": "一个真正适合家庭生活的日历。",
+        "welcome.eyebrow": "围绕家庭生活设计的日历",
+        "welcome.headline": "每个孩子，每次接送。",
+        "welcome.headlineAccent": "一份清晰的安排。",
+        "welcome.heroExample": "家庭日程示例",
+        "welcome.heroDay": "周一 · 放学后",
+        "welcome.heroPlanTitle": "小细节，也安排妥当。",
+        "welcome.heroPiano": "钢琴课",
+        "welcome.heroPianoTime": "15:15–16:00",
+        "welcome.heroStudio": "音乐教室",
+        "welcome.heroPickup": "接送",
+        "welcome.heroBring": "携带",
+        "welcome.heroAlex": "亚历克斯",
+        "welcome.heroMusicBook": "乐谱书",
+        "welcome.heroSoccer": "足球训练",
+        "welcome.heroSoccerTime": "15:30–16:30",
+        "welcome.heroPark": "河滨公园",
+        "welcome.heroJordan": "乔丹",
+        "welcome.heroSoccerKit": "水和足球鞋",
+        "welcome.heroConflictTitle": "同一个下午，不同的孩子。",
+        "welcome.heroConflictBody": "时间重叠，不一定就是安排冲突。",
+        "welcome.heroExplore": "探索示例一周",
         "welcome.heroPeekTitle": "一份清晰的家庭安排。",
         "welcome.heroPeekNote": "示例周计划一览",
         "welcome.heroPeekAria": "查看这些家庭日程示例",
-        "welcome.description": "把活动、接送、学校日期、旅行和家庭计划放进同一周。提前发现冲突，让交接更轻松。",
+        "welcome.description": "日历上的时间只是计划的一半。把每个孩子的活动、接送人和携带物品放在一起，让接手的人也能看清完整安排。",
         "welcome.signInAccount": "登录你的账户",
         "welcome.highlights": "KidsSync 能帮助家庭完成什么",
         "welcome.trialNote": "无需账户即可体验 10 分钟。登录后即可保存并在不同设备上同步日历。",
-        "welcome.capabilityPlan": "安排整周",
-        "welcome.capabilityPlanDetail": "每个孩子都有专属颜色日程",
-        "welcome.capabilityConflicts": "发现冲突",
-        "welcome.capabilityConflictsDetail": "在安排撞车之前看到重叠时间",
-        "welcome.capabilityShare": "共享计划",
-        "welcome.capabilityShareDetail": "为照护者同步、打印或导出日程",
+        "welcome.capabilityPlan": "每个孩子都有专属颜色",
+        "welcome.capabilityPlanDetail": "分清各自的计划，也看清全家的一周。",
+        "welcome.capabilityConflicts": "看懂真正的时间冲突",
+        "welcome.capabilityConflictsDetail": "发现同一个人的重复安排。",
+        "welcome.capabilityShare": "方便下一位照护者接手",
+        "welcome.capabilityShareDetail": "接送人、地点和携带物品，不只是时间。",
         "welcome.proofPreview": "无需账户即可试用",
         "welcome.proofDevices": "适用于手机和电脑",
         "welcome.proofLanguages": "支持英文和中文",
