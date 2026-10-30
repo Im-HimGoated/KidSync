@@ -8,6 +8,6 @@
     "icon": "../assets/kidssync-app-icon-512.png",
     "ios": { "supportsTablet": false },
     "android": {},
-    "plugins": []
+    "plugins": [["expo-notifications", { "enableBackgroundRemoteNotifications": false }]]
   }
 }

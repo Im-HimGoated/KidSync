@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { useAppearance, useThemeStyles } from '../ui/AppearanceContext';
 import { AccessibilityInfo, AppState, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { ArrowRight, Check, ExternalLink, Pause, Play } from 'lucide-react-native';
+import { ArrowRight, Check, Palette, ExternalLink, Pause, Play } from 'lucide-react-native';
 import CalendarPreview from '../ui/CalendarPreview';
+import { AppearanceSheet } from '../ui/AppearanceSettings';
 
 const FAMILY_PHOTOS = [
   require('../../../assets/kidssync-family-park-signin.jpg'),
@@ -11,7 +13,7 @@ const FAMILY_PHOTOS = [
 
 export const welcomeCopy = {
   en: {
-    heading: 'Welcome to KidsSync',
+    appearance: 'Choose your colors', heading: 'Welcome to KidsSync',
     tagline: 'Every kid. Every pickup.',
     headlineAccent: 'One clear plan.',
     description: 'Activities, pickup adults, and what to bring. The little details that keep a family in sync.',
@@ -29,6 +31,7 @@ export const welcomeCopy = {
     footer: 'One family. One shared week.'
   },
   zh: {
+    appearance: '选择外观颜色',
     heading: '\u6b22\u8fce\u4f7f\u7528 KidsSync',
     tagline: '每个孩子，每次接送。',
     headlineAccent: '一份清晰的安排。',
@@ -50,8 +53,10 @@ export const welcomeCopy = {
 
 export default function WelcomeScreen({ language, onSignIn, onGetStarted, onPersonalize, onOpenWebsite, error }) {
   const t = welcomeCopy[language] || welcomeCopy.en;
+  const { colors, available } = useAppearance(), styles = useThemeStyles(createStyles);
   const { height, fontScale } = useWindowDimensions();
   const compact = height < 760 && fontScale <= 1.25;
+  const [appearanceOpen, setAppearanceOpen] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(true);
@@ -78,18 +83,18 @@ export default function WelcomeScreen({ language, onSignIn, onGetStarted, onPers
   }, [paused, reduceMotion, appState]);
 
   return <View style={styles.screen}>
-    <ScrollView contentContainerStyle={styles.scroll}>
+    <ScrollView style={styles.scroller} contentContainerStyle={styles.scroll}>
     <View style={styles.inner}>
       <ImageBackground source={FAMILY_PHOTOS[photoIndex]}
         accessible={false} resizeMode="cover" style={[styles.hero, compact && styles.heroCompact]} imageStyle={styles.heroImage}>
         <View style={styles.photoControls}>
           <Pressable accessibilityRole="button" accessibilityLabel={t.nextPhoto} accessibilityHint={t.photoDescriptions[photoIndex]}
             onPress={() => setPhotoIndex(index => (index + 1) % FAMILY_PHOTOS.length)} style={styles.photoButton}>
-            <ArrowRight size={18} color="#ffffff" aria-hidden={true} />
+            <ArrowRight size={18} color={colors.photoText} aria-hidden={true} />
           </Pressable>
           {!reduceMotion && <Pressable accessibilityRole="button" accessibilityLabel={paused ? t.play : t.pause}
             accessibilityState={{ selected: paused }} onPress={() => setPaused(value => !value)} style={styles.photoButton}>
-            {paused ? <Play size={18} color="#ffffff" aria-hidden={true} /> : <Pause size={18} color="#ffffff" aria-hidden={true} />}
+            {paused ? <Play size={18} color={colors.photoText} aria-hidden={true} /> : <Pause size={18} color={colors.photoText} aria-hidden={true} />}
           </Pressable>}
         </View>
         <View style={styles.caption}>
@@ -100,11 +105,12 @@ export default function WelcomeScreen({ language, onSignIn, onGetStarted, onPers
       <View style={styles.body}>
         <Text accessibilityRole="header" style={styles.tagline}>{t.tagline}{'\n'}<Text style={styles.headlineAccent}>{t.headlineAccent}</Text></Text>
         <Text style={styles.description}>{t.description}</Text>
-        {!!onPersonalize && <Pressable accessibilityRole="button" onPress={onPersonalize} style={styles.personalize}><Text style={styles.signInText}>{t.personalize}</Text><ArrowRight size={16} color="#245b48" aria-hidden={true} /></Pressable>}
+        {!!onPersonalize && <Pressable accessibilityRole="button" onPress={onPersonalize} style={styles.personalize}><Text style={styles.signInText}>{t.personalize}</Text><ArrowRight size={16} color={colors.primary} aria-hidden={true} /></Pressable>}
+        <Pressable accessibilityRole="button" disabled={!available} onPress={() => setAppearanceOpen(true)} style={styles.appearance}><Palette size={18} color={colors.primary} /><Text style={styles.signInText}>{t.appearance}</Text></Pressable>
         <CalendarPreview language={language} compact={compact} showHandoff />
         <Pressable accessibilityRole="link" onPress={onOpenWebsite} style={styles.explore}>
           <Text style={styles.link}>{t.explore}</Text>
-          <ExternalLink size={15} color="#4c626e" aria-hidden={true} />
+          <ExternalLink size={15} color={colors.muted} aria-hidden={true} />
         </Pressable>
         <Text style={styles.footer}>{t.footer}</Text>
       </View>
@@ -116,9 +122,9 @@ export default function WelcomeScreen({ language, onSignIn, onGetStarted, onPers
         <Pressable accessibilityRole="button" onPress={onGetStarted}
           style={({ pressed }) => [styles.primary, pressed && styles.pressed]}>
           <Text style={styles.primaryText}>{t.getStarted}</Text>
-          <ArrowRight size={20} color="#ffffff" aria-hidden={true} />
+          <ArrowRight size={20} color={colors.onPrimary} aria-hidden={true} />
         </Pressable>
-        <View style={styles.setupHint}><Check size={13} color="#35634e" aria-hidden={true} /><Text style={styles.hintText}>{t.setupHint}</Text></View>
+        <View style={styles.setupHint}><Check size={13} color={colors.success} aria-hidden={true} /><Text style={styles.hintText}>{t.setupHint}</Text></View>
         <View style={styles.returning}>
           <Text style={styles.returningText}>{t.returning}</Text>
           <Pressable accessibilityRole="button" onPress={onSignIn}
@@ -128,39 +134,42 @@ export default function WelcomeScreen({ language, onSignIn, onGetStarted, onPers
         </View>
       </View>
     </View>
+    {appearanceOpen && <AppearanceSheet language={language} onClose={() => setAppearanceOpen(false)} />}
   </View>;
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#ffffff' },
-  scroll: { flexGrow: 1, alignItems: 'center', paddingBottom: 20, backgroundColor: '#ffffff' },
+function createStyles(colors, palettes) { return StyleSheet.create({
+  appearance: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start' },
+  screen: { flex: 1, minHeight: 0, backgroundColor: colors.surface },
+  scroller: { flex: 1, minHeight: 0 },
+  scroll: { flexGrow: 1, alignItems: 'center', paddingBottom: 20, backgroundColor: colors.surface },
   inner: { width: '100%', maxWidth: 560, flexGrow: 1 },
   hero: { width: '100%', aspectRatio: 2.2, minHeight: 160, maxHeight: 210, justifyContent: 'flex-end', overflow: 'hidden', flexShrink: 0 },
   heroCompact: { minHeight: 130, maxHeight: 150, aspectRatio: 2.4 },
   heroImage: { width: '100%', height: '100%' },
   photoControls: { position: 'absolute', top: 12, right: 12, flexDirection: 'row', gap: 6 },
-  photoButton: { width: 44, height: 44, borderRadius: 10, backgroundColor: 'rgba(12, 32, 43, 0.78)', alignItems: 'center', justifyContent: 'center' },
-  caption: { paddingHorizontal: 20, paddingVertical: 12, backgroundColor: 'rgba(12, 32, 43, 0.78)' },
-  eyebrow: { color: '#d4eddf', fontSize: 13, fontWeight: '500', marginBottom: 5 },
-  heading: { color: '#ffffff', fontSize: 21, fontWeight: '600', lineHeight: 27 },
-  body: { paddingHorizontal: 20, paddingTop: 22, gap: 16, backgroundColor: '#ffffff', flexGrow: 1 },
-  tagline: { color: '#203c38', fontSize: 28, lineHeight: 34, fontWeight: '700', letterSpacing: -0.6 },
-  headlineAccent: { color: '#28734f' },
-  description: { color: '#4c626e', fontSize: 15, lineHeight: 23, marginTop: -5 },
+  photoButton: { width: 44, height: 44, borderRadius: 10, backgroundColor: colors.photoOverlay, alignItems: 'center', justifyContent: 'center' },
+  caption: { paddingHorizontal: 20, paddingVertical: 12, backgroundColor: colors.photoOverlay },
+  eyebrow: { color: colors.photoMuted, fontSize: 13, fontWeight: '500', marginBottom: 5 },
+  heading: { color: colors.photoText, fontSize: 21, fontWeight: '600', lineHeight: 27 },
+  body: { paddingHorizontal: 20, paddingTop: 22, gap: 16, backgroundColor: colors.surface, flexGrow: 1 },
+  tagline: { color: colors.ink, fontSize: 28, lineHeight: 34, fontWeight: '700', letterSpacing: -0.6 },
+  headlineAccent: { color: colors.primary },
+  description: { color: colors.muted, fontSize: 15, lineHeight: 23, marginTop: -5 },
   personalize: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: -7 },
-  actionBar: { flexShrink: 0, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 4, borderTopWidth: 1, borderColor: '#dce7e1', backgroundColor: '#ffffff' },
+  actionBar: { flexShrink: 0, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 4, borderTopWidth: 1, borderColor: colors.line, backgroundColor: colors.surface },
   actions: { width: '100%', maxWidth: 520, alignSelf: 'center', gap: 4 },
-  primary: { minHeight: 52, padding: 14, borderRadius: 12, backgroundColor: '#235b47', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
-  primaryText: { color: '#ffffff', fontSize: 17, fontWeight: '600', flexShrink: 1 },
+  primary: { minHeight: 52, padding: 14, borderRadius: 12, backgroundColor: colors.primary, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
+  primaryText: { color: colors.onPrimary, fontSize: 17, fontWeight: '600', flexShrink: 1 },
   returning: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', columnGap: 4 },
-  returningText: { color: '#4c626e', fontSize: 14, lineHeight: 22 },
+  returningText: { color: colors.muted, fontSize: 14, lineHeight: 22 },
   setupHint: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, paddingTop: 4 },
-  hintText: { flexShrink: 1, color: '#4c626e', fontSize: 11, lineHeight: 17, textAlign: 'center' },
+  hintText: { flexShrink: 1, color: colors.muted, fontSize: 11, lineHeight: 17, textAlign: 'center' },
   signIn: { minHeight: 44, minWidth: 44, paddingHorizontal: 5, justifyContent: 'center' },
-  signInText: { color: '#245b48', fontSize: 14, fontWeight: '600' },
+  signInText: { color: colors.primary, fontSize: 14, fontWeight: '600' },
   explore: { minHeight: 44, flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center', justifyContent: 'center', padding: 8 },
-  link: { fontSize: 14, color: '#4c626e', textAlign: 'center' },
-  footer: { color: '#4c626e', fontSize: 12, lineHeight: 20, textAlign: 'center' },
+  link: { fontSize: 14, color: colors.muted, textAlign: 'center' },
+  footer: { color: colors.muted, fontSize: 12, lineHeight: 20, textAlign: 'center' },
   pressed: { opacity: 0.75 },
-  error: { color: '#a12632', fontSize: 15, lineHeight: 22 }
-});
+  error: { color: colors.error, fontSize: 15, lineHeight: 22 }
+}); }

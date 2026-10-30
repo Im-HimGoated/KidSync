@@ -14,6 +14,9 @@ test('family collaboration is discoverable without crowding the mobile shell', (
   assert.match(app, /familyPendingCount/);
   assert.match(app, /<FamilyScreen/);
   assert.match(app, /workspaceView !== 'family'/);
+  assert.match(family, /People, permissions and pickups in one place/);
+  assert.match(family, /const inboxPending =/);
+  assert.match(family, /tabBadge/);
 });
 
 test('family screen uses server-backed access, invitation, comment, and pickup helpers', () => {
@@ -30,12 +33,22 @@ test('family screen uses server-backed access, invitation, comment, and pickup h
   assert.doesNotMatch(family, /\.update\(\{\s*schedule/);
 });
 
-test('family permission choices and native editor limitation are explicit', () => {
+test('family permission choices and the native shared-calendar route are explicit', () => {
   assert.match(family, /value: 'viewer'/);
   assert.match(family, /value: 'commenter'/);
   assert.match(family, /value: 'editor'/);
-  assert.match(family, /Shared event editing is currently available on the web calendar/);
-  assert.match(family, /原生编辑适配完成前/);
+  assert.match(family, /onOpenSharedCalendar/);
+  assert.match(family, /View in Calendar/);
+  assert.match(family, /verifies access before every change/);
+  assert.match(app, /sharedCalendar\.readSharedCalendar/);
+  assert.match(app, /sharedCalendar\.createSharedCalendarAdapter/);
+  assert.match(app, /sharedSession\.forActor\(sharedAccess, actorId\)/);
+  assert.match(app, /accountScope\.current !== actorId/);
+  assert.match(app, /sharedSession\.isRevoked\(failure\)/);
+  assert.match(app, /setInterval\(catchUp, 5000\)/);
+  assert.match(app, /sharedActivityActions=\{sharedSelected \? sharedActivityActions : null\}/);
+  assert.match(app, /onSharedSchedule=\{acceptSharedSchedule\}/);
+  assert.doesNotMatch(app.match(/const acceptSharedSchedule[^]*?\n  \}, \[[^]*?\]\);/)?.[0] || '', /ownerSync/);
 });
 
 test('invitation delivery is honest and pickup actions require a server response', () => {

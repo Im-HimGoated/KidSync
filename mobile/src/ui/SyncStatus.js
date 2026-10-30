@@ -1,20 +1,26 @@
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CloudCheck, CloudOff, RefreshCw, TriangleAlert } from 'lucide-react-native';
-import { Button, Sheet, colors } from '../calendar/ui';
+import { Button, Sheet } from '../calendar/ui';
+import { useAppearance, useThemeStyles } from './AppearanceContext';
 import copy from '../lib/sync-copy';
 import schedules from '../../../shared/backend/schedules';
 
 function Version({ label, event, t }) {
+  const s = useThemeStyles(createStyles);
   const text = value => ['string', 'number'].includes(typeof value) ? String(value) : '';
+  const translated = (field, value) => ['child', 'importance', 'recurrence'].includes(field)
+    && Object.prototype.hasOwnProperty.call(t.values, value) ? t.values[value] : text(value);
   return <View style={{ gap: 3 }}><Text style={s.status}>{label}</Text>
     <Text style={s.text}>{event ? [text(event.title), text(event.startDate), event.allDay ? t.allDay : `${text(event.start)}–${text(event.end)}`].filter(Boolean).join(' · ') : t.missing}</Text>
-    {!!event && ['endDate', 'child', 'location', 'responsible', 'items', 'notes', 'importance', 'recurrence'].map(field => text(event[field]) ? <Text key={field} style={s.text}>{text(event[field])}</Text> : null)}
+    {!!event && Object.keys(t.fields).map(field => text(event[field]) ? <Text key={field} style={s.text}>{t.fields[field]}: {translated(field, event[field])}</Text> : null)}
   </View>;
 }
 
 /** Small persistent owner-sync status; destructive queue discard is confirmed. */
 export default function SyncStatus({ sync, language = 'en' }) {
+  const { colors } = useAppearance();
+  const s = useThemeStyles(createStyles);
   const t = copy[language] || copy.en;
   const [open, setOpen] = useState(false), [confirm, setConfirm] = useState(false), [busy, setBusy] = useState(false), [failed, setFailed] = useState(false);
   if (!sync?.userId) return null;
@@ -59,7 +65,7 @@ export default function SyncStatus({ sync, language = 'en' }) {
     </Sheet>}
   </>;
 }
-const s = StyleSheet.create({
+const createStyles = colors => StyleSheet.create({
   bar: { minHeight: 49, flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 16, paddingRight: 10, paddingVertical: 3, backgroundColor: colors.page, borderBottomWidth: 1, borderBottomColor: colors.line },
   warning: { backgroundColor: colors.redSoft }, status: { color: colors.ink, fontSize: 12, lineHeight: 18, fontWeight: '600' },
   hint: { color: colors.muted, fontSize: 11, lineHeight: 17 }, action: { minHeight: 44, paddingHorizontal: 10, paddingVertical: 5 },

@@ -1,8 +1,8 @@
 import React, { useRef, useState } from 'react';
+import { useAppearance, useThemeStyles } from '../ui/AppearanceContext';
 import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ArrowLeft, ArrowRight, CalendarDays, Check, Settings2 } from 'lucide-react-native';
 import trial from '../lib/native-trial';
-import theme from '../ui/theme';
 
 export const personalizeCopy = {
   en: {
@@ -37,6 +37,7 @@ export const personalizeCopy = {
 
 export default function PersonalizeCalendarScreen({ language, data, error, signedIn, onContinue, onPreferences, onBack }) {
   const t = personalizeCopy[language] || personalizeCopy.en;
+  const { colors } = useAppearance(), styles = useThemeStyles(createStyles);
   const [values, setValues] = useState({ ...data.profile, calendarName: data.profile.calendarName || t.defaultCalendar });
   const [touched, setTouched] = useState(false), [busy, setBusy] = useState(false);
   const [requireName, setRequireName] = useState(true);
@@ -79,51 +80,51 @@ export default function PersonalizeCalendarScreen({ language, data, error, signe
     finally { submitting.current = false; setBusy(false); }
   }
   return <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-    <View style={styles.header}><Pressable accessibilityRole="button" disabled={busy} onPress={goBack} style={styles.back}><ArrowLeft size={18} color="#235b47" /><Text style={styles.link}>{t.back}</Text></Pressable></View>
+    <View style={styles.header}><Pressable accessibilityRole="button" disabled={busy} onPress={goBack} style={styles.back}><ArrowLeft size={18} color={colors.primary} /><Text style={styles.link}>{t.back}</Text></Pressable></View>
     <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} contentContainerStyle={styles.scroll}>
       <View style={styles.intro}>
         <Text style={styles.eyebrow}>{data.elapsedMs >= trial.LIMIT_MS ? t.complete : t.early}</Text>
         <Text accessibilityRole="header" style={styles.heading}>{t.title}</Text>
         <Text style={styles.description}>{t.intro}</Text>
-        <View style={styles.summary}><CalendarDays size={22} color="#35634e" /><View style={styles.flex}><Text style={styles.summaryTitle}>{data.events.length} {data.events.length === 1 ? t.onePlan : t.plans}</Text><Text style={styles.small}>{people.size} {people.size === 1 ? t.onePerson : t.people}</Text></View><Check size={19} color="#35634e" /></View>
+        <View style={styles.summary}><CalendarDays size={22} color={colors.success} /><View style={styles.flex}><Text style={styles.summaryTitle}>{data.events.length} {data.events.length === 1 ? t.onePlan : t.plans}</Text><Text style={styles.small}>{people.size} {people.size === 1 ? t.onePerson : t.people}</Text></View><Check size={19} color={colors.success} /></View>
         {!!data.draft && <Text style={styles.small}>{t.draft}</Text>}
       </View>
       <View style={styles.form}>
         {[['name', t.name, 50], ['calendarName', t.calendar, 60], ['description', t.description, 160]].map(([key, label, maxLength]) => <View key={key} style={styles.field}>
-          <Text style={styles.label}>{label}</Text><TextInput ref={key === 'name' ? nameRef : key === 'calendarName' ? calendarRef : descriptionRef}
+          <Text style={styles.label}>{label}</Text><TextInput placeholderTextColor={colors.muted} selectionColor={colors.primary} ref={key === 'name' ? nameRef : key === 'calendarName' ? calendarRef : descriptionRef}
             accessibilityLabel={label} accessibilityHint={touched && errors[key] ? t[errors[key]] : undefined} value={values[key]} maxLength={maxLength} editable={!busy}
             autoComplete={key === 'name' ? 'name' : 'off'} autoCapitalize="sentences" multiline={key === 'description'}
             returnKeyType={key === 'description' ? 'default' : 'next'} submitBehavior={key === 'description' ? 'newline' : 'submit'}
             onSubmitEditing={key === 'name' ? () => calendarRef.current?.focus() : key === 'calendarName' ? () => descriptionRef.current?.focus() : undefined}
-            onFocus={() => setFocused(key)} onBlur={() => setFocused(null)} selectionColor={theme.colors.primary}
+            onFocus={() => setFocused(key)} onBlur={() => setFocused(null)}
             onChangeText={value => { setFailure(false); setValues(current => ({ ...current, [key]: value })); }} style={[styles.input, focused === key && styles.focused, touched && errors[key] && styles.invalid]} />
           {touched && errors[key] && <Text accessibilityRole="alert" style={styles.error}>{t[errors[key]]}</Text>}
         </View>)}
         <Text style={styles.label}>{t.icon}</Text>
-        <View style={styles.icons}>{trial.ICONS.map((icon, index) => <Pressable key={icon} accessibilityRole="radio" accessibilityLabel={`${t.icon}: ${t.iconNames[index]}`}
+        <View style={styles.icons}>{trial.ICONS.map((icon, index) => <Pressable key={icon} accessibilityRole="radio" aria-checked={values.icon === icon} accessibilityLabel={`${t.icon}: ${t.iconNames[index]}`}
           accessibilityState={{ checked: values.icon === icon }} disabled={busy} onPress={() => setValues(current => ({ ...current, icon }))}
           style={[styles.icon, values.icon === icon && styles.selectedIcon]}><Text style={styles.emoji}>{icon}</Text></Pressable>)}</View>
-        <Pressable accessibilityRole="button" disabled={busy} onPress={configure} style={styles.preferences}><Settings2 size={18} color="#235b47" /><Text style={styles.link}>{t.preferences}</Text><ArrowRight size={17} color="#235b47" /></Pressable>
+        <Pressable accessibilityRole="button" disabled={busy} onPress={configure} style={styles.preferences}><Settings2 size={18} color={colors.primary} /><Text style={styles.link}>{t.preferences}</Text><ArrowRight size={17} color={colors.primary} /></Pressable>
         <Text style={styles.small}>{t.privacy}</Text>
         {!!(error || failure) && <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.error}>{t[error] || t.saveFailed}</Text>}
       </View>
     </ScrollView>
     <View style={styles.footer}>
-      <Pressable accessibilityRole="button" disabled={busy} accessibilityState={{ busy, disabled: busy }} onPress={() => submit(signedIn ? 'account' : 'signup')} style={styles.primary}>{busy ? <ActivityIndicator color="#fff" accessibilityLabel={t.saving} /> : <><Text style={styles.primaryText}>{signedIn ? t.saveAccount : t.create}</Text><ArrowRight size={18} color="#fff" /></>}</Pressable>
+      <Pressable accessibilityRole="button" disabled={busy} accessibilityState={{ busy, disabled: busy }} onPress={() => submit(signedIn ? 'account' : 'signup')} style={styles.primary}>{busy ? <ActivityIndicator color={colors.onPrimary} accessibilityLabel={t.saving} /> : <><Text style={styles.primaryText}>{signedIn ? t.saveAccount : t.create}</Text><ArrowRight size={18} color={colors.onPrimary} /></>}</Pressable>
       {!signedIn && <Pressable accessibilityRole="button" accessibilityHint={t.signedInName} disabled={busy} onPress={() => submit('signin')} style={styles.signIn}><Text style={styles.link}>{t.signIn}</Text></Pressable>}
     </View>
   </KeyboardAvoidingView>;
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#fff' }, header: { paddingHorizontal: 16 }, back: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 7, alignSelf: 'flex-start', paddingRight: 10 },
-  scroll: { paddingHorizontal: 20, paddingBottom: 24, gap: 22 }, intro: { gap: 12, paddingTop: 8 }, eyebrow: { color: '#4d795f', fontSize: 11, lineHeight: 18, fontWeight: '700' },
-  heading: { color: '#203c38', fontSize: 30, lineHeight: 37, fontWeight: '700', letterSpacing: -0.6 }, description: { color: '#5c7066', fontSize: 15, lineHeight: 23 },
-  summary: { padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#d4e4d9', backgroundColor: '#f0f7f1', flexDirection: 'row', gap: 12, alignItems: 'center' }, flex: { flex: 1 }, summaryTitle: { color: '#31583f', fontSize: 14, lineHeight: 21, fontWeight: '600' },
-  small: { color: theme.colors.muted, fontSize: 12, lineHeight: 19 }, form: { gap: 17 }, field: { gap: 7 }, label: { color: '#3c5748', fontSize: 14, fontWeight: '600' },
-  input: { minHeight: 50, borderWidth: 1, borderColor: theme.colors.line, borderRadius: 13, padding: 12, fontSize: 16, lineHeight: 23, color: '#203c38', backgroundColor: '#fff' }, focused: { borderColor: theme.colors.primary, backgroundColor: '#F6FAF7' }, invalid: { borderColor: '#a13640' },
-  error: { color: '#a13640', fontSize: 12, lineHeight: 19 }, icons: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, icon: { minWidth: 44, minHeight: 44, padding: 8, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#d4e1d8', borderRadius: 10 },
-  selectedIcon: { backgroundColor: '#e8f3e9', borderColor: '#3c805a', borderWidth: 2 }, emoji: { fontSize: 22 }, preferences: { minHeight: 48, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 9, padding: 10, borderRadius: 8, backgroundColor: '#f0f6f2' },
-  link: { color: '#245b48', fontSize: 13, fontWeight: '600' }, footer: { flexShrink: 0, borderTopWidth: 1, borderColor: '#dce7e1', paddingHorizontal: 16, paddingVertical: 10, gap: 3 },
-  primary: { minHeight: 50, backgroundColor: '#235b47', padding: 12, borderRadius: 11, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 9 }, primaryText: { color: '#fff', fontSize: 15, fontWeight: '600' }, signIn: { minHeight: 44, alignItems: 'center', justifyContent: 'center' }
-});
+function createStyles(colors, palettes) { return StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.surface }, header: { paddingHorizontal: 16 }, back: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 7, alignSelf: 'flex-start', paddingRight: 10 },
+  scroll: { paddingHorizontal: 20, paddingBottom: 24, gap: 22 }, intro: { gap: 12, paddingTop: 8 }, eyebrow: { color: colors.primary, fontSize: 11, lineHeight: 18, fontWeight: '700' },
+  heading: { color: colors.ink, fontSize: 30, lineHeight: 37, fontWeight: '700', letterSpacing: -0.6 }, description: { color: colors.muted, fontSize: 15, lineHeight: 23 },
+  summary: { padding: 14, borderRadius: 12, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.successSoft, flexDirection: 'row', gap: 12, alignItems: 'center' }, flex: { flex: 1 }, summaryTitle: { color: colors.success, fontSize: 14, lineHeight: 21, fontWeight: '600' },
+  small: { color: colors.muted, fontSize: 12, lineHeight: 19 }, form: { gap: 17 }, field: { gap: 7 }, label: { color: colors.ink, fontSize: 14, fontWeight: '600' },
+  input: { minHeight: 50, borderWidth: 1, borderColor: colors.line, borderRadius: 13, padding: 12, fontSize: 16, lineHeight: 23, color: colors.ink, backgroundColor: colors.surface }, focused: { borderColor: colors.primary, backgroundColor: colors.inputFocused }, invalid: { borderColor: colors.error },
+  error: { color: colors.error, fontSize: 12, lineHeight: 19 }, icons: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, icon: { minWidth: 44, minHeight: 44, padding: 8, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.line, borderRadius: 10 },
+  selectedIcon: { backgroundColor: colors.primarySoft, borderColor: colors.primary, borderWidth: 2 }, emoji: { fontSize: 22 }, preferences: { minHeight: 48, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 9, padding: 10, borderRadius: 8, backgroundColor: colors.primarySoft },
+  link: { color: colors.primary, fontSize: 13, fontWeight: '600' }, footer: { flexShrink: 0, borderTopWidth: 1, borderColor: colors.line, paddingHorizontal: 16, paddingVertical: 10, gap: 3 },
+  primary: { minHeight: 50, backgroundColor: colors.primary, padding: 12, borderRadius: 11, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 9 }, primaryText: { color: colors.onPrimary, fontSize: 15, fontWeight: '600' }, signIn: { minHeight: 44, alignItems: 'center', justifyContent: 'center' }
+}); }

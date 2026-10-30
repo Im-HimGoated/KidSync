@@ -258,9 +258,47 @@ function planOccurrenceChange(original, occurrenceStartDate, options = {}) {
   return { changes, occurrenceStartDate };
 }
 
+function calendarAccess({ userId, client, calendar: selected, onSchedule, readOnly, sharedAccess, sharedActivityActions, onSharedSchedule } = {}) {
+  const ownerId = selected?.ownerId || userId, shared = !!selected?.ownerId && ownerId !== userId;
+  if (!shared) return { shared: false, canWrite: !!userId && !!client && typeof onSchedule === 'function' && !readOnly, setupRequired: false };
+  const scope = sharedActivityActions?.scope;
+  const scopeMatches = scope?.kind === 'shared' && scope.actorId === userId && scope.ownerId === ownerId && scope.calendarId === selected.id;
+  const actionsReady = ['saveActivity', 'deleteActivity', 'mutateActivities', 'restoreActivities'].every(key => typeof sharedActivityActions?.[key] === 'function');
+  const accessMatches = sharedAccess?.ownerId === ownerId && sharedAccess.calendarId === selected.id
+    && sharedAccess.calendar?.ownerId === ownerId && sharedAccess.calendar.id === selected.id;
+  return { shared: true, setupRequired: !!(accessMatches && sharedAccess.setupRequired),
+    canWrite: !!userId && !!client && !readOnly && scopeMatches && actionsReady && accessMatches && selected.role === 'editor'
+      && sharedAccess.role === 'editor' && sharedAccess.canWrite === true && !sharedAccess.setupRequired
+      && typeof onSharedSchedule === 'function' };
+}
+
+function checkedSharedResult(result, scope) {
+  if (!result || result.shared !== true || result.pending || Object.prototype.hasOwnProperty.call(result, 'schedule')
+    || result.ownerId !== scope.ownerId || result.calendarId !== scope.calendarId
+    || result.calendar?.ownerId !== scope.ownerId || result.calendar?.id !== scope.calendarId
+    || !Array.isArray(result.calendar?.data?.activities) || !Array.isArray(result.calendar?.data?.kids)) {
+    throw uiError('FORBIDDEN', 'The shared calendar result could not be confirmed. Refresh before editing.');
+  }
+  return result;
+}
+
 /** Captures account scope without caching snapshots or creating example rows. */
-function createCalendarActions({ client, userId, onSchedule, onSelectCalendar, isCurrent = () => true, activityActions = backend } = {}) {
-  const writer = key => activityActions?.[key] || backend[key];
+function createCalendarActions({ client, userId, onSchedule, onSelectCalendar, isCurrent = () => true, activityActions = backend, sharedScope = null } = {}) {
+  const scopedId = value => {
+    if (sharedScope && value !== sharedScope.calendarId) throw uiError('FORBIDDEN', 'Choose the verified shared calendar.');
+    return value;
+  };
+  const writer = key => {
+    if (sharedScope) {
+      const scope = activityActions?.scope;
+      if (scope?.kind !== 'shared' || scope.actorId !== userId || scope.ownerId !== sharedScope.ownerId
+        || scope.calendarId !== sharedScope.calendarId || typeof activityActions?.[key] !== 'function') {
+        throw uiError('SETUP_REQUIRED', 'Shared calendar editing is not available yet.');
+      }
+      return activityActions[key];
+    }
+    return activityActions?.[key] || backend[key];
+  };
   let busy = false;
   function assertCurrent() { if (!isCurrent()) throw uiError('STALE_SCOPE', 'This account or calendar is no longer active.'); }
   async function run(operation, selectCreated = false) {
@@ -270,6 +308,7 @@ function createCalendarActions({ client, userId, onSchedule, onSelectCalendar, i
     try {
       const row = await operation();
       assertCurrent();
+      if (sharedScope) checkedSharedResult(row, sharedScope);
       await onSchedule?.(row);
       if (selectCreated) { assertCurrent(); await onSelectCalendar?.(row.calendarId); }
       return row;
@@ -277,26 +316,29 @@ function createCalendarActions({ client, userId, onSchedule, onSelectCalendar, i
   }
   return {
     save(calendarId, event, original = null) {
-      return run(() => typeof activityActions?.save === 'function'
+      return run(() => !sharedScope && typeof activityActions?.save === 'function'
         ? activityActions.save(calendarId, event, original)
-        : writer('saveActivity')(client, userId, calendarId, event, { original }));
+        : writer('saveActivity')(client, userId, scopedId(calendarId), event, { original }));
     },
     remove(calendarId, eventId, original) {
-      return run(() => typeof activityActions?.remove === 'function'
+      return run(() => !sharedScope && typeof activityActions?.remove === 'function'
         ? activityActions.remove(calendarId, eventId, original)
-        : writer('deleteActivity')(client, userId, calendarId, eventId, { original }));
+        : writer('deleteActivity')(client, userId, scopedId(calendarId), eventId, { original }));
     },
-    create(name) { return run(() => writer('createCalendar')(client, userId, { name }), true); },
+    create(name) {
+      if (sharedScope) return Promise.reject(uiError('FORBIDDEN', 'Only an owner can create calendars here.'));
+      return run(() => writer('createCalendar')(client, userId, { name }), true);
+    },
     saveOccurrence(calendarId, original, occurrenceStartDate, event) {
-      return run(() => writer('mutateActivities')(client, userId, calendarId,
+      return run(() => writer('mutateActivities')(client, userId, scopedId(calendarId),
         planOccurrenceChange(original, occurrenceStartDate, { event }).changes));
     },
     removeOccurrence(calendarId, original, occurrenceStartDate) {
-      return run(() => writer('mutateActivities')(client, userId, calendarId,
+      return run(() => writer('mutateActivities')(client, userId, scopedId(calendarId),
         planOccurrenceChange(original, occurrenceStartDate, { remove: true }).changes));
     },
     restore(calendarId, undoToken) {
-      return run(() => writer('restoreActivities')(client, userId, calendarId, undoToken));
+      return run(() => writer('restoreActivities')(client, userId, scopedId(calendarId), undoToken));
     },
   };
 }
@@ -306,4 +348,5 @@ module.exports = {
   filterActivities, timeMinutes, sortAgenda, layoutDay, initialEventForm, buildCalendarEvent, createCalendarActions,
   eventFormChanged,
   isRecurringActivity, occurrenceDraft, planOccurrenceChange,
+  calendarAccess, checkedSharedResult,
 };

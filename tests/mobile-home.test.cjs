@@ -49,6 +49,8 @@ test('signed-in phone shell exposes focused home, calendar, and family navigatio
   assert.match(app, /<FamilyScreen/);
   assert.match(app, /<BottomNavigation/);
   assert.match(app, /familyPendingCount/);
+  assert.match(app, /onOpenFamily=\{\(\) => setWorkspaceView\('family'\)\}/);
+  assert.match(app, /bottomIndicator/);
   assert.match(app, /useScheduleSync\(\{ client: supabase, userId: session\?\.user\.id \}\)/);
   assert.match(app, /<SyncStatus/);
   assert.match(app, /activityActions=\{ownerActivityActions\}/);
@@ -56,5 +58,8 @@ test('signed-in phone shell exposes focused home, calendar, and family navigatio
   assert.doesNotMatch(app, /watchSchedule\(/);
   assert.match(app, /<AccountSettings/);
   assert.match(screen, /Family Handoff Center/);
+  assert.match(screen, /todayLabel/);
+  assert.match(screen, /workloadAvatar/);
+  assert.match(screen, /Coordinate pickups/);
   assert.match(screen, /onOpenDate\?\.\(item\.dateKey\)/);
 });

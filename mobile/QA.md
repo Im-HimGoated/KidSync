@@ -148,3 +148,38 @@ account and iPhone simulator checks remain pending until performed above.
 - Notification delivery is disabled. Live authenticated native sync/import,
   real-device offline recovery, and two-account sharing checks remain pending.
   Publication of this development snapshot does not claim those checks passed.
+
+## Remaining-feature implementation (2026-10-30)
+
+- Appearance is implemented across Home, Family, Calendar, forms, trial, account
+  settings and sync review: System/Light/Dark plus four accent palettes, with
+  device-local guest/account isolation, live preview, reset and honest failure
+  feedback. Real-component browser checks covered persistence, rapid/deferred
+  saves across account switches, EN/ZH, 320px/390px layouts and selected radio
+  semantics. The short-phone welcome scroller no longer sits behind its CTA.
+- Local reminders are installed and connected to the signed-in shell/settings.
+  They are off by default, require a deliberate opt-in and use generic content.
+  Lifecycle tests cover confirmed snapshots, account cleanup, permission denial,
+  edit/delete reconciliation and validated tap routing. Actual Expo Go on iPhone
+  16 Pro / iOS 26.5 loaded the isolated reminder hook with disabled state and zero
+  scheduled notices. The Mac locked before the permission/scheduling test; no OS
+  permission or display result is claimed. The temporary harness was stopped.
+- Accepted shared calendars route into the native calendar with separate
+  actor/owner/calendar scope, server-confirmed actions and no owner-queue/cache
+  contamination. Account switches filter old shared data during render, revoked
+  access is removed, and interrupted connections retain an explicitly read-only
+  stale view with foreground catch-up.
+- Checked shared mutations require the additive migration and review in
+  `supabase/mobile-shared-calendar*`. Independent local embedded PostgreSQL tests
+  executed the actual SQL: **12/12 passed**, including permissions/RLS, exact
+  originals, atomic changes, Undo, legacy boundaries and malformed payloads.
+  This is not production deployment or real two-account/JWT acceptance.
+- The isolated `codex/mobile-settings-sharing-release` snapshot passed **618**
+  fast tests; installed Expo dependency checks passed using its offline map.
+  Fresh web, iOS and Android production exports succeeded. Unrelated website
+  edits and their extra tests are excluded.
+- Live native sign-in/sync/offline recovery is awaiting the human's sign-in in
+  the actual Expo app, separately from Safari/website sign-in. Shared-editing
+  deployment is awaiting specific human approval for Supabase admin access;
+  automatic approval review blocked opening that destination, and no workaround
+  or retry was used. Until verified deployment, missing-RPC access stays read-only.

@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useAppearance, useThemeStyles } from '../ui/AppearanceContext';
 import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, X } from 'lucide-react-native';
@@ -56,6 +57,7 @@ function displayDate(key, language) {
 
 export default function TrialCalendarScreen({ language, data, preferences, error, onSave, onDraft, onDelete, onRetry, onPersonalize, onBack }) {
   const t = trialCopy[language] || trialCopy.en;
+  const { colors } = useAppearance(), styles = useThemeStyles(createStyles);
   const [date, setDate] = useState(trial.dateKey());
   const [editor, setEditor] = useState(null), [saving, setSaving] = useState(false), [deleting, setDeleting] = useState(null);
   const [pendingEditor, setPendingEditor] = useState(null), [opening, setOpening] = useState(false), [localError, setLocalError] = useState(false);
@@ -95,24 +97,24 @@ export default function TrialCalendarScreen({ language, data, preferences, error
   }
   return <View style={styles.screen}>
     <View style={styles.top}>
-      <Pressable accessibilityRole="button" accessibilityLabel={t.back} disabled={saving || opening} onPress={onBack} style={styles.iconButton}><ArrowLeft size={20} color="#235b47" /></Pressable>
+      <Pressable accessibilityRole="button" accessibilityLabel={t.back} disabled={saving || opening} onPress={onBack} style={styles.iconButton}><ArrowLeft size={20} color={colors.primary} /></Pressable>
       <View style={styles.flex}><Text accessibilityRole="header" style={styles.heading}>{data.profile.calendarName ? `${data.profile.icon} ${data.profile.calendarName}` : t.title}</Text><Text style={styles.caption}>{t.preview}</Text></View>
       <Text style={styles.clock}>{trial.remainingLabel(data.elapsedMs)} {t.left}</Text>
     </View>
     <View style={styles.dateNav}>
-      <Pressable accessibilityRole="button" accessibilityLabel={t.previous} onPress={() => setDate(moveDay(date, -1))} style={styles.iconButton}><ChevronLeft size={20} color="#235b47" /></Pressable>
+      <Pressable accessibilityRole="button" accessibilityLabel={t.previous} onPress={() => setDate(moveDay(date, -1))} style={styles.iconButton}><ChevronLeft size={20} color={colors.primary} /></Pressable>
       <View style={styles.flex}><Text style={styles.date}>{displayDate(date, language)}</Text></View>
       <Pressable accessibilityRole="button" onPress={() => setDate(trial.dateKey())} style={styles.textButton}><Text style={styles.link}>{t.today}</Text></Pressable>
-      <Pressable accessibilityRole="button" accessibilityLabel={t.next} onPress={() => setDate(moveDay(date, 1))} style={styles.iconButton}><ChevronRight size={20} color="#235b47" /></Pressable>
+      <Pressable accessibilityRole="button" accessibilityLabel={t.next} onPress={() => setDate(moveDay(date, 1))} style={styles.iconButton}><ChevronRight size={20} color={colors.primary} /></Pressable>
     </View>
     <ScrollView contentContainerStyle={styles.list} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
       {!!(error || localError) && <View style={styles.notice}><Text accessibilityRole="alert" style={styles.error}>{t[error] || t.saveFailed}</Text><Pressable accessibilityRole="button" disabled={saving || opening} onPress={() => { setLocalError(false); onRetry(); }} style={styles.textButton}><Text style={styles.link}>{t.retry}</Text></Pressable></View>}
-      {data.draft && <Pressable accessibilityRole="button" disabled={locked} onPress={() => setEditor(data.draft)} style={styles.resume}><Pencil size={16} color="#235b47" /><Text style={styles.link}>{t.resume}</Text></Pressable>}
-      {!events.length && <View style={styles.empty}><CalendarDays size={36} color="#498366" /><Text style={styles.emptyTitle}>{t.empty}</Text><Text style={styles.secondary}>{t.emptyBody}</Text></View>}
+      {data.draft && <Pressable accessibilityRole="button" disabled={locked} onPress={() => setEditor(data.draft)} style={styles.resume}><Pencil size={16} color={colors.primary} /><Text style={styles.link}>{t.resume}</Text></Pressable>}
+      {!events.length && <View style={styles.empty}><CalendarDays size={36} color={colors.primary} /><Text style={styles.emptyTitle}>{t.empty}</Text><Text style={styles.secondary}>{t.emptyBody}</Text></View>}
       {events.map(event => <View key={event.id} style={[styles.event, event.child && styles.childEvent]}>
         <View style={styles.eventTop}><View style={styles.flex}><Text style={styles.time}>{event.allDay ? t.allDay : `${event.start}–${event.end}`}</Text><Text style={styles.eventTitle}>{event.title}</Text><Text style={styles.secondary}>{event.child || t.family}</Text></View>
-          <Pressable accessibilityRole="button" accessibilityLabel={`${t.edit}: ${event.title}`} disabled={locked} onPress={() => openEditor(event)} style={styles.iconButton}><Pencil size={18} color="#235b47" /></Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel={`${t.remove}: ${event.title}`} disabled={locked} onPress={() => setDeleting(event.id)} style={styles.iconButton}><Trash2 size={18} color="#a13640" /></Pressable></View>
+          <Pressable accessibilityRole="button" accessibilityLabel={`${t.edit}: ${event.title}`} disabled={locked} onPress={() => openEditor(event)} style={styles.iconButton}><Pencil size={18} color={colors.primary} /></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel={`${t.remove}: ${event.title}`} disabled={locked} onPress={() => setDeleting(event.id)} style={styles.iconButton}><Trash2 size={18} color={colors.error} /></Pressable></View>
         {!!event.location && <Text style={styles.detail}>{event.location}</Text>}
         {!!event.responsible && <Text style={styles.detail}>{t.pickupDetail}: {event.responsible}</Text>}
         {!!event.items && <Text style={styles.detail}>{t.bringDetail}: {event.items}</Text>}
@@ -121,15 +123,15 @@ export default function TrialCalendarScreen({ language, data, preferences, error
       <Text style={styles.local}>{t.local}</Text>
     </ScrollView>
     <View style={styles.footer}>
-      <Pressable accessibilityRole="button" accessibilityState={{ disabled: locked, busy: opening }} disabled={locked} onPress={() => openEditor()} style={[styles.primary, locked && { opacity: 0.5 }]}>{opening ? <ActivityIndicator color="#fff" /> : <Plus size={19} color="#fff" />}<Text style={styles.primaryText}>{opening ? t.opening : t.add}</Text></Pressable>
-      <Pressable accessibilityRole="button" disabled={saving || opening} onPress={onPersonalize} style={styles.personalize}><Text style={styles.link}>{t.personalize}</Text><ArrowRight size={17} color="#235b47" /></Pressable>
+      <Pressable accessibilityRole="button" accessibilityState={{ disabled: locked, busy: opening }} disabled={locked} onPress={() => openEditor()} style={[styles.primary, locked && { opacity: 0.5 }]}>{opening ? <ActivityIndicator color={colors.onPrimary} /> : <Plus size={19} color={colors.onPrimary} />}<Text style={styles.primaryText}>{opening ? t.opening : t.add}</Text></Pressable>
+      <Pressable accessibilityRole="button" disabled={saving || opening} onPress={onPersonalize} style={styles.personalize}><Text style={styles.link}>{t.personalize}</Text><ArrowRight size={17} color={colors.primary} /></Pressable>
     </View>
     {!!(pendingEditor || editor) && <Modal visible animationType="none" onRequestClose={() => {
       if (!savingRef.current && !openingRef.current) { setPendingEditor(null); setEditor(null); }
     }}><SafeAreaView accessibilityViewIsModal style={styles.screen}>
       {pendingEditor ? <>
         <View style={styles.top}><Text accessibilityRole="header" style={[styles.heading, styles.flex]}>{t.unfinished}</Text>
-          <Pressable accessibilityRole="button" accessibilityLabel={t.keepDraft} disabled={opening} style={styles.iconButton} onPress={() => setPendingEditor(null)}><X size={22} color="#235b47" /></Pressable></View>
+          <Pressable accessibilityRole="button" accessibilityLabel={t.keepDraft} disabled={opening} style={styles.iconButton} onPress={() => setPendingEditor(null)}><X size={22} color={colors.primary} /></Pressable></View>
         <ScrollView contentContainerStyle={styles.form}><Text style={styles.secondary}>{t.unfinishedBody}</Text>
           {!!data.draft?.title && <Text style={styles.eventTitle}>{data.draft.title}</Text>}
           {!!(error || localError) && <Text accessibilityRole="alert" style={styles.error}>{t[error] || t.saveFailed}</Text>}
@@ -144,6 +146,7 @@ export default function TrialCalendarScreen({ language, data, preferences, error
 
 function EventEditor({ language, initial, busy, error, onChange, onSave, onClose }) {
   const t = trialCopy[language] || trialCopy.en;
+  const { colors } = useAppearance(), styles = useThemeStyles(createStyles);
   const [values, setValues] = useState(initial), [touched, setTouched] = useState(false);
   const fieldRefs = useRef({}), positions = useRef({}), scroll = useRef(null);
   const errors = trial.eventErrors(values);
@@ -152,19 +155,19 @@ function EventEditor({ language, initial, busy, error, onChange, onSave, onClose
     if (busy) return;
     setTouched(true);
     const first = Object.keys(errors)[0];
-    if (first) { scroll.current?.scrollTo({ y: Math.max(0, (positions.current[first] || 0) - 12), animated: true }); fieldRefs.current[first]?.focus(); return; }
+    if (first) { scroll.current?.scrollTo({ y: Math.max(0, (positions.current[first] || 0) - 12), animated: false }); fieldRefs.current[first]?.focus(); return; }
     Keyboard.dismiss(); onSave(values);
   }
   const fields = [['title', t.titleLabel, 100], ['startDate', t.date, 10], ...(!values.allDay ? [['start', t.start, 5], ['end', t.end, 5]] : []),
     ['child', t.person, 50], ['location', t.location, 160], ['responsible', t.pickup, 80], ['items', t.bring, 300]];
   return <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View style={styles.top}><Text accessibilityRole="header" style={[styles.heading, styles.flex]}>{initial.id ? t.edit : t.add}</Text><Pressable accessibilityRole="button" accessibilityLabel={t.cancel} disabled={busy} onPress={onClose} style={styles.iconButton}><X size={22} color="#235b47" /></Pressable></View>
+        <View style={styles.top}><Text accessibilityRole="header" style={[styles.heading, styles.flex]}>{initial.id ? t.edit : t.add}</Text><Pressable accessibilityRole="button" accessibilityLabel={t.cancel} disabled={busy} onPress={onClose} style={styles.iconButton}><X size={22} color={colors.primary} /></Pressable></View>
         <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" contentContainerStyle={styles.form}>
           <Text style={styles.secondary}>{t.dateHint}</Text>
           {touched && !!Object.keys(errors).length && <Text accessibilityRole="alert" style={styles.error}>{t.validation}</Text>}
-          <View style={styles.switchRow}><Text style={styles.label}>{t.allDay}</Text><Switch accessibilityLabel={t.allDay} disabled={busy} value={values.allDay} onValueChange={value => update('allDay', value)} /></View>
+          <View style={styles.switchRow}><Text style={styles.label}>{t.allDay}</Text><Switch trackColor={{ false: colors.strongLine, true: colors.primary }} thumbColor={colors.surface} ios_backgroundColor={colors.line} accessibilityLabel={t.allDay} disabled={busy} value={values.allDay} onValueChange={value => update('allDay', value)} /></View>
           {fields.map(([key, label, maxLength], index) => <View key={key} style={styles.field} onLayout={event => { positions.current[key] = event.nativeEvent.layout.y; }}>
-            <Text style={styles.label}>{label}</Text><TextInput ref={node => { fieldRefs.current[key] = node; }} accessibilityLabel={label} value={values[key] || ''} maxLength={maxLength}
+            <Text style={styles.label}>{label}</Text><TextInput placeholderTextColor={colors.muted} selectionColor={colors.primary} ref={node => { fieldRefs.current[key] = node; }} accessibilityLabel={label} value={values[key] || ''} maxLength={maxLength}
               autoCapitalize={['startDate', 'start', 'end'].includes(key) ? 'none' : 'sentences'} autoCorrect={!['startDate', 'start', 'end'].includes(key)}
               keyboardType={['startDate', 'start', 'end'].includes(key) ? 'numbers-and-punctuation' : 'default'} returnKeyType={key === 'items' ? 'default' : 'next'}
               onSubmitEditing={() => fieldRefs.current[fields[index + 1]?.[0]]?.focus()} blurOnSubmit={false}
@@ -176,28 +179,28 @@ function EventEditor({ language, initial, busy, error, onChange, onSave, onClose
           {!!error && <Text accessibilityRole="alert" style={styles.error}>{t[error] || t.saveFailed}</Text>}
         </ScrollView>
         <View style={styles.footer}><Pressable accessibilityRole="button" accessibilityState={{ disabled: !!busy, busy: !!busy }} disabled={busy} onPress={submit} style={[styles.primary, busy && { opacity: 0.6 }]}>
-          {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryText}>{t.save}</Text>}
+          {busy ? <ActivityIndicator color={colors.onPrimary} /> : <Text style={styles.primaryText}>{t.save}</Text>}
         </Pressable></View>
   </KeyboardAvoidingView>;
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#fff' }, top: { flexDirection: 'row', gap: 8, alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8 },
-  flex: { flex: 1, minWidth: 0 }, heading: { color: '#203c38', fontSize: 22, lineHeight: 29, fontWeight: '700' }, caption: { color: '#65776e', fontSize: 11, lineHeight: 17 },
-  clock: { color: '#3b614d', fontSize: 12, fontVariant: ['tabular-nums'], backgroundColor: '#edf5ef', padding: 9, borderRadius: 8 },
+function createStyles(colors, palettes) { return StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.surface }, top: { flexDirection: 'row', gap: 8, alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8 },
+  flex: { flex: 1, minWidth: 0 }, heading: { color: colors.ink, fontSize: 22, lineHeight: 29, fontWeight: '700' }, caption: { color: colors.muted, fontSize: 11, lineHeight: 17 },
+  clock: { color: colors.primary, fontSize: 12, fontVariant: ['tabular-nums'], backgroundColor: colors.primarySoft, padding: 9, borderRadius: 8 },
   iconButton: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }, textButton: { minWidth: 44, minHeight: 44, paddingHorizontal: 10, alignItems: 'center', justifyContent: 'center' },
-  dateNav: { paddingHorizontal: 8, paddingVertical: 5, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderColor: '#e0e9e3', backgroundColor: '#f6faf7' }, date: { color: '#203c38', fontSize: 15, fontWeight: '600' },
-  list: { padding: 16, gap: 12, flexGrow: 1 }, empty: { paddingVertical: 34, alignItems: 'center', gap: 14 }, emptyTitle: { textAlign: 'center', fontSize: 22, lineHeight: 29, color: '#294e3d', fontWeight: '600' },
-  secondary: { color: '#5a6e66', fontSize: 14, lineHeight: 22 }, local: { fontSize: 11, lineHeight: 18, color: '#65776e', textAlign: 'center', marginTop: 10 },
-  event: { borderWidth: 1, borderColor: '#d1e1d6', borderLeftWidth: 4, borderLeftColor: '#478363', borderRadius: 12, padding: 13, backgroundColor: '#f0f7f1', gap: 5 },
-  childEvent: { backgroundColor: '#f0f5fa', borderColor: '#cfdfeb', borderLeftColor: '#33779c' }, eventTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 2 }, time: { color: '#315d48', fontSize: 12, fontWeight: '600' },
-  eventTitle: { color: '#203c38', fontSize: 18, lineHeight: 24, fontWeight: '700', marginTop: 5 }, detail: { color: '#426052', fontSize: 12, lineHeight: 19 },
-  footer: { flexShrink: 0, paddingHorizontal: 16, paddingVertical: 10, gap: 4, borderTopWidth: 1, borderColor: '#dce7e1', backgroundColor: '#fff' },
-  primary: { minHeight: 50, borderRadius: 11, paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#235b47', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }, primaryText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  personalize: { minHeight: 44, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8 }, link: { color: '#245b48', fontSize: 13, fontWeight: '600' },
-  notice: { padding: 12, borderRadius: 8, backgroundColor: '#fff3ee' }, error: { color: '#a13640', fontSize: 12, lineHeight: 19 }, resume: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderWidth: 1, borderColor: '#c4d7ca', borderRadius: 8 },
-  deleteConfirm: { marginTop: 8, borderTopWidth: 1, borderColor: '#d9c9c8', paddingTop: 10 }, row: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  form: { padding: 20, gap: 18 }, field: { gap: 7 }, label: { fontSize: 14, color: '#3d5749', fontWeight: '600' },
-  input: { minHeight: 48, borderWidth: 1, borderColor: '#c9d8cf', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 12, color: '#203c38', fontSize: 16, backgroundColor: '#fff' },
-  invalid: { borderColor: '#a13640' }, switchRow: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }
-});
+  dateNav: { paddingHorizontal: 8, paddingVertical: 5, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderColor: colors.line, backgroundColor: colors.surface2 }, date: { color: colors.ink, fontSize: 15, fontWeight: '600' },
+  list: { padding: 16, gap: 12, flexGrow: 1 }, empty: { paddingVertical: 34, alignItems: 'center', gap: 14 }, emptyTitle: { textAlign: 'center', fontSize: 22, lineHeight: 29, color: colors.ink, fontWeight: '600' },
+  secondary: { color: colors.muted, fontSize: 14, lineHeight: 22 }, local: { fontSize: 11, lineHeight: 18, color: colors.muted, textAlign: 'center', marginTop: 10 },
+  event: { borderWidth: 1, borderColor: colors.line, borderLeftWidth: 4, borderLeftColor: palettes.green.line, borderRadius: 12, padding: 13, backgroundColor: palettes.green.soft, gap: 5 },
+  childEvent: { backgroundColor: palettes.blue.soft, borderColor: palettes.blue.line, borderLeftColor: palettes.blue.line }, eventTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 2 }, time: { color: colors.ink, fontSize: 12, fontWeight: '600' },
+  eventTitle: { color: colors.ink, fontSize: 18, lineHeight: 24, fontWeight: '700', marginTop: 5 }, detail: { color: colors.muted, fontSize: 12, lineHeight: 19 },
+  footer: { flexShrink: 0, paddingHorizontal: 16, paddingVertical: 10, gap: 4, borderTopWidth: 1, borderColor: colors.line, backgroundColor: colors.surface },
+  primary: { minHeight: 50, borderRadius: 11, paddingHorizontal: 16, paddingVertical: 12, backgroundColor: colors.primary, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }, primaryText: { color: colors.onPrimary, fontSize: 16, fontWeight: '600' },
+  personalize: { minHeight: 44, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8 }, link: { color: colors.primary, fontSize: 13, fontWeight: '600' },
+  notice: { padding: 12, borderRadius: 8, backgroundColor: colors.errorSoft }, error: { color: colors.error, fontSize: 12, lineHeight: 19 }, resume: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderWidth: 1, borderColor: colors.line, borderRadius: 8 },
+  deleteConfirm: { marginTop: 8, borderTopWidth: 1, borderColor: colors.line, paddingTop: 10 }, row: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  form: { padding: 20, gap: 18 }, field: { gap: 7 }, label: { fontSize: 14, color: colors.ink, fontWeight: '600' },
+  input: { minHeight: 48, borderWidth: 1, borderColor: colors.line, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 12, color: colors.ink, fontSize: 16, backgroundColor: colors.surface },
+  invalid: { borderColor: colors.error }, switchRow: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }
+}); }

@@ -1,14 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import calendar from '../lib/calendar';
 import model from './model';
 import getCopy from './copy';
-import { colors, personColor } from './ui';
+import { personColor } from './ui';
+import { useAppearance } from '../ui/AppearanceContext';
+
+function useViewStyles() {
+  const { colors, palettes } = useAppearance();
+  const s = useMemo(() => createStyles(colors), [colors]);
+  return { colors, palettes, s };
+}
 
 const HOUR_HEIGHT = 60;
 const GUTTER = 42;
 const ownDate = value => value instanceof Date && Number.isFinite(value.getTime()) ? value : new Date();
-const text = value => typeof value === 'string' || typeof value === 'number' ? String(value) : '';
+const text = value => typeof value === 'string' ? value : typeof value === 'number' && Number.isFinite(value) ? String(value) : '';
 const firstDayValue = value => value === 0 || value === 'sunday' ? 0 : 1;
 const locale = language => String(language).startsWith('zh') ? 'zh-CN' : 'en-US';
 const formatDate = (value, language, options) => value.toLocaleDateString(locale(language), options);
@@ -31,9 +38,9 @@ function viewCopy(language) {
   };
 }
 
-function colorFor(event, kids) {
-  const value = personColor(event, kids) || {};
-  return { soft: value.soft || '#EAF3FA', ink: value.ink || colors.ink, line: value.line || colors.blue };
+function colorFor(event, kids, palettes, colors) {
+  const value = personColor(event, kids, palettes) || {};
+  return { soft: value.soft || colors.primarySoft, ink: value.ink || colors.ink, line: value.line || colors.primary };
 }
 
 function attendee(event, kids, t) {
@@ -73,6 +80,7 @@ function useRevealSelectedDay(scroll, width, index) {
 
 /** A full seven-day strip; narrow phones scroll instead of shrinking targets. */
 export function DateStrip({ date, firstDay = 1, events = [], kids = [], language = 'en', onDate }) {
+  const { colors, palettes, s } = useViewStyles();
   const selected = ownDate(date), first = model.startOfDisplayWeek(selected, firstDayValue(firstDay));
   const width = usePhoneWidth(7 * 44);
   const t = viewCopy(language), scroll = useRef(null);
@@ -90,7 +98,7 @@ export function DateStrip({ date, firstDay = 1, events = [], kids = [], language
         <Text style={[s.weekday, chosen && s.selectedText]}>{formatDate(day, language, { weekday: 'short' }).replace('周', '')}</Text>
         <Text style={[s.dateNumber, key === today && s.todayNumber, chosen && s.selectedText]}>{day.getDate()}</Text>
         <View accessible={false} style={s.dots}>{items.slice(0, 3).map((event, i) => <View key={i}
-          style={[s.dot, { backgroundColor: chosen ? colors.white : colorFor(event, kids).line }]} />)}</View>
+          style={[s.dot, { backgroundColor: chosen ? colors.onPrimary : colorFor(event, kids, palettes, colors).line }]} />)}</View>
       </Pressable>;
     })}
   </ScrollView>;
@@ -98,6 +106,7 @@ export function DateStrip({ date, firstDay = 1, events = [], kids = [], language
 
 /** A 42-date grid using the account's saved first weekday. */
 export function MonthGrid({ date, firstDay = 1, events = [], kids = [], language = 'en', onDate }) {
+  const { colors, palettes, s } = useViewStyles();
   const selected = ownDate(date), start = model.startOfDisplayWeek(selected, firstDayValue(firstDay));
   const days = model.displayMonthDays(selected, firstDayValue(firstDay));
   const width = usePhoneWidth(7 * 44), cell = width / 7;
@@ -117,7 +126,7 @@ export function MonthGrid({ date, firstDay = 1, events = [], kids = [], language
             <Text style={[s.monthNumber, day.getMonth() !== selected.getMonth() && s.outsideMonth,
               key === today && s.todayNumber, chosen && s.selectedText]}>{day.getDate()}</Text>
             <View accessible={false} style={s.dots}>{items.slice(0, 3).map((event, i) => <View key={i}
-              style={[s.dot, { backgroundColor: chosen ? colors.white : colorFor(event, kids).line }]} />)}</View>
+              style={[s.dot, { backgroundColor: chosen ? colors.onPrimary : colorFor(event, kids, palettes, colors).line }]} />)}</View>
           </View>
         </Pressable>;
       })}</View>
@@ -126,7 +135,8 @@ export function MonthGrid({ date, firstDay = 1, events = [], kids = [], language
 }
 
 function EventBlock({ event, date, kids, language, t, onEvent, style, compact = false, occurrenceStartDate }) {
-  const palette = colorFor(event, kids), cancelled = event.status === 'cancelled';
+  const { colors, palettes, s } = useViewStyles();
+  const palette = colorFor(event, kids, palettes, colors), cancelled = event.status === 'cancelled';
   const segment = calendar.daySegment(event, date, occurrenceStartDate);
   return <Pressable accessibilityRole="button" accessibilityLabel={eventLabel(event, date, kids, language, t, occurrenceStartDate)}
     accessibilityHint={t.details} onPress={() => onEvent?.(event, date, occurrenceStartDate)}
@@ -139,6 +149,7 @@ function EventBlock({ event, date, kids, language, t, onEvent, style, compact = 
 }
 
 function NonTimedRow({ label, rows, dates, colWidth, scrollRef, scrollProps, kids, language, t, onEvent }) {
+  const { colors, palettes, s } = useViewStyles();
   const count = Math.max(1, ...rows.map(items => items.length));
   const height = Math.max(38, count * 47 + 5);
   return <View style={[s.nonTimed, { minHeight: height }]}>
@@ -159,6 +170,7 @@ function NonTimedRow({ label, rows, dates, colWidth, scrollRef, scrollProps, kid
  * agenda so narrow overlap lanes are not the only way to reach an activity.
  */
 export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kids = [], language = 'en', onDate, onEvent }) {
+  const { colors, palettes, s } = useViewStyles();
   const selected = ownDate(date), first = model.startOfDisplayWeek(selected, firstDayValue(firstDay));
   const dates = Array.from({ length: 7 }, (_, i) => calendar.addDays(first, i));
   const t = viewCopy(language), width = usePhoneWidth(430), colWidth = (width - GUTTER) / 7;
@@ -253,29 +265,29 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
   </View>;
 }
 
-const s = StyleSheet.create({
+const createStyles = colors => StyleSheet.create({
   stripScroll: { flexGrow: 0, marginBottom: 14 }, strip: { flexDirection: 'row' },
   stripDay: { flex: 1, minWidth: 44, minHeight: 76, borderRadius: 14, alignItems: 'center', justifyContent: 'center', gap: 7 },
   weekday: { color: colors.muted, fontSize: 12, lineHeight: 17, textAlign: 'center' },
   dateNumber: { color: colors.ink, fontSize: 18, lineHeight: 24, fontWeight: '700' },
-  selectedDay: { backgroundColor: colors.blue }, selectedText: { color: colors.white },
+  selectedDay: { backgroundColor: colors.primary }, selectedText: { color: colors.onPrimary },
   dots: { flexDirection: 'row', gap: 2, minHeight: 4, justifyContent: 'center' }, dot: { width: 4, height: 4, borderRadius: 2 },
-  monthScroll: { flexGrow: 0, marginBottom: 17 }, month: { backgroundColor: colors.white, borderRadius: 16, overflow: 'hidden', paddingVertical: 5 },
+  monthScroll: { flexGrow: 0, marginBottom: 17 }, month: { backgroundColor: colors.surface, borderRadius: 16, overflow: 'hidden', paddingVertical: 5 },
   weekdays: { flexDirection: 'row' }, monthWeekday: { color: colors.muted, fontSize: 12, paddingVertical: 10, textAlign: 'center' },
   monthGrid: { flexDirection: 'row', flexWrap: 'wrap' }, monthCell: { minHeight: 49, alignItems: 'center', justifyContent: 'center' },
   monthDate: { width: 42, minHeight: 44, borderRadius: 13, alignItems: 'center', justifyContent: 'center', gap: 4 },
-  monthNumber: { color: colors.ink, fontSize: 15, lineHeight: 20 }, outsideMonth: { color: '#9AABB2' }, todayNumber: { color: colors.blue, fontWeight: '700' },
-  weekContainer: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line, borderRadius: 15, overflow: 'hidden', marginBottom: 17 },
+  monthNumber: { color: colors.ink, fontSize: 15, lineHeight: 20 }, outsideMonth: { color: colors.muted, opacity: 0.65 }, todayNumber: { color: colors.primary, fontWeight: '700' },
+  weekContainer: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, borderRadius: 15, overflow: 'hidden', marginBottom: 17 },
   dayHeaders: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.line },
-  headerGutter: { width: GUTTER, backgroundColor: colors.white }, daysViewport: { flex: 1 }, dayHeaderColumns: { flexDirection: 'row' },
+  headerGutter: { width: GUTTER, backgroundColor: colors.surface }, daysViewport: { flex: 1 }, dayHeaderColumns: { flexDirection: 'row' },
   gridDayHeader: { minHeight: 70, alignItems: 'center', justifyContent: 'center', gap: 3, borderLeftWidth: 1, borderLeftColor: colors.line },
-  gridDate: { width: 35, height: 35, borderRadius: 12, alignItems: 'center', justifyContent: 'center' }, currentColumn: { backgroundColor: 'rgba(31,104,152,0.04)' },
+  gridDate: { width: 35, height: 35, borderRadius: 12, alignItems: 'center', justifyContent: 'center' }, currentColumn: { backgroundColor: colors.primarySoft },
   nonTimed: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.line }, nonTimedGutter: { width: GUTTER, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3 },
   nonTimedLabel: { color: colors.muted, fontSize: 10, lineHeight: 14, textAlign: 'center' }, nonTimedDays: { flexDirection: 'row' },
   nonTimedColumn: { paddingHorizontal: 2, paddingVertical: 3, gap: 3, borderLeftWidth: 1, borderLeftColor: colors.line },
-  hoursViewport: { height: 390, flexGrow: 0 }, timeBody: { flexDirection: 'row' }, timeGutter: { width: GUTTER, backgroundColor: colors.white },
+  hoursViewport: { height: 390, flexGrow: 0 }, timeBody: { flexDirection: 'row' }, timeGutter: { width: GUTTER, backgroundColor: colors.surface },
   hourLabel: { position: 'absolute', left: 0, right: 0, color: colors.muted, fontSize: 9, lineHeight: 13, paddingTop: 3, paddingRight: 4, textAlign: 'right' },
-  hourLine: { position: 'absolute', height: 1, backgroundColor: '#E7EDF0', left: 0 }, dayColumn: { position: 'absolute', top: 0, borderLeftWidth: 1, borderLeftColor: colors.line },
+  hourLine: { position: 'absolute', height: 1, backgroundColor: colors.line, left: 0 }, dayColumn: { position: 'absolute', top: 0, borderLeftWidth: 1, borderLeftColor: colors.line },
   eventBlock: { borderLeftWidth: 3, borderRadius: 5, paddingVertical: 3, paddingHorizontal: 3, overflow: 'hidden' },
   compactBlock: { minHeight: 44, justifyContent: 'center' }, blockTitle: { fontSize: 10, lineHeight: 13, fontWeight: '600' },
   cancelled: { textDecorationLine: 'line-through' }, overviewHint: { color: colors.muted, fontSize: 11, lineHeight: 17, padding: 11, borderTopWidth: 1, borderTopColor: colors.line },

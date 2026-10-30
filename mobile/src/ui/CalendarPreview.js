@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAppearance, useThemeStyles } from './AppearanceContext';
 import { StyleSheet, Text, View } from 'react-native';
 import { Backpack, CalendarDays, UserRound } from 'lucide-react-native';
 
@@ -22,7 +23,7 @@ export const calendarPreviewCopy = {
 };
 
 // Match the website's child/family palettes and left-accent event blocks.
-const colors = [
+const lightExamplePalettes = [
   { soft: '#e4f0f7', line: '#88aec5', ink: '#173f59' },
   { soft: '#e7f2eb', line: '#94b9a3', ink: '#214c38' },
   { soft: '#f8f0dc', line: '#c8ae71', ink: '#594514' }
@@ -30,11 +31,13 @@ const colors = [
 
 export default function CalendarPreview({ language, compact = false, showHandoff = false }) {
   const t = calendarPreviewCopy[language] || calendarPreviewCopy.en;
+  const { colors, palettes, isDark } = useAppearance(), styles = useThemeStyles(createStyles);
+  const eventColors = isDark ? [palettes.blue, palettes.green, palettes.yellow] : lightExamplePalettes;
   return <View style={styles.preview}>
     <View style={styles.labelRow}>
       <Text style={styles.example}>{t.example}</Text>
       <View style={styles.family}>
-        <CalendarDays size={14} color="#4c626e" aria-hidden={true} />
+        <CalendarDays size={14} color={colors.muted} aria-hidden={true} />
         <Text style={styles.familyText}>{t.family}</Text>
       </View>
     </View>
@@ -56,11 +59,11 @@ export default function CalendarPreview({ language, compact = false, showHandoff
         <View style={[styles.gutter, styles.hour, compact && styles.compactHour]}><Text style={styles.small}>{hour}</Text></View>
         {t.days.map((day, dayIndex) => <View key={day} style={[styles.slot, compact && styles.compactSlot]}>
             {dayIndex === hourIndex && <View style={[styles.event, compact && styles.compactEvent, {
-              backgroundColor: colors[dayIndex].soft, borderColor: colors[dayIndex].line,
-              borderLeftColor: colors[dayIndex].ink
+              backgroundColor: eventColors[dayIndex].soft, borderColor: eventColors[dayIndex].line,
+              borderLeftColor: eventColors[dayIndex].ink
             }]}>
-              <Text style={[styles.eventTitle, { color: colors[dayIndex].ink }]}>{t.titles[dayIndex]}</Text>
-              <Text style={[styles.eventTime, { color: colors[dayIndex].ink }]}>{t.times[dayIndex]}</Text>
+              <Text style={[styles.eventTitle, { color: eventColors[dayIndex].ink }]}>{t.titles[dayIndex]}</Text>
+              <Text style={[styles.eventTime, { color: eventColors[dayIndex].ink }]}>{t.times[dayIndex]}</Text>
             </View>}
         </View>)}
       </View>)}
@@ -68,44 +71,44 @@ export default function CalendarPreview({ language, compact = false, showHandoff
     {showHandoff && <View style={styles.handoff}>
       <Text style={styles.handoffTitle}>{t.handoff}</Text>
       <View style={styles.handoffRow}>
-        <View style={styles.handoffDetail}><UserRound size={16} color="#35634e" aria-hidden={true} /><View style={styles.handoffCopy}><Text style={styles.handoffLabel}>{t.pickup}</Text><Text style={styles.handoffValue}>{t.adult}</Text></View></View>
-        <View style={styles.handoffDetail}><Backpack size={16} color="#35634e" aria-hidden={true} /><View style={styles.handoffCopy}><Text style={styles.handoffLabel}>{t.bring}</Text><Text style={styles.handoffValue}>{t.items}</Text></View></View>
+        <View style={styles.handoffDetail}><UserRound size={16} color={colors.success} aria-hidden={true} /><View style={styles.handoffCopy}><Text style={styles.handoffLabel}>{t.pickup}</Text><Text style={styles.handoffValue}>{t.adult}</Text></View></View>
+        <View style={styles.handoffDetail}><Backpack size={16} color={colors.success} aria-hidden={true} /><View style={styles.handoffCopy}><Text style={styles.handoffLabel}>{t.bring}</Text><Text style={styles.handoffValue}>{t.items}</Text></View></View>
       </View>
     </View>}
   </View>;
 }
 
-const styles = StyleSheet.create({
-  preview: { gap: 12, padding: 12, borderWidth: 1, borderColor: '#dce7e1', borderRadius: 14, backgroundColor: '#ffffff' },
+function createStyles(colors) { return StyleSheet.create({
+  preview: { gap: 12, padding: 12, borderWidth: 1, borderColor: colors.line, borderRadius: 14, backgroundColor: colors.surface },
   labelRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 8, alignItems: 'center' },
-  example: { color: '#4c626e', fontSize: 12, fontWeight: '600', lineHeight: 18 },
+  example: { color: colors.muted, fontSize: 12, fontWeight: '600', lineHeight: 18 },
   family: { flexDirection: 'row', gap: 5, alignItems: 'center' },
-  familyText: { color: '#4c626e', fontSize: 12 },
-  grid: { borderTopWidth: 1, borderBottomWidth: 1, borderColor: '#dce5e9' },
+  familyText: { color: colors.muted, fontSize: 12 },
+  grid: { borderTopWidth: 1, borderBottomWidth: 1, borderColor: colors.line },
   row: { flexDirection: 'row' },
   gutter: { width: 40, flexShrink: 0, alignItems: 'center', justifyContent: 'center' },
   month: { alignSelf: 'stretch' },
-  small: { color: '#4c626e', fontSize: 10, lineHeight: 15, textAlign: 'center' },
-  day: { flex: 1, minWidth: 0, alignItems: 'center', paddingVertical: 5, gap: 3, borderLeftWidth: 1, borderColor: '#dce5e9' },
+  small: { color: colors.muted, fontSize: 10, lineHeight: 15, textAlign: 'center' },
+  day: { flex: 1, minWidth: 0, alignItems: 'center', paddingVertical: 5, gap: 3, borderLeftWidth: 1, borderColor: colors.line },
   date: { width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderRadius: 13 },
-  dateText: { color: '#172b3a', fontSize: 15, fontWeight: '600' },
-  selectedDate: { backgroundColor: '#172b3a' },
-  selectedDateText: { color: '#ffffff' },
-  allDayRow: { flexDirection: 'row', minHeight: 24, borderTopWidth: 1, borderColor: '#dce5e9', backgroundColor: '#f7fafb' },
-  allDayCell: { flex: 1, borderLeftWidth: 1, borderColor: '#dce5e9' },
+  dateText: { color: colors.ink, fontSize: 15, fontWeight: '600' },
+  selectedDate: { backgroundColor: colors.primary },
+  selectedDateText: { color: colors.onPrimary },
+  allDayRow: { flexDirection: 'row', minHeight: 24, borderTopWidth: 1, borderColor: colors.line, backgroundColor: colors.surface2 },
+  allDayCell: { flex: 1, borderLeftWidth: 1, borderColor: colors.line },
   hour: { minHeight: 64, justifyContent: 'flex-start', paddingTop: 3 },
-  slot: { flex: 1, minWidth: 0, minHeight: 64, borderTopWidth: 1, borderLeftWidth: 1, borderColor: '#e8eef1', padding: 3 },
+  slot: { flex: 1, minWidth: 0, minHeight: 64, borderTopWidth: 1, borderLeftWidth: 1, borderColor: colors.line, padding: 3 },
   event: { minHeight: 56, borderWidth: 1, borderLeftWidth: 3, borderRadius: 5, paddingHorizontal: 4, paddingVertical: 4, gap: 3 },
   eventTitle: { fontSize: 11, lineHeight: 14, fontWeight: '600' },
   eventTime: { fontSize: 10, lineHeight: 13 },
   compactHour: { minHeight: 52 },
   compactSlot: { minHeight: 52 },
   compactEvent: { minHeight: 44 },
-  handoff: { padding: 12, gap: 10, borderRadius: 10, backgroundColor: '#eff6f0' },
-  handoffTitle: { color: '#30563f', fontSize: 12, fontWeight: '600', lineHeight: 18 },
+  handoff: { padding: 12, gap: 10, borderRadius: 10, backgroundColor: colors.successSoft },
+  handoffTitle: { color: colors.success, fontSize: 12, fontWeight: '600', lineHeight: 18 },
   handoffRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   handoffDetail: { flexGrow: 1, flexBasis: 100, flexDirection: 'row', alignItems: 'flex-start', gap: 7 },
   handoffCopy: { flex: 1, minWidth: 0, gap: 2 },
-  handoffLabel: { color: '#4c626e', fontSize: 10, lineHeight: 15 },
-  handoffValue: { color: '#30563f', fontSize: 12, lineHeight: 18, fontWeight: '600' }
-});
+  handoffLabel: { color: colors.muted, fontSize: 10, lineHeight: 15 },
+  handoffValue: { color: colors.success, fontSize: 12, lineHeight: 18, fontWeight: '600' }
+}); }

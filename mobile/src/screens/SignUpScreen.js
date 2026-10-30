@@ -1,8 +1,8 @@
 import React, { useRef, useState } from 'react';
+import { useAppearance, useThemeStyles } from '../ui/AppearanceContext';
 import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ArrowLeft, ArrowRight, Check, CircleAlert, Eye, EyeOff, Mail } from 'lucide-react-native';
 import signUp from '../lib/sign-up';
-import theme from '../ui/theme';
 
 export const signUpCopy = {
   en: {
@@ -47,6 +47,7 @@ export const signUpCopy = {
 
 export default function SignUpScreen({ language, email, onEmailChange, onCreateAccount, onSignIn, onBack, backLabel, hasPreferences, busy, error }) {
   const t = signUpCopy[language] || signUpCopy.en;
+  const { colors } = useAppearance(), styles = useThemeStyles(createStyles);
   const emailRef = useRef(null), passwordRef = useRef(null), confirmationRef = useRef(null), scroll = useRef(null), submitting = useRef(false);
   const [password, setPassword] = useState(''), [confirmation, setConfirmation] = useState('');
   const [showPassword, setShowPassword] = useState(false), [showConfirmation, setShowConfirmation] = useState(false);
@@ -79,23 +80,23 @@ export default function SignUpScreen({ language, email, onEmailChange, onCreateA
     <ScrollView ref={scroll} style={styles.scroller} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" contentContainerStyle={styles.scroll}>
       <View style={styles.inner}>
         <Pressable accessibilityRole="button" disabled={busy} onPress={onBack} style={styles.back}>
-          <ArrowLeft size={18} color="#235b47" aria-hidden={true} /><Text style={styles.link}>{backLabel || (hasPreferences ? t.review : t.back)}</Text>
+          <ArrowLeft size={18} color={colors.primary} aria-hidden={true} /><Text style={styles.link}>{backLabel || (hasPreferences ? t.review : t.back)}</Text>
         </Pressable>
         <View style={styles.main}>
-          {hasPreferences && <View style={styles.saved}><View style={styles.check}><Check size={16} color="#27765a" aria-hidden={true} /></View><Text style={styles.savedText}>{t.saved}</Text></View>}
+          {hasPreferences && <View style={styles.saved}><View style={styles.check}><Check size={16} color={colors.success} aria-hidden={true} /></View><Text style={styles.savedText}>{t.saved}</Text></View>}
           <Text accessibilityRole="header" style={styles.heading}>{confirmationEmail ? t.checkEmail : t.heading}</Text>
           <Text style={styles.description}>{confirmationEmail ? t.confirmationIntro : t.description}</Text>
           {confirmationEmail ? <View style={styles.confirmation} accessibilityLiveRegion="polite">
-            <Mail size={30} color="#235b47" aria-hidden={true} /><Text style={styles.emailValue}>{confirmationEmail}</Text>
+            <Mail size={30} color={colors.primary} aria-hidden={true} /><Text style={styles.emailValue}>{confirmationEmail}</Text>
             <Text style={styles.secondary}>{t.confirmationExisting}</Text>
             {hasPreferences && <Text style={styles.secondary}>{t.confirmationNote}</Text>}
             <Pressable accessibilityRole="button" style={styles.textButton} onPress={() => { setConfirmationEmail(null); onEmailChange(email); }}><Text style={styles.link}>{t.changeEmail}</Text></Pressable>
           </View> : <View style={styles.form}>
             <View style={styles.field}>
               <Text style={styles.label}>{t.email}</Text>
-              <TextInput ref={emailRef} value={email} onChangeText={onEmailChange} accessibilityLabel={t.email}
+              <TextInput placeholderTextColor={colors.muted} selectionColor={colors.primary} ref={emailRef} value={email} onChangeText={onEmailChange} accessibilityLabel={t.email}
                 accessibilityHint={touched.email && errors.email ? t[errors.email] : undefined}
-                placeholder={t.emailPlaceholder} placeholderTextColor="#85949e" keyboardType="email-address" autoCapitalize="none" autoCorrect={false}
+                placeholder={t.emailPlaceholder} keyboardType="email-address" autoCapitalize="none" autoCorrect={false}
                 autoComplete="email" textContentType="emailAddress" editable={!busy} returnKeyType="next"
                 onSubmitEditing={() => passwordRef.current?.focus()} onFocus={() => setFocused('email')}
                 onBlur={() => { setFocused(null); setTouched(value => ({ ...value, email: true })); }}
@@ -105,26 +106,26 @@ export default function SignUpScreen({ language, email, onEmailChange, onCreateA
             {[['password', password, setPassword, passwordRef, showPassword, setShowPassword], ['confirmation', confirmation, setConfirmation, confirmationRef, showConfirmation, setShowConfirmation]].map(([key, value, update, ref, show, toggle]) => <View key={key} style={styles.field}>
               <Text style={styles.label}>{t[key]}</Text>
               <View style={[styles.inputRow, focused === key && styles.focused, touched[key] && errors[key] && styles.invalid]}>
-                <TextInput ref={ref} value={value} onChangeText={update} accessibilityLabel={t[key]}
+                <TextInput placeholderTextColor={colors.muted} selectionColor={colors.primary} ref={ref} value={value} onChangeText={update} accessibilityLabel={t[key]}
                   accessibilityHint={touched[key] && errors[key] ? t[errors[key]] : key === 'password' ? t.passwordHint : undefined}
-                  placeholder={key === 'password' ? t.passwordPlaceholder : t.confirmationPlaceholder} placeholderTextColor="#85949e"
+                  placeholder={key === 'password' ? t.passwordPlaceholder : t.confirmationPlaceholder}
                   secureTextEntry={!show} autoComplete="new-password" textContentType="newPassword" autoCapitalize="none" autoCorrect={false} editable={!busy}
                   returnKeyType={key === 'password' ? 'next' : 'go'} onSubmitEditing={key === 'password' ? () => confirmationRef.current?.focus() : submit}
                   onFocus={() => setFocused(key)} onBlur={() => { setFocused(null); setTouched(previous => ({ ...previous, [key]: true })); }} style={styles.input} />
                 <Pressable accessibilityRole="button" disabled={busy} accessibilityState={{ selected: show }}
                   accessibilityLabel={key === 'password' ? show ? t.hide : t.show : show ? t.hideConfirmation : t.showConfirmation}
                   onPress={() => toggle(previous => !previous)} style={styles.eye}>
-                  {show ? <EyeOff size={20} color="#657786" aria-hidden={true} /> : <Eye size={20} color="#657786" aria-hidden={true} />}
+                  {show ? <EyeOff size={20} color={colors.muted} aria-hidden={true} /> : <Eye size={20} color={colors.muted} aria-hidden={true} />}
                 </Pressable>
               </View>
               {key === 'password' && !fieldError(key) && <Text style={styles.hint}>{t.passwordHint}</Text>}
               {fieldError(key)}
             </View>)}
-            {!!error && <View accessibilityRole="alert" style={styles.errorRow}><CircleAlert size={18} color="#a12632" aria-hidden={true} /><Text style={styles.error}>{error}</Text></View>}
+            {!!error && <View accessibilityRole="alert" style={styles.errorRow}><CircleAlert size={18} color={colors.error} aria-hidden={true} /><Text style={styles.error}>{error}</Text></View>}
             <Pressable accessibilityRole="button" disabled={busy} accessibilityState={{ disabled: busy, busy }} onPress={submit}
               style={({ pressed }) => [styles.primary, (pressed || busy) && styles.pressed]}>
               <Text style={styles.primaryText}>{busy ? t.creating : t.create}</Text>
-              {busy ? <ActivityIndicator color="#ffffff" /> : <ArrowRight size={20} color="#ffffff" aria-hidden={true} />}
+              {busy ? <ActivityIndicator color={colors.onPrimary} /> : <ArrowRight size={20} color={colors.onPrimary} aria-hidden={true} />}
             </Pressable>
             {hasPreferences && <Text style={styles.note}>{t.note}</Text>}
           </View>}
@@ -137,24 +138,24 @@ export default function SignUpScreen({ language, email, onEmailChange, onCreateA
   </KeyboardAvoidingView>;
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#ffffff' }, scroller: { flex: 1 }, scroll: { flexGrow: 1, alignItems: 'center' },
+function createStyles(colors, palettes) { return StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.surface }, scroller: { flex: 1 }, scroll: { flexGrow: 1, alignItems: 'center' },
   inner: { width: '100%', maxWidth: 420, flexGrow: 1, paddingHorizontal: 24, paddingBottom: 16 },
   back: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, alignSelf: 'flex-start' },
   main: { paddingTop: 8, paddingBottom: 12 }, saved: { flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 20 },
-  check: { width: 29, height: 29, borderRadius: 15, backgroundColor: '#e4f3e7', justifyContent: 'center', alignItems: 'center' },
-  savedText: { flex: 1, color: '#27765a', fontSize: 14, lineHeight: 21 },
-  heading: { fontSize: 29, lineHeight: 36, fontWeight: '700', color: theme.colors.ink, marginBottom: 8, letterSpacing: -0.5 }, description: { color: theme.colors.muted, fontSize: 15, lineHeight: 24 },
-  form: { marginTop: 24, gap: 16 }, field: { gap: 8 }, label: { color: '#3d4d5c', fontSize: 14, lineHeight: 20, fontWeight: '600' },
-  inputRow: { minHeight: 52, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: theme.colors.line, borderRadius: 13, backgroundColor: '#ffffff' },
-  input: { flex: 1, minWidth: 0, minHeight: 50, color: '#172b3a', fontSize: 16, paddingHorizontal: 14, paddingVertical: 12 },
-  emailInput: { flex: 0, borderWidth: 1, borderColor: theme.colors.line, borderRadius: 13 }, focused: { borderColor: '#235b47', backgroundColor: '#f7fbf8' }, invalid: { borderColor: '#a12632' },
-  eye: { minWidth: 44, minHeight: 44, justifyContent: 'center', alignItems: 'center' }, hint: { color: '#657786', fontSize: 12, lineHeight: 18 },
-  primary: { minHeight: 54, flexDirection: 'row', gap: 10, justifyContent: 'center', alignItems: 'center', padding: 14, backgroundColor: theme.colors.primary, borderRadius: 13, marginTop: 6 },
-  primaryText: { color: '#ffffff', fontSize: 17, lineHeight: 23, fontWeight: '600', flexShrink: 1 }, pressed: { opacity: 0.7 },
-  note: { color: '#657786', fontSize: 12, lineHeight: 19, textAlign: 'center' }, returning: { width: '100%', maxWidth: 420, alignSelf: 'center', paddingHorizontal: 24, paddingTop: 4, paddingBottom: 12, flexDirection: 'row', flexWrap: 'wrap', columnGap: 4, justifyContent: 'center', alignItems: 'center' },
-  textButton: { minWidth: 44, minHeight: 44, justifyContent: 'center', paddingHorizontal: 3 }, link: { color: '#235b47', fontSize: 14, lineHeight: 21, fontWeight: '500' },
-  signIn: { color: '#235b47', fontSize: 15, lineHeight: 22, fontWeight: '600', textDecorationLine: 'underline' }, secondary: { color: '#657786', fontSize: 14, lineHeight: 22 },
-  fieldError: { color: '#a12632', fontSize: 13, lineHeight: 19 }, errorRow: { flexDirection: 'row', gap: 8, alignItems: 'flex-start' }, error: { flex: 1, color: '#a12632', fontSize: 14, lineHeight: 21 },
-  confirmation: { marginTop: 28, gap: 16, alignItems: 'flex-start' }, emailValue: { fontSize: 17, lineHeight: 25, fontWeight: '600', color: '#172b3a', alignSelf: 'stretch' }
-});
+  check: { width: 29, height: 29, borderRadius: 15, backgroundColor: colors.successSoft, justifyContent: 'center', alignItems: 'center' },
+  savedText: { flex: 1, color: colors.success, fontSize: 14, lineHeight: 21 },
+  heading: { fontSize: 29, lineHeight: 36, fontWeight: '700', color: colors.ink, marginBottom: 8, letterSpacing: -0.5 }, description: { color: colors.muted, fontSize: 15, lineHeight: 24 },
+  form: { marginTop: 24, gap: 16 }, field: { gap: 8 }, label: { color: colors.ink, fontSize: 14, lineHeight: 20, fontWeight: '600' },
+  inputRow: { minHeight: 52, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: colors.line, borderRadius: 13, backgroundColor: colors.surface },
+  input: { flex: 1, minWidth: 0, minHeight: 50, color: colors.ink, fontSize: 16, paddingHorizontal: 14, paddingVertical: 12 },
+  emailInput: { flex: 0, borderWidth: 1, borderColor: colors.line, borderRadius: 13 }, focused: { borderColor: colors.primary, backgroundColor: colors.inputFocused }, invalid: { borderColor: colors.error },
+  eye: { minWidth: 44, minHeight: 44, justifyContent: 'center', alignItems: 'center' }, hint: { color: colors.muted, fontSize: 12, lineHeight: 18 },
+  primary: { minHeight: 54, flexDirection: 'row', gap: 10, justifyContent: 'center', alignItems: 'center', padding: 14, backgroundColor: colors.primary, borderRadius: 13, marginTop: 6 },
+  primaryText: { color: colors.onPrimary, fontSize: 17, lineHeight: 23, fontWeight: '600', flexShrink: 1 }, pressed: { opacity: 0.7 },
+  note: { color: colors.muted, fontSize: 12, lineHeight: 19, textAlign: 'center' }, returning: { width: '100%', maxWidth: 420, alignSelf: 'center', paddingHorizontal: 24, paddingTop: 4, paddingBottom: 12, flexDirection: 'row', flexWrap: 'wrap', columnGap: 4, justifyContent: 'center', alignItems: 'center' },
+  textButton: { minWidth: 44, minHeight: 44, justifyContent: 'center', paddingHorizontal: 3 }, link: { color: colors.primary, fontSize: 14, lineHeight: 21, fontWeight: '500' },
+  signIn: { color: colors.primary, fontSize: 15, lineHeight: 22, fontWeight: '600', textDecorationLine: 'underline' }, secondary: { color: colors.muted, fontSize: 14, lineHeight: 22 },
+  fieldError: { color: colors.error, fontSize: 13, lineHeight: 19 }, errorRow: { flexDirection: 'row', gap: 8, alignItems: 'flex-start' }, error: { flex: 1, color: colors.error, fontSize: 14, lineHeight: 21 },
+  confirmation: { marginTop: 28, gap: 16, alignItems: 'flex-start' }, emailValue: { fontSize: 17, lineHeight: 25, fontWeight: '600', color: colors.ink, alignSelf: 'stretch' }
+}); }

@@ -13,6 +13,8 @@ const copy = {
     discard: 'Discard device changes', confirmTitle: 'Discard all pending changes?',
     confirmBody: 'This removes unsynced edits from this phone and shows the last downloaded account calendar. Changes already saved to your account are kept.',
     keep: 'Keep changes', confirm: 'Discard pending changes', failed: 'Could not update the saved changes. Please try again.',
+    fields: { endDate: 'Through', child: 'For', location: 'Location', responsible: 'Responsible adult', items: 'Bring', notes: 'Notes', importance: 'Importance', recurrence: 'Repeats' },
+    values: { __family__: 'Everyone', low: 'Low', normal: 'Normal', high: 'High', none: 'Does not repeat', daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', yearly: 'Yearly' },
   },
   zh: {
     SUBSCRIBED: '已是最新', CONNECTING: '正在连接…', SYNCING: '正在同步…', CACHED: '已保存在此手机',
@@ -27,6 +29,8 @@ const copy = {
     discard: '放弃此手机上的更改', confirmTitle: '放弃全部待同步更改？',
     confirmBody: '这会从此手机移除尚未同步的编辑，并显示上次下载的账户日历。已保存到账户的更改会保留。',
     keep: '保留更改', confirm: '放弃待同步更改', failed: '无法更新已保存的更改，请重试。',
+    fields: { endDate: '结束日期', child: '参与者', location: '地点', responsible: '负责的成人', items: '携带物品', notes: '备注', importance: '重要性', recurrence: '重复' },
+    values: { __family__: '全家人', low: '低', normal: '普通', high: '高', none: '不重复', daily: '每天', weekly: '每周', monthly: '每月', yearly: '每年' },
   },
 };
 module.exports = copy;

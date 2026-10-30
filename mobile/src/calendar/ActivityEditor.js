@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Pressable, ScrollView, StyleSheet, Switch, Text, View
 } from 'react-native';
@@ -8,7 +8,14 @@ import {
 } from 'lucide-react-native';
 import calendar from '../lib/calendar';
 import model from './model';
-import { colors, Button, Field } from './ui';
+import { Button, Field } from './ui';
+import { useAppearance } from '../ui/AppearanceContext';
+
+function useEditorStyles() {
+  const { colors } = useAppearance();
+  const s = useMemo(() => createStyles(colors), [colors]);
+  return { colors, s };
+}
 
 const COPY = {
   en: {
@@ -18,7 +25,7 @@ const COPY = {
     responsible: 'Pickup / responsible adult', adultHint: 'For example, Dad', items: 'What to bring', itemsHint: 'Water bottle, cleats, or anything else',
     notes: 'Notes', notesHint: 'Anything else to remember', importance: 'Importance', low: 'Low', normal: 'Normal', high: 'High',
     reminder: 'Reminder preference', noReminder: 'None', atStart: 'At the start', before10: '10 min before', before30: '30 min before',
-    reminderHint: 'Saved with this activity only. Phone notifications are not scheduled yet.',
+    reminderHint: 'Reminder preferences are saved with this activity. Phone notifications depend on your settings and permission.',
     repeats: 'Repeats', none: 'Does not repeat', daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', yearly: 'Yearly',
     every: 'Every', dayUnit: 'days', weekUnit: 'weeks', monthUnit: 'months', yearUnit: 'years', through: 'Through',
     interval: 'Repeat every', intervalHint: '1–12', weekdays: 'Days of the week', until: 'Repeat until (optional)',
@@ -51,7 +58,7 @@ const COPY = {
     responsible: '接送／负责人', adultHint: '例如：爸爸', items: '需要携带', itemsHint: '水壶、球鞋或其他物品',
     notes: '备注', notesHint: '补充活动详情', importance: '重要程度', low: '低', normal: '普通', high: '高',
     reminder: '提醒偏好', noReminder: '无', atStart: '开始时', before10: '提前 10 分钟', before30: '提前 30 分钟',
-    reminderHint: '仅保存到这项活动，暂不会安排手机通知。',
+    reminderHint: '提醒偏好会随此活动保存。手机通知取决于你的设置与授权。',
     repeats: '重复', none: '不重复', daily: '每天', weekly: '每周', monthly: '每月', yearly: '每年',
     every: '每', dayUnit: '天', weekUnit: '周', monthUnit: '个月', yearUnit: '年', through: '截止',
     interval: '重复间隔', intervalHint: '1–12', weekdays: '每周日期', until: '重复截止日期（可选）',
@@ -79,13 +86,14 @@ const COPY = {
   }
 };
 
-const text = value => value == null ? '' : String(value);
+const text = value => typeof value === 'string' ? value : typeof value === 'number' && Number.isFinite(value) ? String(value) : '';
 const repeated = model.isRecurringActivity;
 const readOnlyEvent = event => !!(event?.externalSource || event?.isBuiltInHoliday);
 const reminderKey = value => value == null ? 'none' : String(value);
 const reminderNumber = value => value === 'none' ? null : Number(value);
 
 function FormChoices({ label, options, value, onChange, disabled, error, onLayout }) {
+  const { colors, s } = useEditorStyles();
   return <View onLayout={onLayout} style={s.choiceGroup}>
     <Text style={s.label}>{label}</Text>
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.choiceList} keyboardShouldPersistTaps="handled">
@@ -112,7 +120,8 @@ export function ActivityEditor(props) {
   return <EditorBody key={`${props.event?.id ?? 'new'}:${dateIdentity(props.date)}`} {...props} />;
 }
 
-function EditorBody({ event = null, date, kids = [], preferences, language = 'en', busy, error, onSave, onCancel, onDirtyChange, scope }) {
+function EditorBody({ event = null, date, kids = [], preferences, language = 'en', busy, disabled = false, error, onSave, onCancel, onDirtyChange, scope }) {
+  const { colors, s } = useEditorStyles();
   const t = COPY[language] || COPY.en;
   const [form, setForm] = useState(() => model.initialEventForm(event, date, preferences));
   const initialForm = useRef(form);
@@ -120,9 +129,10 @@ function EditorBody({ event = null, date, kids = [], preferences, language = 'en
   const [failure, setFailure] = useState('');
   const [saving, setSaving] = useState(false);
   const touched = useRef(new Set());
+  const draftIdentity = useRef(null);
   const active = useRef(true), request = useRef(false), scroll = useRef(null);
   const inputs = useRef({}), positions = useRef({});
-  const readOnly = readOnlyEvent(event), locked = !!busy || saving || readOnly;
+  const readOnly = readOnlyEvent(event), locked = !!busy || saving || readOnly || disabled;
   useEffect(() => { active.current = true; return () => { active.current = false; }; }, []);
   useEffect(() => { onDirtyChange?.(model.eventFormChanged(initialForm.current, form)); }, [form, onDirtyChange]);
 
@@ -172,6 +182,7 @@ function EditorBody({ event = null, date, kids = [], preferences, language = 'en
     if (locked || request.current || typeof onSave !== 'function') return;
     request.current = true;
     const submission = { ...form };
+    if (!event && draftIdentity.current !== null) submission.id = draftIdentity.current;
     if (scope === 'occurrence') Object.assign(submission, { recurrence: 'none', repeatInterval: 1, repeatDays: [], repeatUntil: '' });
     // Preserve existing metadata, including legacy values the current choices do
     // not expose. The model receives only metadata the person actually changed.
@@ -189,6 +200,7 @@ function EditorBody({ event = null, date, kids = [], preferences, language = 'en
       revealError(result.errors || {});
       return;
     }
+    if (!event && draftIdentity.current === null) draftIdentity.current = result.event.id;
     setSaving(true); setFailure('');
     try {
       const saved = await onSave(result.event, { original: event });
@@ -200,14 +212,14 @@ function EditorBody({ event = null, date, kids = [], preferences, language = 'en
   const inputProps = { editable: !locked, autoCorrect: false };
   return <View style={s.panel}>
     <ScrollView ref={scroll} style={s.scroll} contentContainerStyle={s.formContent} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
-      {(repeated(event) || scope === 'occurrence') && <View style={s.notice}><Repeat2 color={colors.blue} size={18} /><Text style={s.noticeText}>{scope === 'occurrence' ? t.occurrenceHint : t.seriesHint}</Text></View>}
+      {(repeated(event) || scope === 'occurrence') && <View style={s.notice}><Repeat2 color={colors.primary} size={18} /><Text style={s.noticeText}>{scope === 'occurrence' ? t.occurrenceHint : t.seriesHint}</Text></View>}
       {readOnly && <Text accessibilityRole="alert" style={s.error}>{t.readOnly}</Text>}
       {!!(Object.keys(errors).length > 0 || error || failure) && <View style={s.errorBox}><Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={s.error}>{error || failure || t.validation}</Text></View>}
       <Field label={t.title} value={text(form.title)} onChangeText={value => change('title', value)} error={fieldError('title')} placeholder={t.titleHint} autoCapitalize="sentences" {...field('title')} {...inputProps} />
       <FormChoices label={t.person} options={people} value={childValue} disabled={locked} error={fieldError('child')} onChange={value => change('child', value)} onLayout={position('child')} />
       <Field label={t.date} value={text(form.date)} onChangeText={value => change('date', value)} error={fieldError('date')} placeholder={t.dateHint} maxLength={10} autoCapitalize="none" {...field('date')} {...inputProps} />
       <Field label={t.endDate} value={text(form.endDate)} onChangeText={value => change('endDate', value)} error={fieldError('endDate')} placeholder={t.dateHint} maxLength={10} autoCapitalize="none" {...field('endDate')} {...inputProps} />
-      <View style={s.toggleRow}><Text style={s.toggleLabel}>{t.allDay}</Text><Switch accessibilityLabel={t.allDay} value={!!form.allDay} disabled={locked} onValueChange={value => change('allDay', value)} trackColor={{ false: '#CAD7DB', true: colors.blue }} thumbColor="#FFFFFF" /></View>
+      <View style={s.toggleRow}><Text style={s.toggleLabel}>{t.allDay}</Text><Switch accessibilityLabel={t.allDay} value={!!form.allDay} disabled={locked} onValueChange={value => change('allDay', value)} trackColor={{ false: colors.line, true: colors.primary }} thumbColor={colors.onPrimary} /></View>
       {!form.allDay && <><View style={s.timeRow} onLayout={layout => { position('start')(layout); position('end')(layout); }}><View style={s.flex}><Field label={t.start} value={text(form.start)} onChangeText={value => change('start', value)} error={fieldError('start')} placeholder="09:00" maxLength={5} inputRef={input => { inputs.current.start = input; }} {...inputProps} /></View><View style={s.flex}><Field label={t.end} value={text(form.end)} onChangeText={value => change('end', value)} error={fieldError('end')} placeholder="10:00" maxLength={5} inputRef={input => { inputs.current.end = input; }} {...inputProps} /></View></View><Text style={s.hint}>{t.timeHint}</Text></>}
       <Field label={t.location} value={text(form.location)} onChangeText={value => change('location', value)} placeholder={t.placeHint} {...field('location')} {...inputProps} />
       <Field label={t.responsible} value={text(form.responsible)} onChangeText={value => change('responsible', value)} error={fieldError('responsible')} placeholder={t.adultHint} maxLength={60} {...field('responsible')} {...inputProps} />
@@ -234,10 +246,12 @@ function EditorBody({ event = null, date, kids = [], preferences, language = 'en
 }
 
 function DetailRow({ icon: Icon, label, children }) {
-  return <View style={s.detailRow}><View style={s.detailIcon}><Icon size={20} color={colors.blue} /></View><View style={s.detailCopy}><Text style={s.detailLabel}>{label}</Text>{typeof children === 'string' ? <Text style={s.detailValue}>{children}</Text> : children}</View></View>;
+  const { colors, s } = useEditorStyles();
+  return <View style={s.detailRow}><View style={s.detailIcon}><Icon size={20} color={colors.primary} /></View><View style={s.detailCopy}><Text style={s.detailLabel}>{label}</Text>{typeof children === 'string' ? <Text style={s.detailValue}>{children}</Text> : children}</View></View>;
 }
 
 export function ActivityDetails({ event, occurrenceDate, occurrenceStartDate, kids = [], language = 'en', canEdit, busy, onEdit, onDelete, onDeleteRequest }) {
+  const { colors, s } = useEditorStyles();
   const t = COPY[language] || COPY.en;
   const activity = event || {}, editable = !!canEdit && !readOnlyEvent(activity);
   const [confirmDelete, setConfirmDelete] = useState(false), [deleting, setDeleting] = useState(false), [failure, setFailure] = useState('');
@@ -247,20 +261,21 @@ export function ActivityDetails({ event, occurrenceDate, occurrenceStartDate, ki
   useEffect(() => { setConfirmDelete(false); setFailure(''); }, [activity.id]);
   const profiles = calendar.kidsForEvent(activity, kids);
   const family = !activity.child || activity.child === '__family__';
-  const childLabel = family ? t.family : profiles.map(kid => kid.name).filter(Boolean).join(' · ') || text(activity.child);
+  const childLabel = family ? t.family : profiles.map(kid => text(kid.name)).filter(Boolean).join(' · ') || text(activity.child) || t.family;
   const time = activity.allDay ? t.allDay : calendar.formatTime(activity.start, language)
     ? `${calendar.formatTime(activity.start, language)}${calendar.formatTime(activity.end, language) ? ` – ${calendar.formatTime(activity.end, language)}` : ''}` : t.noTime;
   const chosenDate = occurrenceDate || activity.startDate;
   const occurrences = calendar.occurrencesForDate(activity, chosenDate).filter(item => !occurrenceStartDate || item.startDate === occurrenceStartDate);
   const occurrence = occurrences.length === 1 ? occurrences[0] : null;
-  const reminder = activity.reminderMinutes;
-  const reminderLabel = reminder == null ? t.noReminder : Number(reminder) === 0 ? t.atStart
+  const reminder = text(activity.reminderMinutes);
+  const reminderLabel = !reminder ? t.noReminder : Number(reminder) === 0 ? t.atStart
     : language === 'zh' ? `提前 ${reminder} 分钟` : `${reminder} min before`;
   const weekdayNames = language === 'zh' ? ['周日', '周一', '周二', '周三', '周四', '周五', '周六'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const repeatInterval = Number(activity.repeatInterval) || 1;
   const repeatUnit = ({ daily: t.dayUnit, weekly: t.weekUnit, monthly: t.monthUnit, yearly: t.yearUnit })[activity.recurrence];
   const recurrenceLabel = repeatInterval > 1 && repeatUnit
-    ? `${t.every} ${repeatInterval} ${repeatUnit}` : t[activity.recurrence] || (activity.day ? t.weekly : text(activity.recurrence));
+    ? `${t.every} ${repeatInterval} ${repeatUnit}` : ['none', 'daily', 'weekly', 'monthly', 'yearly'].includes(activity.recurrence)
+      ? t[activity.recurrence] : text(activity.day) ? t.weekly : text(activity.recurrence);
   const repeatDays = Array.isArray(activity.repeatDays) ? [...new Set(activity.repeatDays.map(Number))]
     .filter(day => Number.isInteger(day) && day >= 0 && day < 7).map(day => weekdayNames[day]).join(' · ') : '';
 
@@ -275,21 +290,21 @@ export function ActivityDetails({ event, occurrenceDate, occurrenceStartDate, ki
 
   return <View style={s.panel}>
     <ScrollView ref={scroll} style={s.scroll} contentContainerStyle={s.detailContent}>
-      <View style={s.detailHeading}><Text style={s.eventIcon} accessible={false}>{activity.icon || '📅'}</Text><View style={s.flex}><Text style={s.detailPerson}>{childLabel}</Text><Text accessibilityRole="header" style={s.eventTitle}>{activity.title || t.title}</Text></View></View>
+      <View style={s.detailHeading}><Text style={s.eventIcon} accessible={false}>{text(activity.icon) || '📅'}</Text><View style={s.flex}><Text style={s.detailPerson}>{childLabel}</Text><Text accessibilityRole="header" style={s.eventTitle}>{text(activity.title) || t.title}</Text></View></View>
       {activity.status === 'cancelled' && <View style={s.cancelled}><Text style={s.cancelledText}>{t.cancelled}</Text></View>}
       <DetailRow icon={CalendarDays} label={t.when}><Text style={s.detailValue}>{dateText(occurrence?.startDate || chosenDate, language, t.noDate)}</Text>{!!(occurrence?.endDate || (!repeated(activity) && activity.endDate)) && (occurrence?.endDate || activity.endDate) !== (occurrence?.startDate || activity.startDate) && <Text style={s.detailSecondary}>– {dateText(occurrence?.endDate || activity.endDate, language, t.noDate)}</Text>}<Text style={s.detailSecondary}>{time}</Text>{occurrences.length > 1 && <Text style={s.detailSecondary}>{t.overlapping}</Text>}</DetailRow>
       {repeated(activity) && !!activity.startDate && !!chosenDate && chosenDate !== activity.startDate && <Text style={s.seriesDate}>{t.seriesStart}: {dateText(activity.startDate, language, t.noDate)}</Text>}
       <DetailRow icon={Users} label={t.who}>{childLabel}</DetailRow>
-      {!!activity.location && <DetailRow icon={MapPin} label={t.where}>{text(activity.location)}</DetailRow>}
-      <DetailRow icon={UserRound} label={t.adult}>{activity.responsible || t.notAssigned}</DetailRow>
-      {!!activity.items && <DetailRow icon={Package} label={t.supplies}>{text(activity.items)}</DetailRow>}
-      <DetailRow icon={Flag} label={t.importance}>{t[activity.importance] || text(activity.importance) || t.normal}</DetailRow>
+      {!!text(activity.location) && <DetailRow icon={MapPin} label={t.where}>{text(activity.location)}</DetailRow>}
+      <DetailRow icon={UserRound} label={t.adult}>{text(activity.responsible) || t.notAssigned}</DetailRow>
+      {!!text(activity.items) && <DetailRow icon={Package} label={t.supplies}>{text(activity.items)}</DetailRow>}
+      <DetailRow icon={Flag} label={t.importance}>{['low', 'normal', 'high'].includes(activity.importance) ? t[activity.importance] : text(activity.importance) || t.normal}</DetailRow>
       {repeated(activity) && <DetailRow icon={Repeat2} label={t.repeats}><Text style={s.detailValue}>{recurrenceLabel}</Text>
         {activity.recurrence === 'weekly' && !!repeatDays && <Text style={s.detailSecondary}>{repeatDays}</Text>}
         {!!activity.repeatUntil && <Text style={s.detailSecondary}>{t.through}: {dateText(activity.repeatUntil, language, t.noDate)}</Text>}
       </DetailRow>}
       {Object.prototype.hasOwnProperty.call(activity, 'reminderMinutes') && <DetailRow icon={Bell} label={t.reminder}><Text style={s.detailValue}>{reminderLabel}</Text><Text style={s.detailSecondary}>{t.reminderHint}</Text></DetailRow>}
-      {!!activity.notes && <DetailRow icon={NotebookPen} label={t.notes}>{text(activity.notes)}</DetailRow>}
+      {!!text(activity.notes) && <DetailRow icon={NotebookPen} label={t.notes}>{text(activity.notes)}</DetailRow>}
       {readOnlyEvent(activity) && <Text style={s.detailSecondary}>{t.readOnly}</Text>}
       {!!failure && <Text accessibilityRole="alert" style={s.error}>{failure}</Text>}
       {editable && confirmDelete && <View style={s.deleteConfirm} onLayout={() => scroll.current?.scrollToEnd({ animated: true })}>
@@ -302,17 +317,17 @@ export function ActivityDetails({ event, occurrenceDate, occurrenceStartDate, ki
   </View>;
 }
 
-const s = StyleSheet.create({
+const createStyles = colors => StyleSheet.create({
   panel: { flexShrink: 1 }, scroll: { flexShrink: 1 }, flex: { flex: 1, minWidth: 0 }, formContent: { paddingHorizontal: 20, paddingTop: 7, paddingBottom: 22 },
-  label: { color: '#172E3B', fontSize: 14, fontWeight: '600' }, choiceGroup: { gap: 9, marginBottom: 19 }, choiceList: { flexDirection: 'row', gap: 8, paddingBottom: 3 },
-  choice: { minHeight: 44, minWidth: 44, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: '#D6E1E5', backgroundColor: '#F7F9F8', justifyContent: 'center', alignItems: 'center' },
-  choiceSelected: { backgroundColor: '#1F6898', borderColor: '#1F6898' }, choiceText: { color: '#253C49', fontSize: 13, fontWeight: '600' }, choiceSelectedText: { color: '#FFFFFF' }, dim: { opacity: 0.5 },
-  toggleRow: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }, toggleLabel: { fontSize: 15, fontWeight: '600', color: '#172E3B' }, timeRow: { flexDirection: 'row', gap: 12 },
-  hint: { color: '#627680', fontSize: 13, lineHeight: 20, marginTop: -7, marginBottom: 19 }, weekdays: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 }, weekday: { minWidth: 44, minHeight: 44, paddingHorizontal: 8, borderRadius: 12, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#D6E1E5', backgroundColor: '#F7F9F8' },
-  footer: { flexDirection: 'row', gap: 10, padding: 16, backgroundColor: '#FFFFFF', borderTopWidth: 1, borderTopColor: '#DCE6E8', flexShrink: 0 }, cancelButton: { flex: 1 }, saveButton: { flex: 2 },
-  notice: { flexDirection: 'row', gap: 9, borderRadius: 12, padding: 12, backgroundColor: '#EAF3FA', marginBottom: 16 }, noticeText: { flex: 1, color: '#1F6898', fontSize: 13, lineHeight: 20 }, error: { color: '#A53242', fontSize: 13, lineHeight: 20 }, errorBox: { padding: 12, backgroundColor: '#FFF0F2', borderRadius: 12, marginBottom: 17 },
-  detailContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24 }, detailHeading: { flexDirection: 'row', gap: 14, alignItems: 'center', padding: 17, borderRadius: 17, backgroundColor: '#F2F7FA', marginBottom: 8 }, eventIcon: { fontSize: 31 }, detailPerson: { fontSize: 13, fontWeight: '600', color: '#3C785A', marginBottom: 5 }, eventTitle: { fontSize: 23, lineHeight: 30, fontWeight: '700', color: '#172E3B' },
-  detailRow: { flexDirection: 'row', gap: 12, paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: '#E9EFF1' }, detailIcon: { width: 23, paddingTop: 2 }, detailCopy: { flex: 1, gap: 5 }, detailLabel: { color: '#627680', fontSize: 13 }, detailValue: { color: '#172E3B', fontSize: 15, lineHeight: 23 }, detailSecondary: { color: '#627680', fontSize: 13, lineHeight: 21 }, seriesDate: { color: '#1F6898', fontSize: 13, lineHeight: 20, paddingLeft: 35, marginTop: 8 },
-  cancelled: { alignSelf: 'flex-start', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 8, backgroundColor: '#FFF0F2', marginTop: 9 }, cancelledText: { color: '#A53242', fontSize: 13, fontWeight: '600' },
-  deleteConfirm: { padding: 16, gap: 12, borderRadius: 14, borderWidth: 1, borderColor: '#F0CDD3', backgroundColor: '#FFF7F8', marginTop: 20 }, deleteTitle: { fontSize: 17, fontWeight: '700', color: '#A53242' }
+  label: { color: colors.ink, fontSize: 14, fontWeight: '600' }, choiceGroup: { gap: 9, marginBottom: 19 }, choiceList: { flexDirection: 'row', gap: 8, paddingBottom: 3 },
+  choice: { minHeight: 44, minWidth: 44, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.input, justifyContent: 'center', alignItems: 'center' },
+  choiceSelected: { backgroundColor: colors.primary, borderColor: colors.primary }, choiceText: { color: colors.ink, fontSize: 13, fontWeight: '600' }, choiceSelectedText: { color: colors.onPrimary }, dim: { opacity: 0.5 },
+  toggleRow: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }, toggleLabel: { fontSize: 15, fontWeight: '600', color: colors.ink }, timeRow: { flexDirection: 'row', gap: 12 },
+  hint: { color: colors.muted, fontSize: 13, lineHeight: 20, marginTop: -7, marginBottom: 19 }, weekdays: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 }, weekday: { minWidth: 44, minHeight: 44, paddingHorizontal: 8, borderRadius: 12, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: colors.line, backgroundColor: colors.input },
+  footer: { flexDirection: 'row', gap: 10, padding: 16, backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.line, flexShrink: 0 }, cancelButton: { flex: 1 }, saveButton: { flex: 2 },
+  notice: { flexDirection: 'row', gap: 9, borderRadius: 12, padding: 12, backgroundColor: colors.primarySoft, marginBottom: 16 }, noticeText: { flex: 1, color: colors.primary, fontSize: 13, lineHeight: 20 }, error: { color: colors.error, fontSize: 13, lineHeight: 20 }, errorBox: { padding: 12, backgroundColor: colors.errorSoft, borderRadius: 12, marginBottom: 17 },
+  detailContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24 }, detailHeading: { flexDirection: 'row', gap: 14, alignItems: 'center', padding: 17, borderRadius: 17, backgroundColor: colors.primarySoft, marginBottom: 8 }, eventIcon: { fontSize: 31 }, detailPerson: { fontSize: 13, fontWeight: '600', color: colors.success, marginBottom: 5 }, eventTitle: { fontSize: 23, lineHeight: 30, fontWeight: '700', color: colors.ink },
+  detailRow: { flexDirection: 'row', gap: 12, paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: colors.line }, detailIcon: { width: 23, paddingTop: 2 }, detailCopy: { flex: 1, gap: 5 }, detailLabel: { color: colors.muted, fontSize: 13 }, detailValue: { color: colors.ink, fontSize: 15, lineHeight: 23 }, detailSecondary: { color: colors.muted, fontSize: 13, lineHeight: 21 }, seriesDate: { color: colors.primary, fontSize: 13, lineHeight: 20, paddingLeft: 35, marginTop: 8 },
+  cancelled: { alignSelf: 'flex-start', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 8, backgroundColor: colors.errorSoft, marginTop: 9 }, cancelledText: { color: colors.error, fontSize: 13, fontWeight: '600' },
+  deleteConfirm: { padding: 16, gap: 12, borderRadius: 14, borderWidth: 1, borderColor: colors.error, backgroundColor: colors.errorSoft, marginTop: 20 }, deleteTitle: { fontSize: 17, fontWeight: '700', color: colors.error }
 });

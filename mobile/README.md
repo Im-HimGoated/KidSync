@@ -59,11 +59,17 @@ activity occurrence to an accepted calendar member and wait for confirmation.
 The tab badge counts pending invitations and pickup requests for the current
 account. Shared calendar comments are available to commenters and editors.
 
-All collaboration changes use the existing server-backed sharing helpers and are
-re-read before the app reports success. Invitation links use the native share
-sheet; KidsSync does not claim that an email was sent. Shared Editor access is
-real, but editing a shared event currently opens the web calendar until the
-native shared-editor adapter is integrated with the calendar editor.
+Collaboration changes use server-backed helpers and are re-read before the app
+reports success. Invitation links use the native share sheet; KidsSync does not
+claim that an email was sent. Accepted calendars open in the native calendar,
+with owner and calendar IDs kept together so equal IDs cannot cross scopes.
+Viewer and Commenter access stays read-only. Editor saves, occurrence changes and
+Undo require the checked RPC in `supabase/mobile-shared-calendar.sql`. Until that
+additive migration is deployed, calendars remain readable and show that a server
+update is required; the native app never falls back to the older blind writer.
+Shared changes require an online server confirmation and never enter the owner
+offline queue. Foreground catch-up refreshes shared data, removes revoked access,
+and makes interrupted connections read-only until fresh access is confirmed.
 
 Owner calendars use a device-backed sync queue. Cached plans reopen without a
 connection, and ordinary activity creates, edits and deletes are written to
@@ -101,22 +107,49 @@ unfinished edits never become active preferences or leak into guest setup.
 - Preferred hours set the week timetable's initial scroll position.
 - Planning audience is retained without inventing children or hiding real plans.
 - Reminder choice initializes new event metadata. New trial events also use the
-  saved starting hours and reminder choice. This does not schedule notifications
-  or request notification permissions.
+  saved starting hours and reminder choice. Choosing a lead time alone does not
+  request notification permission or turn reminders on.
 
-Preferences are not cloud-synced. The account button now opens scrollable native
-settings, calendar preferences, English/Chinese language selection, specific help
-answers and a sign-out confirmation with retry feedback. Language is remembered
-on this device. Shared controls use a contrast-checked palette; sheets respect
-Reduce Motion and native accessibility escape. Notification delivery remains
-separate work; Help describes those limits explicitly.
+Preferences are not cloud-synced. The account button opens scrollable native
+settings, calendar preferences, appearance, phone reminders, English/Chinese
+language selection, help and confirmed sign out. Language is remembered on this
+device. Sheets respect Reduce Motion and native accessibility escape.
 
-### Local-reminder integration contract (not enabled yet)
+## Appearance
 
-`src/lib/local-reminders.js` is an injected service with no backend calls or
-push-token registration. The toolchain owner must install the SDK 58-compatible
-`expo-notifications` package before integration. This service implementation did
-not change dependencies, app permissions or live account data.
+Appearance offers Device default, Light and Dark with Sage, Ocean, Lavender and
+Rose accents. A compact live preview updates the calendar, forms and settings.
+Choices are device-local, isolated between accounts and a separate guest profile.
+An account switch uses safe defaults while that profile loads; a failed write is
+identified as preview-only and can be retried. Reset changes appearance only.
+Theme factories use semantic surfaces and on-primary text instead of treating
+literal white as both background and foreground.
+
+## Local phone reminders
+
+Phone reminders are off by default. A signed-in user can enable them in Account
+settings; only that explained action can request OS notification permission.
+Permission-denied states offer system settings and retry. Lock-screen text is
+generic and excludes activity names, people and locations. There is no push-token
+registration, remote push, email delivery, sound permission or exact-alarm grant.
+
+The SDK-compatible `expo-notifications` package is installed and the app shell
+mounts `useLocalReminders` once, including through sign-out. It reconciles only
+complete confirmed owner calendars; cached optimistic edits and shared calendars
+are not scheduling inputs. Queued changes reconcile after successful sync.
+Account changes cancel this feature's notices from the previous account before
+waiting for the new calendar to load. Notification taps validate the current
+account/calendar/event before navigating to the calendar date.
+
+The service schedules a rolling 14-day window, capped at 48 managed notices minus
+unrelated pending notices. Reopen KidsSync regularly to replenish that window.
+Other-device edits update local reminders when this app reconnects. Delivery is
+best-effort and can be delayed or silenced by Focus, OS settings or battery limits.
+
+### Reminder lifecycle contract
+
+`src/lib/local-reminders.js` remains injectable for isolated tests. The app's
+`use-local-reminders.js` and `reminder-lifecycle.js` own the native integration:
 
 - Create one `createLocalReminderService({ notifications, storage, platform })`
   per process, passing the Expo module and AsyncStorage.
@@ -139,10 +172,9 @@ not change dependencies, app permissions or live account data.
   this service does not replace another feature's global notification handler.
 
 Deterministic identifiers reconcile edits/deletions without cancelling unrelated
-notices. A `scheduled` result means native scheduling was requested, not that the
-OS displayed it; timing is best-effort, not an exact-alarm promise. Remote/push
-and email reminders are not implemented here. No real permission prompt or local
-notification delivery was tested by the isolated unit tests.
+notices. A `scheduled` result confirms an SDK scheduling request, not that the OS
+displayed it. Isolated tests cannot establish permission-prompt or delivery
+behavior; actual device results are tracked separately in `QA.md`.
 
 API reference: [Expo Notifications](https://docs.expo.dev/versions/latest/sdk/notifications/).
 
@@ -166,6 +198,13 @@ not have a server-enforced revision, so a non-cooperating writer reusing a
 version can still overwrite a snapshot. Native calendar sharing requires the
 existing calendar-member schema and RPCs. Pickup responsibility additionally
 requires `supabase/family-coordination.sql` in the connected project.
+
+Native shared editing additionally requires the reviewed additive
+`supabase/mobile-shared-calendar.sql` migration. Deployment and non-mutating
+verification queries are in `supabase/mobile-shared-calendar-review.md`. This
+source migration does not change table grants or RLS policies and has not been
+applied merely by installing the app. The older web writer remains outside its
+checked protocol; see the review for that concurrency limit.
 
 ## Run and verify
 

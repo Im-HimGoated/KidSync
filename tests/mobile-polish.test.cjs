@@ -34,8 +34,10 @@ test('account help is bilingual and is honest about notifications, sharing and g
   }
   assert.match(copy.en.faqs[4][1], /not scheduled/);
   assert.match(copy.en.faqs[5][1], /Open Family/);
-  assert.match(copy.en.faqs[5][1], /still open on the website/);
-  assert.match(copy.en.faqs[3][1], /not an offline queue/);
+  assert.match(copy.en.faqs[5][1], /depend on your role and calendar setup/);
+  assert.match(copy.en.faqs[3][1], /saved offline changes stay on this device until synced/);
+  assert.match(copy.en.faqs[3][1], /Shared changes need an online confirmation/);
+  assert.match(source, /index === 4 && onReminders \? t.remindersHelp/);
   assert.match(source, /accessibilityState=\{\{ expanded: question === index \}\}/);
   assert.match(source, /closeLabel=\{t.close\}[^]*onClose=\{onClose\}/);
 });
@@ -54,4 +56,11 @@ test('shared modal motion respects accessibility and native escape does not bypa
   assert.match(source, /reduceMotion \? 'none' : 'slide'/);
   assert.match(source, /AccessibilityInfo.isReduceMotionEnabled/);
   assert.match(source, /onAccessibilityEscape=\{\(\) => \{ if \(!busy\) onClose\(\); \}\}/);
+});
+
+test('calendar add action stays in the toolbar instead of covering mobile filters', () => {
+  const source = read('calendar/CalendarScreen.js');
+  assert.match(source, /<View style=\{s\.calendarRow\}>[^]*<IconButton icon=\{Plus\} label=\{t\.add\}/);
+  assert.doesNotMatch(source, /style=\{\(\{ pressed \}\) => \[s\.add/);
+  assert.doesNotMatch(source, /add: \{ position: 'absolute'/);
 });

@@ -31,7 +31,7 @@ test('welcome has matching complete English and Chinese copy', () => {
 });
 
 test('welcome is scrollable and uses bundled imagery with accessible actions', () => {
-  assert.match(welcome, /<ScrollView contentContainerStyle/);
+  assert.match(welcome, /<ScrollView[^>]*contentContainerStyle/);
   assert.match(welcome, /maxWidth: 560/);
   assert.match(welcome, /flexWrap: 'wrap'/);
   assert.match(welcome, /imageStyle=\{styles.heroImage\}/);

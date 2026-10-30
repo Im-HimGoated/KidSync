@@ -25,11 +25,16 @@ import CalendarScreen from './calendar/CalendarScreen';
 import phoneAccess from './lib/phone-access';
 import HomeScreen from './screens/HomeScreen';
 import FamilyScreen from './screens/FamilyScreen';
-import { colors } from './calendar/ui';
 import AccountSettings from './ui/AccountSettings';
 import useDeviceLanguage from './ui/use-device-language';
 import useScheduleSync from './lib/use-schedule-sync';
 import SyncStatus from './ui/SyncStatus';
+import { AppearanceProvider, useAppearance } from './ui/AppearanceContext';
+import useLocalReminders from './lib/use-local-reminders';
+import ReminderSettings, { reminderCopy } from './ui/ReminderSettings';
+import calendarTools from './lib/calendar';
+import sharedCalendar from '../../shared/backend/mobile-shared-calendar';
+import sharedSession from './lib/shared-calendar-session';
 
 const preferenceStore = preferences.createPreferenceStore(AsyncStorage);
 
@@ -72,18 +77,19 @@ const copy = {
 };
 
 function BottomNavigation({ language, active, onChange, familyPendingCount = 0 }) {
-  const t = copy[language];
-  return <View accessibilityRole="tablist" style={styles.bottomNav}>
+  const t = copy[language], { colors } = useAppearance();
+  return <View accessibilityRole="tablist" style={[styles.bottomNav, { backgroundColor: colors.surface, borderTopColor: colors.line }]}>
     {[{ key: 'home', label: t.home, icon: Home }, { key: 'calendar', label: t.calendar, icon: CalendarDays },
       { key: 'family', label: t.family, icon: UsersRound, count: familyPendingCount }].map(item => {
       const Icon = item.icon, selected = active === item.key;
       return <Pressable key={item.key} accessibilityRole="tab" accessibilityState={{ selected }} accessibilityLabel={item.label}
         onPress={() => onChange(item.key)} style={({ pressed }) => [styles.bottomTab, selected && styles.bottomTabSelected, pressed && { opacity: 0.55 }]}>
         <View style={styles.bottomIcon}>
-          <Icon size={21} color={selected ? colors.blue : colors.muted} strokeWidth={selected ? 2.4 : 1.8} />
-          {!!item.count && <View accessibilityLabel={`${item.count} pending`} style={styles.bottomBadge}><Text style={styles.bottomBadgeText}>{item.count > 9 ? '9+' : item.count}</Text></View>}
+          {selected && <View style={[styles.bottomIndicator, { backgroundColor: colors.primary }]} />}
+          <Icon size={21} color={selected ? colors.primary : colors.muted} strokeWidth={selected ? 2.4 : 1.8} />
+          {!!item.count && <View accessibilityLabel={`${item.count} pending`} style={[styles.bottomBadge, { backgroundColor: colors.error, borderColor: colors.surface }]}><Text style={styles.bottomBadgeText}>{item.count > 9 ? '9+' : item.count}</Text></View>}
         </View>
-        <Text style={[styles.bottomTabText, selected && styles.bottomTabTextSelected]}>{item.label}</Text>
+        <Text style={[styles.bottomTabText, { color: selected ? colors.primary : colors.muted }, selected && styles.bottomTabTextSelected]}>{item.label}</Text>
       </Pressable>;
     })}
   </View>;
@@ -100,11 +106,15 @@ function Workspace() {
   const authRequest = useRef(false);
   const [error, setError] = useState('');
   const [calendarId, setCalendarId] = useState(null);
+  const [calendarOwnerId, setCalendarOwnerId] = useState(null);
+  const [sharedSource, setSharedSource] = useState(null);
+  const [sharedAccess, setSharedAccess] = useState(null);
   const [entryScreen, setEntryScreen] = useState('welcome');
   const [workspaceView, setWorkspaceView] = useState('home');
   const [familyPendingCount, setFamilyPendingCount] = useState(0);
   const [calendarFocusDate, setCalendarFocusDate] = useState(null);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [remindersOpen, setRemindersOpen] = useState(false);
   const [onboardingInitial, setOnboardingInitial] = useState(null);
   const [pendingSetup, setPendingSetup] = useState(null);
   const [preferencesUser, setPreferencesUser] = useState(null);
@@ -118,7 +128,7 @@ function Workspace() {
   const trial = useNativeTrial(!booting && !session && entryScreen === 'trial');
   const [trialAuthIntent, setTrialAuthIntent] = useState(false), [trialSetupReturn, setTrialSetupReturn] = useState(false);
   const [trialSaving, setTrialSaving] = useState(false), [trialImportError, setTrialImportError] = useState('');
-  const importRequest = useRef(false), accountScope = useRef(null);
+  const importRequest = useRef(false), accountScope = useRef(null), sharedRequest = useRef(0), sharedScope = useRef('');
   accountScope.current = session?.user.id || null;
   const ownerSync = useScheduleSync({ client: supabase, userId: session?.user.id });
   const ownerActivityActions = useMemo(() => ({
@@ -126,6 +136,108 @@ function Workspace() {
     saveActivity: (_client, _userId, id, event, { original } = {}) => ownerSync.saveActivity(id, event, { original }),
     deleteActivity: (_client, _userId, id, eventId, { original } = {}) => ownerSync.deleteActivity(id, eventId, { original }),
   }), [ownerSync.saveActivity, ownerSync.deleteActivity]);
+  const confirmedOwnerEntries = useMemo(() => ownerSync.userId === session?.user.id && ownerSync.confirmedRow?.schedule
+    ? schedules.calendarEntries(ownerSync.confirmedRow.schedule) : [], [ownerSync.userId, ownerSync.confirmedRow, session?.user.id]);
+  const remindersReady = ownerSync.userId === session?.user.id && ownerSync.loaded && !!ownerSync.confirmedRow
+    && !['CONNECTING', 'CACHED', 'OFFLINE', 'AUTH_REQUIRED', 'STORAGE_ERROR', 'ERROR'].includes(ownerSync.status);
+  const openReminderTarget = useCallback(target => {
+    const userId = session?.user.id;
+    if (!userId || accountScope.current !== userId || !target?.calendarId || !target?.eventId) return false;
+    const selected = confirmedOwnerEntries.find(item => item.id === target.calendarId);
+    const event = selected?.data?.activities?.find(item => String(item?.id) === String(target.eventId));
+    const date = calendarTools.parseDateKey(target.date);
+    if (!event || !Number.isFinite(date.getTime()) || calendarTools.dateKey(date) !== target.date) return false;
+    setCalendarId(selected.id); setCalendarOwnerId(userId); setCalendarFocusDate(target.date); setWorkspaceView('calendar');
+    return true;
+  }, [session?.user.id, confirmedOwnerEntries]);
+  const reminders = useLocalReminders({ userId: session?.user.id, calendars: confirmedOwnerEntries,
+    ready: remindersReady, language, onNavigate: openReminderTarget });
+  const reminderText = reminderCopy[language] || reminderCopy.en;
+  const reminderHint = reminders.state.status === 'scheduled'
+    ? `${reminderText.scheduled} · ${reminders.state.scheduled || 0}`
+    : reminderText[reminders.state.status] || reminderText.waiting;
+  const actorId = session?.user.id || null;
+  const actorSharedSource = sharedSession.forActor(sharedSource, actorId);
+  const actorSharedAccess = sharedSession.forActor(sharedAccess, actorId);
+  const sharedKey = actorSharedAccess && actorId
+    ? JSON.stringify([actorId, actorSharedAccess.ownerId, actorSharedAccess.calendarId]) : '';
+  sharedScope.current = sharedKey;
+  const sharedActivityActions = useMemo(() => {
+    if (!actorSharedSource || !actorSharedAccess || !actorId || !sharedKey) return null;
+    try {
+      return sharedCalendar.createSharedCalendarAdapter({ client: supabase, account: session.user, calendar: actorSharedSource,
+        isCurrent: () => accountScope.current === actorId && sharedScope.current === sharedKey });
+    } catch { return null; }
+  }, [actorId, session?.user.email, actorSharedSource?.id, actorSharedSource?.ownerId,
+    actorSharedSource?.invitation?.id, actorSharedAccess?.calendarId, actorSharedAccess?.ownerId, sharedKey]);
+
+  const selectOwnerCalendar = useCallback(id => {
+    setCalendarId(id); setCalendarOwnerId(session?.user.id || null);
+  }, [session?.user.id]);
+
+  const openSharedCalendar = useCallback(async context => {
+    const account = session?.user, calendar = context?.calendar, invitation = context?.invitation;
+    if (!account?.id || !account.email || !calendar?.id || !calendar.ownerId || !invitation?.id) {
+      throw new Error('Choose an accepted shared calendar.');
+    }
+    const source = sharedSession.attachActor({ id: calendar.id, ownerId: calendar.ownerId, name: calendar.name, invitation }, account.id);
+    const ticket = ++sharedRequest.current;
+    const access = await sharedCalendar.readSharedCalendar(supabase, account, source, {
+      isCurrent: () => accountScope.current === account.id && sharedRequest.current === ticket,
+    });
+    if (accountScope.current !== account.id || sharedRequest.current !== ticket) return false;
+    setError('');
+    setSharedSource(source); setSharedAccess(sharedSession.attachActor(access, account.id));
+    setCalendarId(access.calendarId); setCalendarOwnerId(access.ownerId);
+    setCalendarFocusDate(null); setWorkspaceView('calendar');
+    return true;
+  }, [session?.user.id, session?.user.email]);
+
+  const refreshSharedCalendar = useCallback(async () => {
+    const account = session?.user, source = actorSharedSource;
+    if (!account?.id || !source || sharedScope.current !== sharedKey) {
+      const failure = new Error('This shared calendar is no longer open.'); failure.code = 'STALE_SCOPE'; throw failure;
+    }
+    const ticket = ++sharedRequest.current;
+    try {
+      const access = await sharedCalendar.readSharedCalendar(supabase, account, source, {
+        isCurrent: () => accountScope.current === account.id && sharedRequest.current === ticket && sharedScope.current === sharedKey,
+      });
+      if (accountScope.current !== account.id || sharedRequest.current !== ticket || sharedScope.current !== sharedKey) return null;
+      setSharedAccess(sharedSession.attachActor(access, account.id));
+      return access;
+    } catch (failure) {
+      if (accountScope.current === account.id && sharedRequest.current === ticket && sharedScope.current === sharedKey) {
+        if (sharedSession.isRevoked(failure)) {
+          sharedRequest.current += 1;
+          setSharedSource(null); setSharedAccess(null);
+          setCalendarId(null); setCalendarOwnerId(account.id); setWorkspaceView('family');
+          setError(failure.message || t.failed);
+        } else {
+          setSharedAccess(current => sharedSession.forActor(current, account.id)
+            ? { ...current, canWrite: false, stale: true } : current);
+        }
+      }
+      throw failure;
+    }
+  }, [session?.user.id, session?.user.email, actorSharedSource, sharedKey, t.failed]);
+
+  const acceptSharedSchedule = useCallback(async result => {
+    if (!result || !actorId || accountScope.current !== actorId || !sharedKey || sharedScope.current !== sharedKey
+      || result.ownerId !== actorSharedAccess?.ownerId || result.calendarId !== actorSharedAccess?.calendarId) return false;
+    setSharedAccess(sharedSession.attachActor(result, actorId));
+    return true;
+  }, [actorId, sharedKey, actorSharedAccess?.ownerId, actorSharedAccess?.calendarId]);
+
+  useEffect(() => {
+    if (!sharedKey) return undefined;
+    const catchUp = () => {
+      if (AppState.currentState === 'active') void refreshSharedCalendar().catch(() => {});
+    };
+    const listener = AppState.addEventListener('change', next => { if (next === 'active') catchUp(); });
+    const interval = setInterval(catchUp, 5000);
+    return () => { listener.remove(); clearInterval(interval); };
+  }, [sharedKey, refreshSharedCalendar]);
 
   useEffect(() => {
     if (!session && entryScreen === 'trial' && trial.data?.elapsedMs >= nativeTrial.LIMIT_MS) setEntryScreen('personalize');
@@ -177,6 +289,7 @@ function Workspace() {
       if (accountScope.current !== userId) return false;
       await ownerSync.acceptConfirmed(result);
       setCalendarId(result.calendarId);
+      setCalendarOwnerId(userId);
       void ownerSync.refresh();
       if (!marked) { setTrialImportError(t.trialMarkFailed); return false; }
       setTrialAuthIntent(false); setEntryScreen('welcome');
@@ -283,10 +396,15 @@ function Workspace() {
 
   useEffect(() => {
     setCalendarId(null);
+    setCalendarOwnerId(session?.user.id || null);
+    setSharedSource(null);
+    setSharedAccess(null);
+    sharedRequest.current += 1;
     setWorkspaceView('home');
     setFamilyPendingCount(0);
     setCalendarFocusDate(null);
     setAccountOpen(false);
+    setRemindersOpen(false);
     setError('');
     if (!session?.user.id) { supabase.auth.stopAutoRefresh(); return; }
     setEntryScreen('welcome');
@@ -358,23 +476,28 @@ function Workspace() {
   const syncError = syncCurrent && ownerSync.error ? t.failed : '';
   const calendars = schedules.calendarEntries(snapshot);
   const calendar = calendars.find(item => item.id === calendarId) || calendars[0];
+  const sharedEntry = actorSharedAccess?.calendar;
+  const calendarEntries = sharedEntry ? [...calendars, sharedEntry] : calendars;
+  const selectedCalendarId = calendarId || calendar?.id || null;
+  const selectedCalendarOwnerId = calendarOwnerId || session?.user.id || null;
+  const sharedSelected = !!sharedEntry && selectedCalendarOwnerId === actorSharedAccess.ownerId && selectedCalendarId === actorSharedAccess.calendarId;
   const activePreferences = preferences.forAccount(accountPreferences, session?.user.id);
 
-  return <SafeAreaView style={styles.page}>
-    <View style={styles.appHeader}>
+  return <AppearanceProvider accountId={session?.user.id || null}>{appearance => <SafeAreaView style={[styles.page, { backgroundColor: appearance.colors.page }]}>
+    <View style={[styles.appHeader, { backgroundColor: appearance.colors.surface, borderBottomColor: appearance.colors.line }]}>
       <View style={styles.brand}>
         <Image source={require('../../assets/kidssync-app-icon-192.png')} style={styles.logo} />
-        <Text style={styles.title}>KidsSync</Text>
+        <Text style={[styles.title, { color: appearance.colors.ink }]}>KidsSync</Text>
       </View>
       <View style={styles.headerActions}><Pressable accessibilityRole="button" accessibilityLabel={language === 'en' ? 'Switch to Chinese' : 'Switch to English'}
           onPress={() => setLanguage(language === 'en' ? 'zh' : 'en')} style={styles.languageButton}>
-          <Text style={styles.languageText}>{language === 'en' ? '\u4e2d\u6587' : 'EN'}</Text>
+          <Text style={[styles.languageText, { color: appearance.colors.primary }]}>{language === 'en' ? '\u4e2d\u6587' : 'EN'}</Text>
         </Pressable>
-        {session && <Pressable accessibilityRole="button" accessibilityLabel={t.account} onPress={() => setAccountOpen(true)} style={({ pressed }) => [styles.avatarButton, pressed && { opacity: 0.55 }]}>
-          <Text style={styles.avatarText}>{session.user.email?.trim()?.[0]?.toUpperCase() || 'K'}</Text>
+        {session && <Pressable accessibilityRole="button" accessibilityLabel={t.account} onPress={() => setAccountOpen(true)} style={({ pressed }) => [styles.avatarButton, { backgroundColor: appearance.colors.primarySoft, borderColor: appearance.colors.line }, pressed && { opacity: 0.55 }]}>
+          <Text style={[styles.avatarText, { color: appearance.colors.primary }]}>{session.user.email?.trim()?.[0]?.toUpperCase() || 'K'}</Text>
         </Pressable>}</View>
     </View>
-    {booting ? <ActivityIndicator accessibilityLabel={t.loading} style={styles.loader} /> : entryScreen === 'personalize' && trial.data && !trial.data.claimedBy ?
+    {booting ? <ActivityIndicator accessibilityLabel={t.loading} color={appearance.colors.primary} style={styles.loader} /> : entryScreen === 'personalize' && trial.data && !trial.data.claimedBy ?
       <PersonalizeCalendarScreen language={language} data={trial.data} signedIn={!!session} error={trial.error || (trialImportError ? 'saveFailed' : '')}
         onContinue={continueTrial} onPreferences={configureTrial} onBack={returnFromPersonalize} /> : !session && entryScreen === 'trial' && trial.data ?
       <TrialCalendarScreen language={language} data={trial.data} preferences={guestPreferences} error={trial.error} onSave={trial.saveEvent} onDraft={trial.saveDraft}
@@ -392,31 +515,35 @@ function Workspace() {
         onPasswordChange={value => { setPassword(value); setError(''); }}
         onSignIn={signIn} onCreateAccount={beginCreateAccount} onGetStarted={beginSetup} onOpenWebsite={openWebsite} onRecover={recoverPassword}
         onBack={() => { setError(''); setPassword(''); setEntryScreen(trialAuthIntent ? 'personalize' : 'welcome'); }} /> : <View style={styles.content}>
-        {!!error && <Text accessibilityRole="alert" style={styles.error}>{error === 'sync' ? t.failed : error}</Text>}
+        {!!error && <Text accessibilityRole="alert" style={[styles.error, { color: appearance.colors.error }]}>{error === 'sync' ? t.failed : error}</Text>}
         <SyncStatus key={session.user.id} sync={ownerSync} language={language} />
-        {trial.data && (!trial.data.claimOwner || trial.data.claimOwner === session.user.id) && (!trial.data.claimedBy || trial.data.claimedBy === session.user.id) && <View style={styles.trialNotice}>
-          <Text style={styles.secondary}>{trial.data.claimedBy ? t.trialSaved : t.trialReady}</Text>
+        {trial.data && (!trial.data.claimOwner || trial.data.claimOwner === session.user.id) && (!trial.data.claimedBy || trial.data.claimedBy === session.user.id) && <View style={[styles.trialNotice, { backgroundColor: appearance.colors.successSoft, borderColor: appearance.colors.line }]}>
+          <Text style={[styles.secondary, { color: appearance.colors.muted }]}>{trial.data.claimedBy ? t.trialSaved : t.trialReady}</Text>
           {!trial.data.claimedBy && <Pressable accessibilityRole="button" disabled={trialSaving} style={styles.button}
             onPress={() => { if (trial.data.profile.calendarName) saveTrialToAccount(); else setEntryScreen('personalize'); }}>
-            <Text style={styles.link}>{trialSaving ? t.trialSaving : trial.data.profile.calendarName ? t.trialSave : t.trialPersonalize}</Text>
+            <Text style={[styles.link, { color: appearance.colors.primary }]}>{trialSaving ? t.trialSaving : trial.data.profile.calendarName ? t.trialSave : t.trialPersonalize}</Text>
           </Pressable>}
-          {!!trialImportError && <Text accessibilityRole="alert" style={styles.error}>{trialImportError}</Text>}
+          {!!trialImportError && <Text accessibilityRole="alert" style={[styles.error, { color: appearance.colors.error }]}>{trialImportError}</Text>}
         </View>}
-        {preferenceError && <View style={{ paddingHorizontal: 16 }}><Text accessibilityRole="alert" style={styles.error}>{t.setupFailed}</Text>
-          <Pressable accessibilityRole="button" style={styles.button} onPress={() => setPreferenceAttempt(value => value + 1)}><Text style={styles.link}>{t.retrySetup}</Text></Pressable></View>}
+        {preferenceError && <View style={{ paddingHorizontal: 16 }}><Text accessibilityRole="alert" style={[styles.error, { color: appearance.colors.error }]}>{t.setupFailed}</Text>
+          <Pressable accessibilityRole="button" style={styles.button} onPress={() => setPreferenceAttempt(value => value + 1)}><Text style={[styles.link, { color: appearance.colors.primary }]}>{t.retrySetup}</Text></Pressable></View>}
         <View style={styles.workspace}>
           <View style={[styles.workspaceScreen, workspaceView !== 'home' && styles.hiddenScreen]}>
             <HomeScreen language={language} calendars={calendars} calendar={calendar} loading={!loaded}
               error={syncError} onRefresh={ownerSync.refresh}
-              onSelectCalendar={setCalendarId} onPreferences={openAccountPreferences}
-              onOpenCalendar={() => setWorkspaceView('calendar')} onOpenDate={date => { setCalendarFocusDate(date); setWorkspaceView('calendar'); }} />
+              onSelectCalendar={selectOwnerCalendar} onPreferences={openAccountPreferences}
+              onOpenCalendar={() => setWorkspaceView('calendar')} onOpenFamily={() => setWorkspaceView('family')}
+              onOpenDate={date => { setCalendarFocusDate(date); setWorkspaceView('calendar'); }} />
           </View>
           <View style={[styles.workspaceScreen, workspaceView !== 'calendar' && styles.hiddenScreen]}>
             <CalendarScreen key={session.user.id} language={language} userId={session.user.id} client={supabase}
-              calendars={calendars} calendarId={calendar?.id || null} preferences={activePreferences} loading={!loaded}
-              focusDate={calendarFocusDate} syncStatus={status} error={syncError} onRefresh={ownerSync.refresh}
-              onSelectCalendar={setCalendarId} onPreferences={openAccountPreferences}
-              activityActions={ownerActivityActions}
+              calendars={calendarEntries} calendarId={selectedCalendarId} calendarOwnerId={selectedCalendarOwnerId}
+              preferences={activePreferences} loading={!loaded}
+              focusDate={calendarFocusDate} syncStatus={status} error={sharedSelected ? '' : syncError} onRefresh={ownerSync.refresh}
+              onSelectCalendar={(id, item) => { setCalendarId(id); setCalendarOwnerId(item?.ownerId || session.user.id); }}
+              onPreferences={openAccountPreferences} activityActions={ownerActivityActions}
+              sharedAccess={sharedSelected ? actorSharedAccess : null} sharedActivityActions={sharedSelected ? sharedActivityActions : null}
+              onSharedSchedule={acceptSharedSchedule} onSharedRefresh={refreshSharedCalendar}
               onSchedule={async row => {
                 if (accountScope.current !== session.user.id) return;
                 if (!row?.pending) await ownerSync.acceptConfirmed(row);
@@ -425,15 +552,17 @@ function Workspace() {
           </View>
           <View style={[styles.workspaceScreen, workspaceView !== 'family' && styles.hiddenScreen]}>
             <FamilyScreen key={session.user.id} language={language} client={supabase} user={session.user}
-              calendars={calendars} calendar={calendar} onSelectCalendar={setCalendarId}
-              onOpenWebsite={openWebsite} onPendingCount={setFamilyPendingCount} />
+              calendars={calendars} calendar={calendar} onSelectCalendar={selectOwnerCalendar}
+              onOpenWebsite={openWebsite} onOpenSharedCalendar={openSharedCalendar} onPendingCount={setFamilyPendingCount} />
           </View>
         </View>
         <BottomNavigation language={language} active={workspaceView} onChange={setWorkspaceView} familyPendingCount={familyPendingCount} />
       </View>}
     {session && accountOpen && <AccountSettings language={language} email={session.user.email || ''} onClose={() => setAccountOpen(false)}
-      onPreferences={() => { setAccountOpen(false); openAccountPreferences(); }} onSignOut={signOut} onLanguage={setLanguage} onWebsite={openWebsite} />}
-  </SafeAreaView>;
+      onPreferences={() => { setAccountOpen(false); openAccountPreferences(); }} onReminders={() => { setAccountOpen(false); setRemindersOpen(true); }}
+      reminderHint={reminderHint} onSignOut={signOut} onLanguage={setLanguage} onWebsite={openWebsite} />}
+    {session && remindersOpen && <ReminderSettings language={language} reminders={reminders} onClose={() => setRemindersOpen(false)} />}
+  </SafeAreaView>}</AppearanceProvider>;
 }
 
 function PhoneWorkspace() {
@@ -499,11 +628,11 @@ const styles = StyleSheet.create({
   content: { flex: 1 },
   workspace: { flex: 1 }, workspaceScreen: { flex: 1 }, hiddenScreen: { display: 'none' },
   bottomNav: { minHeight: 62, flexDirection: 'row', alignItems: 'stretch', borderTopWidth: 1, borderTopColor: '#dce6e8', backgroundColor: '#ffffff', paddingHorizontal: 18, paddingTop: 5 },
-  bottomTab: { flex: 1, minHeight: 54, alignItems: 'center', justifyContent: 'center', gap: 3, borderTopWidth: 2, borderTopColor: 'transparent' },
-  bottomIcon: { minWidth: 28, minHeight: 23, alignItems: 'center', justifyContent: 'center' },
+  bottomTab: { flex: 1, minHeight: 54, alignItems: 'center', justifyContent: 'center', gap: 3 },
+  bottomIcon: { minWidth: 28, minHeight: 23, alignItems: 'center', justifyContent: 'center' }, bottomIndicator: { position: 'absolute', top: -7, width: 24, height: 3, borderRadius: 2 },
   bottomBadge: { position: 'absolute', top: -5, right: -8, minWidth: 17, height: 17, borderRadius: 9, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center', backgroundColor: '#b42332', borderWidth: 2, borderColor: '#ffffff' },
   bottomBadgeText: { color: '#ffffff', fontSize: 9, lineHeight: 11, fontWeight: '700' },
-  bottomTabSelected: { borderTopColor: '#1f6898' }, bottomTabText: { color: '#617680', fontSize: 11, fontWeight: '600' }, bottomTabTextSelected: { color: '#1f6898' },
+  bottomTabSelected: {}, bottomTabText: { color: '#617680', fontSize: 11, fontWeight: '600' }, bottomTabTextSelected: { color: '#1f6898' },
   trialNotice: { padding: 14, marginHorizontal: 16, marginBottom: 12, borderWidth: 1, borderColor: '#cfe0d4', borderRadius: 10, backgroundColor: '#f0f7f1' },
   flex: { flexShrink: 1, gap: 4 },
   secondary: { color: '#4c626e', fontSize: 15, lineHeight: 22 },

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useAppearance, useThemeStyles } from '../ui/AppearanceContext';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ArrowRight, Check, ChevronLeft, CircleHelp } from 'lucide-react-native';
 import preferences from '../lib/preferences';
@@ -6,7 +7,7 @@ import preferences from '../lib/preferences';
 export const onboardingCopy = {
   en: {
     eyebrow: 'MAKE IT YOURS', step: 'of 5', back: 'Back', next: 'Continue', skip: 'Skip this question', why: 'Why these questions?',
-    explanation: 'These optional choices set your opening view, week order and first hours shown. You can review every answer before saving. Reminder choices are saved with new plans; phone notifications are not available yet.',
+    explanation: 'These optional choices set your opening view, week order and first hours shown. You can review every answer before saving. Reminder choices are saved with new plans. After signing in, enable local phone reminders in Account & settings.',
     review: 'Review your preferences', reviewIntro: 'A quick check before you continue.', reviewAction: 'Review my choices', edit: 'Edit', editLabel: 'Edit {name}', saveAnswer: 'Save answer', cancel: 'Cancel',
     save: 'Save & continue', saving: 'Saving…', note: 'Next: create your account, or sign in. Your answers stay saved on this device.', draftFailed: 'Draft could not be saved on this device. Keep this screen open and try Save & continue when finished.', failed: 'Could not save your choices. Your answers are still here. Please try again.',
     trialNote: 'Return to your calendar with your choices saved on this device.',
@@ -16,12 +17,12 @@ export const onboardingCopy = {
       ['How do you like to see your plans?', 'Save your preferred calendar view.', [['today', 'Today', 'One day at a time · recommended for phones'], ['week', 'This week', 'See how the whole week fits together.'], ['month', 'This month', 'Keep the bigger picture in view.']]],
       ['When does your week begin?', 'Choose the order you prefer for the calendar.', [['monday', 'Monday', 'Start with the school and work week.'], ['sunday', 'Sunday', 'Start with the weekend.']]],
       ['Which hours should we show first?', 'Save the hours you’d like to see first.', [['morning', 'Morning', '6 AM–12 PM'], ['afternoon', 'Afternoon', '12–6 PM'], ['evening', 'Evening', '6–10 PM'], ['daytime', 'The whole day', 'Start around 8 AM']]],
-      ['Choose a reminder for new plans?', 'Save a default with each new plan. Phone notifications are not available yet.', [['none', 'No reminders yet', 'I’ll choose them later.'], ['start', 'At the start', 'At the plan’s start time.'], ['10', '10 minutes before', 'A little time to get ready.'], ['30', '30 minutes before', 'Time to prepare and head out.']]]
+      ['Choose a reminder for new plans?', 'Save a default for new plans. Phone reminders are enabled separately in Account & settings.', [['none', 'No reminders yet', 'I’ll choose them later.'], ['start', 'At the start', 'At the plan’s start time.'], ['10', '10 minutes before', 'A little time to get ready.'], ['30', '30 minutes before', 'Time to prepare and head out.']]]
     ]
   },
   zh: {
     eyebrow: '个性化设置', step: '/ 5', back: '返回', next: '继续', skip: '跳过此问题', why: '为什么需要这些问题？',
-    explanation: '这些可选设置决定默认视图、每周顺序和优先显示时段。保存前，你可以核对每个答案。提醒选项会随新计划保存，目前尚不支持手机通知。',
+    explanation: '这些可选设置决定默认视图、每周顺序和优先显示时段。保存前，你可以核对每个答案。提醒选项会随新计划保存。登录后，可在“账户与设置”中开启手机本地提醒。',
     review: '核对你的偏好', reviewIntro: '继续之前，快速核对一下。', reviewAction: '核对我的选择', edit: '编辑', editLabel: '编辑{name}', saveAnswer: '保存答案', cancel: '取消',
     save: '保存并继续', saving: '正在保存…', note: '下一步：创建账户或登录。答案会保留在此设备上。', draftFailed: '无法在此设备上保存草稿。请保持页面打开，完成后尝试保存并继续。', failed: '无法保存选择。答案仍保留在此，请重试。',
     trialNote: '返回日历，你的选择已保存在此设备上。',
@@ -31,13 +32,14 @@ export const onboardingCopy = {
       ['你喜欢如何查看计划？', '保存你偏好的日历视图。', [['today', '今天', '专注每一天 · 推荐手机使用'], ['week', '本周', '一起查看一整周的安排。'], ['month', '本月', '了解更长远的计划。']]],
       ['你的一周从哪天开始？', '选择你习惯的日历顺序。', [['monday', '星期一', '从上学和工作的一周开始。'], ['sunday', '星期日', '从周末开始。']]],
       ['你想优先查看哪个时段？', '保存你想优先查看的时段。', [['morning', '上午', '6:00–12:00'], ['afternoon', '下午', '12:00–18:00'], ['evening', '晚上', '18:00–22:00'], ['daytime', '全天', '从早上 8 点左右开始']]],
-      ['为新计划选择提醒时间？', '为每项新计划保存默认选项，目前尚不支持手机通知。', [['none', '暂不提醒', '以后再选择。'], ['start', '开始时', '计划开始的时间。'], ['10', '提前 10 分钟', '留一点准备时间。'], ['30', '提前 30 分钟', '留出准备和出发时间。']]]
+      ['为新计划选择提醒时间？', '为每项新计划保存默认选项。手机提醒需在“账户与设置”中单独开启。', [['none', '暂不提醒', '以后再选择。'], ['start', '开始时', '计划开始的时间。'], ['10', '提前 10 分钟', '留一点准备时间。'], ['30', '提前 30 分钟', '留出准备和出发时间。']]]
     ]
   }
 };
 const keys = ['people', 'view', 'week', 'hours', 'reminders'];
 export default function OnboardingScreen({ language, initialDraft, onDraftChange, onBack, onComplete, returnToCalendar = false }) {
   const t = onboardingCopy[language] || onboardingCopy.en;
+  const { colors } = useAppearance(), styles = useThemeStyles(createStyles);
   const [answers, setAnswers] = useState(() => preferences.normalizePreferences(initialDraft?.answers));
   const [step, setStep] = useState(initialDraft?.step || 0), [review, setReview] = useState(initialDraft?.review || false), [editing, setEditing] = useState(initialDraft?.editing || false);
   const [choice, setChoice] = useState(initialDraft?.choice || null);
@@ -75,7 +77,7 @@ export default function OnboardingScreen({ language, initialDraft, onDraftChange
       <View style={styles.top}>
         <Pressable accessibilityRole="button" accessibilityLabel={editing ? t.cancel : t.back} disabled={busy} style={styles.back}
           onPress={() => { if (editing) { setReview(true); setEditing(false); } else if (review) move(4); else if (step) move(step - 1); else onBack(); }}>
-          <ChevronLeft size={18} color="#17649b" /><Text style={styles.link}>{editing ? t.cancel : t.back}</Text>
+          <ChevronLeft size={18} color={colors.primary} /><Text style={styles.link}>{editing ? t.cancel : t.back}</Text>
         </Pressable>
         {!review && <Text style={styles.muted}>{step + 1} {t.step}</Text>}
       </View>
@@ -88,7 +90,7 @@ export default function OnboardingScreen({ language, initialDraft, onDraftChange
         <Text accessibilityRole="header" style={styles.heading}>{review ? t.review : current[0]}</Text>
         <Text style={styles.description}>{review ? t.reviewIntro : current[1]}</Text>
         <Pressable accessibilityRole="button" accessibilityState={{ expanded: whyOpen }} disabled={busy} onPress={() => setWhyOpen(value => !value)} style={styles.why}>
-          <CircleHelp size={15} color="#17649b" /><Text style={styles.whyText}>{t.why}</Text>
+          <CircleHelp size={15} color={colors.primary} /><Text style={styles.whyText}>{t.why}</Text>
         </Pressable>
         {whyOpen && <Text style={styles.explanation}>{t.explanation}</Text>}
         {review ? <View style={styles.review}>
@@ -99,10 +101,10 @@ export default function OnboardingScreen({ language, initialDraft, onDraftChange
               onPress={() => move(index, true)} style={styles.edit}><Text style={styles.link}>{t.edit}</Text></Pressable>
           </View>)}
         </View> : <View style={styles.options}>
-          {current[2].map(option => <Pressable key={option[0]} accessibilityRole="radio" accessibilityLabel={option[1]} accessibilityHint={option[2]} disabled={busy} accessibilityState={{ checked: choice === option[0], disabled: busy }}
+          {current[2].map(option => <Pressable key={option[0]} accessibilityRole="radio" aria-checked={choice === option[0]} accessibilityLabel={option[1]} accessibilityHint={option[2]} disabled={busy} accessibilityState={{ checked: choice === option[0], disabled: busy }}
             onPress={() => setChoice(option[0])} style={[styles.option, choice === option[0] && styles.selected]}>
             <View style={styles.answer}><Text style={styles.optionTitle}>{option[1]}</Text><Text style={styles.optionDescription}>{option[2]}</Text></View>
-            <View style={[styles.radio, choice === option[0] && styles.radioSelected]}>{choice === option[0] && <Check size={14} color="#ffffff" />}</View>
+            <View style={[styles.radio, choice === option[0] && styles.radioSelected]}>{choice === option[0] && <Check size={14} color={colors.onPrimary} />}</View>
           </Pressable>)}
         </View>}
       </View>
@@ -111,7 +113,7 @@ export default function OnboardingScreen({ language, initialDraft, onDraftChange
         {!!error && <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.error}>{error}</Text>}
         <Pressable accessibilityRole="button" disabled={busy || (!review && !choice)} accessibilityState={{ disabled: busy || (!review && !choice), busy }}
           onPress={review ? save : () => advance()} style={[styles.primary, (busy || (!review && !choice)) && styles.disabled]}>
-          {busy ? <ActivityIndicator color="#ffffff" accessibilityLabel={t.saving} /> : <><Text style={styles.primaryText}>{review ? t.save : editing ? t.saveAnswer : step === 4 ? t.reviewAction : t.next}</Text><ArrowRight size={18} color="#ffffff" /></>}
+          {busy ? <ActivityIndicator color={colors.onPrimary} accessibilityLabel={t.saving} /> : <><Text style={styles.primaryText}>{review ? t.save : editing ? t.saveAnswer : step === 4 ? t.reviewAction : t.next}</Text><ArrowRight size={18} color={colors.onPrimary} /></>}
         </Pressable>
         {review ? <Text style={styles.note}>{returnToCalendar ? t.trialNote : t.note}</Text> : <Pressable accessibilityRole="button" disabled={busy} style={styles.skip}
           onPress={() => { if (editing) { setReview(true); setEditing(false); } else advance(true); }}><Text style={styles.muted}>{editing ? t.cancel : t.skip}</Text></Pressable>}
@@ -119,23 +121,23 @@ export default function OnboardingScreen({ language, initialDraft, onDraftChange
     </View>
   </ScrollView>;
 }
-const styles = StyleSheet.create({
-  scroll: { flexGrow: 1, alignItems: 'center', backgroundColor: '#f5f8fb' },
+function createStyles(colors, palettes) { return StyleSheet.create({
+  scroll: { flexGrow: 1, alignItems: 'center', backgroundColor: colors.page },
   inner: { width: '100%', maxWidth: 420, flexGrow: 1, paddingHorizontal: 22, paddingBottom: 24 },
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 4 },
   back: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44 },
-  link: { color: '#17649b', fontSize: 14, fontWeight: '500' }, muted: { color: '#526a7a', fontSize: 13 },
-  progress: { flexDirection: 'row', gap: 5, marginVertical: 10 }, segment: { flex: 1, height: 4, borderRadius: 4, backgroundColor: '#dce5eb' }, segmentActive: { backgroundColor: '#17649b' },
-  content: { paddingTop: 22, paddingBottom: 20 }, eyebrow: { color: '#17649b', fontSize: 12, letterSpacing: 1, fontWeight: '600', marginBottom: 12 },
-  heading: { color: '#203e52', fontSize: 27, lineHeight: 33, fontWeight: '600', marginBottom: 12 },
-  description: { color: '#526a7a', fontSize: 14, lineHeight: 22 },
-  why: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', marginVertical: 6 }, whyText: { color: '#17649b', fontSize: 13 },
-  explanation: { padding: 12, backgroundColor: '#e9f3fb', color: '#203e52', fontSize: 13, lineHeight: 20, borderRadius: 10, marginBottom: 14 },
-  options: { gap: 10 }, option: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 76, padding: 14, borderWidth: 1, borderColor: '#d0dde5', backgroundColor: '#ffffff', borderRadius: 12 },
-  selected: { backgroundColor: '#e9f3fb', borderColor: '#17649b' }, answer: { flex: 1, minWidth: 0 }, optionTitle: { color: '#203e52', fontSize: 16, fontWeight: '600' }, optionDescription: { color: '#526a7a', fontSize: 12, lineHeight: 19, marginTop: 4 },
-  radio: { width: 21, height: 21, borderRadius: 11, borderWidth: 1, borderColor: '#adc2d0', alignItems: 'center', justifyContent: 'center' }, radioSelected: { backgroundColor: '#17649b', borderColor: '#17649b' },
-  review: { borderWidth: 1, borderColor: '#d0dde5', backgroundColor: '#ffffff', borderRadius: 14, overflow: 'hidden' }, reviewRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }, divider: { borderTopWidth: 1, borderTopColor: '#dce5eb' },
-  answerLabel: { color: '#526a7a', fontSize: 12, marginBottom: 4 }, answerValue: { color: '#203e52', fontSize: 16, fontWeight: '600' }, edit: { minWidth: 44, minHeight: 44, justifyContent: 'center', alignItems: 'center' },
-  footer: { marginTop: 'auto', paddingTop: 16 }, primary: { minHeight: 54, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, padding: 14, backgroundColor: '#17649b', borderRadius: 10 }, primaryText: { color: '#ffffff', fontSize: 16, fontWeight: '600', flexShrink: 1 },
-  disabled: { opacity: 0.5 }, skip: { minHeight: 44, alignItems: 'center', justifyContent: 'center', marginTop: 7 }, note: { color: '#526a7a', fontSize: 12, lineHeight: 19, textAlign: 'center', marginTop: 12 }, error: { color: '#a12632', fontSize: 14, lineHeight: 21, marginBottom: 12 }
-});
+  link: { color: colors.primary, fontSize: 14, fontWeight: '500' }, muted: { color: colors.muted, fontSize: 13 },
+  progress: { flexDirection: 'row', gap: 5, marginVertical: 10 }, segment: { flex: 1, height: 4, borderRadius: 4, backgroundColor: colors.line }, segmentActive: { backgroundColor: colors.primary },
+  content: { paddingTop: 22, paddingBottom: 20 }, eyebrow: { color: colors.primary, fontSize: 12, letterSpacing: 1, fontWeight: '600', marginBottom: 12 },
+  heading: { color: colors.ink, fontSize: 27, lineHeight: 33, fontWeight: '600', marginBottom: 12 },
+  description: { color: colors.muted, fontSize: 14, lineHeight: 22 },
+  why: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', marginVertical: 6 }, whyText: { color: colors.primary, fontSize: 13 },
+  explanation: { padding: 12, backgroundColor: colors.primarySoft, color: colors.ink, fontSize: 13, lineHeight: 20, borderRadius: 10, marginBottom: 14 },
+  options: { gap: 10 }, option: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 76, padding: 14, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface, borderRadius: 12 },
+  selected: { backgroundColor: colors.primarySoft, borderColor: colors.primary }, answer: { flex: 1, minWidth: 0 }, optionTitle: { color: colors.ink, fontSize: 16, fontWeight: '600' }, optionDescription: { color: colors.muted, fontSize: 12, lineHeight: 19, marginTop: 4 },
+  radio: { width: 21, height: 21, borderRadius: 11, borderWidth: 1, borderColor: colors.strongLine, alignItems: 'center', justifyContent: 'center' }, radioSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
+  review: { borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface, borderRadius: 14, overflow: 'hidden' }, reviewRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }, divider: { borderTopWidth: 1, borderTopColor: colors.line },
+  answerLabel: { color: colors.muted, fontSize: 12, marginBottom: 4 }, answerValue: { color: colors.ink, fontSize: 16, fontWeight: '600' }, edit: { minWidth: 44, minHeight: 44, justifyContent: 'center', alignItems: 'center' },
+  footer: { marginTop: 'auto', paddingTop: 16 }, primary: { minHeight: 54, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, padding: 14, backgroundColor: colors.primary, borderRadius: 10 }, primaryText: { color: colors.onPrimary, fontSize: 16, fontWeight: '600', flexShrink: 1 },
+  disabled: { opacity: 0.5 }, skip: { minHeight: 44, alignItems: 'center', justifyContent: 'center', marginTop: 7 }, note: { color: colors.muted, fontSize: 12, lineHeight: 19, textAlign: 'center', marginTop: 12 }, error: { color: colors.error, fontSize: 14, lineHeight: 21, marginBottom: 12 }
+}); }

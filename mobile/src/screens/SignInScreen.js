@@ -1,11 +1,11 @@
 import React, { useRef, useState } from 'react';
+import { useAppearance, useThemeStyles } from '../ui/AppearanceContext';
 import {
   ActivityIndicator, ImageBackground, Keyboard, KeyboardAvoidingView, Platform,
   Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions
 } from 'react-native';
 import { ArrowLeft, ArrowRight, CheckCircle2, CircleAlert, ExternalLink, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from 'lucide-react-native';
 import signIn from '../lib/sign-in';
-import theme from '../ui/theme';
 
 export const signInCopy = {
   en: {
@@ -43,6 +43,7 @@ export default function SignInScreen({
   onBack, backLabel, onGetStarted, onCreateAccount, onOpenWebsite, onRecover, busy, error
 }) {
   const t = signInCopy[language] || signInCopy.en;
+  const { colors } = useAppearance(), styles = useThemeStyles(createStyles);
   const { height } = useWindowDimensions();
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
@@ -83,7 +84,7 @@ export default function SignInScreen({
           <View accessible accessibilityRole="image" accessibilityLabel={t.photo} pointerEvents="none" style={StyleSheet.absoluteFillObject} />
           <Pressable accessibilityRole="button" accessibilityLabel={backLabel || t.back} disabled={busy}
             onPress={onBack} style={styles.back}>
-            <ArrowLeft size={21} color="#ffffff" aria-hidden={true} />
+            <ArrowLeft size={21} color={colors.photoText} aria-hidden={true} />
           </Pressable>
           <View style={styles.caption}>
             <Text style={styles.eyebrow}>{t.eyebrow}</Text>
@@ -91,12 +92,12 @@ export default function SignInScreen({
           </View>
         </ImageBackground>
         <View style={styles.form}>
-          <View style={styles.assurance}><ShieldCheck size={16} color={theme.colors.primary} /><Text style={styles.assuranceText}>{t.assurance}</Text></View>
+          <View style={styles.assurance}><ShieldCheck size={16} color={colors.primary} /><Text style={styles.assuranceText}>{t.assurance}</Text></View>
           <View style={styles.field}>
             <Text style={styles.label}>{t.email}</Text>
             <View style={[styles.inputRow, focused === 'email' && styles.focused, emailError && styles.invalid]}>
-              <Mail size={18} color="#4c626e" aria-hidden={true} />
-              <TextInput ref={emailRef} accessibilityLabel={t.email} accessibilityHint={emailError ? t[emailError] : undefined}
+              <Mail size={18} color={colors.muted} aria-hidden={true} />
+              <TextInput placeholderTextColor={colors.muted} selectionColor={colors.primary} ref={emailRef} accessibilityLabel={t.email} accessibilityHint={emailError ? t[emailError] : undefined}
                 value={email} onChangeText={value => { setRecoverySent(false); onEmailChange(value); }} keyboardType="email-address" editable={!busy}
                 autoCapitalize="none" autoCorrect={false} autoComplete="email" textContentType="emailAddress"
                 returnKeyType="next" onSubmitEditing={() => passwordRef.current?.focus()}
@@ -108,8 +109,8 @@ export default function SignInScreen({
           <View style={styles.field}>
             <Text style={styles.label}>{t.password}</Text>
             <View style={[styles.inputRow, focused === 'password' && styles.focused, passwordError && styles.invalid]}>
-              <LockKeyhole size={18} color="#4c626e" aria-hidden={true} />
-              <TextInput ref={passwordRef} accessibilityLabel={t.password} accessibilityHint={passwordError ? t[passwordError] : undefined}
+              <LockKeyhole size={18} color={colors.muted} aria-hidden={true} />
+              <TextInput placeholderTextColor={colors.muted} selectionColor={colors.primary} ref={passwordRef} accessibilityLabel={t.password} accessibilityHint={passwordError ? t[passwordError] : undefined}
                 value={password} onChangeText={onPasswordChange} secureTextEntry={!showPassword} editable={!busy}
                 autoCapitalize="none" autoCorrect={false} autoComplete="current-password" textContentType="password"
                 returnKeyType="go" onSubmitEditing={submit}
@@ -118,7 +119,7 @@ export default function SignInScreen({
               <Pressable accessibilityRole="button" accessibilityLabel={showPassword ? t.hide : t.show}
                 accessibilityState={{ selected: showPassword }} disabled={busy}
                 onPress={() => setShowPassword(value => !value)} style={styles.eye}>
-                {showPassword ? <EyeOff size={19} color="#4c626e" aria-hidden={true} /> : <Eye size={19} color="#4c626e" aria-hidden={true} />}
+                {showPassword ? <EyeOff size={19} color={colors.muted} aria-hidden={true} /> : <Eye size={19} color={colors.muted} aria-hidden={true} />}
               </Pressable>
             </View>
             {!!passwordError && <Text accessibilityRole="alert" style={styles.fieldError}>{t[passwordError]}</Text>}
@@ -127,17 +128,17 @@ export default function SignInScreen({
             </Pressable>
           </View>
           {recoverySent && <View accessibilityLiveRegion="polite" style={styles.successRow}>
-            <CheckCircle2 size={18} color="#27765a" aria-hidden={true} />
+            <CheckCircle2 size={18} color={colors.success} aria-hidden={true} />
             <Text style={styles.successText}>{t.resetSent}</Text>
           </View>}
           {!!error && <View accessibilityRole="alert" style={styles.errorRow}>
-            <CircleAlert size={18} color="#a12632" aria-hidden={true} />
+            <CircleAlert size={18} color={colors.error} aria-hidden={true} />
             <Text style={styles.error}>{error}</Text>
           </View>}
           <Pressable accessibilityRole="button" accessibilityState={{ busy, disabled: busy }} disabled={busy}
             onPress={submit} style={({ pressed }) => [styles.primary, (pressed || busy) && styles.pressed]}>
             <Text style={styles.primaryText}>{busy && !recovering ? t.signingIn : t.signIn}</Text>
-            {busy && !recovering ? <ActivityIndicator color="#ffffff" /> : <ArrowRight size={19} color="#ffffff" aria-hidden={true} />}
+            {busy && !recovering ? <ActivityIndicator color={colors.onPrimary} /> : <ArrowRight size={19} color={colors.onPrimary} aria-hidden={true} />}
           </Pressable>
           <View style={styles.newAccount}>
             <Text style={styles.secondary}>{t.newHere}</Text>
@@ -151,7 +152,7 @@ export default function SignInScreen({
           <View style={styles.footer}>
             <Pressable accessibilityRole="link" onPress={onOpenWebsite} disabled={busy} style={styles.explore}>
               <Text style={styles.secondary}>{t.explore}</Text>
-              <ExternalLink size={14} color="#4c626e" aria-hidden={true} />
+              <ExternalLink size={14} color={colors.muted} aria-hidden={true} />
             </Pressable>
             <Text style={styles.footerText}>{t.footer}</Text>
           </View>
@@ -161,41 +162,41 @@ export default function SignInScreen({
   </KeyboardAvoidingView>;
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#ffffff' },
+function createStyles(colors, palettes) { return StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.surface },
   scroll: { flexGrow: 1, alignItems: 'center', paddingBottom: 20 },
   inner: { width: '100%', maxWidth: 560, flexGrow: 1 },
   hero: { width: '100%', aspectRatio: 2, minHeight: 170, maxHeight: 210, justifyContent: 'flex-end', overflow: 'hidden', flexShrink: 0 },
   compactHero: { minHeight: 135, maxHeight: 145, aspectRatio: 2.6 },
   heroImage: { width: '100%', height: '100%' },
-  back: { position: 'absolute', top: 12, left: 16, width: 44, height: 44, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(12, 32, 43, 0.72)' },
-  caption: { backgroundColor: 'rgba(12, 32, 43, 0.72)', paddingHorizontal: 24, paddingVertical: 12 },
-  eyebrow: { fontSize: 13, lineHeight: 18, color: '#d4eddf', marginBottom: 4 },
-  heading: { fontSize: 24, lineHeight: 31, color: '#ffffff', fontWeight: '600' },
+  back: { position: 'absolute', top: 12, left: 16, width: 44, height: 44, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.photoOverlay },
+  caption: { backgroundColor: colors.photoOverlay, paddingHorizontal: 24, paddingVertical: 12 },
+  eyebrow: { fontSize: 13, lineHeight: 18, color: colors.photoMuted, marginBottom: 4 },
+  heading: { fontSize: 24, lineHeight: 31, color: colors.photoText, fontWeight: '600' },
   form: { paddingHorizontal: 22, paddingTop: 18, gap: 16, flexGrow: 1 },
-  assurance: { flexDirection: 'row', alignItems: 'center', gap: 7, backgroundColor: theme.colors.primarySoft, borderRadius: 11, paddingHorizontal: 11, paddingVertical: 9 }, assuranceText: { flex: 1, fontSize: 12, lineHeight: 19, color: theme.colors.primary },
+  assurance: { flexDirection: 'row', alignItems: 'center', gap: 7, backgroundColor: colors.primarySoft, borderRadius: 11, paddingHorizontal: 11, paddingVertical: 9 }, assuranceText: { flex: 1, fontSize: 12, lineHeight: 19, color: colors.primary },
   field: { gap: 8 },
-  label: { color: '#172b3a', fontSize: 14, lineHeight: 20, fontWeight: '600' },
-  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 54, paddingLeft: 14, paddingRight: 4, borderRadius: 13, borderWidth: 1, borderColor: theme.colors.line, backgroundColor: '#ffffff' },
-  focused: { borderColor: theme.colors.primary, backgroundColor: '#f6faf7' },
-  invalid: { borderColor: '#a12632' },
-  input: { flex: 1, minWidth: 0, minHeight: 52, fontSize: 16, color: '#172b3a', paddingVertical: 12, paddingHorizontal: 0 },
+  label: { color: colors.ink, fontSize: 14, lineHeight: 20, fontWeight: '600' },
+  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 54, paddingLeft: 14, paddingRight: 4, borderRadius: 13, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface },
+  focused: { borderColor: colors.primary, backgroundColor: colors.inputFocused },
+  invalid: { borderColor: colors.error },
+  input: { flex: 1, minWidth: 0, minHeight: 52, fontSize: 16, color: colors.ink, paddingVertical: 12, paddingHorizontal: 0 },
   eye: { width: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
-  fieldError: { fontSize: 13, lineHeight: 19, color: '#a12632' },
+  fieldError: { fontSize: 13, lineHeight: 19, color: colors.error },
   forgot: { minHeight: 44, flexDirection: 'row', flexWrap: 'wrap', gap: 6, alignItems: 'center', alignSelf: 'flex-end', paddingVertical: 8 },
-  link: { fontSize: 14, lineHeight: 20, color: theme.colors.primary },
-  primary: { minHeight: 52, borderRadius: 13, backgroundColor: theme.colors.primary, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, padding: 14 },
-  primaryText: { fontSize: 17, lineHeight: 23, fontWeight: '600', color: '#ffffff', flexShrink: 1 },
+  link: { fontSize: 14, lineHeight: 20, color: colors.primary },
+  primary: { minHeight: 52, borderRadius: 13, backgroundColor: colors.primary, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, padding: 14 },
+  primaryText: { fontSize: 17, lineHeight: 23, fontWeight: '600', color: colors.onPrimary, flexShrink: 1 },
   pressed: { opacity: 0.7 },
   errorRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
-  error: { color: '#a12632', fontSize: 14, lineHeight: 21, flex: 1 },
+  error: { color: colors.error, fontSize: 14, lineHeight: 21, flex: 1 },
   successRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
-  successText: { color: '#27765a', fontSize: 14, lineHeight: 21, flex: 1 },
+  successText: { color: colors.success, fontSize: 14, lineHeight: 21, flex: 1 },
   newAccount: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, justifyContent: 'center', alignItems: 'center' },
-  secondary: { color: '#4c626e', fontSize: 14, lineHeight: 21 },
+  secondary: { color: colors.muted, fontSize: 14, lineHeight: 21 },
   textButton: { minHeight: 44, minWidth: 44, justifyContent: 'center', paddingHorizontal: 4 },
-  linkStrong: { color: theme.colors.primary, fontSize: 14, lineHeight: 21, fontWeight: '600' },
-  footer: { marginTop: 'auto', borderTopWidth: 1, borderColor: '#e2e9ed', paddingTop: 12, gap: 8 },
+  linkStrong: { color: colors.primary, fontSize: 14, lineHeight: 21, fontWeight: '600' },
+  footer: { marginTop: 'auto', borderTopWidth: 1, borderColor: colors.line, paddingTop: 12, gap: 8 },
   explore: { minHeight: 44, flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center', justifyContent: 'center' },
-  footerText: { fontSize: 12, lineHeight: 20, color: '#4c626e', textAlign: 'center' }
-});
+  footerText: { fontSize: 12, lineHeight: 20, color: colors.muted, textAlign: 'center' }
+}); }

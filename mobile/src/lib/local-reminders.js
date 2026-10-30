@@ -1,5 +1,4 @@
-// SDK-independent local notification planner/controller. Inject expo-notifications
-// only after the toolchain owner installs the matching SDK package. No push token,
+// SDK-independent local notification planner/controller. No push token,
 // remote notification service, automatic permission prompt, or backend write.
 const calendar = require('./calendar');
 const timeMinutes = require('../calendar/model').timeMinutes;
@@ -90,6 +89,12 @@ function createLocalReminderService({ notifications: sdk, storage, platform, now
   return {
     available,
     readPreference,
+    activateAccount: userId => enqueue(async () => {
+      if (!available()) return { status: 'unsupported' };
+      if (userId) preferenceKey(userId);
+      await cancelWhere(data => !userId || data.userId !== userId);
+      return { status: userId ? 'waiting' : 'signed-out' };
+    }),
     // Wire to an explained, explicit enable action only. Startup and sync never
     // request permission. Do not invoke this in tests against a real device.
     configure: (userId, { enabled, showTitles = false, userInitiated = false } = {}) => enqueue(async () => {
@@ -104,13 +109,13 @@ function createLocalReminderService({ notifications: sdk, storage, platform, now
         if (!authorized(permission)) return { status: 'permission-denied', canAskAgain: permission.canAskAgain !== false };
       }
       const value = { enabled: enabled === true, showTitles: showTitles === true };
-      await writePreference(userId, value);
-      if (!value.enabled) await cancelWhere(data => data.userId === userId);
+      try { await writePreference(userId, value); }
+      finally { if (!value.enabled) await cancelWhere(data => data.userId === userId); }
       return { status: value.enabled ? 'enabled' : 'disabled', ...value };
     }),
     // Call after confirmed CRUD/import, fresh sync, foreground, timezone changes
     // and account changes. Supply a complete, successfully loaded calendar list.
-    synchronize: ({ userId, calendars, language = 'en', isCurrent = () => true } = {}) => enqueue(async () => {
+    synchronize: ({ userId, calendars, language = 'en', privateContent = false, isCurrent = () => true } = {}) => enqueue(async () => {
       if (!available()) return { status: 'unsupported', scheduled: 0 };
       if (!isCurrent()) return { status: 'stale', scheduled: 0 };
       if (!userId) { await cancelWhere(() => true); return { status: 'signed-out', scheduled: 0 }; }
@@ -127,7 +132,7 @@ function createLocalReminderService({ notifications: sdk, storage, platform, now
       if (!authorized(permission)) { await cancelWhere(data => data.userId === userId); return { status: 'permission-denied', scheduled: 0 }; }
       const existing = await sdk.getAllScheduledNotificationsAsync();
       const otherCount = existing.filter(notice => !managed(notice)).length;
-      const plan = buildReminderPlan({ userId, calendars, language, showTitles: preference.showTitles, now: new Date(now()), limit: MAX_PENDING - otherCount });
+      const plan = buildReminderPlan({ userId, calendars, language, showTitles: !privateContent && preference.showTitles, now: new Date(now()), limit: MAX_PENDING - otherCount });
       const desired = new Map(plan.plans.map(item => [item.identifier, item]));
       for (const notice of existing) {
         if (!isCurrent()) return { status: 'stale', scheduled: 0 };
