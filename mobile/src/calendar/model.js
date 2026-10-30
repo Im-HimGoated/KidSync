@@ -88,10 +88,10 @@ function importanceRank(event) {
 }
 
 /** Importance only breaks a same-time tie; it never moves an event in time. */
-function sortAgenda(events) {
+function sortAgenda(events, date) {
   return (Array.isArray(events) ? events : [])
     .filter(event => event && typeof event === 'object' && !Array.isArray(event))
-    .map((event, index) => ({ event, index, start: timeMinutes(event.start) ?? Infinity }))
+    .map((event, index) => ({ event, index, start: (date ? calendar.daySegment(event, date)?.start : null) ?? timeMinutes(event.start) ?? Infinity }))
     .sort((a, b) => Number(Boolean(b.event.allDay)) - Number(Boolean(a.event.allDay))
       || (a.start === b.start ? 0 : a.start - b.start)
       || importanceRank(a.event) - importanceRank(b.event)
@@ -112,11 +112,20 @@ function layoutDay(events, options = {}) {
   (Array.isArray(events) ? events : []).forEach((event, index) => {
     if (!event || typeof event !== 'object' || Array.isArray(event)) return;
     if (event.allDay) { allDay.push(event); return; }
-    const start = timeMinutes(event.start), end = timeMinutes(event.end);
-    if (start === null || end === null || end <= start) { untimed.push(event); return; }
-    const top = start / 60 * hourHeight;
-    const height = Math.max((end - start) / 60 * hourHeight, minHeight);
-    timed.push({ event, index, start, end, top, height, visualEnd: top + height });
+    const day = options.date ? calendar.daySegment(event, options.date) : null;
+    const segments = day?.segments || [{ start: timeMinutes(event.start), end: timeMinutes(event.end) }];
+    let placed = false;
+    segments.forEach(segment => {
+      const { start, end } = segment;
+      if (start === null || end === null || end <= start) return;
+      placed = true;
+      const top = start / 60 * hourHeight;
+      const height = Math.max((end - start) / 60 * hourHeight, minHeight);
+      timed.push({ event, index, start, end, top, height, visualEnd: top + height,
+        occurrenceStartDate: segment.occurrenceStartDate,
+        continuesBefore: !!segment.continuesBefore, continuesAfter: !!segment.continuesAfter });
+    });
+    if (!placed) untimed.push(event);
   });
   timed.sort((a, b) => a.top - b.top || importanceRank(a.event) - importanceRank(b.event)
     || a.end - b.end || a.index - b.index);
@@ -149,22 +158,33 @@ function initialEventForm(existing, date, preferences = {}) {
   const legacyDay = weekdayNames.indexOf(String(event?.day || '').toLowerCase());
   const repeatDays = Array.isArray(event?.repeatDays) && event.repeatDays.length ? [...event.repeatDays]
     : [legacyDay >= 0 ? legacyDay : validDate(anchor) ? anchor.getDay() : 1];
+  const display = normalizeDisplayPreferences(preferences);
+  const timeAtHour = hour => `${String(hour).padStart(2, '0')}:00`;
   return {
     date: startDate,
     endDate: event?.endDate || '',
     title: event?.title || '',
     child: event?.child || '__family__',
     allDay: Boolean(event?.allDay),
-    start: event ? (typeof event.start === 'string' ? event.start : '') : '09:00',
-    end: event ? (typeof event.end === 'string' ? event.end : '') : '10:00',
+    start: event ? (typeof event.start === 'string' ? event.start : '') : timeAtHour(display.initialHour),
+    end: event ? (typeof event.end === 'string' ? event.end : '') : timeAtHour(display.initialHour + 1),
     location: event?.location || '', responsible: event?.responsible || '', items: event?.items || '', notes: event?.notes || '',
     importance: validImportance.includes(event?.importance) ? event.importance : 'normal',
-    reminderMinutes: event ? reminderValue(event.reminderMinutes) ?? null : normalizeDisplayPreferences(preferences).defaultReminderMinutes,
+    reminderMinutes: event ? reminderValue(event.reminderMinutes) ?? null : display.defaultReminderMinutes,
     recurrence: event?.recurrence || (event?.day ? 'weekly' : 'none'),
     repeatInterval: String(event?.repeatInterval || 1),
     repeatDays,
     repeatUntil: event?.repeatUntil || '',
   };
+}
+
+/** Weekday selection order has no meaning when deciding whether a draft changed. */
+function eventFormChanged(initial, current) {
+  const comparable = value => Object.fromEntries(Object.keys(value || {}).sort().map(key => [key,
+    key === 'repeatDays' && Array.isArray(value[key])
+      ? [...new Set(value[key].map(Number))].sort((a, b) => a - b) : value[key],
+  ]));
+  return JSON.stringify(comparable(initial)) !== JSON.stringify(comparable(current));
 }
 
 /** Preserve all fields the mobile form does not edit, including future metadata. */
@@ -192,8 +212,55 @@ function buildCalendarEvent(existing, form = {}, kids = [], preferences = {}) {
 
 function uiError(code, message) { const error = new Error(message); error.code = code; return error; }
 
+function isRecurringActivity(event) {
+  return ['daily', 'weekly', 'monthly', 'yearly'].includes(event?.recurrence)
+    || (!event?.startDate && weekdayNames.includes(String(event?.day || '').toLowerCase()));
+}
+
+/** Materialize one explicitly selected series start for editing, keeping its raw ID. */
+function occurrenceDraft(original, occurrenceStartDate) {
+  if (!isRecurringActivity(original) || original.externalSource || original.isBuiltInHoliday
+    || !calendar.occurrencesForDate(original, occurrenceStartDate).some(item => item.startDate === occurrenceStartDate)) {
+    throw uiError('INVALID_OCCURRENCE', 'Choose an existing occurrence of an editable repeating activity.');
+  }
+  const occurrence = calendar.occurrencesForDate(original, occurrenceStartDate).find(item => item.startDate === occurrenceStartDate);
+  const draft = { ...JSON.parse(JSON.stringify(original)), startDate: occurrence.startDate,
+    endDate: original.endDate ? occurrence.endDate : '', recurrence: 'none', repeatInterval: 1,
+    repeatDays: [], repeatUntil: '', excludedDates: [] };
+  delete draft.day;
+  delete draft.occurrenceDate;
+  return draft;
+}
+
+/** A series exclusion and optional detached event are one atomic, reversible change. */
+function planOccurrenceChange(original, occurrenceStartDate, options = {}) {
+  const draft = occurrenceDraft(original, occurrenceStartDate);
+  if (original.excludedDates != null && !Array.isArray(original.excludedDates)) {
+    throw uiError('INVALID_OCCURRENCE', 'Refresh this repeating activity before making changes.');
+  }
+  const series = { ...original, excludedDates: [...new Set([...(original.excludedDates || []), occurrenceStartDate])] };
+  const changes = [{ original, event: series }];
+  if (!options.remove) {
+    if (!options.event || typeof options.event !== 'object' || Array.isArray(options.event)) {
+      throw uiError('INVALID_OCCURRENCE', 'Use valid details for this occurrence.');
+    }
+    const id = options.id ?? globalThis.crypto?.randomUUID?.()
+      ?? `activity-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    if (id === original.id || !((typeof id === 'string' && id.trim()) || (typeof id === 'number' && Number.isFinite(id)))) {
+      throw uiError('INVALID_OCCURRENCE', 'Use a new identifier for this occurrence.');
+    }
+    const detached = { ...draft, ...options.event, id, recurrence: 'none', repeatInterval: 1,
+      repeatDays: [], repeatUntil: '', excludedDates: [] };
+    delete detached.day;
+    delete detached.occurrenceDate;
+    changes.push({ original: null, event: detached });
+  }
+  return { changes, occurrenceStartDate };
+}
+
 /** Captures account scope without caching snapshots or creating example rows. */
-function createCalendarActions({ client, userId, onSchedule, onSelectCalendar, isCurrent = () => true } = {}) {
+function createCalendarActions({ client, userId, onSchedule, onSelectCalendar, isCurrent = () => true, activityActions = backend } = {}) {
+  const writer = key => activityActions?.[key] || backend[key];
   let busy = false;
   function assertCurrent() { if (!isCurrent()) throw uiError('STALE_SCOPE', 'This account or calendar is no longer active.'); }
   async function run(operation, selectCreated = false) {
@@ -210,16 +277,33 @@ function createCalendarActions({ client, userId, onSchedule, onSelectCalendar, i
   }
   return {
     save(calendarId, event, original = null) {
-      return run(() => backend.saveActivity(client, userId, calendarId, event, { original }));
+      return run(() => typeof activityActions?.save === 'function'
+        ? activityActions.save(calendarId, event, original)
+        : writer('saveActivity')(client, userId, calendarId, event, { original }));
     },
     remove(calendarId, eventId, original) {
-      return run(() => backend.deleteActivity(client, userId, calendarId, eventId, { original }));
+      return run(() => typeof activityActions?.remove === 'function'
+        ? activityActions.remove(calendarId, eventId, original)
+        : writer('deleteActivity')(client, userId, calendarId, eventId, { original }));
     },
-    create(name) { return run(() => backend.createCalendar(client, userId, { name }), true); },
+    create(name) { return run(() => writer('createCalendar')(client, userId, { name }), true); },
+    saveOccurrence(calendarId, original, occurrenceStartDate, event) {
+      return run(() => writer('mutateActivities')(client, userId, calendarId,
+        planOccurrenceChange(original, occurrenceStartDate, { event }).changes));
+    },
+    removeOccurrence(calendarId, original, occurrenceStartDate) {
+      return run(() => writer('mutateActivities')(client, userId, calendarId,
+        planOccurrenceChange(original, occurrenceStartDate, { remove: true }).changes));
+    },
+    restore(calendarId, undoToken) {
+      return run(() => writer('restoreActivities')(client, userId, calendarId, undoToken));
+    },
   };
 }
 
 module.exports = {
   normalizeDisplayPreferences, startOfDisplayWeek, displayMonthDays, movePeriod,
   filterActivities, timeMinutes, sortAgenda, layoutDay, initialEventForm, buildCalendarEvent, createCalendarActions,
+  eventFormChanged,
+  isRecurringActivity, occurrenceDraft, planOccurrenceChange,
 };

@@ -23,6 +23,8 @@ const COPY = {
     every: 'Every', dayUnit: 'days', weekUnit: 'weeks', monthUnit: 'months', yearUnit: 'years', through: 'Through',
     interval: 'Repeat every', intervalHint: '1–12', weekdays: 'Days of the week', until: 'Repeat until (optional)',
     seriesHint: 'Changes apply to the whole repeating activity.', cancel: 'Cancel', save: 'Save activity', saving: 'Saving…',
+    occurrenceHint: 'You’re editing one occurrence. Other dates in this repeating activity stay as planned.',
+    overlapping: 'More than one occurrence covers this date. Choose the occurrence to change after tapping Edit or Delete.',
     edit: 'Edit activity', delete: 'Delete activity', deleting: 'Deleting…', deleteTitle: 'Delete this activity?',
     deleteBody: 'This removes the entire activity and its repeating dates. Other activities are kept.', keep: 'Keep activity',
     confirmDelete: 'Yes, delete activity', readOnly: 'This activity is managed by its source and can’t be edited here.',
@@ -54,6 +56,8 @@ const COPY = {
     every: '每', dayUnit: '天', weekUnit: '周', monthUnit: '个月', yearUnit: '年', through: '截止',
     interval: '重复间隔', intervalHint: '1–12', weekdays: '每周日期', until: '重复截止日期（可选）',
     seriesHint: '修改将应用于整项重复活动。', cancel: '取消', save: '保存活动', saving: '保存中…',
+    occurrenceHint: '你正在编辑单次活动，重复活动的其他日期保持原安排。',
+    overlapping: '此日期有多次重叠的重复活动。点击编辑或删除后，请选择要修改的那一次。',
     edit: '编辑活动', delete: '删除活动', deleting: '删除中…', deleteTitle: '删除这项活动？',
     deleteBody: '将删除整项活动及其重复日期，保留其他活动。', keep: '保留活动',
     confirmDelete: '确认删除活动', readOnly: '这项活动由来源管理，无法在此编辑。',
@@ -76,13 +80,13 @@ const COPY = {
 };
 
 const text = value => value == null ? '' : String(value);
-const repeated = event => !!event?.recurrence && event.recurrence !== 'none';
+const repeated = model.isRecurringActivity;
 const readOnlyEvent = event => !!(event?.externalSource || event?.isBuiltInHoliday);
 const reminderKey = value => value == null ? 'none' : String(value);
 const reminderNumber = value => value === 'none' ? null : Number(value);
 
-function FormChoices({ label, options, value, onChange, disabled, error }) {
-  return <View style={s.choiceGroup}>
+function FormChoices({ label, options, value, onChange, disabled, error, onLayout }) {
+  return <View onLayout={onLayout} style={s.choiceGroup}>
     <Text style={s.label}>{label}</Text>
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.choiceList} keyboardShouldPersistTaps="handled">
       {options.map(option => <Pressable key={String(option.value)} accessibilityRole="button" accessibilityLabel={`${label}: ${option.label}`}
@@ -108,16 +112,19 @@ export function ActivityEditor(props) {
   return <EditorBody key={`${props.event?.id ?? 'new'}:${dateIdentity(props.date)}`} {...props} />;
 }
 
-function EditorBody({ event = null, date, kids = [], preferences, language = 'en', busy, error, onSave, onCancel }) {
+function EditorBody({ event = null, date, kids = [], preferences, language = 'en', busy, error, onSave, onCancel, onDirtyChange, scope }) {
   const t = COPY[language] || COPY.en;
   const [form, setForm] = useState(() => model.initialEventForm(event, date, preferences));
+  const initialForm = useRef(form);
   const [errors, setErrors] = useState({});
   const [failure, setFailure] = useState('');
   const [saving, setSaving] = useState(false);
   const touched = useRef(new Set());
   const active = useRef(true), request = useRef(false), scroll = useRef(null);
+  const inputs = useRef({}), positions = useRef({});
   const readOnly = readOnlyEvent(event), locked = !!busy || saving || readOnly;
   useEffect(() => { active.current = true; return () => { active.current = false; }; }, []);
+  useEffect(() => { onDirtyChange?.(model.eventFormChanged(initialForm.current, form)); }, [form, onDirtyChange]);
 
   const profiles = (Array.isArray(kids) ? kids : []).filter(kid => kid && typeof kid.name === 'string' && kid.name.trim());
   const matched = profiles.find(kid => kid.name === form.child || String(kid.id) === String(form.child));
@@ -131,6 +138,20 @@ function EditorBody({ event = null, date, kids = [], preferences, language = 'en
   const currentReminder = reminderKey(form.reminderMinutes);
   if (!reminderOptions.some(option => option.value === currentReminder)) reminderOptions.push({ value: currentReminder, label: language === 'zh' ? `提前 ${currentReminder} 分钟` : `${currentReminder} min before` });
   const fieldError = key => errors[key] ? t.errors[errors[key]] || t.validation : '';
+  const position = key => layout => { positions.current[key] = layout.nativeEvent.layout.y; };
+  const field = key => ({ inputRef: input => { inputs.current[key] = input; }, onLayout: position(key) });
+
+  function revealError(nextErrors) {
+    const first = ['title', 'child', 'date', 'endDate', 'start', 'end', 'location', 'responsible', 'items', 'notes',
+      'importance', 'reminderMinutes', 'recurrence', 'repeatInterval', 'repeatDays', 'repeatUntil'].find(key => nextErrors[key]);
+    const reveal = () => {
+      if (!active.current) return;
+      scroll.current?.scrollTo({ y: Math.max(0, (positions.current[first] || 0) - 12), animated: true });
+      inputs.current[first]?.focus();
+    };
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(reveal);
+    else reveal();
+  }
 
   function change(key, value) {
     if (locked) return;
@@ -151,10 +172,11 @@ function EditorBody({ event = null, date, kids = [], preferences, language = 'en
     if (locked || request.current || typeof onSave !== 'function') return;
     request.current = true;
     const submission = { ...form };
+    if (scope === 'occurrence') Object.assign(submission, { recurrence: 'none', repeatInterval: 1, repeatDays: [], repeatUntil: '' });
     // Preserve existing metadata, including legacy values the current choices do
     // not expose. The model receives only metadata the person actually changed.
     if (event) for (const key of ['responsible', 'items', 'importance', 'reminderMinutes']) {
-      if (!touched.current.has(key)) delete submission[key];
+      if (!touched.current.has(key) || form[key] === initialForm.current[key]) delete submission[key];
     }
     if (form.endDate && (!event?.eventType || event.eventType === 'activity')) submission.eventType = 'trip';
     else if (!form.endDate && event?.eventType === 'trip') submission.eventType = 'activity';
@@ -164,7 +186,7 @@ function EditorBody({ event = null, date, kids = [], preferences, language = 'en
     setErrors(result.errors || {});
     if (!result.event) {
       request.current = false;
-      scroll.current?.scrollTo({ y: 0, animated: true });
+      revealError(result.errors || {});
       return;
     }
     setSaving(true); setFailure('');
@@ -178,33 +200,33 @@ function EditorBody({ event = null, date, kids = [], preferences, language = 'en
   const inputProps = { editable: !locked, autoCorrect: false };
   return <View style={s.panel}>
     <ScrollView ref={scroll} style={s.scroll} contentContainerStyle={s.formContent} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
-      {repeated(event) && <View style={s.notice}><Repeat2 color={colors.blue} size={18} /><Text style={s.noticeText}>{t.seriesHint}</Text></View>}
+      {(repeated(event) || scope === 'occurrence') && <View style={s.notice}><Repeat2 color={colors.blue} size={18} /><Text style={s.noticeText}>{scope === 'occurrence' ? t.occurrenceHint : t.seriesHint}</Text></View>}
       {readOnly && <Text accessibilityRole="alert" style={s.error}>{t.readOnly}</Text>}
       {!!(Object.keys(errors).length > 0 || error || failure) && <View style={s.errorBox}><Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={s.error}>{error || failure || t.validation}</Text></View>}
-      <Field label={t.title} value={text(form.title)} onChangeText={value => change('title', value)} error={fieldError('title')} placeholder={t.titleHint} autoCapitalize="sentences" {...inputProps} />
-      <FormChoices label={t.person} options={people} value={childValue} disabled={locked} error={fieldError('child')} onChange={value => change('child', value)} />
-      <Field label={t.date} value={text(form.date)} onChangeText={value => change('date', value)} error={fieldError('date')} placeholder={t.dateHint} maxLength={10} autoCapitalize="none" {...inputProps} />
-      <Field label={t.endDate} value={text(form.endDate)} onChangeText={value => change('endDate', value)} error={fieldError('endDate')} placeholder={t.dateHint} maxLength={10} autoCapitalize="none" {...inputProps} />
+      <Field label={t.title} value={text(form.title)} onChangeText={value => change('title', value)} error={fieldError('title')} placeholder={t.titleHint} autoCapitalize="sentences" {...field('title')} {...inputProps} />
+      <FormChoices label={t.person} options={people} value={childValue} disabled={locked} error={fieldError('child')} onChange={value => change('child', value)} onLayout={position('child')} />
+      <Field label={t.date} value={text(form.date)} onChangeText={value => change('date', value)} error={fieldError('date')} placeholder={t.dateHint} maxLength={10} autoCapitalize="none" {...field('date')} {...inputProps} />
+      <Field label={t.endDate} value={text(form.endDate)} onChangeText={value => change('endDate', value)} error={fieldError('endDate')} placeholder={t.dateHint} maxLength={10} autoCapitalize="none" {...field('endDate')} {...inputProps} />
       <View style={s.toggleRow}><Text style={s.toggleLabel}>{t.allDay}</Text><Switch accessibilityLabel={t.allDay} value={!!form.allDay} disabled={locked} onValueChange={value => change('allDay', value)} trackColor={{ false: '#CAD7DB', true: colors.blue }} thumbColor="#FFFFFF" /></View>
-      {!form.allDay && <><View style={s.timeRow}><View style={s.flex}><Field label={t.start} value={text(form.start)} onChangeText={value => change('start', value)} error={fieldError('start')} placeholder="09:00" maxLength={5} {...inputProps} /></View><View style={s.flex}><Field label={t.end} value={text(form.end)} onChangeText={value => change('end', value)} error={fieldError('end')} placeholder="10:00" maxLength={5} {...inputProps} /></View></View><Text style={s.hint}>{t.timeHint}</Text></>}
-      <Field label={t.location} value={text(form.location)} onChangeText={value => change('location', value)} placeholder={t.placeHint} {...inputProps} />
-      <Field label={t.responsible} value={text(form.responsible)} onChangeText={value => change('responsible', value)} error={fieldError('responsible')} placeholder={t.adultHint} maxLength={60} {...inputProps} />
-      <Field label={t.items} value={text(form.items)} onChangeText={value => change('items', value)} error={fieldError('items')} placeholder={t.itemsHint} maxLength={160} {...inputProps} />
-      <Field label={t.notes} value={text(form.notes)} onChangeText={value => change('notes', value)} multiline placeholder={t.notesHint} {...inputProps} />
-      <FormChoices label={t.importance} options={importance} value={form.importance || 'normal'} disabled={locked} error={fieldError('importance')} onChange={value => change('importance', value)} />
-      <FormChoices label={t.reminder} options={reminderOptions} value={currentReminder} disabled={locked} error={fieldError('reminderMinutes')} onChange={value => change('reminderMinutes', reminderNumber(value))} />
+      {!form.allDay && <><View style={s.timeRow} onLayout={layout => { position('start')(layout); position('end')(layout); }}><View style={s.flex}><Field label={t.start} value={text(form.start)} onChangeText={value => change('start', value)} error={fieldError('start')} placeholder="09:00" maxLength={5} inputRef={input => { inputs.current.start = input; }} {...inputProps} /></View><View style={s.flex}><Field label={t.end} value={text(form.end)} onChangeText={value => change('end', value)} error={fieldError('end')} placeholder="10:00" maxLength={5} inputRef={input => { inputs.current.end = input; }} {...inputProps} /></View></View><Text style={s.hint}>{t.timeHint}</Text></>}
+      <Field label={t.location} value={text(form.location)} onChangeText={value => change('location', value)} placeholder={t.placeHint} {...field('location')} {...inputProps} />
+      <Field label={t.responsible} value={text(form.responsible)} onChangeText={value => change('responsible', value)} error={fieldError('responsible')} placeholder={t.adultHint} maxLength={60} {...field('responsible')} {...inputProps} />
+      <Field label={t.items} value={text(form.items)} onChangeText={value => change('items', value)} error={fieldError('items')} placeholder={t.itemsHint} maxLength={160} {...field('items')} {...inputProps} />
+      <Field label={t.notes} value={text(form.notes)} onChangeText={value => change('notes', value)} multiline placeholder={t.notesHint} {...field('notes')} {...inputProps} />
+      <FormChoices label={t.importance} options={importance} value={form.importance || 'normal'} disabled={locked} error={fieldError('importance')} onChange={value => change('importance', value)} onLayout={position('importance')} />
+      <FormChoices label={t.reminder} options={reminderOptions} value={currentReminder} disabled={locked} error={fieldError('reminderMinutes')} onChange={value => change('reminderMinutes', reminderNumber(value))} onLayout={position('reminderMinutes')} />
       <Text style={s.hint}>{t.reminderHint}</Text>
-      <FormChoices label={t.repeats} options={['none', 'daily', 'weekly', 'monthly', 'yearly'].map(value => ({ value, label: t[value] }))} value={form.recurrence || 'none'} disabled={locked} error={fieldError('recurrence')} onChange={changeRecurrence} />
-      {form.recurrence && form.recurrence !== 'none' && <>
-        <Field label={t.interval} value={text(form.repeatInterval)} onChangeText={value => change('repeatInterval', value)} error={fieldError('repeatInterval')} keyboardType="number-pad" maxLength={2} placeholder={t.intervalHint} {...inputProps} />
-        {form.recurrence === 'weekly' && <View style={s.choiceGroup}><Text style={s.label}>{t.weekdays}</Text><View style={s.weekdays}>{[1, 2, 3, 4, 5, 6, 0].map(day => {
+      {scope !== 'occurrence' && <FormChoices label={t.repeats} options={['none', 'daily', 'weekly', 'monthly', 'yearly'].map(value => ({ value, label: t[value] }))} value={form.recurrence || 'none'} disabled={locked} error={fieldError('recurrence')} onChange={changeRecurrence} onLayout={position('recurrence')} />}
+      {scope !== 'occurrence' && form.recurrence && form.recurrence !== 'none' && <>
+        <Field label={t.interval} value={text(form.repeatInterval)} onChangeText={value => change('repeatInterval', value)} error={fieldError('repeatInterval')} keyboardType="number-pad" maxLength={2} placeholder={t.intervalHint} {...field('repeatInterval')} {...inputProps} />
+        {form.recurrence === 'weekly' && <View style={s.choiceGroup} onLayout={position('repeatDays')}><Text style={s.label}>{t.weekdays}</Text><View style={s.weekdays}>{[1, 2, 3, 4, 5, 6, 0].map(day => {
           const selected = Array.isArray(form.repeatDays) && form.repeatDays.includes(day);
           return <Pressable key={day} accessibilityRole="checkbox" accessibilityLabel={weekNames[day]} accessibilityState={{ checked: selected, disabled: locked }} disabled={locked}
             onPress={() => change('repeatDays', selected ? form.repeatDays.filter(value => value !== day) : [...(form.repeatDays || []), day])} style={[s.weekday, selected && s.choiceSelected]}>
             <Text style={[s.choiceText, selected && s.choiceSelectedText]}>{weekNames[day]}</Text>
           </Pressable>;
         })}</View>{!!errors.repeatDays && <Text accessibilityRole="alert" style={s.error}>{fieldError('repeatDays')}</Text>}</View>}
-        <Field label={t.until} value={text(form.repeatUntil)} onChangeText={value => change('repeatUntil', value)} error={fieldError('repeatUntil')} placeholder={t.dateHint} maxLength={10} autoCapitalize="none" {...inputProps} />
+        <Field label={t.until} value={text(form.repeatUntil)} onChangeText={value => change('repeatUntil', value)} error={fieldError('repeatUntil')} placeholder={t.dateHint} maxLength={10} autoCapitalize="none" {...field('repeatUntil')} {...inputProps} />
       </>}
     </ScrollView>
     <View style={s.footer}><Button secondary disabled={!!busy || saving} onPress={onCancel} style={s.cancelButton}>{t.cancel}</Button><Button disabled={locked || typeof onSave !== 'function'} onPress={save} style={s.saveButton}>{saving || busy ? t.saving : t.save}</Button></View>
@@ -215,7 +237,7 @@ function DetailRow({ icon: Icon, label, children }) {
   return <View style={s.detailRow}><View style={s.detailIcon}><Icon size={20} color={colors.blue} /></View><View style={s.detailCopy}><Text style={s.detailLabel}>{label}</Text>{typeof children === 'string' ? <Text style={s.detailValue}>{children}</Text> : children}</View></View>;
 }
 
-export function ActivityDetails({ event, occurrenceDate, kids = [], language = 'en', canEdit, busy, onEdit, onDelete }) {
+export function ActivityDetails({ event, occurrenceDate, occurrenceStartDate, kids = [], language = 'en', canEdit, busy, onEdit, onDelete, onDeleteRequest }) {
   const t = COPY[language] || COPY.en;
   const activity = event || {}, editable = !!canEdit && !readOnlyEvent(activity);
   const [confirmDelete, setConfirmDelete] = useState(false), [deleting, setDeleting] = useState(false), [failure, setFailure] = useState('');
@@ -229,6 +251,8 @@ export function ActivityDetails({ event, occurrenceDate, kids = [], language = '
   const time = activity.allDay ? t.allDay : calendar.formatTime(activity.start, language)
     ? `${calendar.formatTime(activity.start, language)}${calendar.formatTime(activity.end, language) ? ` – ${calendar.formatTime(activity.end, language)}` : ''}` : t.noTime;
   const chosenDate = occurrenceDate || activity.startDate;
+  const occurrences = calendar.occurrencesForDate(activity, chosenDate).filter(item => !occurrenceStartDate || item.startDate === occurrenceStartDate);
+  const occurrence = occurrences.length === 1 ? occurrences[0] : null;
   const reminder = activity.reminderMinutes;
   const reminderLabel = reminder == null ? t.noReminder : Number(reminder) === 0 ? t.atStart
     : language === 'zh' ? `提前 ${reminder} 分钟` : `${reminder} min before`;
@@ -236,7 +260,7 @@ export function ActivityDetails({ event, occurrenceDate, kids = [], language = '
   const repeatInterval = Number(activity.repeatInterval) || 1;
   const repeatUnit = ({ daily: t.dayUnit, weekly: t.weekUnit, monthly: t.monthUnit, yearly: t.yearUnit })[activity.recurrence];
   const recurrenceLabel = repeatInterval > 1 && repeatUnit
-    ? `${t.every} ${repeatInterval} ${repeatUnit}` : t[activity.recurrence] || text(activity.recurrence);
+    ? `${t.every} ${repeatInterval} ${repeatUnit}` : t[activity.recurrence] || (activity.day ? t.weekly : text(activity.recurrence));
   const repeatDays = Array.isArray(activity.repeatDays) ? [...new Set(activity.repeatDays.map(Number))]
     .filter(day => Number.isInteger(day) && day >= 0 && day < 7).map(day => weekdayNames[day]).join(' · ') : '';
 
@@ -253,8 +277,8 @@ export function ActivityDetails({ event, occurrenceDate, kids = [], language = '
     <ScrollView ref={scroll} style={s.scroll} contentContainerStyle={s.detailContent}>
       <View style={s.detailHeading}><Text style={s.eventIcon} accessible={false}>{activity.icon || '📅'}</Text><View style={s.flex}><Text style={s.detailPerson}>{childLabel}</Text><Text accessibilityRole="header" style={s.eventTitle}>{activity.title || t.title}</Text></View></View>
       {activity.status === 'cancelled' && <View style={s.cancelled}><Text style={s.cancelledText}>{t.cancelled}</Text></View>}
-      <DetailRow icon={CalendarDays} label={t.when}><Text style={s.detailValue}>{dateText(chosenDate, language, t.noDate)}</Text>{!!activity.endDate && activity.endDate !== activity.startDate && <Text style={s.detailSecondary}>– {dateText(activity.endDate, language, t.noDate)}</Text>}<Text style={s.detailSecondary}>{time}</Text></DetailRow>
-      {repeated(activity) && !!chosenDate && chosenDate !== activity.startDate && <Text style={s.seriesDate}>{t.seriesStart}: {dateText(activity.startDate, language, t.noDate)}</Text>}
+      <DetailRow icon={CalendarDays} label={t.when}><Text style={s.detailValue}>{dateText(occurrence?.startDate || chosenDate, language, t.noDate)}</Text>{!!(occurrence?.endDate || (!repeated(activity) && activity.endDate)) && (occurrence?.endDate || activity.endDate) !== (occurrence?.startDate || activity.startDate) && <Text style={s.detailSecondary}>– {dateText(occurrence?.endDate || activity.endDate, language, t.noDate)}</Text>}<Text style={s.detailSecondary}>{time}</Text>{occurrences.length > 1 && <Text style={s.detailSecondary}>{t.overlapping}</Text>}</DetailRow>
+      {repeated(activity) && !!activity.startDate && !!chosenDate && chosenDate !== activity.startDate && <Text style={s.seriesDate}>{t.seriesStart}: {dateText(activity.startDate, language, t.noDate)}</Text>}
       <DetailRow icon={Users} label={t.who}>{childLabel}</DetailRow>
       {!!activity.location && <DetailRow icon={MapPin} label={t.where}>{text(activity.location)}</DetailRow>}
       <DetailRow icon={UserRound} label={t.adult}>{activity.responsible || t.notAssigned}</DetailRow>
@@ -274,7 +298,7 @@ export function ActivityDetails({ event, occurrenceDate, kids = [], language = '
         <Button danger disabled={!!busy || deleting} onPress={remove}>{deleting || busy ? t.deleting : t.confirmDelete}</Button>
       </View>}
     </ScrollView>
-    {editable && <View style={s.footer}><Button secondary icon={Pencil} disabled={!!busy || deleting || typeof onEdit !== 'function'} onPress={() => onEdit(activity)} style={s.saveButton}>{t.edit}</Button><Button danger icon={Trash2} disabled={!!busy || deleting || typeof onDelete !== 'function'} onPress={() => setConfirmDelete(true)} style={s.saveButton}>{t.delete}</Button></View>}
+    {editable && <View style={s.footer}><Button secondary icon={Pencil} disabled={!!busy || deleting || typeof onEdit !== 'function'} onPress={() => onEdit(activity)} style={s.saveButton}>{t.edit}</Button><Button danger icon={Trash2} disabled={!!busy || deleting || typeof onDelete !== 'function'} onPress={() => onDeleteRequest ? onDeleteRequest(activity) : setConfirmDelete(true)} style={s.saveButton}>{t.delete}</Button></View>}
   </View>;
 }
 

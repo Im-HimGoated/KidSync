@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ArrowLeft, ArrowRight, Check, CircleAlert, Eye, EyeOff, Mail } from 'lucide-react-native';
 import signUp from '../lib/sign-up';
+import theme from '../ui/theme';
 
 export const signUpCopy = {
   en: {
@@ -58,6 +59,7 @@ export default function SignUpScreen({ language, email, onEmailChange, onCreateA
     if (errors.email) { emailRef.current?.focus(); return; }
     if (errors.password) { passwordRef.current?.focus(); return; }
     if (errors.confirmation) { confirmationRef.current?.focus(); return; }
+    Keyboard.dismiss();
     submitting.current = true;
     try {
       const result = await onCreateAccount(password, confirmation);
@@ -142,13 +144,13 @@ const styles = StyleSheet.create({
   main: { paddingTop: 8, paddingBottom: 12 }, saved: { flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 20 },
   check: { width: 29, height: 29, borderRadius: 15, backgroundColor: '#e4f3e7', justifyContent: 'center', alignItems: 'center' },
   savedText: { flex: 1, color: '#27765a', fontSize: 14, lineHeight: 21 },
-  heading: { fontSize: 29, lineHeight: 36, fontWeight: '700', color: '#172b3a', marginBottom: 8 }, description: { color: '#657786', fontSize: 16, lineHeight: 24 },
+  heading: { fontSize: 29, lineHeight: 36, fontWeight: '700', color: theme.colors.ink, marginBottom: 8, letterSpacing: -0.5 }, description: { color: theme.colors.muted, fontSize: 15, lineHeight: 24 },
   form: { marginTop: 24, gap: 16 }, field: { gap: 8 }, label: { color: '#3d4d5c', fontSize: 14, lineHeight: 20, fontWeight: '600' },
-  inputRow: { minHeight: 52, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#cbd5df', borderRadius: 8, backgroundColor: '#ffffff' },
+  inputRow: { minHeight: 52, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: theme.colors.line, borderRadius: 13, backgroundColor: '#ffffff' },
   input: { flex: 1, minWidth: 0, minHeight: 50, color: '#172b3a', fontSize: 16, paddingHorizontal: 14, paddingVertical: 12 },
-  emailInput: { flex: 0, borderWidth: 1, borderColor: '#cbd5df', borderRadius: 8 }, focused: { borderColor: '#235b47', backgroundColor: '#f7fbf8' }, invalid: { borderColor: '#a12632' },
+  emailInput: { flex: 0, borderWidth: 1, borderColor: theme.colors.line, borderRadius: 13 }, focused: { borderColor: '#235b47', backgroundColor: '#f7fbf8' }, invalid: { borderColor: '#a12632' },
   eye: { minWidth: 44, minHeight: 44, justifyContent: 'center', alignItems: 'center' }, hint: { color: '#657786', fontSize: 12, lineHeight: 18 },
-  primary: { minHeight: 54, flexDirection: 'row', gap: 10, justifyContent: 'center', alignItems: 'center', padding: 14, backgroundColor: '#235b47', borderRadius: 9, marginTop: 6 },
+  primary: { minHeight: 54, flexDirection: 'row', gap: 10, justifyContent: 'center', alignItems: 'center', padding: 14, backgroundColor: theme.colors.primary, borderRadius: 13, marginTop: 6 },
   primaryText: { color: '#ffffff', fontSize: 17, lineHeight: 23, fontWeight: '600', flexShrink: 1 }, pressed: { opacity: 0.7 },
   note: { color: '#657786', fontSize: 12, lineHeight: 19, textAlign: 'center' }, returning: { width: '100%', maxWidth: 420, alignSelf: 'center', paddingHorizontal: 24, paddingTop: 4, paddingBottom: 12, flexDirection: 'row', flexWrap: 'wrap', columnGap: 4, justifyContent: 'center', alignItems: 'center' },
   textButton: { minWidth: 44, minHeight: 44, justifyContent: 'center', paddingHorizontal: 3 }, link: { color: '#235b47', fontSize: 14, lineHeight: 21, fontWeight: '500' },

@@ -1,12 +1,10 @@
-import React from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { AccessibilityInfo, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
+import theme from '../ui/theme';
 
-export const colors = {
-  ink: '#172E3B', muted: '#617680', blue: '#1F6898', blueSoft: '#EAF3FA', green: '#3C785A',
-  page: '#F7F9F8', line: '#DCE6E8', white: '#FFFFFF', red: '#A53242',
-};
+export const colors = theme.colors;
 export const palettes = {
   blue: { ink: '#245D83', soft: '#E4F0F7', line: '#88AEC5' },
   green: { ink: '#315F43', soft: '#E7F2EB', line: '#94B9A3' },
@@ -29,8 +27,8 @@ export function IconButton({ icon: Icon, label, onPress, color = colors.ink, dis
   return <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled: !!disabled }} disabled={disabled} onPress={onPress}
     style={({ pressed }) => [u.iconButton, style, (pressed || disabled) && { opacity: 0.45 }]}><Icon size={21} color={color} strokeWidth={1.8} /></Pressable>;
 }
-export function Field({ label, value, onChangeText, error, multiline, style, ...props }) {
-  return <View style={[u.field, style]}><Text style={u.label}>{label}</Text><TextInput accessibilityLabel={label} value={value == null ? '' : String(value)} onChangeText={onChangeText}
+export function Field({ label, value, onChangeText, error, multiline, style, inputRef, onLayout, ...props }) {
+  return <View onLayout={onLayout} style={[u.field, style]}><Text style={u.label}>{label}</Text><TextInput ref={inputRef} accessibilityLabel={label} value={value == null ? '' : String(value)} onChangeText={onChangeText}
     placeholderTextColor="#88979F" multiline={multiline} style={[u.input, multiline && { minHeight: 90, textAlignVertical: 'top' }, error && { borderColor: colors.red }]} {...props} />
     {!!error && <Text accessibilityRole="alert" style={u.error}>{error}</Text>}
   </View>;
@@ -40,10 +38,17 @@ export function ChoiceRow({ options, value, onChange, label, disabled }) {
     style={[u.choice, value === option.value && u.choiceSelected, disabled && { opacity: 0.5 }]}>{option.color && <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: option.color }} />}<Text style={[u.choiceText, value === option.value && { color: colors.white }]}>{option.label}</Text></Pressable>)}</View>;
 }
 export function Sheet({ title, closeLabel, onClose, busy, children }) {
-  return <Modal transparent animationType="slide" presentationStyle="overFullScreen" statusBarTranslucent onRequestClose={() => { if (!busy) onClose(); }}>
+  const [reduceMotion, setReduceMotion] = useState(true);
+  useEffect(() => {
+    let active = true, changed = false;
+    const listener = AccessibilityInfo.addEventListener('reduceMotionChanged', value => { changed = true; setReduceMotion(value); });
+    AccessibilityInfo.isReduceMotionEnabled().then(value => { if (active && !changed) setReduceMotion(value); }).catch(() => {});
+    return () => { active = false; listener.remove(); };
+  }, []);
+  return <Modal transparent animationType={reduceMotion ? 'none' : 'slide'} presentationStyle="overFullScreen" supportedOrientations={['portrait', 'landscape']} statusBarTranslucent onRequestClose={() => { if (!busy) onClose(); }}>
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={u.modal}>
-      <Pressable accessibilityRole="button" accessibilityLabel={closeLabel} disabled={busy} onPress={onClose} style={StyleSheet.absoluteFill} />
-      <SafeAreaView edges={['bottom']} style={u.sheet}>
+      <Pressable accessible={false} importantForAccessibility="no-hide-descendants" disabled={busy} onPress={onClose} style={StyleSheet.absoluteFill} />
+      <SafeAreaView accessibilityViewIsModal onAccessibilityEscape={() => { if (!busy) onClose(); }} edges={['bottom', 'left', 'right']} style={u.sheet}>
         <View style={u.handle} /><View style={u.sheetHeading}><Text accessibilityRole="header" style={u.sheetTitle}>{title}</Text><IconButton icon={X} label={closeLabel} onPress={onClose} disabled={busy} /></View>
         {children}
       </SafeAreaView>
@@ -51,7 +56,7 @@ export function Sheet({ title, closeLabel, onClose, busy, children }) {
   </Modal>;
 }
 export const u = StyleSheet.create({
-  button: { minHeight: 48, backgroundColor: colors.blue, borderRadius: 13, paddingVertical: 12, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 9 },
+  button: { minHeight: 48, backgroundColor: colors.primary, borderRadius: 13, paddingVertical: 12, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 9 },
   secondaryButton: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line }, dangerButton: { backgroundColor: '#FFF1F2', borderWidth: 1, borderColor: '#F3D7DC' }, buttonText: { fontSize: 15, fontWeight: '600', textAlign: 'center', flexShrink: 1 },
   iconButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 13 },
   modal: { flex: 1, justifyContent: 'flex-end', alignItems: 'center', backgroundColor: 'rgba(18,38,49,.36)' }, sheet: { width: '100%', maxWidth: 640, maxHeight: '93%', backgroundColor: colors.white, borderTopLeftRadius: 25, borderTopRightRadius: 25, paddingTop: 9, flexShrink: 1, overflow: 'hidden' }, handle: { width: 35, height: 4, backgroundColor: '#D8E1E4', borderRadius: 3, alignSelf: 'center' }, sheetHeading: { paddingLeft: 20, paddingRight: 9, paddingVertical: 9, flexDirection: 'row', alignItems: 'center', gap: 12, justifyContent: 'space-between' }, sheetTitle: { fontSize: 18, fontWeight: '700', color: colors.ink, flexShrink: 1 },

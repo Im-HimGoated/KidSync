@@ -40,7 +40,8 @@ function validEvent(event) {
     || !Number.isFinite(dates.parseDateKey(event.startDate).getTime())
     || event.endDate && (!Number.isFinite(dates.parseDateKey(event.endDate).getTime()) || event.endDate < event.startDate)
     || event.allDay != null && typeof event.allDay !== 'boolean'
-    || !event.allDay && (!time.test(event.start) || !time.test(event.end) || event.end <= event.start)
+    || !event.allDay && (!time.test(event.start) || !time.test(event.end)
+      || (!event.endDate || event.endDate === event.startDate) && event.end <= event.start)
     || event.externalSource || event.isBuiltInHoliday) throw failure('INVALID_ACTIVITY');
 }
 function calendarIn(row, calendarId) {
@@ -189,7 +190,10 @@ function createScheduleSync({ client, storage, userId, onChange = () => {}, isCu
     syncing = (async () => {
       try {
         if (!ready) await load();
-        assertCurrent(); status = 'SYNCING'; error = null; emit();
+        assertCurrent();
+        // Keep an already-confirmed calendar calm during background polling.
+        if (!state.pending.some(item => item.blocked) && (state.pending.length || status !== 'SUBSCRIBED')) status = 'SYNCING';
+        error = null; emit();
         await authenticated();
         const remote = await schedules.readSchedule(client, userId);
         assertCurrent();
@@ -241,6 +245,7 @@ function createScheduleSync({ client, storage, userId, onChange = () => {}, isCu
     const before = original == null ? null : copy(original);
     if (kind === 'delete' && !before || before && before.id !== eventId) throw failure('INVALID_ACTIVITY');
     const desired = kind === 'save' ? { ...(before || {}), ...copy(event) } : null;
+    if (desired?.allDay) { desired.start = ''; desired.end = ''; }
     if (desired) validEvent(desired);
     if (before?.externalSource || before?.isBuiltInHoliday) throw failure('FORBIDDEN');
     try {

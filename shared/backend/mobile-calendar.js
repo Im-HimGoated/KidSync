@@ -68,7 +68,8 @@ function validateActivity(activity) {
     || (activity.endDate != null && activity.endDate !== ''
       && (!validDate(activity.endDate) || activity.endDate < activity.startDate))
     || (activity.allDay != null && typeof activity.allDay !== 'boolean')
-    || (!activity.allDay && (!time.test(activity.start) || !time.test(activity.end) || activity.end <= activity.start))) {
+    || (!activity.allDay && (!time.test(activity.start) || !time.test(activity.end)
+      || (!(activity.endDate > activity.startDate) && activity.end <= activity.start)))) {
     fail('INVALID_ACTIVITY', 'Check the activity title, date, and times.');
   }
 }
@@ -195,16 +196,144 @@ async function deleteActivity(client, userId, calendarId, eventId, { original } 
   if (!userId) fail('FORBIDDEN', 'Sign in to manage your calendar.');
   if (!validId(eventId)) fail('INVALID_ACTIVITY', 'Use a valid activity.');
   if (!record(original) || original.id !== eventId) fail('CONFLICT', 'Refresh this activity before deleting it.');
-  const before = jsonCopy(original);
+  return mutateActivities(client, userId, calendarId, [{ original, event: null }]);
+}
+
+function onlyExclusionsChanged(before, after) {
+  if (!before || !after || !Array.isArray(after.excludedDates) || !after.excludedDates.every(validDate)) return false;
+  const { excludedDates: _before, ...beforeRest } = before;
+  const { excludedDates: _after, ...afterRest } = after;
+  return equal(beforeRest, afterRest);
+}
+
+// A small set of related event changes is committed together. Recurrence edits
+// use this for the original series exclusion and its detached one-off event.
+async function mutateActivities(client, userId, calendarId, input) {
+  if (!userId) fail('FORBIDDEN', 'Sign in to manage your calendar.');
+  if (!Array.isArray(input) || !input.length || input.length > 20) fail('INVALID_ACTIVITY', 'Use valid activity changes.');
+  const seen = new Set();
+  const changes = input.map(change => {
+    if (!record(change)) fail('INVALID_ACTIVITY', 'Use valid activity changes.');
+    const before = change.original == null ? null : jsonCopy(change.original);
+    const patch = change.event == null ? null : jsonCopy(change.event);
+    const id = before?.id ?? patch?.id;
+    if (!validId(id) || (before !== null && !record(before)) || (patch !== null && !record(patch))
+      || (before === null && patch === null) || (before && patch && before.id !== patch.id) || seen.has(id)) {
+      fail('INVALID_ACTIVITY', 'Use distinct original activities.');
+    }
+    if (before?.externalSource || before?.isBuiltInHoliday || patch?.externalSource || patch?.isBuiltInHoliday) {
+      fail('FORBIDDEN', 'This activity is managed by its source.');
+    }
+    seen.add(id);
+    if (!before && patch) validateActivity(patch);
+    return { id, before, patch };
+  });
   const row = await loadOwnerRow(client, userId);
   if (!row) fail('NO_CALENDAR', 'This calendar is no longer available.');
   const selected = locateCalendar(row.schedule, calendarId);
-  const index = findActivity(selected.activities, eventId);
-  if (index < 0 || !equal(selected.activities[index], before)) {
-    fail('CONFLICT', 'This activity changed. Refresh and try again.');
+  // Verify every original before building a snapshot or sending any PATCH.
+  for (const { id, before } of changes) {
+    const index = findActivity(selected.activities, id);
+    if ((before && (index < 0 || !equal(selected.activities[index], before))) || (!before && index >= 0)) {
+      fail('CONFLICT', 'This activity changed. Refresh and try again.');
+    }
   }
-  const activities = changedActivities(selected.activities, eventId, null);
-  const snapshot = replaceActivities(row.schedule, calendarId, selected, activities, eventId, null);
+  let snapshot = row.schedule;
+  const receipt = [];
+  const mirrored = row.schedule.activeCalendarId === calendarId && Array.isArray(row.schedule.activities);
+  for (const { id, before, patch } of changes) {
+    const after = patch === null ? null : { ...(before || {}), ...patch };
+    // Removing an occurrence should also work for an otherwise unchanged legacy
+    // series whose old clocks are missing; new/edited activities remain strict.
+    if (after && !onlyExclusionsChanged(before, after)) validateActivity(after);
+    const current = locateCalendar(snapshot, calendarId);
+    const index = findActivity(current.activities, id);
+    const mirrorIndex = mirrored ? findActivity(snapshot.activities, id) : -1;
+    const mirrorBefore = mirrorIndex < 0 ? null : snapshot.activities[mirrorIndex];
+    const activities = changedActivities(current.activities, id, after);
+    snapshot = replaceActivities(snapshot, calendarId, current, activities, id, after, patch);
+    const mirrorAfterIndex = mirrored ? findActivity(snapshot.activities, id) : -1;
+    receipt.push({ id, before, after, index, mirrorIndex, mirrorBefore,
+      mirrorAfter: mirrorAfterIndex < 0 ? null : snapshot.activities[mirrorAfterIndex] });
+  }
+  const result = await compareAndSet(client, userId, row, snapshot);
+  return { ...result, undoToken: jsonCopy({ version: 1, userId, calendarId, mirrored, changes: receipt }) };
+}
+
+function replaceExact(activities, id, value, originalIndex) {
+  const index = findActivity(activities, id);
+  if (value === null) return changedActivities(activities, id, null);
+  if (index >= 0) return activities.map((event, offset) => offset === index ? value : event);
+  const next = [...activities];
+  next.splice(Math.max(0, Math.min(next.length, originalIndex < 0 ? next.length : originalIndex)), 0, value);
+  return next;
+}
+
+function expectedActivity(activities, id, expected) {
+  const index = findActivity(activities, id);
+  if (expected === null ? index >= 0 : index < 0 || !equal(activities[index], expected)) {
+    fail('CONFLICT', 'This activity changed. Refresh before undoing.');
+  }
+}
+
+// Undo restores just the affected records in a fresh row. It never reinstates
+// an old account snapshot or overwrites another person's subsequent event edit.
+async function restoreActivities(client, userId, calendarId, input) {
+  if (!userId) fail('FORBIDDEN', 'Sign in to manage your calendar.');
+  const token = jsonCopy(input);
+  if (!record(token) || token.version !== 1 || token.userId !== userId || token.calendarId !== calendarId
+    || !Array.isArray(token.changes) || !token.changes.length || token.changes.length > 20) {
+    fail('CONFLICT', 'This change cannot be undone in this calendar.');
+  }
+  const seen = new Set();
+  for (const change of token.changes) {
+    if (!record(change) || !validId(change.id) || seen.has(change.id)
+      || !own(change, 'before') || !own(change, 'after') || (change.before === null && change.after === null)
+      || !Number.isInteger(change.index) || !Number.isInteger(change.mirrorIndex)
+      || (change.before !== null && (!record(change.before) || change.before.id !== change.id))
+      || (change.after !== null && (!record(change.after) || change.after.id !== change.id))
+      || !own(change, 'mirrorBefore') || !own(change, 'mirrorAfter')
+      || (change.mirrorBefore !== null && (!record(change.mirrorBefore) || change.mirrorBefore.id !== change.id))
+      || (change.mirrorAfter !== null && (!record(change.mirrorAfter) || change.mirrorAfter.id !== change.id))) {
+      fail('CONFLICT', 'This change cannot be safely undone.');
+    }
+    seen.add(change.id);
+  }
+  const row = await loadOwnerRow(client, userId);
+  if (!row) fail('NO_CALENDAR', 'This calendar is no longer available.');
+  const selected = locateCalendar(row.schedule, calendarId);
+  const mirrored = selected.modern && row.schedule.activeCalendarId === calendarId && Array.isArray(row.schedule.activities);
+  for (const change of token.changes) {
+    expectedActivity(selected.activities, change.id, change.after);
+    if (mirrored && token.mirrored) expectedActivity(row.schedule.activities, change.id, change.mirrorAfter);
+    else if (mirrored) {
+      const index = findActivity(row.schedule.activities, change.id), current = index < 0 ? null : row.schedule.activities[index];
+      // The calendar may have become active since the change. Extra mirror-only
+      // keys are retained, but known affected keys must still match the result.
+      if (change.after === null ? current !== null : !current
+        || !Object.keys(change.after).every(key => own(current, key) && equal(current[key], change.after[key]))) {
+        fail('CONFLICT', 'This activity changed. Refresh before undoing.');
+      }
+    }
+  }
+  let activities = selected.activities;
+  let mirrors = mirrored ? row.schedule.activities : null;
+  // Positions were captured before each sequential change. Reverse that sequence
+  // when restoring so multiple deletions retain their original relative order.
+  for (const change of [...token.changes].reverse()) {
+    activities = replaceExact(activities, change.id, change.before, change.index);
+    if (mirrored) {
+      let restored = change.mirrorBefore;
+      if (!token.mirrored) {
+        const index = findActivity(mirrors, change.id), current = index < 0 ? {} : mirrors[index];
+        restored = change.before === null ? null : { ...current, ...change.before };
+        if (restored && change.after) for (const key of Object.keys(change.after)) if (!own(change.before, key)) delete restored[key];
+      }
+      mirrors = replaceExact(mirrors, change.id, restored, token.mirrored ? change.mirrorIndex : change.index);
+    }
+  }
+  const snapshot = selected.modern ? { ...row.schedule, calendarData: { ...row.schedule.calendarData,
+    [calendarId]: { ...selected.data, activities } }, ...(mirrored ? { activities: mirrors } : {}) } : { ...row.schedule, activities };
   return compareAndSet(client, userId, row, snapshot);
 }
 
@@ -262,4 +391,4 @@ async function createCalendar(client, userId, { name } = {}) {
   return { ...data, calendarId: id };
 }
 
-module.exports = { MobileCalendarError, saveActivity, deleteActivity, createCalendar };
+module.exports = { MobileCalendarError, saveActivity, deleteActivity, createCalendar, mutateActivities, restoreActivities };

@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ArrowLeft, ArrowRight, CalendarDays, Check, Settings2 } from 'lucide-react-native';
 import trial from '../lib/native-trial';
+import theme from '../ui/theme';
 
 export const personalizeCopy = {
   en: {
@@ -38,26 +39,48 @@ export default function PersonalizeCalendarScreen({ language, data, error, signe
   const t = personalizeCopy[language] || personalizeCopy.en;
   const [values, setValues] = useState({ ...data.profile, calendarName: data.profile.calendarName || t.defaultCalendar });
   const [touched, setTouched] = useState(false), [busy, setBusy] = useState(false);
-  const submitting = useRef(false);
-  const errors = trial.profileErrors(values);
+  const [requireName, setRequireName] = useState(true);
+  const [failure, setFailure] = useState(false);
+  const [focused, setFocused] = useState(null);
+  const submitting = useRef(false), nameRef = useRef(null), calendarRef = useRef(null), descriptionRef = useRef(null);
+  const errors = trial.profileErrors(values, requireName);
   const people = new Set(data.events.map(event => event.child.trim().toLocaleLowerCase()).filter(Boolean));
   async function submit(view) {
     if (submitting.current) return;
+    setRequireName(view === 'signup');
     setTouched(view === 'signup');
-    if (Object.keys(trial.profileErrors(values, view === 'signup')).length) { setTouched(true); return; }
-    submitting.current = true; setBusy(true);
+    const invalid = trial.profileErrors(values, view === 'signup');
+    if (Object.keys(invalid).length) {
+      setTouched(true);
+      if (invalid.name) nameRef.current?.focus();
+      else if (invalid.calendarName) calendarRef.current?.focus();
+      return;
+    }
+    Keyboard.dismiss();
+    submitting.current = true; setBusy(true); setFailure(false);
     try { await onContinue(view, values); }
+    catch { setFailure(true); }
     finally { submitting.current = false; setBusy(false); }
   }
   async function configure() {
     if (submitting.current) return;
-    submitting.current = true; setBusy(true);
+    Keyboard.dismiss();
+    submitting.current = true; setBusy(true); setFailure(false);
     try { await onPreferences({ ...values, calendarName: values.calendarName || t.defaultCalendar }); }
+    catch { setFailure(true); }
+    finally { submitting.current = false; setBusy(false); }
+  }
+  async function goBack() {
+    if (submitting.current) return;
+    Keyboard.dismiss();
+    submitting.current = true; setBusy(true); setFailure(false);
+    try { await onBack(values); }
+    catch { setFailure(true); }
     finally { submitting.current = false; setBusy(false); }
   }
   return <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-    <View style={styles.header}><Pressable accessibilityRole="button" disabled={busy} onPress={() => onBack(values)} style={styles.back}><ArrowLeft size={18} color="#235b47" /><Text style={styles.link}>{t.back}</Text></Pressable></View>
-    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scroll}>
+    <View style={styles.header}><Pressable accessibilityRole="button" disabled={busy} onPress={goBack} style={styles.back}><ArrowLeft size={18} color="#235b47" /><Text style={styles.link}>{t.back}</Text></Pressable></View>
+    <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} contentContainerStyle={styles.scroll}>
       <View style={styles.intro}>
         <Text style={styles.eyebrow}>{data.elapsedMs >= trial.LIMIT_MS ? t.complete : t.early}</Text>
         <Text accessibilityRole="header" style={styles.heading}>{t.title}</Text>
@@ -67,9 +90,13 @@ export default function PersonalizeCalendarScreen({ language, data, error, signe
       </View>
       <View style={styles.form}>
         {[['name', t.name, 50], ['calendarName', t.calendar, 60], ['description', t.description, 160]].map(([key, label, maxLength]) => <View key={key} style={styles.field}>
-          <Text style={styles.label}>{label}</Text><TextInput accessibilityLabel={label} value={values[key]} maxLength={maxLength} editable={!busy}
+          <Text style={styles.label}>{label}</Text><TextInput ref={key === 'name' ? nameRef : key === 'calendarName' ? calendarRef : descriptionRef}
+            accessibilityLabel={label} accessibilityHint={touched && errors[key] ? t[errors[key]] : undefined} value={values[key]} maxLength={maxLength} editable={!busy}
             autoComplete={key === 'name' ? 'name' : 'off'} autoCapitalize="sentences" multiline={key === 'description'}
-            onChangeText={value => setValues(current => ({ ...current, [key]: value }))} style={[styles.input, touched && errors[key] && styles.invalid]} />
+            returnKeyType={key === 'description' ? 'default' : 'next'} submitBehavior={key === 'description' ? 'newline' : 'submit'}
+            onSubmitEditing={key === 'name' ? () => calendarRef.current?.focus() : key === 'calendarName' ? () => descriptionRef.current?.focus() : undefined}
+            onFocus={() => setFocused(key)} onBlur={() => setFocused(null)} selectionColor={theme.colors.primary}
+            onChangeText={value => { setFailure(false); setValues(current => ({ ...current, [key]: value })); }} style={[styles.input, focused === key && styles.focused, touched && errors[key] && styles.invalid]} />
           {touched && errors[key] && <Text accessibilityRole="alert" style={styles.error}>{t[errors[key]]}</Text>}
         </View>)}
         <Text style={styles.label}>{t.icon}</Text>
@@ -78,11 +105,11 @@ export default function PersonalizeCalendarScreen({ language, data, error, signe
           style={[styles.icon, values.icon === icon && styles.selectedIcon]}><Text style={styles.emoji}>{icon}</Text></Pressable>)}</View>
         <Pressable accessibilityRole="button" disabled={busy} onPress={configure} style={styles.preferences}><Settings2 size={18} color="#235b47" /><Text style={styles.link}>{t.preferences}</Text><ArrowRight size={17} color="#235b47" /></Pressable>
         <Text style={styles.small}>{t.privacy}</Text>
-        {!!error && <Text accessibilityRole="alert" style={styles.error}>{t[error] || t.saveFailed}</Text>}
+        {!!(error || failure) && <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.error}>{t[error] || t.saveFailed}</Text>}
       </View>
     </ScrollView>
     <View style={styles.footer}>
-      <Pressable accessibilityRole="button" disabled={busy} onPress={() => submit(signedIn ? 'account' : 'signup')} style={styles.primary}>{busy ? <ActivityIndicator color="#fff" /> : <><Text style={styles.primaryText}>{signedIn ? t.saveAccount : t.create}</Text><ArrowRight size={18} color="#fff" /></>}</Pressable>
+      <Pressable accessibilityRole="button" disabled={busy} accessibilityState={{ busy, disabled: busy }} onPress={() => submit(signedIn ? 'account' : 'signup')} style={styles.primary}>{busy ? <ActivityIndicator color="#fff" accessibilityLabel={t.saving} /> : <><Text style={styles.primaryText}>{signedIn ? t.saveAccount : t.create}</Text><ArrowRight size={18} color="#fff" /></>}</Pressable>
       {!signedIn && <Pressable accessibilityRole="button" accessibilityHint={t.signedInName} disabled={busy} onPress={() => submit('signin')} style={styles.signIn}><Text style={styles.link}>{t.signIn}</Text></Pressable>}
     </View>
   </KeyboardAvoidingView>;
@@ -93,8 +120,8 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: 20, paddingBottom: 24, gap: 22 }, intro: { gap: 12, paddingTop: 8 }, eyebrow: { color: '#4d795f', fontSize: 11, lineHeight: 18, fontWeight: '700' },
   heading: { color: '#203c38', fontSize: 30, lineHeight: 37, fontWeight: '700', letterSpacing: -0.6 }, description: { color: '#5c7066', fontSize: 15, lineHeight: 23 },
   summary: { padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#d4e4d9', backgroundColor: '#f0f7f1', flexDirection: 'row', gap: 12, alignItems: 'center' }, flex: { flex: 1 }, summaryTitle: { color: '#31583f', fontSize: 14, lineHeight: 21, fontWeight: '600' },
-  small: { color: '#62776b', fontSize: 11, lineHeight: 18 }, form: { gap: 17 }, field: { gap: 7 }, label: { color: '#3c5748', fontSize: 14, fontWeight: '600' },
-  input: { minHeight: 48, borderWidth: 1, borderColor: '#c9d8cf', borderRadius: 8, padding: 12, fontSize: 16, lineHeight: 23, color: '#203c38', backgroundColor: '#fff' }, invalid: { borderColor: '#a13640' },
+  small: { color: theme.colors.muted, fontSize: 12, lineHeight: 19 }, form: { gap: 17 }, field: { gap: 7 }, label: { color: '#3c5748', fontSize: 14, fontWeight: '600' },
+  input: { minHeight: 50, borderWidth: 1, borderColor: theme.colors.line, borderRadius: 13, padding: 12, fontSize: 16, lineHeight: 23, color: '#203c38', backgroundColor: '#fff' }, focused: { borderColor: theme.colors.primary, backgroundColor: '#F6FAF7' }, invalid: { borderColor: '#a13640' },
   error: { color: '#a13640', fontSize: 12, lineHeight: 19 }, icons: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, icon: { minWidth: 44, minHeight: 44, padding: 8, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#d4e1d8', borderRadius: 10 },
   selectedIcon: { backgroundColor: '#e8f3e9', borderColor: '#3c805a', borderWidth: 2 }, emoji: { fontSize: 22 }, preferences: { minHeight: 48, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 9, padding: 10, borderRadius: 8, backgroundColor: '#f0f6f2' },
   link: { color: '#245b48', fontSize: 13, fontWeight: '600' }, footer: { flexShrink: 0, borderTopWidth: 1, borderColor: '#dce7e1', paddingHorizontal: 16, paddingVertical: 10, gap: 3 },

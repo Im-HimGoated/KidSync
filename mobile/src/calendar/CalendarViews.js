@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import calendar from '../lib/calendar';
 import model from './model';
@@ -24,6 +24,7 @@ function viewCopy(language) {
     cancelled: copy.cancelled || (zh ? '已取消' : 'Cancelled'),
     details: zh ? '打开活动详情' : 'Opens activity details',
     adult: copy.pickup || (zh ? '接送人' : 'Pickup'),
+    continuesBefore: copy.continuesBefore, continuesAfter: copy.continuesAfter,
     overview: zh ? '左右滑动查看整周，上下滑动查看其他时间。下方日程可查看完整活动。'
       : 'Swipe across days and scroll through hours. The daily agenda below has full activity details.',
     activities: count => zh ? `${count} 项活动` : `${count} ${count === 1 ? 'activity' : 'activities'}`,
@@ -41,14 +42,16 @@ function attendee(event, kids, t) {
   return people.length ? people.join(', ') : Array.isArray(event.child) ? event.child.map(text).filter(Boolean).join(', ') : text(event.child);
 }
 
-function eventLabel(event, date, kids, language, t) {
+function eventLabel(event, date, kids, language, t, occurrenceStartDate) {
   const start = calendar.formatTime(event.start, language);
   const end = calendar.formatTime(event.end, language);
+  const segment = calendar.daySegment(event, date, occurrenceStartDate);
   return [
     event.status === 'cancelled' ? t.cancelled : '',
     text(event.title) || t.activity,
     formatDate(date, language, { weekday: 'long', month: 'long', day: 'numeric' }),
     event.allDay ? t.allDay : start ? `${start}${end ? ` – ${end}` : ''}` : t.untimed,
+    segment?.continuesBefore ? t.continuesBefore : '', segment?.continuesAfter ? t.continuesAfter : '',
     attendee(event, kids, t), text(event.location), event.responsible ? `${t.adult}: ${text(event.responsible)}` : '',
   ].filter(Boolean).join(', ');
 }
@@ -58,12 +61,25 @@ function usePhoneWidth(minimum) {
   return Math.max(minimum, Math.min(width, 640) - 40);
 }
 
+function useRevealSelectedDay(scroll, width, index) {
+  const [viewport, setViewport] = useState(0);
+  useEffect(() => {
+    if (!viewport) return;
+    const x = Math.max(0, Math.min(width - viewport, (index + 0.5) * width / 7 - viewport / 2));
+    scroll.current?.scrollTo({ x, animated: false });
+  }, [width, index, viewport]);
+  return event => setViewport(event.nativeEvent.layout.width);
+}
+
 /** A full seven-day strip; narrow phones scroll instead of shrinking targets. */
 export function DateStrip({ date, firstDay = 1, events = [], kids = [], language = 'en', onDate }) {
   const selected = ownDate(date), first = model.startOfDisplayWeek(selected, firstDayValue(firstDay));
   const width = usePhoneWidth(7 * 44);
-  const t = viewCopy(language);
-  return <ScrollView horizontal style={s.stripScroll} showsHorizontalScrollIndicator={false}
+  const t = viewCopy(language), scroll = useRef(null);
+  const selectedIndex = (selected.getDay() - firstDayValue(firstDay) + 7) % 7;
+  const onLayout = useRevealSelectedDay(scroll, width, selectedIndex);
+  const today = calendar.dateKey(new Date());
+  return <ScrollView horizontal ref={scroll} onLayout={onLayout} style={s.stripScroll} showsHorizontalScrollIndicator={false}
     contentContainerStyle={[s.strip, { width }]}>
     {Array.from({ length: 7 }, (_, index) => {
       const day = calendar.addDays(first, index), key = calendar.dateKey(day);
@@ -72,7 +88,7 @@ export function DateStrip({ date, firstDay = 1, events = [], kids = [], language
         accessibilityLabel={`${formatDate(day, language, { weekday: 'long', month: 'long', day: 'numeric' })}, ${t.activities(items.length)}`}
         onPress={() => onDate?.(day)} style={[s.stripDay, chosen && s.selectedDay]}>
         <Text style={[s.weekday, chosen && s.selectedText]}>{formatDate(day, language, { weekday: 'short' }).replace('周', '')}</Text>
-        <Text style={[s.dateNumber, chosen && s.selectedText]}>{day.getDate()}</Text>
+        <Text style={[s.dateNumber, key === today && s.todayNumber, chosen && s.selectedText]}>{day.getDate()}</Text>
         <View accessible={false} style={s.dots}>{items.slice(0, 3).map((event, i) => <View key={i}
           style={[s.dot, { backgroundColor: chosen ? colors.white : colorFor(event, kids).line }]} />)}</View>
       </Pressable>;
@@ -86,7 +102,9 @@ export function MonthGrid({ date, firstDay = 1, events = [], kids = [], language
   const days = model.displayMonthDays(selected, firstDayValue(firstDay));
   const width = usePhoneWidth(7 * 44), cell = width / 7;
   const today = calendar.dateKey(new Date()), selectedKey = calendar.dateKey(selected), t = viewCopy(language);
-  return <ScrollView horizontal style={s.monthScroll} showsHorizontalScrollIndicator={false}>
+  const scroll = useRef(null), selectedIndex = (selected.getDay() - firstDayValue(firstDay) + 7) % 7;
+  const onLayout = useRevealSelectedDay(scroll, width, selectedIndex);
+  return <ScrollView horizontal ref={scroll} onLayout={onLayout} style={s.monthScroll} showsHorizontalScrollIndicator={false}>
     <View style={[s.month, { width }]}>
       <View style={s.weekdays}>{Array.from({ length: 7 }, (_, i) => <Text key={i}
         style={[s.monthWeekday, { width: cell }]}>{formatDate(calendar.addDays(start, i), language, { weekday: 'short' }).replace('周', '')}</Text>)}</View>
@@ -107,24 +125,25 @@ export function MonthGrid({ date, firstDay = 1, events = [], kids = [], language
   </ScrollView>;
 }
 
-function EventBlock({ event, date, kids, language, t, onEvent, style, compact = false }) {
+function EventBlock({ event, date, kids, language, t, onEvent, style, compact = false, occurrenceStartDate }) {
   const palette = colorFor(event, kids), cancelled = event.status === 'cancelled';
-  return <Pressable accessibilityRole="button" accessibilityLabel={eventLabel(event, date, kids, language, t)}
-    accessibilityHint={t.details} onPress={() => onEvent?.(event, date)}
+  const segment = calendar.daySegment(event, date, occurrenceStartDate);
+  return <Pressable accessibilityRole="button" accessibilityLabel={eventLabel(event, date, kids, language, t, occurrenceStartDate)}
+    accessibilityHint={t.details} onPress={() => onEvent?.(event, date, occurrenceStartDate)}
     style={({ pressed }) => [s.eventBlock, { backgroundColor: palette.soft, borderLeftColor: palette.line },
       compact && s.compactBlock, style, (pressed || cancelled) && { opacity: 0.6 }]}>
     <Text style={[s.blockTitle, { color: palette.ink }, cancelled && s.cancelled]} numberOfLines={compact ? 2 : 3}>
-      {text(event.title) || t.activity}
+      {segment?.continuesBefore ? '← ' : ''}{text(event.title) || t.activity}{segment?.continuesAfter ? ' →' : ''}
     </Text>
   </Pressable>;
 }
 
-function NonTimedRow({ label, rows, dates, colWidth, scrollRef, kids, language, t, onEvent }) {
+function NonTimedRow({ label, rows, dates, colWidth, scrollRef, scrollProps, kids, language, t, onEvent }) {
   const count = Math.max(1, ...rows.map(items => items.length));
   const height = Math.max(38, count * 47 + 5);
   return <View style={[s.nonTimed, { minHeight: height }]}>
     <View style={[s.nonTimedGutter, { height }]}><Text style={s.nonTimedLabel}>{label}</Text></View>
-    <ScrollView ref={scrollRef} horizontal scrollEnabled={false} showsHorizontalScrollIndicator={false} style={s.daysViewport}>
+    <ScrollView ref={scrollRef} horizontal {...scrollProps} nestedScrollEnabled directionalLockEnabled showsHorizontalScrollIndicator={false} style={s.daysViewport}>
       <View style={[s.nonTimedDays, { width: colWidth * 7, minHeight: height }]}>{rows.map((items, index) =>
         <View key={calendar.dateKey(dates[index])} style={[s.nonTimedColumn, { width: colWidth }]}>
           {items.map((event, j) => <EventBlock key={`${event.id ?? 'event'}:${j}`} event={event} date={dates[index]}
@@ -143,18 +162,25 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
   const selected = ownDate(date), first = model.startOfDisplayWeek(selected, firstDayValue(firstDay));
   const dates = Array.from({ length: 7 }, (_, i) => calendar.addDays(first, i));
   const t = viewCopy(language), width = usePhoneWidth(430), colWidth = (width - GUTTER) / 7;
-  const columns = dates.map(day => model.layoutDay(calendar.eventsForDate(events, day), { hourHeight: HOUR_HEIGHT, minHeight: 30 }));
+  const columns = dates.map(day => model.layoutDay(calendar.eventsForDate(events, day), { date: day, hourHeight: HOUR_HEIGHT, minHeight: 30 }));
   const canvasHeight = Math.max(24 * HOUR_HEIGHT, ...columns.flatMap(column => column.timed.map(item => item.top + item.height + 4)));
-  const vertical = useRef(null), headers = useRef(null), allDay = useRef(null), untimed = useRef(null);
+  const vertical = useRef(null), horizontal = useRef(null), headers = useRef(null), allDay = useRef(null), untimed = useRef(null);
+  const horizontalSource = useRef(horizontal), horizontalOffset = useRef(0), [viewportWidth, setViewportWidth] = useState(0);
   const lastInitial = useRef(''), firstKey = calendar.dateKey(first);
   const startHour = Number.isFinite(Number(initialHour)) ? Math.max(0, Math.min(23, Number(initialHour))) : 8;
   const scrollKey = `${firstKey}:${startHour}`;
   const selectedKey = calendar.dateKey(selected);
+  const today = calendar.dateKey(new Date());
   const hasUntimed = columns.some(column => column.untimed.length);
 
-  function syncHorizontal(event) {
+  function syncHorizontal(event, source) {
+    if (horizontalSource.current !== source) return;
     const x = event.nativeEvent.contentOffset.x;
-    for (const ref of [headers, allDay, untimed]) ref.current?.scrollTo({ x, animated: false });
+    horizontalOffset.current = x;
+    for (const ref of [horizontal, headers, allDay, untimed]) if (ref !== source) ref.current?.scrollTo({ x, animated: false });
+  }
+  function horizontalProps(source) {
+    return { onScrollBeginDrag: () => { horizontalSource.current = source; }, onScroll: event => syncHorizontal(event, source), scrollEventThrottle: 16 };
   }
   function scrollInitially() {
     if (lastInitial.current === scrollKey) return;
@@ -165,27 +191,37 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
     const frame = requestAnimationFrame(() => { lastInitial.current = ''; scrollInitially(); });
     return () => cancelAnimationFrame(frame);
   }, [scrollKey]);
+  useEffect(() => {
+    if (!viewportWidth) return;
+    const index = (selected.getDay() - firstDayValue(firstDay) + 7) % 7;
+    const left = index * colWidth, right = left + colWidth;
+    const current = horizontalOffset.current;
+    const x = Math.max(0, Math.min(colWidth * 7 - viewportWidth,
+      left < current ? left : right > current + viewportWidth ? right - viewportWidth : current));
+    horizontalOffset.current = x;
+    for (const ref of [horizontal, headers, allDay, untimed]) ref.current?.scrollTo({ x, animated: false });
+  }, [selectedKey, firstDay, colWidth, viewportWidth, hasUntimed]);
 
-  function chooseEvent(event, day) { onDate?.(day); onEvent?.(event, day); }
+  function chooseEvent(event, day, occurrenceStartDate) { onDate?.(day); onEvent?.(event, day, occurrenceStartDate); }
 
-  return <View style={s.weekContainer}>
+  return <View style={s.weekContainer} onLayout={event => setViewportWidth(Math.max(0, event.nativeEvent.layout.width - GUTTER))}>
     <View style={s.dayHeaders}><View style={s.headerGutter} />
-      <ScrollView horizontal ref={headers} scrollEnabled={false} showsHorizontalScrollIndicator={false} style={s.daysViewport}>
+      <ScrollView horizontal ref={headers} {...horizontalProps(headers)} nestedScrollEnabled directionalLockEnabled showsHorizontalScrollIndicator={false} style={s.daysViewport}>
         <View style={[s.dayHeaderColumns, { width: colWidth * 7 }]}>{dates.map(day => {
           const key = calendar.dateKey(day), chosen = key === selectedKey;
           return <Pressable key={key} accessibilityRole="button" accessibilityState={{ selected: chosen }}
             accessibilityLabel={formatDate(day, language, { weekday: 'long', month: 'long', day: 'numeric' })}
             onPress={() => onDate?.(day)} style={[s.gridDayHeader, { width: colWidth }, chosen && s.currentColumn]}>
             <Text style={s.weekday}>{formatDate(day, language, { weekday: 'short' }).replace('周', '')}</Text>
-            <View style={[s.gridDate, chosen && s.selectedDay]}><Text style={[s.dateNumber, chosen && s.selectedText]}>{day.getDate()}</Text></View>
+            <View style={[s.gridDate, chosen && s.selectedDay]}><Text style={[s.dateNumber, key === today && s.todayNumber, chosen && s.selectedText]}>{day.getDate()}</Text></View>
           </Pressable>;
         })}</View>
       </ScrollView>
     </View>
     <NonTimedRow label={t.allDay} rows={columns.map(column => column.allDay)} dates={dates} colWidth={colWidth}
-      scrollRef={allDay} kids={kids} language={language} t={t} onEvent={chooseEvent} />
+      scrollRef={allDay} scrollProps={horizontalProps(allDay)} kids={kids} language={language} t={t} onEvent={chooseEvent} />
     {hasUntimed && <NonTimedRow label={t.untimed} rows={columns.map(column => column.untimed)} dates={dates} colWidth={colWidth}
-      scrollRef={untimed} kids={kids} language={language} t={t} onEvent={chooseEvent} />}
+      scrollRef={untimed} scrollProps={horizontalProps(untimed)} kids={kids} language={language} t={t} onEvent={chooseEvent} />}
     <ScrollView ref={vertical} style={s.hoursViewport} nestedScrollEnabled directionalLockEnabled
       onContentSizeChange={scrollInitially} showsVerticalScrollIndicator>
       <View style={[s.timeBody, { height: canvasHeight }]}>
@@ -194,7 +230,7 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
             {calendar.formatTime(`${String(hour).padStart(2, '0')}:00`, language).replace(':00', '')}
           </Text>)}
         </View>
-        <ScrollView horizontal nestedScrollEnabled onScroll={syncHorizontal} scrollEventThrottle={16}
+        <ScrollView ref={horizontal} horizontal nestedScrollEnabled {...horizontalProps(horizontal)}
           showsHorizontalScrollIndicator directionalLockEnabled style={s.daysViewport}>
           <View style={{ width: colWidth * 7, height: canvasHeight }}>
             {Array.from({ length: 25 }, (_, hour) => <View accessible={false} key={hour}
@@ -203,8 +239,8 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
               style={[s.dayColumn, { left: index * colWidth, width: colWidth, height: canvasHeight }, calendar.dateKey(day) === selectedKey && s.currentColumn]}>
               {columns[index].timed.map((item, j) => {
                 const laneWidth = colWidth / Math.max(1, item.lanes);
-                return <EventBlock key={`${item.event.id ?? 'event'}:${j}`} event={item.event} date={day}
-                  kids={kids} language={language} t={t} onEvent={chooseEvent}
+                return <EventBlock key={`${item.event.id ?? 'event'}:${item.occurrenceStartDate || ''}:${j}`} event={item.event} date={day}
+                  kids={kids} language={language} t={t} onEvent={chooseEvent} occurrenceStartDate={item.occurrenceStartDate}
                   style={{ position: 'absolute', top: item.top, height: item.height,
                     left: item.lane * laneWidth + 1, width: Math.max(1, laneWidth - 2) }} />;
               })}

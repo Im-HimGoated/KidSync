@@ -1,10 +1,11 @@
 import React, { useRef, useState } from 'react';
 import {
-  ActivityIndicator, ImageBackground, KeyboardAvoidingView, Platform,
-  Pressable, ScrollView, StyleSheet, Text, TextInput, View
+  ActivityIndicator, ImageBackground, Keyboard, KeyboardAvoidingView, Platform,
+  Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions
 } from 'react-native';
-import { ArrowLeft, ArrowRight, CheckCircle2, CircleAlert, ExternalLink, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react-native';
+import { ArrowLeft, ArrowRight, CheckCircle2, CircleAlert, ExternalLink, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from 'lucide-react-native';
 import signIn from '../lib/sign-in';
+import theme from '../ui/theme';
 
 export const signInCopy = {
   en: {
@@ -19,7 +20,7 @@ export const signInCopy = {
     sendingReset: 'Sending reset link…', resetSent: 'Reset link sent. Check your email to continue on the KidsSync website.',
     invalidCredentials: 'The email or password is incorrect.', emailNotConfirmed: 'Confirm your email address before signing in.',
     rateLimited: 'Too many attempts. Please wait a little and try again.', connectionFailed: 'Could not connect. Check your internet connection and try again.',
-    authFailed: 'Something went wrong. Please try again.'
+    authFailed: 'Something went wrong. Please try again.', assurance: 'Same account. Same family calendar.'
   },
   zh: {
     heading: '\u6b22\u8fce\u56de\u6765', eyebrow: '\u5bb6\u4eba\u7684\u65f6\u5149\uff0c\u4e00\u8d77\u5b89\u6392',
@@ -33,7 +34,7 @@ export const signInCopy = {
     sendingReset: '\u6b63\u5728\u53d1\u9001\u91cd\u7f6e\u94fe\u63a5\u2026', resetSent: '\u91cd\u7f6e\u94fe\u63a5\u5df2\u53d1\u9001\u3002\u8bf7\u67e5\u6536\u90ae\u4ef6\uff0c\u5728 KidsSync \u7f51\u7ad9\u7ee7\u7eed\u3002',
     invalidCredentials: '\u90ae\u7bb1\u6216\u5bc6\u7801\u4e0d\u6b63\u786e\u3002', emailNotConfirmed: '\u8bf7\u5148\u786e\u8ba4\u90ae\u7bb1\u5730\u5740\uff0c\u518d\u767b\u5f55\u3002',
     rateLimited: '\u5c1d\u8bd5\u6b21\u6570\u8fc7\u591a\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5\u3002', connectionFailed: '\u65e0\u6cd5\u8fde\u63a5\uff0c\u8bf7\u68c0\u67e5\u7f51\u7edc\u540e\u91cd\u8bd5\u3002',
-    authFailed: '\u51fa\u73b0\u95ee\u9898\uff0c\u8bf7\u91cd\u8bd5\u3002'
+    authFailed: '\u51fa\u73b0\u95ee\u9898\uff0c\u8bf7\u91cd\u8bd5\u3002', assurance: '同一个账户，同一份家庭日历。'
   }
 };
 
@@ -42,6 +43,7 @@ export default function SignInScreen({
   onBack, backLabel, onGetStarted, onCreateAccount, onOpenWebsite, onRecover, busy, error
 }) {
   const t = signInCopy[language] || signInCopy.en;
+  const { height } = useWindowDimensions();
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -58,6 +60,7 @@ export default function SignInScreen({
     setTouched({ email: true, password: true });
     if (errors.email) { emailRef.current?.focus(); return; }
     if (errors.password) { passwordRef.current?.focus(); return; }
+    Keyboard.dismiss();
     onSignIn();
   }
 
@@ -66,16 +69,18 @@ export default function SignInScreen({
     setTouched(value => ({ ...value, email: true }));
     if (errors.email) { emailRef.current?.focus(); return; }
     setRecoverySent(false);
+    Keyboard.dismiss();
     setRecovering(true);
     try { if (await onRecover()) setRecoverySent(true); }
     finally { setRecovering(false); }
   }
 
   return <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scroll}>
+    <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} contentContainerStyle={styles.scroll}>
       <View style={styles.inner}>
         <ImageBackground source={require('../../../assets/kidssync-auth-family-signin.jpg')}
-          accessible accessibilityLabel={t.photo} resizeMode="cover" style={styles.hero} imageStyle={styles.heroImage}>
+          accessible={false} resizeMode="cover" style={[styles.hero, height < 700 && styles.compactHero]} imageStyle={styles.heroImage}>
+          <View accessible accessibilityRole="image" accessibilityLabel={t.photo} pointerEvents="none" style={StyleSheet.absoluteFillObject} />
           <Pressable accessibilityRole="button" accessibilityLabel={backLabel || t.back} disabled={busy}
             onPress={onBack} style={styles.back}>
             <ArrowLeft size={21} color="#ffffff" aria-hidden={true} />
@@ -86,6 +91,7 @@ export default function SignInScreen({
           </View>
         </ImageBackground>
         <View style={styles.form}>
+          <View style={styles.assurance}><ShieldCheck size={16} color={theme.colors.primary} /><Text style={styles.assuranceText}>{t.assurance}</Text></View>
           <View style={styles.field}>
             <Text style={styles.label}>{t.email}</Text>
             <View style={[styles.inputRow, focused === 'email' && styles.focused, emailError && styles.invalid]}>
@@ -116,7 +122,7 @@ export default function SignInScreen({
               </Pressable>
             </View>
             {!!passwordError && <Text accessibilityRole="alert" style={styles.fieldError}>{t[passwordError]}</Text>}
-            <Pressable accessibilityRole="button" onPress={recover} disabled={busy} style={styles.forgot}>
+            <Pressable accessibilityRole="button" onPress={recover} disabled={busy || recovering} accessibilityState={{ busy: recovering, disabled: busy || recovering }} style={styles.forgot}>
               <Text style={styles.link}>{recovering ? t.sendingReset : t.forgot}</Text>
             </Pressable>
           </View>
@@ -159,24 +165,26 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#ffffff' },
   scroll: { flexGrow: 1, alignItems: 'center', paddingBottom: 20 },
   inner: { width: '100%', maxWidth: 560, flexGrow: 1 },
-  hero: { width: '100%', aspectRatio: 1.75, minHeight: 190, maxHeight: 240, justifyContent: 'flex-end', overflow: 'hidden', flexShrink: 0 },
+  hero: { width: '100%', aspectRatio: 2, minHeight: 170, maxHeight: 210, justifyContent: 'flex-end', overflow: 'hidden', flexShrink: 0 },
+  compactHero: { minHeight: 135, maxHeight: 145, aspectRatio: 2.6 },
   heroImage: { width: '100%', height: '100%' },
-  back: { position: 'absolute', top: 12, left: 16, width: 44, height: 44, borderRadius: 6, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(12, 32, 43, 0.72)' },
+  back: { position: 'absolute', top: 12, left: 16, width: 44, height: 44, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(12, 32, 43, 0.72)' },
   caption: { backgroundColor: 'rgba(12, 32, 43, 0.72)', paddingHorizontal: 24, paddingVertical: 12 },
   eyebrow: { fontSize: 13, lineHeight: 18, color: '#d4eddf', marginBottom: 4 },
   heading: { fontSize: 24, lineHeight: 31, color: '#ffffff', fontWeight: '600' },
-  form: { paddingHorizontal: 24, paddingTop: 26, gap: 18, flexGrow: 1 },
+  form: { paddingHorizontal: 22, paddingTop: 18, gap: 16, flexGrow: 1 },
+  assurance: { flexDirection: 'row', alignItems: 'center', gap: 7, backgroundColor: theme.colors.primarySoft, borderRadius: 11, paddingHorizontal: 11, paddingVertical: 9 }, assuranceText: { flex: 1, fontSize: 12, lineHeight: 19, color: theme.colors.primary },
   field: { gap: 8 },
   label: { color: '#172b3a', fontSize: 14, lineHeight: 20, fontWeight: '600' },
-  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 54, paddingLeft: 14, paddingRight: 4, borderRadius: 6, borderWidth: 1, borderColor: '#b5c5ce', backgroundColor: '#ffffff' },
-  focused: { borderColor: '#17649b', backgroundColor: '#f6fafd' },
+  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 54, paddingLeft: 14, paddingRight: 4, borderRadius: 13, borderWidth: 1, borderColor: theme.colors.line, backgroundColor: '#ffffff' },
+  focused: { borderColor: theme.colors.primary, backgroundColor: '#f6faf7' },
   invalid: { borderColor: '#a12632' },
   input: { flex: 1, minWidth: 0, minHeight: 52, fontSize: 16, color: '#172b3a', paddingVertical: 12, paddingHorizontal: 0 },
   eye: { width: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   fieldError: { fontSize: 13, lineHeight: 19, color: '#a12632' },
   forgot: { minHeight: 44, flexDirection: 'row', flexWrap: 'wrap', gap: 6, alignItems: 'center', alignSelf: 'flex-end', paddingVertical: 8 },
-  link: { fontSize: 14, lineHeight: 20, color: '#17649b' },
-  primary: { minHeight: 52, borderRadius: 6, backgroundColor: '#17649b', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, padding: 14 },
+  link: { fontSize: 14, lineHeight: 20, color: theme.colors.primary },
+  primary: { minHeight: 52, borderRadius: 13, backgroundColor: theme.colors.primary, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, padding: 14 },
   primaryText: { fontSize: 17, lineHeight: 23, fontWeight: '600', color: '#ffffff', flexShrink: 1 },
   pressed: { opacity: 0.7 },
   errorRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
@@ -186,7 +194,7 @@ const styles = StyleSheet.create({
   newAccount: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, justifyContent: 'center', alignItems: 'center' },
   secondary: { color: '#4c626e', fontSize: 14, lineHeight: 21 },
   textButton: { minHeight: 44, minWidth: 44, justifyContent: 'center', paddingHorizontal: 4 },
-  linkStrong: { color: '#17649b', fontSize: 14, lineHeight: 21, fontWeight: '600' },
+  linkStrong: { color: theme.colors.primary, fontSize: 14, lineHeight: 21, fontWeight: '600' },
   footer: { marginTop: 'auto', borderTopWidth: 1, borderColor: '#e2e9ed', paddingTop: 12, gap: 8 },
   explore: { minHeight: 44, flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center', justifyContent: 'center' },
   footerText: { fontSize: 12, lineHeight: 20, color: '#4c626e', textAlign: 'center' }

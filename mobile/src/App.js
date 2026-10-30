@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator, AppState, Image,
   Dimensions, Linking, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { CalendarDays, Home, UsersRound } from 'lucide-react-native';
 import { supabase } from './lib/supabase';
 import schedules from '../../shared/backend/schedules';
 import WelcomeScreen from './screens/WelcomeScreen';
@@ -19,8 +20,16 @@ import useNativeTrial from './lib/use-native-trial';
 import TrialCalendarScreen, { trialCopy } from './screens/TrialCalendarScreen';
 import PersonalizeCalendarScreen from './screens/PersonalizeCalendarScreen';
 import trialImport from '../../shared/backend/claim-native-trial';
+import mobileCalendar from '../../shared/backend/mobile-calendar';
 import CalendarScreen from './calendar/CalendarScreen';
 import phoneAccess from './lib/phone-access';
+import HomeScreen from './screens/HomeScreen';
+import FamilyScreen from './screens/FamilyScreen';
+import { colors } from './calendar/ui';
+import AccountSettings from './ui/AccountSettings';
+import useDeviceLanguage from './ui/use-device-language';
+import useScheduleSync from './lib/use-schedule-sync';
+import SyncStatus from './ui/SyncStatus';
 
 const preferenceStore = preferences.createPreferenceStore(AsyncStorage);
 
@@ -39,7 +48,8 @@ const copy = {
     trialSaved: 'Your preview was saved as a separate account calendar.', trialSaving: 'Saving preview…', trialBack: 'Back to your calendar profile',
     trialSaveFailed: 'Could not save the preview to your account. Your plans are still on this device; retry when connected.',
     trialConflict: 'Your account calendar changed. Retry to save alongside its latest plans.',
-    trialMarkFailed: 'The calendar is saved to your account, but this device could not mark it complete. Retrying is safe and will not create a duplicate.'
+    trialMarkFailed: 'The calendar is saved to your account, but this device could not mark it complete. Retrying is safe and will not create a duplicate.',
+    home: 'Home', family: 'Family', account: 'Account', accountSettings: 'Calendar preferences', close: 'Close', signedInAs: 'Signed in as'
   },
   zh: {
     signIn: '\u767b\u5f55', email: '\u90ae\u7bb1', password: '\u5bc6\u7801', signOut: '\u9000\u51fa',
@@ -56,12 +66,31 @@ const copy = {
     trialSaved: '体验日历已单独保存在你的账户中。', trialSaving: '正在保存体验日历…', trialBack: '返回日历个人资料',
     trialSaveFailed: '无法将体验日历保存到账户。计划仍在此设备上，请联网后重试。',
     trialConflict: '账户日历已更改。请重试，在最新安排旁保存体验日历。',
-    trialMarkFailed: '日历已保存到账户，但此设备无法标记为完成。可以安全重试，不会重复创建。'
+    trialMarkFailed: '日历已保存到账户，但此设备无法标记为完成。可以安全重试，不会重复创建。',
+    home: '首页', family: '家庭', account: '账户', accountSettings: '日历偏好', close: '关闭', signedInAs: '当前账户'
   }
 };
 
+function BottomNavigation({ language, active, onChange, familyPendingCount = 0 }) {
+  const t = copy[language];
+  return <View accessibilityRole="tablist" style={styles.bottomNav}>
+    {[{ key: 'home', label: t.home, icon: Home }, { key: 'calendar', label: t.calendar, icon: CalendarDays },
+      { key: 'family', label: t.family, icon: UsersRound, count: familyPendingCount }].map(item => {
+      const Icon = item.icon, selected = active === item.key;
+      return <Pressable key={item.key} accessibilityRole="tab" accessibilityState={{ selected }} accessibilityLabel={item.label}
+        onPress={() => onChange(item.key)} style={({ pressed }) => [styles.bottomTab, selected && styles.bottomTabSelected, pressed && { opacity: 0.55 }]}>
+        <View style={styles.bottomIcon}>
+          <Icon size={21} color={selected ? colors.blue : colors.muted} strokeWidth={selected ? 2.4 : 1.8} />
+          {!!item.count && <View accessibilityLabel={`${item.count} pending`} style={styles.bottomBadge}><Text style={styles.bottomBadgeText}>{item.count > 9 ? '9+' : item.count}</Text></View>}
+        </View>
+        <Text style={[styles.bottomTabText, selected && styles.bottomTabTextSelected]}>{item.label}</Text>
+      </Pressable>;
+    })}
+  </View>;
+}
+
 function Workspace() {
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useDeviceLanguage();
   const t = copy[language];
   const [session, setSession] = useState(null);
   const [booting, setBooting] = useState(true);
@@ -70,12 +99,12 @@ function Workspace() {
   const [busy, setBusy] = useState(false);
   const authRequest = useRef(false);
   const [error, setError] = useState('');
-  const [snapshot, setSnapshot] = useState(null);
-  const [loaded, setLoaded] = useState(false);
-  const [status, setStatus] = useState('CONNECTING');
   const [calendarId, setCalendarId] = useState(null);
-  const [watcher, setWatcher] = useState(null);
   const [entryScreen, setEntryScreen] = useState('welcome');
+  const [workspaceView, setWorkspaceView] = useState('home');
+  const [familyPendingCount, setFamilyPendingCount] = useState(0);
+  const [calendarFocusDate, setCalendarFocusDate] = useState(null);
+  const [accountOpen, setAccountOpen] = useState(false);
   const [onboardingInitial, setOnboardingInitial] = useState(null);
   const [pendingSetup, setPendingSetup] = useState(null);
   const [preferencesUser, setPreferencesUser] = useState(null);
@@ -91,6 +120,12 @@ function Workspace() {
   const [trialSaving, setTrialSaving] = useState(false), [trialImportError, setTrialImportError] = useState('');
   const importRequest = useRef(false), accountScope = useRef(null);
   accountScope.current = session?.user.id || null;
+  const ownerSync = useScheduleSync({ client: supabase, userId: session?.user.id });
+  const ownerActivityActions = useMemo(() => ({
+    ...mobileCalendar,
+    saveActivity: (_client, _userId, id, event, { original } = {}) => ownerSync.saveActivity(id, event, { original }),
+    deleteActivity: (_client, _userId, id, eventId, { original } = {}) => ownerSync.deleteActivity(id, eventId, { original }),
+  }), [ownerSync.saveActivity, ownerSync.deleteActivity]);
 
   useEffect(() => {
     if (!session && entryScreen === 'trial' && trial.data?.elapsedMs >= nativeTrial.LIMIT_MS) setEntryScreen('personalize');
@@ -140,8 +175,9 @@ function Workspace() {
       // successful request was in flight. UI changes still require the old scope.
       const marked = await trial.markClaimed(userId, result.calendarId);
       if (accountScope.current !== userId) return false;
-      setSnapshot({ userId, value: result.schedule }); setLoaded(true); setCalendarId(result.calendarId);
-      watcher?.refresh();
+      await ownerSync.acceptConfirmed(result);
+      setCalendarId(result.calendarId);
+      void ownerSync.refresh();
       if (!marked) { setTrialImportError(t.trialMarkFailed); return false; }
       setTrialAuthIntent(false); setEntryScreen('welcome');
       return true;
@@ -246,37 +282,22 @@ function Workspace() {
   }
 
   useEffect(() => {
-    setSnapshot(null);
     setCalendarId(null);
-    setLoaded(false);
+    setWorkspaceView('home');
+    setFamilyPendingCount(0);
+    setCalendarFocusDate(null);
+    setAccountOpen(false);
     setError('');
-    setStatus('CONNECTING');
-    if (!session?.user.id) { setWatcher(null); return; }
+    if (!session?.user.id) { supabase.auth.stopAutoRefresh(); return; }
     setEntryScreen('welcome');
-    let active = true;
-    const sync = schedules.watchSchedule(supabase, session.user.id, {
-      onData: row => { setSnapshot({ userId: session.user.id, value: row?.schedule || null }); setLoaded(true); setError(''); },
-      onError: () => { setError('sync'); setLoaded(true); },
-      onStatus: setStatus
-    });
-    setWatcher(sync);
     const foreground = next => {
-      if (next === 'active') {
-        supabase.auth.startAutoRefresh();
-        sync.refresh();
-      } else supabase.auth.stopAutoRefresh();
+      if (next === 'active') supabase.auth.startAutoRefresh();
+      else supabase.auth.stopAutoRefresh();
     };
     foreground(AppState.currentState);
     const listener = AppState.addEventListener('change', foreground);
-    // Reconnect/catch up even if a device temporarily loses Realtime connectivity.
-    const interval = setInterval(() => {
-      if (active && AppState.currentState === 'active') sync.refresh();
-    }, 5000);
     return () => {
-      active = false;
       listener.remove();
-      clearInterval(interval);
-      sync.stop();
       supabase.auth.stopAutoRefresh();
     };
   }, [session?.user.id]);
@@ -323,20 +344,35 @@ function Workspace() {
     catch { setError(t.linkFailed); }
   }
 
-  const calendars = schedules.calendarEntries(snapshot?.userId === session?.user.id ? snapshot?.value : null);
+  async function signOut() {
+    const { error: signOutError } = await supabase.auth.signOut();
+    if (signOutError) { setError(signOutError.message); return false; }
+    setAccountOpen(false);
+    return true;
+  }
+
+  const syncCurrent = ownerSync.userId === session?.user.id;
+  const snapshot = syncCurrent ? ownerSync.row?.schedule : null;
+  const loaded = syncCurrent && ownerSync.loaded;
+  const status = syncCurrent ? ownerSync.status : 'CONNECTING';
+  const syncError = syncCurrent && ownerSync.error ? t.failed : '';
+  const calendars = schedules.calendarEntries(snapshot);
   const calendar = calendars.find(item => item.id === calendarId) || calendars[0];
   const activePreferences = preferences.forAccount(accountPreferences, session?.user.id);
 
   return <SafeAreaView style={styles.page}>
-    <View style={styles.header}>
+    <View style={styles.appHeader}>
       <View style={styles.brand}>
         <Image source={require('../../assets/kidssync-app-icon-192.png')} style={styles.logo} />
         <Text style={styles.title}>KidsSync</Text>
       </View>
-      <Pressable accessibilityRole="button" accessibilityLabel={language === 'en' ? 'Switch to Chinese' : 'Switch to English'}
-        onPress={() => setLanguage(language === 'en' ? 'zh' : 'en')} style={styles.button}>
-        <Text style={styles.link}>{language === 'en' ? '\u4e2d\u6587' : 'EN'}</Text>
-      </Pressable>
+      <View style={styles.headerActions}><Pressable accessibilityRole="button" accessibilityLabel={language === 'en' ? 'Switch to Chinese' : 'Switch to English'}
+          onPress={() => setLanguage(language === 'en' ? 'zh' : 'en')} style={styles.languageButton}>
+          <Text style={styles.languageText}>{language === 'en' ? '\u4e2d\u6587' : 'EN'}</Text>
+        </Pressable>
+        {session && <Pressable accessibilityRole="button" accessibilityLabel={t.account} onPress={() => setAccountOpen(true)} style={({ pressed }) => [styles.avatarButton, pressed && { opacity: 0.55 }]}>
+          <Text style={styles.avatarText}>{session.user.email?.trim()?.[0]?.toUpperCase() || 'K'}</Text>
+        </Pressable>}</View>
     </View>
     {booting ? <ActivityIndicator accessibilityLabel={t.loading} style={styles.loader} /> : entryScreen === 'personalize' && trial.data && !trial.data.claimedBy ?
       <PersonalizeCalendarScreen language={language} data={trial.data} signedIn={!!session} error={trial.error || (trialImportError ? 'saveFailed' : '')}
@@ -356,17 +392,8 @@ function Workspace() {
         onPasswordChange={value => { setPassword(value); setError(''); }}
         onSignIn={signIn} onCreateAccount={beginCreateAccount} onGetStarted={beginSetup} onOpenWebsite={openWebsite} onRecover={recoverPassword}
         onBack={() => { setError(''); setPassword(''); setEntryScreen(trialAuthIntent ? 'personalize' : 'welcome'); }} /> : <View style={styles.content}>
-        <View style={styles.header}>
-          <View style={styles.flex}>
-            <Text style={styles.heading}>{t.calendar}</Text>
-            <Text style={styles.secondary}>{t.readOnly} · {status === 'SUBSCRIBED' ? t.live : t.connecting}</Text>
-          </View>
-          <Pressable accessibilityRole="button" style={styles.button} onPress={async () => {
-            const { error: signOutError } = await supabase.auth.signOut();
-            if (signOutError) setError(signOutError.message);
-          }}><Text style={styles.link}>{t.signOut}</Text></Pressable>
-        </View>
         {!!error && <Text accessibilityRole="alert" style={styles.error}>{error === 'sync' ? t.failed : error}</Text>}
+        <SyncStatus key={session.user.id} sync={ownerSync} language={language} />
         {trial.data && (!trial.data.claimOwner || trial.data.claimOwner === session.user.id) && (!trial.data.claimedBy || trial.data.claimedBy === session.user.id) && <View style={styles.trialNotice}>
           <Text style={styles.secondary}>{trial.data.claimedBy ? t.trialSaved : t.trialReady}</Text>
           {!trial.data.claimedBy && <Pressable accessibilityRole="button" disabled={trialSaving} style={styles.button}
@@ -375,25 +402,44 @@ function Workspace() {
           </Pressable>}
           {!!trialImportError && <Text accessibilityRole="alert" style={styles.error}>{trialImportError}</Text>}
         </View>}
-        {preferencesUser === session.user.id && <Text style={[styles.secondary, { paddingHorizontal: 16 }]}>{t.setupSaved}</Text>}
         {preferenceError && <View style={{ paddingHorizontal: 16 }}><Text accessibilityRole="alert" style={styles.error}>{t.setupFailed}</Text>
           <Pressable accessibilityRole="button" style={styles.button} onPress={() => setPreferenceAttempt(value => value + 1)}><Text style={styles.link}>{t.retrySetup}</Text></Pressable></View>}
-        <CalendarScreen key={session.user.id} language={language} userId={session.user.id} client={supabase}
-          calendars={calendars} calendarId={calendar?.id || null} preferences={activePreferences} loading={!loaded}
-          syncStatus={status} error={error === 'sync' ? t.failed : ''} onRefresh={() => watcher?.refresh()}
-          onSelectCalendar={setCalendarId} onPreferences={openAccountPreferences}
-          onSchedule={row => {
-            if (accountScope.current !== session.user.id) return;
-            setSnapshot({ userId: session.user.id, value: row.schedule }); setLoaded(true); watcher?.refresh();
-          }} />
+        <View style={styles.workspace}>
+          <View style={[styles.workspaceScreen, workspaceView !== 'home' && styles.hiddenScreen]}>
+            <HomeScreen language={language} calendars={calendars} calendar={calendar} loading={!loaded}
+              error={syncError} onRefresh={ownerSync.refresh}
+              onSelectCalendar={setCalendarId} onPreferences={openAccountPreferences}
+              onOpenCalendar={() => setWorkspaceView('calendar')} onOpenDate={date => { setCalendarFocusDate(date); setWorkspaceView('calendar'); }} />
+          </View>
+          <View style={[styles.workspaceScreen, workspaceView !== 'calendar' && styles.hiddenScreen]}>
+            <CalendarScreen key={session.user.id} language={language} userId={session.user.id} client={supabase}
+              calendars={calendars} calendarId={calendar?.id || null} preferences={activePreferences} loading={!loaded}
+              focusDate={calendarFocusDate} syncStatus={status} error={syncError} onRefresh={ownerSync.refresh}
+              onSelectCalendar={setCalendarId} onPreferences={openAccountPreferences}
+              activityActions={ownerActivityActions}
+              onSchedule={async row => {
+                if (accountScope.current !== session.user.id) return;
+                if (!row?.pending) await ownerSync.acceptConfirmed(row);
+                void ownerSync.refresh();
+              }} />
+          </View>
+          <View style={[styles.workspaceScreen, workspaceView !== 'family' && styles.hiddenScreen]}>
+            <FamilyScreen key={session.user.id} language={language} client={supabase} user={session.user}
+              calendars={calendars} calendar={calendar} onSelectCalendar={setCalendarId}
+              onOpenWebsite={openWebsite} onPendingCount={setFamilyPendingCount} />
+          </View>
+        </View>
+        <BottomNavigation language={language} active={workspaceView} onChange={setWorkspaceView} familyPendingCount={familyPendingCount} />
       </View>}
+    {session && accountOpen && <AccountSettings language={language} email={session.user.email || ''} onClose={() => setAccountOpen(false)}
+      onPreferences={() => { setAccountOpen(false); openAccountPreferences(); }} onSignOut={signOut} onLanguage={setLanguage} onWebsite={openWebsite} />}
   </SafeAreaView>;
 }
 
 function PhoneWorkspace() {
   const window = useWindowDimensions();
   const screen = Dimensions.get('screen');
-  const [language, setLanguage] = useState('en'), [linkFailed, setLinkFailed] = useState(false);
+  const [language, setLanguage] = useDeviceLanguage(), [linkFailed, setLinkFailed] = useState(false);
   const browser = Platform.OS === 'web' ? globalThis.navigator : null;
   const isDevelopment = typeof __DEV__ !== 'undefined' && __DEV__;
   const developmentPreviewRequested = Platform.OS === 'web' && isDevelopment
@@ -435,10 +481,15 @@ const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: '#f7fafb', ...Platform.select({
     web: { width: '100%', maxWidth: 390, alignSelf: 'center' }
   }) },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, gap: 12, flexWrap: 'wrap' },
+  appHeader: { minHeight: 62, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 14, paddingVertical: 8, gap: 10, backgroundColor: '#ffffff', borderBottomWidth: 1, borderBottomColor: '#dce6e8' },
   brand: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  logo: { width: 36, height: 36 },
-  title: { fontSize: 22, fontWeight: '700', color: '#172b3a' },
+  logo: { width: 34, height: 34 },
+  title: { fontSize: 20, fontWeight: '700', color: '#172b3a' },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  languageButton: { minWidth: 44, minHeight: 44, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 8 },
+  languageText: { color: '#17649b', fontSize: 14, fontWeight: '600' },
+  avatarButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#eaf3fa', borderWidth: 1, borderColor: '#c7ddea', alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: '#1f6898', fontSize: 15, fontWeight: '700' },
   heading: { fontSize: 24, fontWeight: '700', color: '#172b3a' },
   label: { fontSize: 16, color: '#172b3a' },
   button: { minHeight: 44, minWidth: 44, padding: 10, justifyContent: 'center' },
@@ -446,6 +497,13 @@ const styles = StyleSheet.create({
   error: { color: '#a12632', paddingHorizontal: 16, fontSize: 16 },
   loader: { margin: 32 },
   content: { flex: 1 },
+  workspace: { flex: 1 }, workspaceScreen: { flex: 1 }, hiddenScreen: { display: 'none' },
+  bottomNav: { minHeight: 62, flexDirection: 'row', alignItems: 'stretch', borderTopWidth: 1, borderTopColor: '#dce6e8', backgroundColor: '#ffffff', paddingHorizontal: 18, paddingTop: 5 },
+  bottomTab: { flex: 1, minHeight: 54, alignItems: 'center', justifyContent: 'center', gap: 3, borderTopWidth: 2, borderTopColor: 'transparent' },
+  bottomIcon: { minWidth: 28, minHeight: 23, alignItems: 'center', justifyContent: 'center' },
+  bottomBadge: { position: 'absolute', top: -5, right: -8, minWidth: 17, height: 17, borderRadius: 9, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center', backgroundColor: '#b42332', borderWidth: 2, borderColor: '#ffffff' },
+  bottomBadgeText: { color: '#ffffff', fontSize: 9, lineHeight: 11, fontWeight: '700' },
+  bottomTabSelected: { borderTopColor: '#1f6898' }, bottomTabText: { color: '#617680', fontSize: 11, fontWeight: '600' }, bottomTabTextSelected: { color: '#1f6898' },
   trialNotice: { padding: 14, marginHorizontal: 16, marginBottom: 12, borderWidth: 1, borderColor: '#cfe0d4', borderRadius: 10, backgroundColor: '#f0f7f1' },
   flex: { flexShrink: 1, gap: 4 },
   secondary: { color: '#4c626e', fontSize: 15, lineHeight: 22 },

@@ -233,3 +233,35 @@ test('sync labels have the same states and retention/confirmation copy in both l
   assert.match(copy.en.pending(1), /1 change waiting/); assert.match(copy.en.pending(2), /2 changes waiting/);
   assert.match(copy.en.confirmBody, /already saved to your account are kept/);
 });
+
+test('queue limit preserves all existing device changes and refuses only the extra edit', async () => {
+  const { sync } = await disconnected();
+  for (let index = 0; index < 50; index++) await sync.saveActivity('home', activity({ id: `event-${index}` }));
+  await assert.rejects(sync.saveActivity('home', activity({ id: 'too-many' })), code('QUEUE_FULL'));
+  await sync.refresh(); assert.equal(sync.getState().pendingCount, 50); assert.equal(events(sync).length, 51);
+});
+
+test('all-day queue entries normalize unused clock values before any cloud write', async () => {
+  const { remote, sync } = await disconnected();
+  await sync.saveActivity('home', activity({ id: 'all-day', allDay: true, start: { invalid: true }, end: ['invalid'] })); await sync.refresh();
+  remote.state.online = true; await sync.refresh();
+  const result = remote.state.row.schedule.calendarData.home.activities.find(event => event.id === 'all-day');
+  assert.equal(result.start, ''); assert.equal(result.end, '');
+});
+
+test('idle background refresh keeps the confirmed up-to-date status instead of flashing a spinner', async () => {
+  const device = storage(), remote = client(), statuses = [];
+  const sync = createScheduleSync({ storage: device, client: remote, userId: 'a', onChange: state => statuses.push(state.status) });
+  await sync.refresh(); statuses.length = 0; await sync.refresh();
+  assert.equal(statuses.every(status => status === 'SUBSCRIBED'), true);
+});
+
+test('overnight queued events keep their real end date and midnight bounds during replay', async () => {
+  const { remote, sync } = await disconnected();
+  const overnight = activity({ id: 'overnight', start: '23:00', end: '00:00', endDate: '2026-10-31' });
+  await sync.saveActivity('home', overnight); await sync.refresh();
+  remote.state.online = true; await sync.refresh();
+  assert.deepEqual(events(sync).find(event => event.id === 'overnight'), overnight);
+  assert.equal(sync.getState().pendingCount, 0);
+  await assert.rejects(sync.saveActivity('home', activity({ id: 'invalid-overnight', start: '23:00', end: '00:00' })), code('INVALID_ACTIVITY'));
+});

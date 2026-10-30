@@ -47,44 +47,84 @@ function dateSerial(date) {
   return result.getTime() / 86400000;
 }
 
-function startsOn(activity, date, anchor) {
-  if (Array.isArray(activity.excludedDates) && activity.excludedDates.includes(dateKey(date))) return false;
-  if (!activity.startDate) return WEEKDAYS[date.getDay()] === String(activity.day || '').toLowerCase();
-  if (!isDate(anchor)) return false;
-  const difference = dateSerial(date) - dateSerial(anchor);
-  if (difference < 0) return false;
+/** Resolve every series start covering a display day; never guess between overlaps. */
+function occurrencesForDate(activity, value) {
+  const date = typeof value === 'string' ? parseDateKey(value) : value;
+  if (!activity || typeof activity !== 'object' || !isDate(date)) return [];
+  const selectedKey = dateKey(date), excluded = new Set(Array.isArray(activity.excludedDates) ? activity.excludedDates : []);
+  const start = parseDateKey(activity.startDate), end = parseDateKey(activity.endDate);
+  if (!activity.startDate) return WEEKDAYS[date.getDay()] === String(activity.day || '').toLowerCase() && !excluded.has(selectedKey)
+    ? [{ date: selectedKey, startDate: selectedKey, endDate: selectedKey, spanDays: 0, isStart: true, isEnd: true }] : [];
+  if (!isDate(start) || dateSerial(date) < dateSerial(start)) return [];
+  const anchor = dateSerial(start), selected = dateSerial(date);
+  const spanDays = isDate(end) ? Math.max(0, dateSerial(end) - anchor) : 0;
   const until = parseDateKey(activity.repeatUntil);
-  if (isDate(until) && dateSerial(date) > dateSerial(until)) return false;
-  const interval = Math.max(1, Number(activity.repeatInterval) || 1);
+  const low = Math.max(anchor, selected - spanDays), high = Math.min(selected, isDate(until) ? dateSerial(until) : selected);
+  if (high < low) return [];
+  const interval = Math.max(1, Math.trunc(Number(activity.repeatInterval)) || 1), candidates = [];
+  const include = candidate => {
+    if (!isDate(candidate)) return;
+    const serial = dateSerial(candidate), key = dateKey(candidate);
+    if (serial < low || serial > high || excluded.has(key)) return;
+    // A timed interval ending exactly at midnight has no minutes on its final
+    // date. All-day ranges retain their inclusive calendar-date end instead.
+    if (spanDays > 0 && !activity.allDay && selected === serial + spanDays
+      && timeMinutes(activity.end) === 0 && Number.isFinite(timeMinutes(activity.start))) return;
+    const endKey = dateKey(addDays(candidate, spanDays));
+    candidates.push({ date: selectedKey, startDate: key, endDate: endKey, spanDays,
+      isStart: serial === selected, isEnd: serial + spanDays === selected });
+  };
   switch (activity.recurrence || 'none') {
-    case 'daily': return difference % interval === 0;
+    case 'daily':
+      for (let serial = anchor + Math.ceil((low - anchor) / interval) * interval; serial <= high; serial += interval) include(addDays(start, serial - anchor));
+      break;
     case 'weekly': {
-      const repeatDays = Array.isArray(activity.repeatDays) && activity.repeatDays.length
-        ? activity.repeatDays.map(Number) : [anchor.getDay()];
-      return Math.floor(difference / 7) % interval === 0 && repeatDays.includes(date.getDay());
+      const days = [...new Set(Array.isArray(activity.repeatDays) && activity.repeatDays.length ? activity.repeatDays.map(Number) : [start.getDay()])]
+        .filter(day => Number.isInteger(day) && day >= 0 && day < 7);
+      const period = interval * 7;
+      for (let block = Math.floor((low - anchor) / period) * period; anchor + block <= high; block += period) {
+        days.forEach(day => include(addDays(start, block + (day - start.getDay() + 7) % 7)));
+      }
+      break;
     }
     case 'monthly': {
-      const months = (date.getFullYear() - anchor.getFullYear()) * 12 + date.getMonth() - anchor.getMonth();
-      return months % interval === 0 && date.getDate() === anchor.getDate();
+      const first = addDays(start, low - anchor), last = addDays(start, high - anchor);
+      const firstMonth = (first.getFullYear() - start.getFullYear()) * 12 + first.getMonth() - start.getMonth();
+      const lastMonth = (last.getFullYear() - start.getFullYear()) * 12 + last.getMonth() - start.getMonth();
+      for (let offset = Math.ceil(firstMonth / interval) * interval; offset <= lastMonth; offset += interval) {
+        const candidate = new Date(start);
+        candidate.setDate(1); candidate.setMonth(candidate.getMonth() + offset); candidate.setDate(start.getDate());
+        if (candidate.getDate() === start.getDate() && (candidate.getFullYear() - start.getFullYear()) * 12 + candidate.getMonth() - start.getMonth() === offset) include(candidate);
+      }
+      break;
     }
-    case 'yearly':
-      return (date.getFullYear() - anchor.getFullYear()) % interval === 0
-        && date.getMonth() === anchor.getMonth() && date.getDate() === anchor.getDate();
-    default: return difference === 0;
+    case 'yearly': {
+      const firstYear = addDays(start, low - anchor).getFullYear() - start.getFullYear();
+      const lastYear = addDays(start, high - anchor).getFullYear() - start.getFullYear();
+      for (let offset = Math.ceil(firstYear / interval) * interval; offset <= lastYear; offset += interval) {
+        const candidate = new Date(start); candidate.setFullYear(candidate.getFullYear() + offset);
+        if (candidate.getMonth() === start.getMonth() && candidate.getDate() === start.getDate()) include(candidate);
+      }
+      break;
+    }
+    default: include(start);
   }
+  return candidates.sort((a, b) => a.startDate.localeCompare(b.startDate));
 }
 
-function occursOn(activity, date) {
-  const start = parseDateKey(activity.startDate);
-  const end = parseDateKey(activity.endDate);
-  if (activity.startDate && (!isDate(start) || dateSerial(date) < dateSerial(start))) return false;
-  const span = isDate(start) && isDate(end) ? Math.min(366, Math.max(0, dateSerial(end) - dateSerial(start))) : 0;
-  // As on the website, exceptions and repeatUntil apply to a series start. A
-  // multi-day occurrence continues through its inclusive end date.
-  for (let offset = 0; offset <= span; offset += 1) {
-    if (startsOn(activity, addDays(date, -offset), start)) return true;
-  }
-  return false;
+/** Floating local wall-clock segments; do not reinterpret stored timezone metadata. */
+function daySegment(activity, value, occurrenceStartDate) {
+  let occurrences = occurrencesForDate(activity, value);
+  if (occurrenceStartDate) occurrences = occurrences.filter(item => item.startDate === occurrenceStartDate);
+  if (!occurrences.length) return null;
+  const allDay = !!activity.allDay;
+  const rawStart = timeMinutes(activity.start), rawEnd = timeMinutes(activity.end);
+  if (!allDay && (!Number.isFinite(rawStart) || !Number.isFinite(rawEnd))) return null;
+  const segments = occurrences.map(item => ({ occurrenceStartDate: item.startDate, start: allDay || !item.isStart ? 0 : rawStart,
+    end: allDay || !item.isEnd ? 1440 : rawEnd, continuesBefore: !item.isStart, continuesAfter: !item.isEnd }));
+  if (segments.some(item => item.end <= item.start)) return null;
+  return { start: segments.reduce((value, item) => Math.min(value, item.start), 1440), end: segments.reduce((value, item) => Math.max(value, item.end), 0), allDay,
+    continuesBefore: segments.some(item => item.continuesBefore), continuesAfter: segments.some(item => item.continuesAfter), occurrences, segments };
 }
 
 function timeMinutes(value) {
@@ -95,11 +135,11 @@ function timeMinutes(value) {
 
 function eventsForDate(activities, date) {
   if (!Array.isArray(activities) || !isDate(date)) return [];
-  return activities.filter(activity => activity && typeof activity === 'object' && occursOn(activity, date))
+  return activities.filter(activity => activity && typeof activity === 'object' && occurrencesForDate(activity, date).length > 0)
     .map((activity, index) => ({ activity, index }))
     .sort((first, second) => {
       const a = first.activity; const b = second.activity;
-      const timeA = timeMinutes(a.start); const timeB = timeMinutes(b.start);
+      const timeA = daySegment(a, date)?.start ?? timeMinutes(a.start); const timeB = daySegment(b, date)?.start ?? timeMinutes(b.start);
       return Number(Boolean(b.allDay)) - Number(Boolean(a.allDay))
         || (timeA === timeB ? 0 : timeA - timeB)
         || String(a.title || '').localeCompare(String(b.title || ''))
@@ -125,4 +165,4 @@ function formatTime(value, language = 'en') {
     : `${hour % 12 || 12}:${minute} ${hour < 12 ? 'AM' : 'PM'}`;
 }
 
-module.exports = { dateKey, parseDateKey, addDays, startOfWeek, monthDays, eventsForDate, kidsForEvent, formatTime };
+module.exports = { dateKey, parseDateKey, addDays, startOfWeek, monthDays, eventsForDate, occurrencesForDate, daySegment, kidsForEvent, formatTime, dateSerial };

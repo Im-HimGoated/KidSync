@@ -55,7 +55,9 @@ test('native auth persists sessions and uses process locking, without URL detect
   const client = source('mobile/src/lib/supabase.js');
   for (const value of ['storage: AsyncStorage', 'persistSession: true', 'detectSessionInUrl: false', 'lock: processLock']) assert.ok(client.includes(value));
   const app = source('mobile/src/App.js');
-  for (const value of ['startAutoRefresh()', 'stopAutoRefresh()', "AppState.addEventListener('change'", 'sync.refresh()', 'sync.stop()', 'subscription.unsubscribe()']) assert.ok(app.includes(value));
+  for (const value of ['startAutoRefresh()', 'stopAutoRefresh()', "AppState.addEventListener('change'", 'subscription.unsubscribe()']) assert.ok(app.includes(value));
+  const syncHook = source('mobile/src/lib/use-schedule-sync.js');
+  for (const value of ['store.refresh()', 'store.stop()', "AppState.addEventListener('change'"]) assert.ok(syncHook.includes(value));
   assert.doesNotMatch(app, /\.upsert\(|\.insert\(|\.update\(|\.delete\(/);
 });
 

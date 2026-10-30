@@ -6,32 +6,32 @@ import preferences from '../lib/preferences';
 export const onboardingCopy = {
   en: {
     eyebrow: 'MAKE IT YOURS', step: 'of 5', back: 'Back', next: 'Continue', skip: 'Skip this question', why: 'Why these questions?',
-    explanation: 'These optional answers save how you prefer to plan. You can review and edit each answer before saving. Calendar views and notifications are being added separately.',
+    explanation: 'These optional choices set your opening view, week order and first hours shown. You can review every answer before saving. Reminder choices are saved with new plans; phone notifications are not available yet.',
     review: 'Review your preferences', reviewIntro: 'A quick check before you continue.', reviewAction: 'Review my choices', edit: 'Edit', editLabel: 'Edit {name}', saveAnswer: 'Save answer', cancel: 'Cancel',
     save: 'Save & continue', saving: 'Saving…', note: 'Next: create your account, or sign in. Your answers stay saved on this device.', draftFailed: 'Draft could not be saved on this device. Keep this screen open and try Save & continue when finished.', failed: 'Could not save your choices. Your answers are still here. Please try again.',
-    trialNote: 'Next: return to your calendar profile. These preferences stay saved on this device.',
+    trialNote: 'Return to your calendar with your choices saved on this device.',
     labels: ['Planning for', 'Opening view', 'Week starts on', 'Hours shown first', 'Default reminder'],
     questions: [
       ['Who are you planning for?', 'You can add family names later.', [['myself', 'Just me', 'A little more room for my plans.'], ['children', 'My children', 'School, activities and the in-between.'], ['family', 'The whole family', 'One place for everyone’s week.']]],
       ['How do you like to see your plans?', 'Save your preferred calendar view.', [['today', 'Today', 'One day at a time · recommended for phones'], ['week', 'This week', 'See how the whole week fits together.'], ['month', 'This month', 'Keep the bigger picture in view.']]],
       ['When does your week begin?', 'Choose the order you prefer for the calendar.', [['monday', 'Monday', 'Start with the school and work week.'], ['sunday', 'Sunday', 'Start with the weekend.']]],
       ['Which hours should we show first?', 'Save the hours you’d like to see first.', [['morning', 'Morning', '6 AM–12 PM'], ['afternoon', 'Afternoon', '12–6 PM'], ['evening', 'Evening', '6–10 PM'], ['daytime', 'The whole day', 'Start around 8 AM']]],
-      ['Want a heads-up before plans?', 'Save a default for future event reminders. Notification permission is not requested during setup.', [['none', 'No reminders yet', 'I’ll choose them later.'], ['start', 'At the start', 'When it’s time.'], ['10', '10 minutes before', 'A little time to get ready.'], ['30', '30 minutes before', 'Time to prepare and head out.']]]
+      ['Choose a reminder for new plans?', 'Save a default with each new plan. Phone notifications are not available yet.', [['none', 'No reminders yet', 'I’ll choose them later.'], ['start', 'At the start', 'At the plan’s start time.'], ['10', '10 minutes before', 'A little time to get ready.'], ['30', '30 minutes before', 'Time to prepare and head out.']]]
     ]
   },
   zh: {
     eyebrow: '个性化设置', step: '/ 5', back: '返回', next: '继续', skip: '跳过此问题', why: '为什么需要这些问题？',
-    explanation: '这些可选答案记录你的日程偏好。保存前，你可以核对和编辑每个答案。日历视图和通知功能将另外添加。',
+    explanation: '这些可选设置决定默认视图、每周顺序和优先显示时段。保存前，你可以核对每个答案。提醒选项会随新计划保存，目前尚不支持手机通知。',
     review: '核对你的偏好', reviewIntro: '继续之前，快速核对一下。', reviewAction: '核对我的选择', edit: '编辑', editLabel: '编辑{name}', saveAnswer: '保存答案', cancel: '取消',
     save: '保存并继续', saving: '正在保存…', note: '下一步：创建账户或登录。答案会保留在此设备上。', draftFailed: '无法在此设备上保存草稿。请保持页面打开，完成后尝试保存并继续。', failed: '无法保存选择。答案仍保留在此，请重试。',
-    trialNote: '下一步：返回日历个人资料。偏好会保留在此设备上。',
+    trialNote: '返回日历，你的选择已保存在此设备上。',
     labels: ['为谁安排', '默认视图', '每周开始于', '优先显示时段', '默认提醒'],
     questions: [
       ['你想为谁安排日程？', '以后可以添加家人的姓名。', [['myself', '我自己', '给自己的计划留些空间。'], ['children', '我的孩子', '学校、活动及日常安排。'], ['family', '全家人', '一起安排每个人的一周。']]],
       ['你喜欢如何查看计划？', '保存你偏好的日历视图。', [['today', '今天', '专注每一天 · 推荐手机使用'], ['week', '本周', '一起查看一整周的安排。'], ['month', '本月', '了解更长远的计划。']]],
       ['你的一周从哪天开始？', '选择你习惯的日历顺序。', [['monday', '星期一', '从上学和工作的一周开始。'], ['sunday', '星期日', '从周末开始。']]],
       ['你想优先查看哪个时段？', '保存你想优先查看的时段。', [['morning', '上午', '6:00–12:00'], ['afternoon', '下午', '12:00–18:00'], ['evening', '晚上', '18:00–22:00'], ['daytime', '全天', '从早上 8 点左右开始']]],
-      ['你想提前收到提醒吗？', '为未来日程保存默认提醒。设置期间不会请求通知权限。', [['none', '暂不提醒', '以后再选择。'], ['start', '开始时', '到时间时提醒。'], ['10', '提前 10 分钟', '留一点准备时间。'], ['30', '提前 30 分钟', '留出准备和出发时间。']]]
+      ['为新计划选择提醒时间？', '为每项新计划保存默认选项，目前尚不支持手机通知。', [['none', '暂不提醒', '以后再选择。'], ['start', '开始时', '计划开始的时间。'], ['10', '提前 10 分钟', '留一点准备时间。'], ['30', '提前 30 分钟', '留出准备和出发时间。']]]
     ]
   }
 };
@@ -87,7 +87,7 @@ export default function OnboardingScreen({ language, initialDraft, onDraftChange
         <Text style={styles.eyebrow}>{t.eyebrow}</Text>
         <Text accessibilityRole="header" style={styles.heading}>{review ? t.review : current[0]}</Text>
         <Text style={styles.description}>{review ? t.reviewIntro : current[1]}</Text>
-        <Pressable accessibilityRole="button" accessibilityState={{ expanded: whyOpen }} onPress={() => setWhyOpen(value => !value)} style={styles.why}>
+        <Pressable accessibilityRole="button" accessibilityState={{ expanded: whyOpen }} disabled={busy} onPress={() => setWhyOpen(value => !value)} style={styles.why}>
           <CircleHelp size={15} color="#17649b" /><Text style={styles.whyText}>{t.why}</Text>
         </Pressable>
         {whyOpen && <Text style={styles.explanation}>{t.explanation}</Text>}
@@ -99,7 +99,7 @@ export default function OnboardingScreen({ language, initialDraft, onDraftChange
               onPress={() => move(index, true)} style={styles.edit}><Text style={styles.link}>{t.edit}</Text></Pressable>
           </View>)}
         </View> : <View style={styles.options}>
-          {current[2].map(option => <Pressable key={option[0]} accessibilityRole="radio" accessibilityState={{ checked: choice === option[0] }}
+          {current[2].map(option => <Pressable key={option[0]} accessibilityRole="radio" accessibilityLabel={option[1]} accessibilityHint={option[2]} disabled={busy} accessibilityState={{ checked: choice === option[0], disabled: busy }}
             onPress={() => setChoice(option[0])} style={[styles.option, choice === option[0] && styles.selected]}>
             <View style={styles.answer}><Text style={styles.optionTitle}>{option[1]}</Text><Text style={styles.optionDescription}>{option[2]}</Text></View>
             <View style={[styles.radio, choice === option[0] && styles.radioSelected]}>{choice === option[0] && <Check size={14} color="#ffffff" />}</View>
@@ -113,7 +113,7 @@ export default function OnboardingScreen({ language, initialDraft, onDraftChange
           onPress={review ? save : () => advance()} style={[styles.primary, (busy || (!review && !choice)) && styles.disabled]}>
           {busy ? <ActivityIndicator color="#ffffff" accessibilityLabel={t.saving} /> : <><Text style={styles.primaryText}>{review ? t.save : editing ? t.saveAnswer : step === 4 ? t.reviewAction : t.next}</Text><ArrowRight size={18} color="#ffffff" /></>}
         </Pressable>
-        {review ? <Text style={styles.note}>{returnToCalendar ? t.trialNote : t.note}</Text> : <Pressable accessibilityRole="button" style={styles.skip}
+        {review ? <Text style={styles.note}>{returnToCalendar ? t.trialNote : t.note}</Text> : <Pressable accessibilityRole="button" disabled={busy} style={styles.skip}
           onPress={() => { if (editing) { setReview(true); setEditing(false); } else advance(true); }}><Text style={styles.muted}>{editing ? t.cancel : t.skip}</Text></Pressable>}
       </View>
     </View>

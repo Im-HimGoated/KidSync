@@ -58,7 +58,8 @@ function validateEventForm(existing, form = {}, kids = []) {
     else if (!normalizeTime(values.start)) errors.start = 'startTimeInvalid';
     if (!values.end) errors.end = 'endTimeRequired';
     else if (!normalizeTime(values.end)) errors.end = 'endTimeInvalid';
-    else if (!errors.start && normalizeTime(values.end) <= normalizeTime(values.start)) errors.end = 'endAfterStart';
+    else if (!errors.start && normalizeTime(values.end) <= normalizeTime(values.start)
+      && !(validDate(values.startDate) && validDate(values.endDate) && values.endDate > values.startDate)) errors.end = 'endAfterStart';
   }
   // The website stores a child's display name. IDs from a native picker map to
   // that name. Preserve an existing orphan reference when changing other fields.

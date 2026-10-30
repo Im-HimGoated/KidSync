@@ -33,7 +33,7 @@ npx pnpm@11.25.0 start
 
 Open the project with an SDK-compatible Expo Go app or a development build.
 Use `npx pnpm@11.25.0 ios` with Xcode/iOS Simulator or `npx pnpm@11.25.0 android` with Android
-Studio/an emulator. Dependency versions follow Expo SDK 55's official template;
+Studio/an emulator. Dependency versions follow Expo SDK 58's compatible runtime;
 upgrade them together with Expo's compatibility tooling rather than independently.
 See [the mobile setup guide](mobile/README.md) for scope and verification.
 
