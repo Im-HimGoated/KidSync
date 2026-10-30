@@ -1,0 +1,32 @@
+const copy = {
+  en: {
+    SUBSCRIBED: 'Up to date', CONNECTING: 'Connecting…', SYNCING: 'Syncing…', CACHED: 'Saved on this phone',
+    OFFLINE: 'Connection unavailable', PENDING: 'Changes saved on this phone', CONFLICT: 'Review your device changes',
+    AUTH_REQUIRED: 'Sign in again to sync', STORAGE_ERROR: 'Could not save on this phone', ERROR: 'Sync needs another try',
+    pending: count => `${count} ${count === 1 ? 'change waiting' : 'changes waiting'} to sync`,
+    retained: 'Your changes stay on this phone until they can be safely saved to your account.',
+    cached: 'Showing the last calendar saved on this phone.', retry: 'Try again', review: 'Review changes', close: 'Close',
+    conflict: 'A plan changed elsewhere. Your device edits are still saved. Compare them with the latest account calendar before continuing.',
+    storage: 'Your last saved plans are kept. New edits cannot be confirmed until device storage works again.',
+    auth: 'This phone keeps the pending changes for this account. They will not be sent to another account.',
+    device: 'On this phone', original: 'Before your edit', current: 'Latest account version', missing: 'Plan or calendar no longer available', allDay: 'All day', actionSave: 'Save plan', actionDelete: 'Delete plan',
+    discard: 'Discard device changes', confirmTitle: 'Discard all pending changes?',
+    confirmBody: 'This removes unsynced edits from this phone and shows the last downloaded account calendar. Changes already saved to your account are kept.',
+    keep: 'Keep changes', confirm: 'Discard pending changes', failed: 'Could not update the saved changes. Please try again.',
+  },
+  zh: {
+    SUBSCRIBED: '已是最新', CONNECTING: '正在连接…', SYNCING: '正在同步…', CACHED: '已保存在此手机',
+    OFFLINE: '暂时无法连接', PENDING: '更改已保存在此手机', CONFLICT: '检查此手机上的更改',
+    AUTH_REQUIRED: '重新登录以同步', STORAGE_ERROR: '无法保存在此手机', ERROR: '请重试同步',
+    pending: count => `${count} 项更改等待同步`, retained: '更改将保留在此手机，直到能够安全保存到账户。',
+    cached: '正在显示上次保存在此手机的日历。', retry: '重试', review: '检查更改', close: '关闭',
+    conflict: '某项安排已在其他设备更改。此手机上的编辑仍已保存，请先与账户中的最新日历比较。',
+    storage: '上次保存的安排仍被保留。手机存储恢复前，无法确认新编辑已保存。',
+    auth: '此手机会为当前账户保留待同步更改，不会发送到其他账户。',
+    device: '此手机上的编辑', original: '编辑前', current: '账户中的最新版本', missing: '安排或日历已不可用', allDay: '全天', actionSave: '保存安排', actionDelete: '删除安排',
+    discard: '放弃此手机上的更改', confirmTitle: '放弃全部待同步更改？',
+    confirmBody: '这会从此手机移除尚未同步的编辑，并显示上次下载的账户日历。已保存到账户的更改会保留。',
+    keep: '保留更改', confirm: '放弃待同步更改', failed: '无法更新已保存的更改，请重试。',
+  },
+};
+module.exports = copy;
