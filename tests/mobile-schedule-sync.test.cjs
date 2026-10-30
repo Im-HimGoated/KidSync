@@ -25,12 +25,12 @@ function client(initial = row()) {
         async maybeSingle() {
           if (!state.online) throw new TypeError('Network request failed');
           assert.equal(filters.user_id, 'a');
-          if (!update) { state.reads++; return { data: clone(state.row), error: null }; }
+          if (!update) { state.reads++; const data = clone(state.row); await state.onRead?.(); return { data, error: null }; }
           state.beforeUpdate?.();
           if (state.row.updated_at !== filters.updated_at) return { data: null, error: null };
           state.row = update; state.writes++;
           if (state.loseResponse) { state.loseResponse = false; throw new TypeError('Network response lost'); }
-          return { data: clone(state.row), error: null };
+          const data = clone(state.row); await state.onWritten?.(); return { data, error: null };
         } };
       return query;
     } };
@@ -264,4 +264,35 @@ test('overnight queued events keep their real end date and midnight bounds durin
   assert.deepEqual(events(sync).find(event => event.id === 'overnight'), overnight);
   assert.equal(sync.getState().pendingCount, 0);
   await assert.rejects(sync.saveActivity('home', activity({ id: 'invalid-overnight', start: '23:00', end: '00:00' })), code('INVALID_ACTIVITY'));
+});
+
+test('an old in-flight refresh cannot replace a newly confirmed online calendar import', async () => {
+  const { device, remote, sync } = setup(); await sync.refresh();
+  let release, started;
+  const gate = new Promise(resolve => { release = resolve; });
+  const reading = new Promise(resolve => { started = resolve; });
+  remote.state.onRead = async () => { started(); await gate; };
+  const refresh = sync.refresh(); await reading;
+  const confirmed = row([activity(), activity({ id: 'imported', title: 'Newly imported plan' })]);
+  confirmed.updated_at = '2026-10-30T11:00:00Z'; remote.state.row = clone(confirmed);
+  await sync.acceptConfirmed(confirmed); release(); await refresh;
+  assert.equal(events(sync).some(event => event.id === 'imported'), true);
+  assert.deepEqual(JSON.parse(device.data.get(keyForUser('a'))).row, confirmed);
+});
+
+test('a delayed outbox acknowledgement keeps a newer online confirmation while acknowledging its own edit', async () => {
+  const { device, remote, sync } = await disconnected();
+  await sync.saveActivity('home', activity({ id: 'queued' })); await sync.refresh();
+  let release, written;
+  const gate = new Promise(resolve => { release = resolve; });
+  const writing = new Promise(resolve => { written = resolve; });
+  remote.state.online = true; remote.state.onWritten = async () => { written(); await gate; };
+  const refresh = sync.refresh(); await writing;
+  const confirmed = clone(remote.state.row);
+  confirmed.updated_at = '2030-01-01T00:00:00Z'; confirmed.schedule.profile.name = 'New online confirmation';
+  remote.state.row = clone(confirmed); await sync.acceptConfirmed(confirmed);
+  release(); await refresh;
+  assert.equal(sync.getState().pendingCount, 0); assert.equal(events(sync).some(event => event.id === 'queued'), true);
+  assert.deepEqual(sync.getState().confirmedRow, confirmed);
+  assert.deepEqual(JSON.parse(device.data.get(keyForUser('a'))).row, confirmed);
 });

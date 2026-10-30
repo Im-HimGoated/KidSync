@@ -119,7 +119,7 @@ function createScheduleSync({ client, storage, userId, onChange = () => {}, isCu
   if (!storage?.getItem || !storage?.setItem) throw failure('STORAGE_ERROR');
   let deviceLocks = locks.get(storage);
   if (!deviceLocks) { deviceLocks = new Map(); locks.set(storage, deviceLocks); }
-  if (!deviceLocks.has(key)) deviceLocks.set(key, { tail: Promise.resolve() });
+  if (!deviceLocks.has(key)) deviceLocks.set(key, { tail: Promise.resolve(), confirmedGeneration: 0 });
   const lock = deviceLocks.get(key);
   let state = { schema: 1, userId, row: null, cachedAt: null, pending: [] };
   let loaded = false, ready = false, stopped = false, status = 'CONNECTING', error = null, offline = false, syncing = null;
@@ -195,9 +195,13 @@ function createScheduleSync({ client, storage, userId, onChange = () => {}, isCu
         if (!state.pending.some(item => item.blocked) && (state.pending.length || status !== 'SUBSCRIBED')) status = 'SYNCING';
         error = null; emit();
         await authenticated();
+        const readGeneration = lock.confirmedGeneration;
         const remote = await schedules.readSchedule(client, userId);
         assertCurrent();
-        await persist(next => ({ ...next, row: remote, cachedAt: Date.now() }));
+        // An online create/import can be confirmed while this read is in flight.
+        // That older response must not replace the newly confirmed cache.
+        await persist(next => readGeneration === lock.confirmedGeneration
+          ? { ...next, row: remote, cachedAt: Date.now() } : next);
         offline = false; emit();
         while (current()) {
           const operation = state.pending[0];
@@ -211,6 +215,7 @@ function createScheduleSync({ client, storage, userId, onChange = () => {}, isCu
             status = 'CONFLICT'; emit(); return info();
           }
           let row = state.row;
+          const writeGeneration = lock.confirmedGeneration;
           if (action === 'write') {
             await authenticated();
             try {
@@ -227,7 +232,12 @@ function createScheduleSync({ client, storage, userId, onChange = () => {}, isCu
           }
           // Persist acknowledgement under the captured account even if sign-out
           // happened during this request. Never proceed with the next operation.
-          await persist(next => ({ ...next, row, cachedAt: Date.now(), pending: next.pending.filter(item => item.id !== operation.id) }), true);
+          await persist(next => {
+            const acceptRow = writeGeneration === lock.confirmedGeneration;
+            if (acceptRow) lock.confirmedGeneration += 1;
+            return { ...next, row: acceptRow ? row : next.row, cachedAt: Date.now(),
+              pending: next.pending.filter(item => item.id !== operation.id) };
+          }, true);
           emit();
         }
         return info();
@@ -272,6 +282,7 @@ function createScheduleSync({ client, storage, userId, onChange = () => {}, isCu
     assertCurrent();
     if (!ready) await load();
     if (!record(row) || !record(row.schedule) || typeof row.updated_at !== 'string') throw failure('INVALID_DATA');
+    lock.confirmedGeneration += 1;
     await persist(next => ({ ...next, row: copy({ schedule: row.schedule, updated_at: row.updated_at }), cachedAt: Date.now() }));
     emit(); return info();
   }
