@@ -15,7 +15,8 @@ export const welcomeCopy = {
     tagline: 'Every kid. Every pickup.',
     headlineAccent: 'One clear plan.',
     description: 'Activities, pickup adults, and what to bring. The little details that keep a family in sync.',
-    setupHint: 'Next: a few optional setup questions',
+    setupHint: '10-minute calendar preview · No account needed',
+    personalize: 'Make your calendar yours',
     family: 'Your family, in sync',
     pause: 'Pause family photos',
     play: 'Resume family photos',
@@ -32,7 +33,8 @@ export const welcomeCopy = {
     tagline: '每个孩子，每次接送。',
     headlineAccent: '一份清晰的安排。',
     description: '活动、接送人、携带物品。让这些小细节，帮全家一起安排好生活。',
-    setupHint: '下一步：几个可跳过的设置问题',
+    setupHint: '10 分钟日历体验 · 无需账户',
+    personalize: '让日历更适合你',
     family: '\u5bb6\u4eba\u7684\u65f6\u5149\uff0c\u4e00\u8d77\u5b89\u6392',
     pause: '\u6682\u505c\u5bb6\u5ead\u7167\u7247',
     play: '\u7ee7\u7eed\u64ad\u653e\u5bb6\u5ead\u7167\u7247',
@@ -46,7 +48,7 @@ export const welcomeCopy = {
   }
 };
 
-export default function WelcomeScreen({ language, onSignIn, onGetStarted, onOpenWebsite, error }) {
+export default function WelcomeScreen({ language, onSignIn, onGetStarted, onPersonalize, onOpenWebsite, error }) {
   const t = welcomeCopy[language] || welcomeCopy.en;
   const { height, fontScale } = useWindowDimensions();
   const compact = height < 760 && fontScale <= 1.25;
@@ -98,6 +100,7 @@ export default function WelcomeScreen({ language, onSignIn, onGetStarted, onOpen
       <View style={styles.body}>
         <Text accessibilityRole="header" style={styles.tagline}>{t.tagline}{'\n'}<Text style={styles.headlineAccent}>{t.headlineAccent}</Text></Text>
         <Text style={styles.description}>{t.description}</Text>
+        {!!onPersonalize && <Pressable accessibilityRole="button" onPress={onPersonalize} style={styles.personalize}><Text style={styles.signInText}>{t.personalize}</Text><ArrowRight size={16} color="#245b48" aria-hidden={true} /></Pressable>}
         <CalendarPreview language={language} compact={compact} showHandoff />
         <Pressable accessibilityRole="link" onPress={onOpenWebsite} style={styles.explore}>
           <Text style={styles.link}>{t.explore}</Text>
@@ -144,6 +147,7 @@ const styles = StyleSheet.create({
   tagline: { color: '#203c38', fontSize: 28, lineHeight: 34, fontWeight: '700', letterSpacing: -0.6 },
   headlineAccent: { color: '#28734f' },
   description: { color: '#4c626e', fontSize: 15, lineHeight: 23, marginTop: -5 },
+  personalize: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: -7 },
   actionBar: { flexShrink: 0, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 4, borderTopWidth: 1, borderColor: '#dce7e1', backgroundColor: '#ffffff' },
   actions: { width: '100%', maxWidth: 520, alignSelf: 'center', gap: 4 },
   primary: { minHeight: 52, padding: 14, borderRadius: 12, backgroundColor: '#235b47', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },

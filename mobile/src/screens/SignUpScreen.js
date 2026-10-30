@@ -44,7 +44,7 @@ export const signUpCopy = {
   }
 };
 
-export default function SignUpScreen({ language, email, onEmailChange, onCreateAccount, onSignIn, onBack, hasPreferences, busy, error }) {
+export default function SignUpScreen({ language, email, onEmailChange, onCreateAccount, onSignIn, onBack, backLabel, hasPreferences, busy, error }) {
   const t = signUpCopy[language] || signUpCopy.en;
   const emailRef = useRef(null), passwordRef = useRef(null), confirmationRef = useRef(null), scroll = useRef(null), submitting = useRef(false);
   const [password, setPassword] = useState(''), [confirmation, setConfirmation] = useState('');
@@ -77,7 +77,7 @@ export default function SignUpScreen({ language, email, onEmailChange, onCreateA
     <ScrollView ref={scroll} style={styles.scroller} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" contentContainerStyle={styles.scroll}>
       <View style={styles.inner}>
         <Pressable accessibilityRole="button" disabled={busy} onPress={onBack} style={styles.back}>
-          <ArrowLeft size={18} color="#235b47" aria-hidden={true} /><Text style={styles.link}>{hasPreferences ? t.review : t.back}</Text>
+          <ArrowLeft size={18} color="#235b47" aria-hidden={true} /><Text style={styles.link}>{backLabel || (hasPreferences ? t.review : t.back)}</Text>
         </Pressable>
         <View style={styles.main}>
           {hasPreferences && <View style={styles.saved}><View style={styles.check}><Check size={16} color="#27765a" aria-hidden={true} /></View><Text style={styles.savedText}>{t.saved}</Text></View>}

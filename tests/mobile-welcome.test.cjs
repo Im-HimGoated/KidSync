@@ -14,7 +14,7 @@ test('native entry defaults to welcome after auth restores, and existing session
   assert.match(app, /booting \? <ActivityIndicator[^]*!session && entryScreen === 'welcome' \?/);
   assert.match(app, /<WelcomeScreen language=\{language\}/);
   assert.match(app, /setEntryScreen\('signin'\)/);
-  assert.match(app, /setPassword\(''\); setEntryScreen\('welcome'\)/);
+  assert.match(app, /setPassword\(''\); setEntryScreen\(trialAuthIntent \? 'personalize' : 'welcome'\)/);
 });
 
 test('welcome has matching complete English and Chinese copy', () => {

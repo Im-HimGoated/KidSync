@@ -39,7 +39,7 @@ export const signInCopy = {
 
 export default function SignInScreen({
   language, email, password, onEmailChange, onPasswordChange, onSignIn,
-  onBack, onGetStarted, onCreateAccount, onOpenWebsite, onRecover, busy, error
+  onBack, backLabel, onGetStarted, onCreateAccount, onOpenWebsite, onRecover, busy, error
 }) {
   const t = signInCopy[language] || signInCopy.en;
   const emailRef = useRef(null);
@@ -76,7 +76,7 @@ export default function SignInScreen({
       <View style={styles.inner}>
         <ImageBackground source={require('../../../assets/kidssync-auth-family-signin.jpg')}
           accessible accessibilityLabel={t.photo} resizeMode="cover" style={styles.hero} imageStyle={styles.heroImage}>
-          <Pressable accessibilityRole="button" accessibilityLabel={t.back} disabled={busy}
+          <Pressable accessibilityRole="button" accessibilityLabel={backLabel || t.back} disabled={busy}
             onPress={onBack} style={styles.back}>
             <ArrowLeft size={21} color="#ffffff" aria-hidden={true} />
           </Pressable>

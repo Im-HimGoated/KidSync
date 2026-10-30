@@ -6,6 +6,9 @@ const DRAFT_KEY = 'kidssync:mobile:onboarding:v1:draft';
 function normalizePreferences(value) {
   return Object.fromEntries(Object.entries(OPTIONS).map(([key, options]) => [key, options.includes(value?.[key]) ? value[key] : DEFAULTS[key]]));
 }
+function forAccount(state, userId) {
+  return userId && state?.userId === userId ? normalizePreferences(state.value) : DEFAULTS;
+}
 function keyForUser(userId) {
   if (typeof userId !== 'string' || !userId.trim() || userId.length > 200) throw new Error('A signed-in account is required');
   return `kidssync:mobile:onboarding:v1:user:${encodeURIComponent(userId)}`;
@@ -28,7 +31,21 @@ function createPreferenceStore(storage) {
   // Serialize draft writes so fast taps cannot let an older step replace the latest one.
   const enqueue = work => { const next = writes.catch(() => {}).then(work); writes = next; return next; };
   const encode = preferences => JSON.stringify({ version: 1, completed: true, preferences: normalizePreferences(preferences) });
+  const readDraftAt = async key => {
+    await writes.catch(() => {});
+    const raw = await storage.getItem(key);
+    try {
+      const data = JSON.parse(raw);
+      return data?.version === 1 && data.completed === false ? normalizeDraft(data) : null;
+    } catch { return null; }
+  };
+  const draftRaw = draft => JSON.stringify({ version: 1, completed: false, ...normalizeDraft(draft) });
   return {
+    readDraftForUser(userId) { return readDraftAt(`${keyForUser(userId)}:draft`); },
+    saveDraftForUser(userId, draft) {
+      const key = `${keyForUser(userId)}:draft`, raw = draftRaw(draft);
+      return enqueue(() => storage.setItem(key, raw));
+    },
     async readDraft() {
       await writes.catch(() => {});
       try {
@@ -48,7 +65,13 @@ function createPreferenceStore(storage) {
       });
     },
     async readForUser(userId) { return decode(await storage.getItem(keyForUser(userId))); },
-    async saveForUser(userId, preferences) { await storage.setItem(keyForUser(userId), encode(preferences)); },
+    async saveForUser(userId, preferences) {
+      const key = keyForUser(userId), raw = encode(preferences);
+      await enqueue(async () => {
+        await storage.setItem(key, raw);
+        try { await storage.removeItem(`${key}:draft`); } catch { /* Saved choices remain durable. */ }
+      });
+    },
     async adoptPending(userId, expected) {
       const raw = await storage.getItem(PENDING_KEY), preferences = decode(raw);
       if (!preferences || JSON.stringify(preferences) !== JSON.stringify(normalizePreferences(expected))) throw new Error('Setup choices changed; please review them again');
@@ -60,4 +83,4 @@ function createPreferenceStore(storage) {
     }
   };
 }
-module.exports = { DEFAULTS, OPTIONS, normalizePreferences, keyForUser, decode, createPreferenceStore, normalizeDraft, PENDING_KEY, DRAFT_KEY };
+module.exports = { DEFAULTS, OPTIONS, normalizePreferences, forAccount, keyForUser, decode, createPreferenceStore, normalizeDraft, PENDING_KEY, DRAFT_KEY };

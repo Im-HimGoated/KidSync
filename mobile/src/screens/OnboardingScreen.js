@@ -9,6 +9,7 @@ export const onboardingCopy = {
     explanation: 'These optional answers save how you prefer to plan. You can review and edit each answer before saving. Calendar views and notifications are being added separately.',
     review: 'Review your preferences', reviewIntro: 'A quick check before you continue.', reviewAction: 'Review my choices', edit: 'Edit', editLabel: 'Edit {name}', saveAnswer: 'Save answer', cancel: 'Cancel',
     save: 'Save & continue', saving: 'Saving…', note: 'Next: create your account, or sign in. Your answers stay saved on this device.', draftFailed: 'Draft could not be saved on this device. Keep this screen open and try Save & continue when finished.', failed: 'Could not save your choices. Your answers are still here. Please try again.',
+    trialNote: 'Next: return to your calendar profile. These preferences stay saved on this device.',
     labels: ['Planning for', 'Opening view', 'Week starts on', 'Hours shown first', 'Default reminder'],
     questions: [
       ['Who are you planning for?', 'You can add family names later.', [['myself', 'Just me', 'A little more room for my plans.'], ['children', 'My children', 'School, activities and the in-between.'], ['family', 'The whole family', 'One place for everyone’s week.']]],
@@ -23,6 +24,7 @@ export const onboardingCopy = {
     explanation: '这些可选答案记录你的日程偏好。保存前，你可以核对和编辑每个答案。日历视图和通知功能将另外添加。',
     review: '核对你的偏好', reviewIntro: '继续之前，快速核对一下。', reviewAction: '核对我的选择', edit: '编辑', editLabel: '编辑{name}', saveAnswer: '保存答案', cancel: '取消',
     save: '保存并继续', saving: '正在保存…', note: '下一步：创建账户或登录。答案会保留在此设备上。', draftFailed: '无法在此设备上保存草稿。请保持页面打开，完成后尝试保存并继续。', failed: '无法保存选择。答案仍保留在此，请重试。',
+    trialNote: '下一步：返回日历个人资料。偏好会保留在此设备上。',
     labels: ['为谁安排', '默认视图', '每周开始于', '优先显示时段', '默认提醒'],
     questions: [
       ['你想为谁安排日程？', '以后可以添加家人的姓名。', [['myself', '我自己', '给自己的计划留些空间。'], ['children', '我的孩子', '学校、活动及日常安排。'], ['family', '全家人', '一起安排每个人的一周。']]],
@@ -34,7 +36,7 @@ export const onboardingCopy = {
   }
 };
 const keys = ['people', 'view', 'week', 'hours', 'reminders'];
-export default function OnboardingScreen({ language, initialDraft, onDraftChange, onBack, onComplete }) {
+export default function OnboardingScreen({ language, initialDraft, onDraftChange, onBack, onComplete, returnToCalendar = false }) {
   const t = onboardingCopy[language] || onboardingCopy.en;
   const [answers, setAnswers] = useState(() => preferences.normalizePreferences(initialDraft?.answers));
   const [step, setStep] = useState(initialDraft?.step || 0), [review, setReview] = useState(initialDraft?.review || false), [editing, setEditing] = useState(initialDraft?.editing || false);
@@ -111,7 +113,7 @@ export default function OnboardingScreen({ language, initialDraft, onDraftChange
           onPress={review ? save : () => advance()} style={[styles.primary, (busy || (!review && !choice)) && styles.disabled]}>
           {busy ? <ActivityIndicator color="#ffffff" accessibilityLabel={t.saving} /> : <><Text style={styles.primaryText}>{review ? t.save : editing ? t.saveAnswer : step === 4 ? t.reviewAction : t.next}</Text><ArrowRight size={18} color="#ffffff" /></>}
         </Pressable>
-        {review ? <Text style={styles.note}>{t.note}</Text> : <Pressable accessibilityRole="button" style={styles.skip}
+        {review ? <Text style={styles.note}>{returnToCalendar ? t.trialNote : t.note}</Text> : <Pressable accessibilityRole="button" style={styles.skip}
           onPress={() => { if (editing) { setReview(true); setEditing(false); } else advance(true); }}><Text style={styles.muted}>{editing ? t.cancel : t.skip}</Text></Pressable>}
       </View>
     </View>

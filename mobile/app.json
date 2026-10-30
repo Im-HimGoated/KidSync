@@ -6,7 +6,7 @@
     "orientation": "default",
     "userInterfaceStyle": "light",
     "icon": "../assets/kidssync-app-icon-512.png",
-    "ios": { "supportsTablet": true },
+    "ios": { "supportsTablet": false },
     "android": {},
     "plugins": []
   }

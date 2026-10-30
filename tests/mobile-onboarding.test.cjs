@@ -88,3 +88,25 @@ test('all five guided questions and review labels have complete English and Chin
     });
   }
 });
+
+test('account preference edits and unfinished drafts remain scoped across account switches and restart', async () => {
+  const device = storage(), store = createPreferenceStore(device);
+  await store.savePending(DEFAULTS);
+  await store.saveForUser('first', selected);
+  await store.saveDraftForUser('first', { answers: selected, step: 3, choice: 'evening', editing: true });
+  assert.equal(await store.readDraftForUser('second'), null);
+  assert.deepEqual(await store.readPending(), DEFAULTS);
+  assert.equal((await createPreferenceStore(device).readDraftForUser('first')).choice, 'evening');
+  const updated = { ...selected, hours: 'morning' };
+  await store.saveForUser('first', updated);
+  assert.equal(await store.readDraftForUser('first'), null);
+  assert.deepEqual(await store.readForUser('first'), updated);
+  assert.equal(await store.readForUser('second'), null);
+});
+test('calendar preferences are safe before sign-in and cannot use a previous account snapshot', () => {
+  const { forAccount } = require('../mobile/src/lib/preferences');
+  assert.deepEqual(forAccount(null, undefined), DEFAULTS);
+  assert.deepEqual(forAccount({ userId: 'first', value: selected }, null), DEFAULTS);
+  assert.deepEqual(forAccount({ userId: 'first', value: selected }, 'second'), DEFAULTS);
+  assert.deepEqual(forAccount({ userId: 'first', value: selected }, 'first'), selected);
+});
