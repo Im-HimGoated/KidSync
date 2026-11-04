@@ -5,8 +5,10 @@ Migration source: `supabase/mobile-shared-calendar.sql`.
 Reviewed SHA-256:
 `35c929503d9afde18a891f50808a1bf6ed5a44bd2ec285f674f58c0d897ce893`.
 
-This source has **not been applied to Supabase**. Native shared editing stays
-read-only with `SETUP_REQUIRED` until the checked function is installed.
+This exact source was applied to the KidsSync production project
+`zddlukukrjdeoeofocud` on **November 3, 2026**, after explicit user approval.
+Native shared editing still requires a successful account-specific capability
+probe; deployment alone does not establish a user's editing permission.
 
 ## Change and scope
 
@@ -42,6 +44,24 @@ These are local database checks. They do not verify a deployed Supabase project,
 real JWT authentication, two concurrent database sessions, or live two-account
 device behavior. JavaScript adapter tests and independent source review supplement
 them.
+
+## Production deployment record (November 3, 2026)
+
+The SQL editor's contents were copied back through the UI and hashed before
+execution; they matched the reviewed SHA-256 above exactly. Supabase reported
+`Success. No rows returned` for the complete transaction. A separate read-only
+catalog query returned all six checks as true:
+
+- The checked RPC is installed.
+- The authenticated role can execute it.
+- The anonymous role cannot execute it.
+- Row-level security is enabled on `family_schedules`.
+- Row-level security is enabled on `calendar_members`.
+- All three validation helpers are private to anonymous/authenticated callers.
+
+No schedule or membership data was changed by this deployment. Actual signed-in
+iPhone sync/offline, shared-role and notification-delivery acceptance remains
+separate from these production catalog checks.
 
 The optional database test uses an isolated development runtime; it adds no app
 dependency:

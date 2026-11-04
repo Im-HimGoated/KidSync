@@ -183,3 +183,18 @@ account and iPhone simulator checks remain pending until performed above.
   deployment is awaiting specific human approval for Supabase admin access;
   automatic approval review blocked opening that destination, and no workaround
   or retry was used. Until verified deployment, missing-RPC access stays read-only.
+
+## Production shared-editing migration (November 3, 2026)
+
+- The human explicitly approved opening Supabase and applying the reviewed
+  migration, then supplied an authenticated Chrome project tab. The exact SQL
+  source hash remained `35c929503d9afde18a891f50808a1bf6ed5a44bd2ec285f674f58c0d897ce893`.
+- The SQL editor contents were verified against that hash before execution.
+  Supabase reported a successful transaction. Six separate catalog checks passed:
+  checked RPC present, authenticated execution allowed, anonymous execution denied,
+  both relevant tables still enforce RLS, and all three validation helpers remain
+  private. No schedule or membership records were changed.
+- The migration deployment gate is cleared. Signed-in native acceptance and
+  notification delivery still require actual device results before being recorded
+  as passed. New website-to-mobile parity work remains separate from the frozen
+  `f3c1752` application runtime used for this release's tests.
