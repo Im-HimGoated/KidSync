@@ -4,9 +4,10 @@
 
 Xcode and an iPhone simulator are now installed. Welcome/sign-in navigation and
 the guest trial's draft recovery, early event creation/edit/deletion and expiry
-handoff have been exercised on iPhone Duo / iOS 27.1. Signed-in native calendar,
-live offline recovery, two-account sharing and cross-device sync acceptance are
-still pending. This is a development release, not completed store-distribution
+handoff have been exercised on iPhone Duo / iOS 27.1. Signed-in calendar CRUD,
+phone-to-website sync, website-to-phone sync and offline queued-edit recovery
+have now passed on iPhone 16 Pro / iOS 26.5. Two-account sharing and physical-phone
+acceptance remain pending. This is a development release, not completed store-distribution
 or physical-device validation. Browser viewports and bundle exports are recorded
 separately from actual iPhone simulator checks below.
 
@@ -198,3 +199,38 @@ account and iPhone simulator checks remain pending until performed above.
   notification delivery still require actual device results before being recorded
   as passed. New website-to-mobile parity work remains separate from the frozen
   `f3c1752` application runtime used for this release's tests.
+
+## Signed-in native acceptance (November 3, 2026)
+
+- Tested the frozen `f3c1752` application runtime in Expo Go SDK 58 on the actual
+  iPhone 16 Pro / iOS 26.5 simulator, served from the isolated release worktree
+  on port 8099. The human signed in directly in the native app; no credentials
+  or authentication storage were read by the test automation.
+- Created one disposable timed activity on November 3, with a child, location,
+  responsible adult and packing item. Native reported Up to date, and the
+  signed-in production website displayed the same activity and all those details.
+  A website title edit appeared automatically in the native calendar, preserving
+  the remaining fields.
+- Agenda, Week and Month displayed the activity. Home showed the corresponding
+  Today/seven-day counts and Next up entry. Native detail view, matching and
+  empty searches, child filtering, next-day navigation and Today passed. Family
+  displayed the current account as Owner; no invitations or access changes were
+  made.
+- Changed appearance from Device default to Dark. A native reload retained the
+  signed-in session, activity and Dark selection. Restored Device default + Sage.
+- With the human's explicit permission, briefly disabled the Mac's Wi-Fi and
+  saved a title edit. The native calendar displayed the edited activity, Saved
+  on this phone, and one change waiting to sync. An Expo Go reload during the
+  interruption returned to the simulator home screen. After restoring Wi-Fi and
+  reopening the exact release from Expo Go recents, the app retained the edit,
+  automatically uploaded it and returned to Up to date. The website displayed
+  the offline-edited title. This verifies durable queued-edit recovery across
+  reopening/reconnection, not a successful offline Expo Go cold launch.
+- Deleted only the disposable test activity in the native app, then verified
+  zero activities on that day in both the native calendar and the reloaded
+  website. Native returned to Up to date. Existing calendars, child records and
+  unrelated plans were preserved, and Wi-Fi was restored to its original network.
+- Runtime/SQL source was unchanged after the isolated 618-test suite, 12 actual
+  PostgreSQL migration tests and successful iOS/Android production exports.
+  Two-account invitation/pickup/shared-edit acceptance, notification permission
+  and delivery, physical devices and store distribution remain unverified.
