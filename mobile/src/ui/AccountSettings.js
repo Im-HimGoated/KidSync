@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Check, ChevronDown, ChevronLeft, ChevronRight, CircleHelp, Bell, Palette, Globe2, LogOut, Settings2, ShieldCheck } from 'lucide-react-native';
 import { Button, Sheet } from '../calendar/ui';
 import AppearanceSettings, { appearanceCopy } from './AppearanceSettings';
@@ -9,8 +9,9 @@ export const accountCopy = {
   en: {
     title: 'Account & settings', close: 'Close', back: 'Back to account', signedIn: 'Signed in as',
     appearance: 'Appearance', reminders: 'Phone reminders', reminderHint: 'Local reminders · off until you enable them',
-    remindersHelp: 'Enable phone reminders in Account & settings. Local reminders use saved event lead times and refresh on app reopen. Push and email are not provided.',
-    preferences: 'Calendar preferences', preferencesHint: 'Opening view, week start, hours and reminder defaults',
+    remindersHelp: 'Enable phone reminders in Account & settings for confirmed calendars you own. Calendars shared with you do not schedule reminders here. Reminder times refresh when the app reopens. Push and email are not provided.',
+    preferences: 'Calendar preferences', preferencesHint: 'Review or edit your setup answers: people, view, week start, hours and reminders',
+    opening: 'Opening…', openFailed: 'Could not open this. Tap again to retry.',
     language: 'App language', languageHint: 'English or Chinese · saved on this device',
     help: 'Help & how it works', helpHint: 'Straightforward answers about your family calendar',
     web: 'Open web calendar', webHint: 'Advanced connections and calendar tools on the website',
@@ -29,8 +30,9 @@ export const accountCopy = {
   zh: {
     title: '账户与设置', close: '关闭', back: '返回账户', signedIn: '当前账户',
     appearance: '外观', reminders: '手机提醒', reminderHint: '本地提醒 · 需手动开启',
-    remindersHelp: '在“账户与设置”中开启手机提醒。本地提醒使用已保存的提前时间，并在重新打开应用时刷新。暂不提供推送或邮件通知。',
-    preferences: '日历偏好', preferencesHint: '默认视图、每周起始、显示时段与提醒偏好',
+    remindersHelp: '在“账户与设置”中，为你拥有且已确认的日历开启手机提醒。他人共享给你的日历不会在此安排提醒。重新打开应用时会刷新提醒时间。暂不提供推送或邮件通知。',
+    preferences: '日历偏好', preferencesHint: '核对或修改最初的设置答案：参与者、视图、每周起始、时段与提醒',
+    opening: '正在打开…', openFailed: '无法打开，请再次点击重试。',
     language: '应用语言', languageHint: '英文或中文 · 保存在此设备上',
     help: '帮助与使用说明', helpHint: '简明了解家庭日历的使用方式',
     web: '打开网页日历', webHint: '高级日历连接与工具请使用网页',
@@ -48,10 +50,10 @@ export const accountCopy = {
   }
 };
 
-function Row({ icon: Icon, title, detail, onPress, danger }) {
+function Row({ icon: Icon, title, detail, onPress, danger, disabled, opening, error }) {
   const { colors } = useAppearance(), s = useThemeStyles(createStyles);
-  return <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.row, pressed && { opacity: 0.65 }]}>
-    <View style={[s.icon, danger && s.dangerIcon]}><Icon size={20} color={danger ? colors.error : colors.primary} /></View><View style={s.flex}><Text style={[s.rowTitle, danger && { color: colors.error }]}>{title}</Text>{!!detail && <Text style={s.body}>{detail}</Text>}</View><ChevronRight size={18} color={colors.muted} />
+  return <Pressable accessibilityRole="button" accessibilityHint={error || detail} disabled={disabled} aria-disabled={!!disabled} accessibilityState={{ disabled: !!disabled, busy: !!opening }} onPress={onPress} style={({ pressed }) => [s.row, (pressed || disabled) && { opacity: 0.65 }]}>
+    <View style={[s.icon, danger && s.dangerIcon]}><Icon size={20} color={danger ? colors.error : colors.primary} /></View><View style={s.flex}><Text style={[s.rowTitle, danger && { color: colors.error }]}>{title}</Text>{!!(error || detail) && <Text accessibilityRole={error ? 'alert' : 'text'} accessibilityLiveRegion={error ? 'polite' : undefined} style={error ? s.error : s.body}>{error || detail}</Text>}</View>{opening ? <ActivityIndicator size="small" color={colors.primary} /> : <ChevronRight size={18} color={colors.muted} />}
   </Pressable>;
 }
 
@@ -60,23 +62,32 @@ export default function AccountSettings({ language, email, onClose, onPreference
   const { colors, settings } = useAppearance(), s = useThemeStyles(createStyles);
   const appearanceText = appearanceCopy[language] || appearanceCopy.en;
   const [page, setPage] = useState('account'), [question, setQuestion] = useState(0), [busy, setBusy] = useState(false), [failure, setFailure] = useState('');
-  const request = useRef(false);
+  const [opening, setOpening] = useState(''), [navigationFailure, setNavigationFailure] = useState('');
+  const request = useRef(false), navigationRequest = useRef(false), mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  async function navigate(name, callback) {
+    if (request.current || navigationRequest.current || typeof callback !== 'function') return;
+    navigationRequest.current = true; setOpening(name); setNavigationFailure('');
+    try { const result = await callback(); if (result === false || result?.error) throw new Error('OPEN_FAILED'); }
+    catch { if (mounted.current) setNavigationFailure(name); }
+    finally { navigationRequest.current = false; if (mounted.current) setOpening(''); }
+  }
   async function signOut() {
     if (request.current) return;
     request.current = true; setBusy(true); setFailure('');
     try { const result = await onSignOut(); if (result === false || result?.error) throw new Error('SIGN_OUT_FAILED'); }
     catch { setFailure(t.signOutFailed); }
-    finally { request.current = false; setBusy(false); }
+    finally { request.current = false; if (mounted.current) setBusy(false); }
   }
   return <Sheet title={page === 'appearance' ? t.appearance : page === 'help' ? t.help : page === 'language' ? t.language : page === 'signout' ? t.confirm : t.title} closeLabel={t.close} busy={busy} onClose={onClose}>
     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={s.content}>
-      {page !== 'account' && <Pressable accessibilityRole="button" onPress={() => { setPage('account'); setFailure(''); }} disabled={busy} style={s.back}><ChevronLeft size={18} color={colors.primary} /><Text style={s.link}>{t.back}</Text></Pressable>}
+      {page !== 'account' && <Pressable accessibilityRole="button" onPress={() => { setPage('account'); setFailure(''); setNavigationFailure(''); }} disabled={busy} style={s.back}><ChevronLeft size={18} color={colors.primary} /><Text style={s.link}>{t.back}</Text></Pressable>}
       {page === 'account' ? <>
         <View style={s.identity}><Text style={s.eyebrow}>{t.signedIn}</Text><Text accessibilityLabel={email} numberOfLines={2} ellipsizeMode="middle" style={s.email}>{email}</Text></View>
-        <View style={s.group}><Row icon={Palette} title={t.appearance} detail={`${appearanceText[settings.mode]} · ${appearanceText[settings.accent]}`} onPress={() => setPage('appearance')} />{onReminders && <Row icon={Bell} title={t.reminders} detail={reminderHint || t.reminderHint} onPress={onReminders} />}<Row icon={Settings2} title={t.preferences} detail={t.preferencesHint} onPress={onPreferences} />{onLanguage && <Row icon={Globe2} title={t.language} detail={t.languageHint} onPress={() => setPage('language')} />}</View>
-        <View style={s.group}><Row icon={CircleHelp} title={t.help} detail={t.helpHint} onPress={() => setPage('help')} />{onWebsite && <Row icon={Globe2} title={t.web} detail={t.webHint} onPress={onWebsite} />}</View>
+        <View style={s.group}><Row icon={Palette} title={t.appearance} detail={`${appearanceText[settings.mode]} · ${appearanceText[settings.accent]}`} disabled={!!opening} onPress={() => setPage('appearance')} />{onReminders && <Row icon={Bell} title={t.reminders} detail={opening === 'reminders' ? t.opening : reminderHint || t.reminderHint} disabled={!!opening} opening={opening === 'reminders'} error={navigationFailure === 'reminders' ? t.openFailed : ''} onPress={() => navigate('reminders', onReminders)} />}<Row icon={Settings2} title={t.preferences} detail={opening === 'preferences' ? t.opening : t.preferencesHint} disabled={!!opening || typeof onPreferences !== 'function'} opening={opening === 'preferences'} error={navigationFailure === 'preferences' ? t.openFailed : ''} onPress={() => navigate('preferences', onPreferences)} />{onLanguage && <Row icon={Globe2} title={t.language} detail={t.languageHint} disabled={!!opening} onPress={() => setPage('language')} />}</View>
+        <View style={s.group}><Row icon={CircleHelp} title={t.help} detail={t.helpHint} disabled={!!opening} onPress={() => setPage('help')} />{onWebsite && <Row icon={Globe2} title={t.web} detail={opening === 'web' ? t.opening : t.webHint} disabled={!!opening} opening={opening === 'web'} error={navigationFailure === 'web' ? t.openFailed : ''} onPress={() => navigate('web', onWebsite)} />}</View>
         <View style={s.privacy}><ShieldCheck size={22} color={colors.success} /><View style={s.flex}><Text style={s.rowTitle}>{t.privacy}</Text><Text style={s.body}>{t.privacyBody}</Text></View></View>
-        <Button secondary danger icon={LogOut} onPress={() => { setFailure(''); setPage('signout'); }}>{t.signOut}</Button>
+        <Button secondary danger icon={LogOut} disabled={!!opening} onPress={() => { setFailure(''); setPage('signout'); }}>{t.signOut}</Button>
       </> : page === 'appearance' ? <AppearanceSettings language={language} /> : page === 'help' ? <><Text style={s.body}>{t.helpIntro}</Text>{t.faqs.map(([title, originalAnswer], index) => <View key={index} style={s.faq}><Pressable accessibilityRole="button" accessibilityState={{ expanded: question === index }} onPress={() => setQuestion(question === index ? -1 : index)} style={s.question}><Text style={[s.rowTitle, s.flex]}>{title}</Text><ChevronDown size={18} color={colors.muted} /></Pressable>{question === index && <Text style={s.answer}>{index === 4 && onReminders ? t.remindersHelp : originalAnswer}</Text>}</View>)}</> : page === 'language' ? [['en', 'English'], ['zh', '中文']].map(([value, label]) => <Pressable key={value} accessibilityRole="radio" aria-checked={language === value} accessibilityLabel={label} accessibilityState={{ checked: language === value }} onPress={() => onLanguage(value)} style={s.language}><Text style={[s.rowTitle, s.flex]}>{label}</Text>{language === value && <Check size={20} color={colors.primary} />}</Pressable>) : <>
         <Text style={s.answer}>{t.confirmBody}</Text>{!!failure && <Text accessibilityRole="alert" style={s.error}>{failure}</Text>}<Button secondary onPress={() => { setFailure(''); setPage('account'); }} disabled={busy}>{t.stay}</Button><Button danger onPress={signOut} disabled={busy}>{busy ? t.signingOut : t.signOut}</Button>
       </>}

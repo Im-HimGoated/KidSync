@@ -38,6 +38,9 @@ test('account help is bilingual and is honest about notifications, sharing and g
   assert.match(copy.en.faqs[3][1], /saved offline changes stay on this device until synced/);
   assert.match(copy.en.faqs[3][1], /Shared changes need an online confirmation/);
   assert.match(source, /index === 4 && onReminders \? t.remindersHelp/);
+  assert.match(copy.en.preferencesHint, /edit your setup answers/);
+  assert.match(copy.en.remindersHelp, /confirmed calendars you own/);
+  assert.match(copy.en.remindersHelp, /shared with you do not schedule reminders/);
   assert.match(source, /accessibilityState=\{\{ expanded: question === index \}\}/);
   assert.match(source, /closeLabel=\{t.close\}[^]*onClose=\{onClose\}/);
 });

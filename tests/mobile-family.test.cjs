@@ -39,7 +39,7 @@ test('family permission choices and the native shared-calendar route are explici
   assert.match(family, /value: 'editor'/);
   assert.match(family, /onOpenSharedCalendar/);
   assert.match(family, /View in Calendar/);
-  assert.match(family, /verifies access before every change/);
+  assert.match(family, /supported, verified write connection/);
   assert.match(app, /sharedCalendar\.readSharedCalendar/);
   assert.match(app, /sharedCalendar\.createSharedCalendarAdapter/);
   assert.match(app, /sharedSession\.forActor\(sharedAccess, actorId\)/);
@@ -58,4 +58,48 @@ test('invitation delivery is honest and pickup actions require a server response
   assert.match(family, /pickupAccept: 'I can do it'/);
   assert.match(family, /pickupDecline: 'I cannot'/);
   assert.match(family, /await run\(`pickup-/);
+});
+
+test('inline Family failures stay visible while sheet failures stay in their sheet', () => {
+  assert.match(family, /const sheetAtStart = sheet/);
+  assert.match(family, /if \(sheetAtStart\) setSheetError\(t\.saveFailed\)/);
+  assert.match(family, /else setError\(t\.saveFailed\)/);
+});
+
+test('owner Share requests open People without discarding a sheet or in-flight work', () => {
+  assert.match(family, /peopleRequest = 0/);
+  assert.match(family, /handledPeopleRequest = useRef\(0\)/);
+  assert.match(family, /if \(sheet \|\| busy\) return/);
+  assert.match(family, /handledPeopleRequest\.current = next;\s*setTab\('people'\)/);
+  const effect = family.match(/useEffect\(\(\) => \{\s*const next = Number\(peopleRequest\);[^]*?\}, \[peopleRequest, sheet, busy\]\);/)?.[0] || '';
+  assert.doesNotMatch(effect, /setSheet\(/);
+});
+
+test('accepted invitations load on demand without an arbitrary invitation cap', () => {
+  assert.match(family, /async function loadSharedContext\(invitation\)/);
+  assert.match(family, /Promise\.allSettled\(active\.map\(loadSharedContext\)\)/);
+  assert.doesNotMatch(family, /slice\(0, 12\)/);
+  assert.match(family, /loadContext: \(\) => loadSharedContext\(invitation\)/);
+  assert.match(family, /setError\(t\.sharedLoadFailed\)/);
+  assert.match(family, /accountScope\.current !== actorScope/);
+});
+
+test('owners can reach calendar comments and the web family-profile handoff', () => {
+  assert.match(family, /openOwnerComments/);
+  assert.match(family, /role: 'owner'/);
+  assert.match(family, /\['owner', 'commenter', 'editor'\]\.includes\(role\)/);
+  assert.match(family, /sharing\.listCalendarComments\(client, account, context\.calendar\)/);
+  assert.match(family, /Manage family profiles \(Web\)/);
+  assert.match(family, /const opened = await onOpenWebsite\(\)/);
+  assert.match(family, /setError\(t\.webFailed\)/);
+});
+
+test('comment reads are scoped to the latest visible account and calendar sheet', () => {
+  assert.match(family, /createLatestRequestGuard\(\)/);
+  assert.match(family, /commentRequests\.current\.invalidate\(\)/);
+  assert.match(family, /commentRequests\.current\.isCurrent\(token, scope\)/);
+  assert.match(family, /accountScope\.current === actorScope/);
+  assert.match(family, /onClose=\{dismissSheet\}/);
+  assert.match(family, /commentsLoading \? <ActivityIndicator/);
+  assert.match(family, /supported, verified write connection/);
 });

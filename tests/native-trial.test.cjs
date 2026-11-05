@@ -93,7 +93,7 @@ test('trial and personalization UI are bilingual, native, reachable early and co
   const app = fs.readFileSync(require.resolve('../mobile/src/App.js'), 'utf8');
   assert.match(app, /entryScreen === 'trial' && trial.data\?\.elapsedMs >= nativeTrial.LIMIT_MS/);
   assert.match(app, /onPersonalize=\{\(\) => beginTrial\(\{ personalize: true \}\)\}/);
-  assert.match(app, /onGetStarted=\{\(\) => beginTrial\(\)\}/);
+  assert.match(app, /onGetStarted=\{beginSetup\} onPreview=\{\(\) => beginTrial\(\)\}/);
   assert.match(app, /trialImport.claimNativeTrial\(supabase, userId, reserved\)/);
   assert.match(app, /entryScreen === 'onboarding' && \(!session \|\| trialSetupReturn \|\| accountSetup\)/);
   assert.match(app, /returnToCalendar=\{trialSetupReturn \|\| accountSetup\}/);

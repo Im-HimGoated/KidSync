@@ -3,6 +3,9 @@
 The Expo/React Native app uses the existing Supabase project and accounts. It is
 an independent native UI; the desktop website remains at the repository root.
 
+See [FEATURE_ACCESS.md](FEATURE_ACCESS.md) for the connected setup, preview,
+account and feature navigation inventory, and [QA.md](QA.md) for verified results.
+
 ## Phone availability
 
 The app flow is available on iPhone and Android handsets. Native tablets,
@@ -17,7 +20,13 @@ builds. Other devices receive an entry screen linking to the existing website.
 
 ## Guest trial and personalization
 
-Get started opens a blank, editable ten-minute calendar. The timer counts only
+Get started opens five optional setup questions, followed by a review with an
+Edit button for each answer. Save & continue opens Create your account, with
+Sign in at the bottom and Preview the calendar first as an account-free option.
+Welcome also offers Try the calendar without an account for people who want to
+explore first. Returning to setup restores unfinished questions or saved review.
+
+The preview opens a blank, editable ten-minute calendar. The timer counts only
 foreground time in that route and survives reopening; background time does not
 consume the trial. Events, unfinished event drafts and the calendar profile stay
 in AsyncStorage. Clock storage errors expire the trial conservatively while
@@ -37,6 +46,11 @@ account switches and ambiguous network failures cannot offer the same backup to
 another account. Idempotent retries, fresh owner checks and timestamp-checked
 writes protect existing data. No guest trial is uploaded automatically.
 
+Successful import selects and opens the new real calendar. An unfinished preview
+event is not imported as a saved event: Review unfinished preview plan keeps its
+details accessible to the account that claimed it, with instructions to finish
+the plan through Calendar. Another account cannot open that retained draft.
+
 ## Signed-in calendar
 
 Signed-in users open on a compact Home view instead of a second stack of calendar
@@ -45,6 +59,13 @@ an assigned handoff adult, upcoming activities and workload by child. Selecting 
 upcoming or handoff item opens the calendar on that date. Multiple calendars are
 available as compact selectors without hiding the active family context.
 
+Ordinary Calendar entry opens Today using the saved view and preferred hours.
+Timed Home plans and reminder targets carry their actual start time into Week;
+all-day or invalid clocks use the saved hour instead. Repeated external opens
+re-center the timeline, while manual browsing and saved-view actions remain
+local. Returning from setup clears an old event focus so changed preferences
+apply without replaying a previous date or time.
+
 Home, Calendar and Family remain one tap away in persistent bottom navigation.
 The account avatar opens a single settings sheet for calendar preferences, saved
 app language, help, the web calendar and confirmed sign out, so those occasional
@@ -52,12 +73,20 @@ actions do not compete with daily planning. Pull to refresh and the compact sync
 state are available on Home as well as Calendar. The signed-in shell keeps only
 one KidsSync header and uses the same calm, high-contrast palette throughout.
 
+Calendar's Share shortcut opens Family for the selected owned calendar. Home
+shortcuts restore the owned calendar context before opening a date, even if a
+shared calendar was previously selected. Account → Calendar preferences reopens
+the saved answer review; Back returns directly to the originating workspace.
+
 Family provides three focused areas. People lets an owner invite an adult and
 assign Viewer, Commenter or Editor access. Inbox lets a signed-in recipient accept
 or decline invitations and pickup requests. Pickups lets the owner assign a saved
 activity occurrence to an accepted calendar member and wait for confirmation.
 The tab badge counts pending invitations and pickup requests for the current
-account. Shared calendar comments are available to commenters and editors.
+account. Accepted shared calendars open directly in the full calendar. Its
+Comments action shows the selected calendar's conversation; posting requires
+owner, commenter or editor access. The People comments shortcut opens that same
+real calendar rather than a separate summary.
 
 Collaboration changes use server-backed helpers and are re-read before the app
 reports success. Invitation links use the native share sheet; KidsSync does not
@@ -82,8 +111,9 @@ occurrence operations, undo and trial import still require an online confirmed
 write and are handed back to the same sync controller after success.
 
 The phone calendar provides Agenda, Week and Month views, date navigation,
-Today, calendar selection and explicit calendar creation. Week includes a
-scrollable 24-hour timetable and all-day band; full-size agenda cards provide
+Today, calendar selection and explicit calendar creation. Week shows a few
+readable day columns at once, with synchronized horizontal scrolling across the
+full seven days, a 24-hour timetable and all-day band; full-size agenda cards provide
 an accessible alternative to small overlapping blocks. Search and person filters
 help locate plans. Event details and the editor cover title, dates/times,
 all-day status, child/family, location, pickup adult, packing notes, importance,

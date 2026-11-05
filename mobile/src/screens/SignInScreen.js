@@ -79,7 +79,7 @@ export default function SignInScreen({
   return <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
     <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} contentContainerStyle={styles.scroll}>
       <View style={styles.inner}>
-        <ImageBackground source={require('../../../assets/kidssync-auth-family-signin.jpg')}
+        <ImageBackground source={require('../../assets/kidssync-auth-family-signin.jpg')}
           accessible={false} resizeMode="cover" style={[styles.hero, height < 700 && styles.compactHero]} imageStyle={styles.heroImage}>
           <View accessible accessibilityRole="image" accessibilityLabel={t.photo} pointerEvents="none" style={StyleSheet.absoluteFillObject} />
           <Pressable accessibilityRole="button" accessibilityLabel={backLabel || t.back} disabled={busy}

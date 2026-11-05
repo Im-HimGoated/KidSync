@@ -41,7 +41,7 @@ test('welcome is scrollable and uses bundled imagery with accessible actions', (
   assert.match(welcome, /accessibilityRole="button" onPress=\{onGetStarted\}/);
   const imagePath = welcome.match(/require\('([^']+\.jpg)'\)/)[1];
   assert.ok(fs.existsSync(path.resolve(root, 'mobile/src/screens', imagePath)));
-  assert.match(app, /catch \{ setError\(t.linkFailed\); \}/);
+  assert.match(app, /catch \{ setError\(t.linkFailed\); return false; \}/);
 });
 
 test('welcome never creates sample accounts, children, or database rows', () => {

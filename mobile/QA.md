@@ -2,14 +2,14 @@
 
 ## Release evidence and remaining acceptance
 
-Xcode and an iPhone simulator are now installed. Welcome/sign-in navigation and
-the guest trial's draft recovery, early event creation/edit/deletion and expiry
-handoff have been exercised on iPhone Duo / iOS 27.1. Signed-in calendar CRUD,
-phone-to-website sync, website-to-phone sync and offline queued-edit recovery
-have now passed on iPhone 16 Pro / iOS 26.5. Two-account sharing and physical-phone
-acceptance remain pending. This is a development release, not completed store-distribution
-or physical-device validation. Browser viewports and bundle exports are recorded
-separately from actual iPhone simulator checks below.
+Welcome/sign-in navigation and the guest trial's draft recovery, early event
+creation/edit/deletion and expiry handoff have been exercised on iPhone Duo /
+iOS 27.1. Signed-in calendar, two-way website sync, offline queued-edit recovery,
+planning tools, preferences, existing shared Viewer access and final date/time
+focus have passed on iPhone 16 Pro / iOS 26.5. Live Editor/Commenter mutation,
+notification delivery, physical devices and store distribution remain unverified.
+Browser fixtures and bundle exports are recorded separately from actual native
+checks below. This is a tested development release.
 
 ## Acceptance sequence
 
@@ -234,3 +234,136 @@ account and iPhone simulator checks remain pending until performed above.
   PostgreSQL migration tests and successful iOS/Android production exports.
   Two-account invitation/pickup/shared-edit acceptance, notification permission
   and delivery, physical devices and store distribution remain unverified.
+
+## Connected entry and feature access (November 3, 2026; new local candidate)
+
+- This follow-up is separate from the published `5ef7c91` release and its actual
+  signed-in device evidence above. New navigation and website-parity additions
+  must be tested as one explicit snapshot before publishing.
+- Welcome's primary Get started opens the five optional questions. Each answer
+  can be edited in review; saving opens Create your account, with Sign in at the
+  bottom and Preview the calendar first. Welcome retains a direct preview route.
+- Real app-shell handler tests use the real preference/preview stores with fake
+  auth/network boundaries. They verify guest setup and preview resumption,
+  reviewed-answer adoption after sign-in, explicit import opening its separate
+  real calendar, retained-draft access isolation, Home returning to owned context
+  after shared-calendar selection, and Calendar Share opening Family.
+- Real RN Web UI checks at 390px and 320px covered question progression,
+  explanation toggle, per-answer edit/save, reviewed answers surviving reload,
+  primary signup and secondary sign-in, signup-to-preview, a local plan saved
+  using the selected evening hours, preview resumption, and Chinese routes.
+  Document width equaled 320px at the small viewport; scrolling reached the
+  account/preview choices. No account was created or cloud event written.
+- Saved preference review Back now exits directly to its caller. Unfinished
+  preview plans remain available as explicitly read-only details after import;
+  they are not silently added to a real calendar.
+- The initial combined source passed **682/682** repository tests and fresh web, iOS
+  and Android production exports. Regression checks include repeat navigation
+  to the same Home date after moving elsewhere in Calendar and an account switch
+  while an imported preview confirmation is finishing.
+- Family now exposes owner comments and an explicit family-profile Web handoff.
+  Accepted invitation contexts load on demand without an arbitrary 12-item cap;
+  failures stay visible and retryable. Comment response generations prevent late
+  results from replacing a new sheet, calendar or account context.
+- Actual simulator testing found a sibling-modal transition that visually opened
+  planning tools but hid accessibility controls. Calendar tools, planning and
+  the new activity editor now share one native Sheet host. Dirty-note protection
+  retains the planning form during discard confirmation. The iPhone tester
+  verified accessible Open time → Next day → Plan here → seeded Add activity.
+- Actual new-candidate simulator acceptance, native share sheets, two-account
+  collaboration and notification delivery are separate checks, still pending
+  until the testing chat records observed results.
+
+## Final integration follow-up (November 4, 2026)
+
+- The phone Week view uses roomy horizontally scrollable day columns, day
+  snapping, aligned headers/non-timed rows and per-day counts. Real WeekGrid and
+  agenda-card browser fixtures passed at 390px and 320px in English and Chinese.
+  Overlapping titles truncate in the narrow lane; full titles and logistics stay
+  available in the selected-day agenda and complete accessible labels.
+- Accepted invitation routes open the actual CalendarScreen directly. Comments
+  are hosted in its existing Sheet, with selected-calendar identity, authenticated
+  account checks, role restrictions, stale-response protection and retained
+  unsent drafts. The Family owner-comments shortcut targets that same calendar.
+- Phone photos now live under mobile/assets with identical image bytes. The
+  isolated candidate preserves the published website's assets and source.
+- The final isolated candidate, based on published `5ef7c91`, passed **698/698**
+  repository tests and fresh web/iOS/Android production exports. Its 70-file
+  runtime import closure matches both the working source and release copy.
+  Only mobile and test paths differ from the published baseline; unrelated
+  website changes, generated bundles and dependency links are excluded.
+- New shared-calendar browser checks used local fake data: Viewer sees the real
+  calendar and comments without edit/post controls; Commenter can confirm a
+  comment and retain an unsent draft; Editor can save an event and see its title
+  updated in that same CalendarScreen. Chinese at 320px had no page overflow or
+  console errors. These are UI/controller checks, not live multi-account proof.
+- Native tools QA confirmed Home search/pins/packing, the native share sheet,
+  repeat date navigation, open-time-to-event creation, comparison, private-note
+  persistence/dirty protection and the weekly preview. All disposable native
+  event/note/saved-view data was cleaned up; the separate local browser preview
+  test event was also removed.
+- Expanded Device Hub intermittently hid the accessibility tree after reopening
+  native sheets. Compact mode restored grounded touch and successful close/reopen;
+  animation and accessibility-flag diagnostics were reverted. No inline-overlay
+  rewrite or native dependency patch was retained.
+- After the human unlocked the Mac, native Find events passed matching/empty
+  search, invalid range validation and opening the matched day. Saved-view apply
+  restored its date/view after navigating elsewhere; the temporary view was
+  removed. Settings, all five preference questions/review/cancel/direct Back,
+  reminders Off without opt-in, Calendar Share → Family People, Inbox/Pickups
+  and owner comments in the actual calendar passed.
+- An existing accepted Viewer calendar also opened directly in the native
+  calendar with actual activities and no add/edit/delete controls. Its comments
+  were read-only. No invitation, comment or notification was sent.
+- Native QA reproduced a Home target hidden behind old Calendar filters. Valid
+  external focus now clears those filters, while ordinary rerenders preserve
+  manual browsing. Find results now label all-day events without a stale clock.
+- Final date/time integration opens Today at the saved view/hour for ordinary
+  entry. Timed Home and reminder targets carry their start; continuation days
+  use their segment time, and all-day/invalid clocks fall back to the saved hour.
+  Repeated external requests re-center Week. Opening account setup clears an old
+  target so new preferences apply on return. Week has a half-hour lead-in above
+  its focused time.
+- The publisher completed the final changed-case native checks on the exact
+  frozen source, as recorded below. Live Editor/Commenter mutation round trips,
+  notification delivery and physical-device acceptance remain separate checks.
+
+## Final frozen iPhone acceptance (November 4, 2026)
+
+- The final 70-file runtime manifest has SHA-256
+  `c27af2daf3bacc3b59af52e3ab379ef5361b95cb0f7262cd888f57c25ad3072a`.
+  Working source, isolated release and native QA copies matched. The native
+  project was reloaded after restarting Metro to include the new focus module.
+  The real signed-in session survived and the app reported Up to date.
+- A stale nonmatching Calendar search and selected child filter were cleared by
+  tapping a Home plan. Calendar opened the correct date with Everyone selected
+  and the target activity visible. Ordinary in-calendar navigation remains
+  covered separately by the focus-effect regressions.
+- With an old Home target at November 5 / 05:00, saved Week + Morning preferences
+  returned to Today, November 4, in Week view at the saved 06:00 hour. An ordinary
+  Home Open calendar action also returned from a future date to Today with those
+  saved settings. The prior target did not override the newly saved preferences.
+- A timed Home target opened November 5 at 05:00 with the 5 AM label and activity
+  visible below the fixed header. The human performed the manual Week swipe
+  because the automation bridge could not send gestures; after observing the
+  scrolled grid, repeating the Home target restored the 5 AM label and activity
+  fully into view. This is native visual/user-assisted evidence, not a claim
+  that every gesture or VoiceOver scenario was automated.
+- An existing all-day Home plan used the saved 06:00 opening hour rather than its
+  retained legacy clock. Find events rendered All day instead of that stale time.
+- The website handoff opened the production KidsSync calendar in iPhone Safari.
+  Returning through Home -> Expo Go preserved the same signed-in Family People
+  screen and Up to date state. No website/provider changes were made.
+- Restored all original effective answers: Whole family, Today, Monday, Whole
+  day and No reminders. Dark + Ocean appearance and the existing pin/packing
+  state were unchanged. Removed the disposable saved view and verified No saved
+  views. Deleted only the disposable 05:00 activity, verified zero activities
+  on its day, then verified Home's zero seven-day plans and Up to date status.
+  Earlier tester-owned QA note/view/activity cleanup was also confirmed.
+- No invitations or comments were posted and no OS reminder permission was
+  accepted. The existing accepted Viewer was verified against a real account;
+  Commenter/Editor writes, invitation/role changes, email-confirmation/recovery,
+  physical devices and notification delivery are not newly claimed as live passes.
+- All **698** isolated automated tests and fresh iOS, Android and web exports
+  passed on this frozen runtime. Only verification documentation changed after
+  those checks.

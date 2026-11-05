@@ -98,6 +98,9 @@ test('reminder panel has complete EN/ZH copy and shell adapter never requests pu
   const copy = vm.runInNewContext(`(${panel.match(/export const reminderCopy = (\{[^]*?\n\});/)[1]})`);
   assert.deepEqual(Object.keys(copy.en), Object.keys(copy.zh));
   for (const language of ['en', 'zh']) for (const value of Object.values(copy[language])) assert(value.trim());
+  assert.match(copy.en.detail, /confirmed calendars you own/);
+  assert.match(copy.en.detail, /shared with you do not schedule reminders/);
+  assert.match(copy.en.waiting, /calendar you own/);
   const hook = fs.readFileSync(require.resolve('../mobile/src/lib/use-local-reminders.js'), 'utf8');
   assert.match(hook, /addNotificationResponseReceivedListener/); assert.match(hook, /getLastNotificationResponseAsync/);
   assert.match(hook, /next === 'active'/); assert.match(hook, /snapshotKey/);

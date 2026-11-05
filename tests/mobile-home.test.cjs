@@ -2,7 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { upcomingOccurrences, eventIsStillRelevant, needsHandoff, buildHomeModel } = require('../mobile/src/home/model');
+const { upcomingOccurrences, searchOccurrences, pinnedOccurrences, packingItems, packingKey, dayBrief,
+  eventIsStillRelevant, needsHandoff, buildHomeModel } = require('../mobile/src/home/model');
 
 const now = new Date(2026, 9, 30, 15, 0);
 const kids = [{ id: 'a', name: 'Andrew', palette: 'blue' }, { id: 'm', name: 'Mark', palette: 'green' }];
@@ -42,6 +43,27 @@ test('home metrics count schedule days and per-child workload without mutating s
   assert.equal(eventIsStillRelevant({ dateKey: '2026-10-30', event: events[0] }, now), false);
 });
 
+test('home productivity helpers search 90 days, show tomorrow, and keep one next occurrence per pin', () => {
+  const extended = [...events,
+    { id: 'camp', title: 'Winter camp', child: 'a', location: 'Community Center', startDate: '2026-12-15', start: '09:00', end: '12:00' }];
+  const model = buildHomeModel(extended, kids, now);
+  assert.deepEqual(model.tomorrow.map(item => item.event.id), ['piano']);
+  assert.deepEqual(searchOccurrences(model.upcoming, 'community winter').map(item => item.event.id), ['camp']);
+  assert.deepEqual(searchOccurrences(model.upcoming, 'mark dad', kids).map(item => item.event.id), ['piano']);
+  const pins = pinnedOccurrences(model.upcoming, ['weekly', 'camp', 'weekly']);
+  assert.deepEqual(pins.map(item => item.event.id), ['weekly', 'camp']);
+});
+
+test('packing and daily brief helpers stay occurrence-scoped without changing events', () => {
+  const source = { id: 'game', title: 'Game', items: 'Cleats, Water; cleats\n- Jersey', startDate: '2026-10-30' };
+  assert.deepEqual(packingItems(source.items), ['Cleats', 'Water', 'Jersey']);
+  assert.equal(packingKey({ event: source, dateKey: '2026-11-06' }), 'game:2026-11-06');
+  assert.equal(packingKey({ event: { ...source, eventType: 'trip', startDate: '2026-11-10' }, dateKey: '2026-11-12' }), 'game:2026-11-10');
+  const message = dayBrief([{ event: source }], { dateLabel: 'Friday, Oct 30', calendarLabel: 'Family',
+    timeFor: () => '4:00 PM – 5:00 PM', peopleFor: () => 'Andrew', includeNotes: true, bring: 'Bring', notes: 'Notes' });
+  assert.match(message, /Friday, Oct 30/); assert.match(message, /4:00 PM – 5:00 PM — Game/); assert.match(message, /Bring: Cleats/);
+});
+
 test('signed-in phone shell exposes focused home, calendar, and family navigation', () => {
   const app = fs.readFileSync(path.resolve(__dirname, '../mobile/src/App.js'), 'utf8');
   const screen = fs.readFileSync(path.resolve(__dirname, '../mobile/src/screens/HomeScreen.js'), 'utf8');
@@ -61,5 +83,14 @@ test('signed-in phone shell exposes focused home, calendar, and family navigatio
   assert.match(screen, /todayLabel/);
   assert.match(screen, /workloadAvatar/);
   assert.match(screen, /Coordinate pickups/);
-  assert.match(screen, /onOpenDate\?\.\(item\.dateKey\)/);
+  assert.match(screen, /function openCurrentDate\(date, time = null\)/);
+  assert.match(screen, /selectCurrentOwnerCalendar\(\);\s*onOpenDate\?\.\(date, time\)/);
+  assert.match(screen, /calendarTools\.daySegment\(item\.event, date\)\?\.start/);
+  assert.match(screen, /openCurrentDate\(item\.dateKey, focusTimeFor\(item\)\)/);
+  assert.match(screen, /selectCurrentOwnerCalendar\(\);\s*onOpenCalendar\?\.\(\)/);
+  assert.match(screen, /selectCurrentOwnerCalendar\(\);\s*onOpenFamily\?\.\(\)/);
+  assert.match(screen, /Quick planning tools/);
+  assert.match(screen, /Share\.share/);
+  assert.match(screen, /personalTools\.scopeFor\(\{ accountId: personalAccountId/);
+  assert.match(screen, /Pins and packing progress stay on this device/);
 });

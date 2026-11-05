@@ -6,7 +6,7 @@ import signUp from '../lib/sign-up';
 
 export const signUpCopy = {
   en: {
-    review: 'Review', back: 'Back to sign in', saved: 'Your setup answers are saved',
+    review: 'Review', back: 'Back to sign in', saved: 'Your setup answers are saved', preview: 'Preview the calendar first', previewHint: '10 minutes · No account needed · Plans stay on this device',
     heading: 'Create your account', description: 'Bring your family’s plans together.',
     email: 'Email address', emailPlaceholder: 'name@example.com', password: 'Password', passwordPlaceholder: 'Create a password',
     confirmation: 'Confirm password', confirmationPlaceholder: 'Re-enter your password', passwordHint: 'Use at least 8 characters.',
@@ -25,7 +25,7 @@ export const signUpCopy = {
     confirmationNote: 'Your setup answers remain saved on this device while you confirm your email.', changeEmail: 'Use a different email'
   },
   zh: {
-    review: '核对答案', back: '返回登录', saved: '你的设置答案已保存',
+    review: '核对答案', back: '返回登录', saved: '你的设置答案已保存', preview: '先体验日历', previewHint: '10 分钟 · 无需账户 · 日程保留在此设备上',
     heading: '创建你的账户', description: '一起安排全家人的计划。',
     email: '邮箱地址', emailPlaceholder: 'name@example.com', password: '密码', passwordPlaceholder: '创建密码',
     confirmation: '确认密码', confirmationPlaceholder: '再次输入密码', passwordHint: '请至少使用 8 个字符。',
@@ -45,7 +45,7 @@ export const signUpCopy = {
   }
 };
 
-export default function SignUpScreen({ language, email, onEmailChange, onCreateAccount, onSignIn, onBack, backLabel, hasPreferences, busy, error }) {
+export default function SignUpScreen({ language, email, onEmailChange, onCreateAccount, onSignIn, onPreview, onBack, backLabel, hasPreferences, busy, error }) {
   const t = signUpCopy[language] || signUpCopy.en;
   const { colors } = useAppearance(), styles = useThemeStyles(createStyles);
   const emailRef = useRef(null), passwordRef = useRef(null), confirmationRef = useRef(null), scroll = useRef(null), submitting = useRef(false);
@@ -128,6 +128,7 @@ export default function SignUpScreen({ language, email, onEmailChange, onCreateA
               {busy ? <ActivityIndicator color={colors.onPrimary} /> : <ArrowRight size={20} color={colors.onPrimary} aria-hidden={true} />}
             </Pressable>
             {hasPreferences && <Text style={styles.note}>{t.note}</Text>}
+            {!!onPreview && <Pressable accessibilityRole="button" accessibilityHint={t.previewHint} disabled={busy} onPress={onPreview} style={styles.preview}><Text style={styles.link}>{t.preview}</Text><Text style={styles.note}>{t.previewHint}</Text></Pressable>}
           </View>}
         </View>
       </View>
@@ -153,6 +154,7 @@ function createStyles(colors, palettes) { return StyleSheet.create({
   eye: { minWidth: 44, minHeight: 44, justifyContent: 'center', alignItems: 'center' }, hint: { color: colors.muted, fontSize: 12, lineHeight: 18 },
   primary: { minHeight: 54, flexDirection: 'row', gap: 10, justifyContent: 'center', alignItems: 'center', padding: 14, backgroundColor: colors.primary, borderRadius: 13, marginTop: 6 },
   primaryText: { color: colors.onPrimary, fontSize: 17, lineHeight: 23, fontWeight: '600', flexShrink: 1 }, pressed: { opacity: 0.7 },
+  preview: { minHeight: 52, alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 8 },
   note: { color: colors.muted, fontSize: 12, lineHeight: 19, textAlign: 'center' }, returning: { width: '100%', maxWidth: 420, alignSelf: 'center', paddingHorizontal: 24, paddingTop: 4, paddingBottom: 12, flexDirection: 'row', flexWrap: 'wrap', columnGap: 4, justifyContent: 'center', alignItems: 'center' },
   textButton: { minWidth: 44, minHeight: 44, justifyContent: 'center', paddingHorizontal: 3 }, link: { color: colors.primary, fontSize: 14, lineHeight: 21, fontWeight: '500' },
   signIn: { color: colors.primary, fontSize: 15, lineHeight: 22, fontWeight: '600', textDecorationLine: 'underline' }, secondary: { color: colors.muted, fontSize: 14, lineHeight: 22 },

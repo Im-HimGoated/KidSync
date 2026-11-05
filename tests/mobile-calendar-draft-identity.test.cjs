@@ -55,8 +55,10 @@ function find(element, predicate) {
 function mount(props) {
   const state = { cursor: 0, cells: [] };
   const body = ActivityEditor({ date: '2026-10-30', ...props });
-  function render() { host = state; state.cursor = 0; return body.type(body.props); }
+  let currentProps = body.props;
+  function render(nextProps) { if (nextProps) currentProps = { ...currentProps, ...nextProps }; host = state; state.cursor = 0; return body.type(currentProps); }
   return { render, changeTitle(value) { find(render(), element => element.type === 'Field' && element.props.label === 'Activity title').props.onChangeText(value); },
+    field(label) { return find(render(), element => element.type === 'Field' && element.props.label === label).props.value; },
     save() { return find(render(), element => element.type === 'Button' && element.props.children === 'Save activity').props.onPress(); } };
 }
 
@@ -86,6 +88,45 @@ test('validation failures do not submit or reserve an invalid event before the v
   await editor.save(); assert.equal(submitted.length, 0);
   editor.changeTitle('Valid plan'); await editor.save(); await editor.save();
   assert.equal(submitted.length, 2); assert.equal(submitted[0].id, submitted[1].id);
+});
+
+test('a proposed window seeds only a new form and saves as a new activity after explicit submission', async () => {
+  const submitted = [], seed = { startDate: '2026-11-07', endDate: '', start: '18:30', end: '19:15',
+    id: 'not-an-existing-event', title: 'Do not prefill metadata', recurrence: 'weekly' };
+  const before = structuredClone(seed);
+  const editor = mount({ initialDraft: seed, preferences: { hours: 'morning', reminders: '10' },
+    onSave: async (event, options) => { submitted.push({ event, options }); return false; } });
+  assert.equal(editor.field('Start date'), '2026-11-07'); assert.equal(editor.field('End date (optional)'), '');
+  assert.equal(editor.field('Starts'), '18:30'); assert.equal(editor.field('Ends'), '19:15');
+  assert.equal(editor.field('Activity title'), ''); assert.deepEqual(submitted, []);
+  editor.changeTitle('Chosen window'); await editor.save();
+  assert.equal(submitted.length, 1); assert.equal(submitted[0].options.original, null);
+  assert.equal(submitted[0].event.startDate, '2026-11-07'); assert.equal(submitted[0].event.start, '18:30'); assert.equal(submitted[0].event.end, '19:15');
+  assert.equal(submitted[0].event.recurrence, 'none'); assert.equal(submitted[0].event.reminderMinutes, 10);
+  assert.notEqual(submitted[0].event.id, seed.id); assert.deepEqual(seed, before);
+});
+
+test('existing event details ignore proposed-window seeds', async () => {
+  const existing = { id: 17, title: 'Existing', startDate: '2026-11-08', start: '01:30', end: '02:30', recurrence: 'none' };
+  const submitted = [];
+  const editor = mount({ event: existing, initialDraft: { startDate: '2026-11-09', endDate: '2026-11-10', start: '18:30', end: '19:15' },
+    onSave: async (event, options) => { submitted.push({ event, options }); return false; } });
+  assert.equal(editor.field('Start date'), '2026-11-08'); assert.equal(editor.field('End date (optional)'), '');
+  assert.equal(editor.field('Starts'), '01:30'); assert.equal(editor.field('Ends'), '02:30');
+  assert.deepEqual(submitted, []); await editor.save();
+  assert.equal(submitted[0].options.original, existing); assert.equal(submitted[0].event.id, 17);
+  assert.equal(submitted[0].event.startDate, '2026-11-08'); assert.equal(submitted[0].event.start, '01:30');
+});
+
+test('seeded drafts keep user edits and retry identity when props rerender or a response is lost', async () => {
+  const submitted = [], editor = mount({ initialDraft: { startDate: '2026-11-07', start: '06:15', end: '07:00' },
+    onSave: async (event, options) => { submitted.push({ event, options }); throw new TypeError('Lost response'); } });
+  editor.changeTitle('Keep this plan'); await editor.save();
+  editor.render({ initialDraft: { startDate: '2026-11-09', start: '12:00', end: '13:00' } });
+  assert.equal(editor.field('Activity title'), 'Keep this plan'); assert.equal(editor.field('Start date'), '2026-11-07');
+  assert.equal(editor.field('Starts'), '06:15'); await editor.save();
+  assert.equal(submitted.length, 2); assert.equal(submitted[0].event.id, submitted[1].event.id);
+  assert.equal(submitted[0].options.original, null); assert.equal(submitted[1].options.original, null);
 });
 
 test.after(() => { Module._load = load; });

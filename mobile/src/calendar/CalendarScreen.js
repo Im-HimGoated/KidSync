@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, Home, MapPin, Plus, RefreshCw, Repeat2, Search, Settings2, Undo2, UserPlus, UserRound, X } from 'lucide-react-native';
+import { ActivityIndicator, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, Home, MapPin, MessageCircle, Plus, RefreshCw, Repeat2, Search, Settings2, SlidersHorizontal, Undo2, UserPlus, UserRound, X } from 'lucide-react-native';
 import scheduleReader from '../../../shared/backend/schedules';
 import calendar from '../lib/calendar';
 import model from './model';
@@ -9,6 +9,13 @@ import { DateStrip, MonthGrid, WeekGrid } from './CalendarViews';
 import { Button, ChoiceRow, Field, IconButton, personColor, Sheet, useCalendarUi } from './ui';
 import getCopy, { dateLabel } from './copy';
 import { useAppearance } from '../ui/AppearanceContext';
+import PlanningTools, { planningCopy } from './PlanningTools';
+import CalendarToolbox, { toolboxCopy } from '../ui/CalendarToolbox';
+import CalendarComments, { calendarCommentsCopy } from '../ui/CalendarComments';
+import focus from './focus';
+
+const planningModes = { 'open-time': 'gaps', 'compare-days': 'compare', 'day-notes': 'notes', 'share-week': 'share', 'saved-views': 'views', 'find-events': 'find' };
+const nativeTools = Object.fromEntries(Object.keys(planningModes).map(id => [id, true]));
 
 /**
  * Signed-in native calendar, with no auth/session or storage ownership.
@@ -18,6 +25,7 @@ import { useAppearance } from '../ui/AppearanceContext';
  * Controlled selection: calendarId + onSelectCalendar(id).
  * Optional: snapshot instead of calendars; onOpenDashboard, onPreferences,
  * onShareCalendar(calendar), readOnly, initialDate (for deterministic previews).
+ * Increment focusRequest to revisit the same focusDate/focusTime after manual navigation.
  * Shared calendars require sharedAccess + sharedActivityActions + onSharedSchedule.
  * onSharedRefresh refreshes only shared data; owner callbacks never receive it.
  * calendarOwnerId disambiguates equal IDs from different owners. Selection sends
@@ -35,14 +43,15 @@ const validDate = date => date instanceof Date && Number.isFinite(date.getTime()
 const repeated = model.isRecurringActivity;
 const displayText = value => typeof value === 'string' ? value : typeof value === 'number' && Number.isFinite(value) ? String(value) : '';
 
-function CalendarAccount({ userId, client, calendars, snapshot, calendarId, calendarOwnerId, activeCalendarId, language = 'en', preferences,
+function CalendarAccount({ userId, account, client, calendars, snapshot, calendarId, calendarOwnerId, activeCalendarId, language = 'en', preferences, commentsRequest,
   loading = false, syncStatus, status, error, onSchedule, onSelectCalendar, onRefresh, onOpenDashboard, onPreferences,
-  onShareCalendar, readOnly = false, initialDate, focusDate, activityActions,
+  onShareCalendar, readOnly = false, initialDate, focusDate, focusTime, focusRequest, activityActions,
   sharedAccess, sharedActivityActions, onSharedSchedule, onSharedRefresh }) {
   const { colors, palettes } = useAppearance();
   const { u } = useCalendarUi();
   const s = useMemo(() => createStyles(colors), [colors]);
   const t = getCopy(language), display = model.normalizeDisplayPreferences(preferences);
+  const commentsCopy = calendarCommentsCopy[String(language).startsWith('zh') ? 'zh' : 'en'];
   const initial = initialDate instanceof Date ? initialDate : calendar.parseDateKey(initialDate);
   const [date, setDate] = useState(() => validDate(initial) ? new Date(initial) : new Date());
   const [view, setView] = useState(display.view), [person, setPerson] = useState('all'), [query, setQuery] = useState('');
@@ -50,11 +59,14 @@ function CalendarAccount({ userId, client, calendars, snapshot, calendarId, cale
   const [localOwnerId, setLocalOwnerId] = useState(null);
   const [refreshing, setRefreshing] = useState(false), [message, setMessage] = useState(''), [notice, setNotice] = useState('');
   const [conflicted, setConflicted] = useState(false), [name, setName] = useState(''), [jump, setJump] = useState('');
-  const [discardConfirm, setDiscardConfirm] = useState(false);
+  const [discardConfirm, setDiscardConfirm] = useState(false), [planningBusy, setPlanningBusy] = useState(false);
   const [undo, setUndo] = useState(null);
   const [sharedBlocked, setSharedBlocked] = useState(null);
+  const [focusedHour, setFocusedHour] = useState(display.initialHour), [acceptedFocusRequest, setAcceptedFocusRequest] = useState(0);
   const draftDirty = useRef(false), onDirtyChange = useCallback(value => { draftDirty.current = value; }, []);
   const mounted = useRef(true), mutation = useRef(false), refreshingRef = useRef(false), calendarScope = useRef(null);
+  const sheetVersion = useRef(0);
+  const handledCommentsRequest = useRef(0);
   const viewPreference = useRef(display.view);
   const rowSnapshot = snapshot?.schedule || snapshot;
   const entries = Array.isArray(calendars) ? calendars : scheduleReader.calendarEntries(rowSnapshot);
@@ -72,6 +84,8 @@ function CalendarAccount({ userId, client, calendars, snapshot, calendarId, cale
   const isShared = access.shared, blocked = sharedBlocked?.scopeId === scopeId;
   const canWrite = access.canWrite && !blocked;
   const canCreate = canWrite && !isShared;
+  const commentRole = isShared ? sharedAccess?.role || active?.role || 'viewer' : 'owner';
+  const commentsAvailable = !!active && account?.id === userId && typeof account?.email === 'string' && !!account.email.trim();
   const writePermission = useRef(canWrite);
   writePermission.current = canWrite;
   const writableEvent = event => canWrite && !event?.externalSource && !event?.isBuiltInHoliday;
@@ -79,12 +93,23 @@ function CalendarAccount({ userId, client, calendars, snapshot, calendarId, cale
   useLayoutEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   useEffect(() => {
     if (viewPreference.current !== display.view) { viewPreference.current = display.view; setView(display.view); }
-  }, [display.view]);
+    setFocusedHour(display.initialHour);
+  }, [display.view, display.initialHour]);
   useEffect(() => {
     const focused = calendar.parseDateKey(focusDate);
-    if (validDate(focused)) setDate(focused);
-  }, [focusDate]);
+    if (validDate(focused)) {
+      setDate(focused); setQuery(''); setPerson('all');
+      setFocusedHour(focus.hourForTime(focusTime, display.initialHour));
+      setAcceptedFocusRequest(value => value + 1);
+    }
+  }, [focusDate, focusTime, focusRequest]);
   useEffect(() => { setPerson('all'); setQuery(''); setSheet(null); setMessage(''); setUndo(null); setSharedBlocked(null); setDiscardConfirm(false); draftDirty.current = false; }, [active?.id, active?.ownerId]);
+  useEffect(() => {
+    const id = Number(commentsRequest?.id);
+    if (!commentsAvailable || !Number.isFinite(id) || id <= handledCommentsRequest.current || sheet || busy || planningBusy
+      || commentsRequest.ownerId !== (active.ownerId || userId) || commentsRequest.calendarId !== active.id) return;
+    handledCommentsRequest.current = id; open('comments');
+  }, [commentsRequest, commentsAvailable, active?.ownerId, active?.id, userId, sheet, busy, planningBusy]);
   useEffect(() => { if (isShared && !canWrite) setUndo(null); }, [isShared, canWrite]);
   useEffect(() => { if (!notice) return; const timer = setTimeout(() => setNotice(''), 5000); return () => clearTimeout(timer); }, [notice]);
 
@@ -147,14 +172,14 @@ function CalendarAccount({ userId, client, calendars, snapshot, calendarId, cale
     }
     finally { refreshingRef.current = false; if (mounted.current) setRefreshing(false); }
   }
-  function closeSheet() { setSheet(null); setMessage(''); setConflicted(false); setDiscardConfirm(false); draftDirty.current = false; }
+  function closeSheet() { sheetVersion.current++; setSheet(null); setMessage(''); setConflicted(false); setDiscardConfirm(false); draftDirty.current = false; }
   function requestClose() {
-    if (busy) return;
+    if (busy || planningBusy) return;
     if (discardConfirm) { setDiscardConfirm(false); return; }
-    if (['new', 'edit'].includes(sheet?.type) && draftDirty.current) { setDiscardConfirm(true); return; }
+    if (['new', 'edit', 'planning', 'comments'].includes(sheet?.type) && draftDirty.current) { setDiscardConfirm(true); return; }
     closeSheet();
   }
-  function open(type, extra = {}) { if (busy) return; setMessage(''); setConflicted(false); setDiscardConfirm(false); draftDirty.current = false; setSheet({ type, ...extra }); }
+  function open(type, extra = {}) { if (busy) return; sheetVersion.current++; setMessage(''); setConflicted(false); setDiscardConfirm(false); draftDirty.current = false; setSheet({ type, ...extra }); }
   function selectCalendar(item) { if (busy) return; setLocalId(item.id); setLocalOwnerId(item.ownerId || userId); onSelectCalendar?.(item.id, item); setSheet(null); }
   function showEvent(event, occurrence = date, occurrenceStartDate) { open('details', { event, occurrenceDate: calendar.dateKey(occurrence), occurrenceStartDate }); }
   function chooseScope(operation, event, occurrenceDate = sheet?.occurrenceDate || calendar.dateKey(date)) {
@@ -181,7 +206,7 @@ function CalendarAccount({ userId, client, calendars, snapshot, calendarId, cale
     if (!sheet?.event || busy) return;
     open(sheet.operation === 'delete' ? 'delete' : 'edit', { event: sheet.event, occurrenceDate: sheet.occurrenceDate, scope: 'series' });
   }
-  function selectDate(value) { if (validDate(value)) { setDate(new Date(value)); setQuery(''); } }
+  function selectDate(value) { if (validDate(value)) { setDate(new Date(value)); setQuery(''); setFocusedHour(display.initialHour); } }
   function resetFilters() { setPerson('all'); setQuery(''); }
   async function saveActivity(event, options) {
     if (!active || !writableEvent(options?.original)) return false;
@@ -218,7 +243,7 @@ function CalendarAccount({ userId, client, calendars, snapshot, calendarId, cale
   }
 
   const headerDate = dateLabel(date, language, { weekday: 'long', month: 'short', day: 'numeric' });
-  const sheetTitle = { calendars: t.calendars, create: t.createCalendar, date: t.datePicker, new: t.add, edit: t.edit, details: t.details, scope: sheet?.operation === 'delete' ? t.deleteScope : t.editScope, delete: t.deleteTitle }[sheet?.type];
+  const sheetTitle = { comments: commentsCopy.title, tools: (toolboxCopy[language] || toolboxCopy.en).title, planning: (planningCopy[language] || planningCopy.en).title, calendars: t.calendars, create: t.createCalendar, date: t.datePicker, new: t.add, edit: t.edit, details: t.details, scope: sheet?.operation === 'delete' ? t.deleteScope : t.editScope, delete: t.deleteTitle }[sheet?.type];
   const occurrences = sheet?.type === 'scope' ? calendar.occurrencesForDate(sheet.event, sheet.occurrenceDate)
     .filter(item => !sheet.occurrenceStartDate || item.startDate === sheet.occurrenceStartDate) : [];
   const occurrenceLabel = item => {
@@ -237,7 +262,8 @@ function CalendarAccount({ userId, client, calendars, snapshot, calendarId, cale
         </Pressable>
         {!!onShareCalendar && <Button secondary icon={UserPlus} onPress={() => onShareCalendar(active)} disabled={!active || busy} style={{ paddingHorizontal: 12 }}>{t.share}</Button>}
         {!!active && canWrite && <IconButton icon={Plus} label={t.add} onPress={() => open('new')} disabled={busy} />}
-        {!!onPreferences && <IconButton icon={Settings2} label={t.openPreferences} onPress={onPreferences} />}
+        {!!active && <IconButton icon={SlidersHorizontal} label={language === 'zh' ? '日历工具' : 'Calendar tools'} disabled={busy} onPress={() => open('tools')} />}
+        {!active && !!onPreferences && <IconButton icon={Settings2} label={t.openPreferences} onPress={onPreferences} />}
       </View>
       <View style={s.dateRow}>
         <Pressable accessibilityRole="button" accessibilityLabel={t.datePicker} onPress={() => { setJump(calendar.dateKey(date)); open('date'); }} style={s.dateButton}>
@@ -252,13 +278,14 @@ function CalendarAccount({ userId, client, calendars, snapshot, calendarId, cale
     {!!error && <Pressable accessibilityRole="button" accessibilityLabel={`${t.loadFailed} ${t.refresh}`} accessibilityState={{ disabled: refreshing || busy }} disabled={refreshing || busy} onPress={refresh} style={s.errorBanner}><Text style={[u.error, { flex: 1 }]}>{t.loadFailed}</Text><RefreshCw size={18} color={colors.error} /></Pressable>}
     <ScrollView style={{ flex: 1 }} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />}>
       <View style={s.search}><Search size={18} color={colors.muted} /><TextInput accessibilityLabel={t.search} value={query} onChangeText={setQuery} placeholder={t.searchPlaceholder} placeholderTextColor={colors.muted} style={s.searchInput} autoCorrect={false} returnKeyType="search" />{!!query && <IconButton icon={X} label={t.clear} onPress={() => setQuery('')} />}</View>
-      <Text style={s.planning}>{isShared ? t.sharedOnline : t.planning[display.people]}</Text>
+      <View style={s.commentsAccessRow}><Text style={[s.planning, { flex: 1, marginBottom: 0 }]}>{isShared ? `${commentsCopy.sharedCalendar} · ${commentsCopy[commentRole] || commentsCopy.viewer}` : t.planning[display.people]}</Text>
+        {commentsAvailable && <Button label={commentsCopy.title} secondary icon={MessageCircle} disabled={busy || planningBusy} style={{ paddingHorizontal: 12 }} onPress={() => open('comments')}>{commentsCopy.action}</Button>}</View>
       {searchActive && <Text style={s.searchScope}>{t.searchScope}</Text>}
       {!!kids.length && <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 14 }}><ChoiceRow options={filters} value={person} onChange={setPerson} label={t.everyone} /></ScrollView>}
       {pending ? <View style={u.empty}><ActivityIndicator color={colors.primary} accessibilityLabel={t.loading} /><Text style={u.body}>{t.loading}</Text></View> : !active ? <View style={u.empty}><CalendarDays size={36} color={colors.primary} /><Text style={[u.heading, s.center]}>{t.noCalendar}</Text><Text style={[u.body, s.center]}>{t.noCalendarBody}</Text>{canCreate && <Button icon={Plus} onPress={() => open('create')}>{t.createCalendar}</Button>}</View> : <>
         {view === 'agenda' && <DateStrip date={date} firstDay={display.firstDay} events={filtered} kids={kids} language={language} onDate={selectDate} />}
         {view === 'month' && <MonthGrid date={date} firstDay={display.firstDay} events={filtered} kids={kids} language={language} onDate={selectDate} />}
-        {view === 'week' && <WeekGrid date={date} firstDay={display.firstDay} initialHour={display.initialHour} events={filtered} kids={kids} language={language} onDate={selectDate} onEvent={showEvent} />}
+        {view === 'week' && <WeekGrid key={`focus:${acceptedFocusRequest}`} date={date} firstDay={display.firstDay} initialHour={focusedHour} events={filtered} kids={kids} language={language} onDate={selectDate} onEvent={showEvent} />}
         <View style={s.agendaHeading}><Text accessibilityRole="header" style={s.agendaTitle}>{searchActive ? t.searchResults : headerDate}</Text><View style={s.count}><Text style={s.countText}>{shownEvents.length}</Text></View></View>
         {shownEvents.length ? shownEvents.map((event, index) => <ActivityCard key={`${event.id ?? 'activity'}:${index}`} event={event} date={date} kids={kids} language={language} showDate={searchActive} onPress={() => showEvent(event, searchActive && validDate(calendar.parseDateKey(event.startDate)) ? calendar.parseDateKey(event.startDate) : date)} />) : <View style={u.empty}><CalendarDays size={28} color={colors.success} /><Text style={[u.heading, s.center]}>{filtersActive ? t.noResults : t.empty}</Text><Text style={[u.body, s.center]}>{filtersActive ? t.filteredBody : t.emptyBody}</Text>{filtersActive ? <Button secondary icon={X} onPress={resetFilters}>{t.resetFilters}</Button> : canWrite && <Button secondary icon={Plus} onPress={() => open('new')}>{t.add}</Button>}</View>}
         <View style={s.syncRow}><Text style={s.syncText}>{refreshing ? t.refreshing : t.refresh}</Text><IconButton icon={RefreshCw} label={t.refresh} onPress={refresh} disabled={refreshing || busy} color={colors.muted} /></View>
@@ -266,15 +293,29 @@ function CalendarAccount({ userId, client, calendars, snapshot, calendarId, cale
           : isShared && (access.setupRequired || sharedBlocked?.code === 'SETUP_REQUIRED') ? t.sharedSetup : t.readOnly}</Text>}
       </>}
     </ScrollView>
-    {!!sheet && <Sheet title={sheetTitle} closeLabel={t.close} busy={busy} onClose={requestClose}>
+    <Sheet visible={!!sheet} title={sheetTitle} closeLabel={t.close} busy={busy || planningBusy} onClose={requestClose}>
+    {!!sheet && <>
       {discardConfirm && <View style={s.discardConfirm}>
-        <Text accessibilityRole="header" style={u.heading}>{t.discardTitle}</Text><Text style={u.body}>{t.discardBody}</Text>
+        <Text accessibilityRole="header" style={u.heading}>{sheet.type === 'comments' ? commentsCopy.discardTitle : sheet.type === 'planning' ? (planningCopy[language] || planningCopy.en).discard : t.discardTitle}</Text><Text style={u.body}>{sheet.type === 'comments' ? commentsCopy.discardBody : sheet.type === 'planning' ? (planningCopy[language] || planningCopy.en).discardBody : t.discardBody}</Text>
         <Button onPress={() => setDiscardConfirm(false)}>{t.keepEditing}</Button><Button danger onPress={closeSheet}>{t.discardChanges}</Button>
       </View>}
+    {sheet.type === 'comments' && commentsAvailable && <View accessibilityElementsHidden={discardConfirm} importantForAccessibility={discardConfirm ? 'no-hide-descendants' : 'auto'} style={{ flexShrink: 1, display: discardConfirm ? 'none' : 'flex' }}><CalendarComments key={scopeId} client={client} account={account}
+      calendar={{ id: active.id, ownerId: active.ownerId || userId, name: active.name }} role={commentRole} stale={!!sharedAccess?.stale}
+      language={language} onDirtyChange={onDirtyChange} onBusyChange={setPlanningBusy} /></View>}
+    {sheet.type === 'tools' && <CalendarToolbox embedded language={language} onClose={closeSheet} nativeAvailability={nativeTools}
+      onPlanning={id => open('planning', { mode: planningModes[id] || 'gaps' })}
+      onPreferences={onPreferences ? () => { closeSheet(); onPreferences(); } : undefined}
+      onWebsite={async () => { const request = sheetVersion.current; await Linking.openURL('https://kid-sync-delta.vercel.app/'); if (mounted.current && calendarScope.current === scopeId && sheetVersion.current === request) closeSheet(); }} />}
+    {sheet.type === 'planning' && !!active && <View accessibilityElementsHidden={discardConfirm} importantForAccessibility={discardConfirm ? 'no-hide-descendants' : 'auto'} style={{ flexShrink: 1, display: discardConfirm ? 'none' : 'flex' }}><PlanningTools key={scopeId} embedded onDirtyChange={onDirtyChange} onBusyChange={setPlanningBusy} initialMode={sheet.mode} userId={userId} ownerId={active.ownerId || userId} calendarId={active.id}
+      events={events} kids={kids} date={date} language={language} firstDay={display.firstDay} canWrite={canWrite}
+      selectedView={{ view, date: calendar.dateKey(date), query, person }} onClose={closeSheet}
+      onPlan={draft => { setDate(calendar.parseDateKey(draft.startDate)); open('new', { initialDraft: draft }); }}
+      onShowDate={value => { setDate(calendar.parseDateKey(value)); setView('agenda'); setQuery(''); setPerson('all'); closeSheet(); }}
+      onApplyView={value => { setDate(calendar.parseDateKey(value.date)); setView(value.view); setQuery(value.query); setPerson(filters.some(item => item.value === value.person) ? value.person : 'all'); closeSheet(); }} /></View>}
       {!!message && <View style={s.sheetFeedback}><Text accessibilityRole="alert" style={u.error}>{message}</Text>{conflicted && <Button secondary icon={RefreshCw} onPress={refresh} disabled={refreshing}>{t.conflictRefresh}</Button>}</View>}
       {sheet.type === 'details' && <ActivityDetails event={sheet.event} occurrenceDate={sheet.occurrenceDate} occurrenceStartDate={sheet.occurrenceStartDate} kids={kids} language={language} canEdit={writableEvent(sheet.event)} busy={busy} onEdit={event => chooseScope('edit', event)} onDelete={deleteActivity} onDeleteRequest={repeated(sheet.event) ? event => chooseScope('delete', event) : undefined} />}
       {['new', 'edit'].includes(sheet.type) && (canWrite || isShared) && <View accessibilityElementsHidden={discardConfirm} importantForAccessibility={discardConfirm ? 'no-hide-descendants' : 'auto'} style={{ flexShrink: 1, display: discardConfirm ? 'none' : 'flex' }}>
-        <ActivityEditor event={sheet.type === 'edit' ? sheet.event : null} date={date} kids={kids} preferences={preferences} language={language} busy={busy} disabled={!canWrite} error={message} onSave={saveActivity} onCancel={requestClose} onDirtyChange={onDirtyChange} scope={sheet.scope} />
+        <ActivityEditor event={sheet.type === 'edit' ? sheet.event : null} initialDraft={sheet.type === 'new' ? sheet.initialDraft : undefined} date={date} kids={kids} preferences={preferences} language={language} busy={busy} disabled={!canWrite} error={message} onSave={saveActivity} onCancel={requestClose} onDirtyChange={onDirtyChange} scope={sheet.scope} />
       </View>}
       {sheet.type === 'scope' && <ScrollView contentContainerStyle={[s.sheetContent, s.scopeContent]}>
         <Text style={u.heading}>{displayText(sheet.event.title) || t.calendar}</Text><Text style={u.body}>{t.scopeBody}</Text>
@@ -292,7 +333,8 @@ function CalendarAccount({ userId, client, calendars, snapshot, calendarId, cale
       {sheet.type === 'calendars' && <ScrollView contentContainerStyle={s.sheetContent}>{entries.map(item => <Pressable key={JSON.stringify([item.ownerId || userId, item.id])} accessibilityRole="button" accessibilityState={{ selected: item === active }} onPress={() => selectCalendar(item)} style={s.calendarOption}><CalendarDays size={21} color={colors.primary} /><Text style={[u.label, { flex: 1 }]}>{displayText(item.name) || t.calendar}</Text>{item === active && <Check size={19} color={colors.primary} />}</Pressable>)}{canCreate && <Button secondary icon={Plus} onPress={() => { setName(''); open('create'); }}>{t.createCalendar}</Button>}</ScrollView>}
       {sheet.type === 'create' && <View style={s.sheetContent}><Field label={t.calendarName} value={name} onChangeText={setName} maxLength={100} autoFocus editable={!busy} onSubmitEditing={createCalendar} /><Button disabled={busy || !name.trim()} onPress={createCalendar}>{busy ? t.refreshing : t.createCalendar}</Button></View>}
       {sheet.type === 'date' && <View style={s.sheetContent}><Field label={t.date} value={jump} onChangeText={value => { setJump(value); setMessage(''); }} placeholder={t.dateHint} maxLength={10} autoFocus autoCapitalize="none" keyboardType="numbers-and-punctuation" returnKeyType="go" onSubmitEditing={jumpToDate} /><Button onPress={jumpToDate}>{t.jump}</Button></View>}
-    </Sheet>}
+    </>}
+    </Sheet>
     {!sheet && !!message && <View style={s.inlineError}><Text accessibilityRole="alert" style={u.error}>{message}</Text></View>}
   </View>;
 }
@@ -322,6 +364,7 @@ function ActivityCard({ event, date, kids, language, onPress, showDate }) {
 }
 
 const createStyles = colors => StyleSheet.create({
+  commentsAccessRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
   scopeContent: { gap: 14 }, undoBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, backgroundColor: colors.successSoft },
   searchScope: { color: colors.muted, fontSize: 12, lineHeight: 18, marginBottom: 12 }, discardConfirm: { padding: 20, paddingTop: 8, gap: 12, backgroundColor: colors.warningSoft, borderBottomWidth: 1, borderBottomColor: colors.line },
   page: { flex: 1, backgroundColor: colors.page }, controls: { paddingHorizontal: 16, paddingTop: 9, paddingBottom: 12, backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.line }, calendarRow: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 12 }, calendarSelector: { flex: 1, minWidth: 0, minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 9, borderWidth: 1, borderColor: colors.line, borderRadius: 14, paddingHorizontal: 12, backgroundColor: colors.surface }, calendarName: { flex: 1, color: colors.ink, fontSize: 16, fontWeight: '700' }, dateRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', marginBottom: 11 }, dateButton: { flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 44 }, period: { fontSize: 18, fontWeight: '700', color: colors.ink }, today: { minHeight: 44, paddingHorizontal: 12, justifyContent: 'center', borderWidth: 1, borderColor: colors.line, borderRadius: 12 }, todayText: { color: colors.primary, fontSize: 13, fontWeight: '600' }, views: { flexDirection: 'row', backgroundColor: colors.input, borderRadius: 13, borderWidth: 1, borderColor: colors.line, overflow: 'hidden' }, viewButton: { flex: 1, minHeight: 45, alignItems: 'center', justifyContent: 'center', borderRadius: 12 }, viewSelected: { backgroundColor: colors.primary }, viewText: { color: colors.ink, fontSize: 14, fontWeight: '600' },

@@ -50,7 +50,7 @@ export function ChoiceRow({ options, value, onChange, label, disabled }) {
   return <View style={u.choices} accessibilityLabel={label}>{options.map(option => <Pressable key={String(option.value)} accessibilityRole="button" accessibilityState={{ selected: value === option.value, disabled: !!disabled }} disabled={disabled} onPress={() => onChange(option.value)}
     style={[u.choice, value === option.value && u.choiceSelected, disabled && { opacity: 0.5 }]}>{option.color && <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: option.color }} />}<Text style={[u.choiceText, value === option.value && { color: colors.onPrimary }]}>{option.label}</Text></Pressable>)}</View>;
 }
-export function Sheet({ title, closeLabel, onClose, busy, children }) {
+export function Sheet({ title, closeLabel, onClose, busy, children, visible = true }) {
   const { u } = useCalendarUi();
   const [reduceMotion, setReduceMotion] = useState(true);
   useEffect(() => {
@@ -59,7 +59,7 @@ export function Sheet({ title, closeLabel, onClose, busy, children }) {
     AccessibilityInfo.isReduceMotionEnabled().then(value => { if (active && !changed) setReduceMotion(value); }).catch(() => {});
     return () => { active = false; listener.remove(); };
   }, []);
-  return <Modal transparent animationType={reduceMotion ? 'none' : 'slide'} presentationStyle="overFullScreen" supportedOrientations={['portrait', 'landscape']} statusBarTranslucent onRequestClose={() => { if (!busy) onClose(); }}>
+  return <Modal visible={visible} transparent animationType={reduceMotion ? 'none' : 'slide'} presentationStyle="overFullScreen" supportedOrientations={['portrait', 'landscape']} statusBarTranslucent onRequestClose={() => { if (!busy) onClose(); }}>
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={u.modal}>
       <Pressable accessible={false} importantForAccessibility="no-hide-descendants" disabled={busy} onPress={onClose} style={StyleSheet.absoluteFill} />
       <SafeAreaView accessibilityViewIsModal onAccessibilityEscape={() => { if (!busy) onClose(); }} edges={['bottom', 'left', 'right']} style={u.sheet}>

@@ -8,9 +8,9 @@ export const reminderCopy = {
   en: {
     title: 'Phone reminders', close: 'Close', toggle: 'Local reminders',
     privacy: 'Lock-screen messages stay generic. Activity names, people and locations are never shown.',
-    detail: 'Uses each saved activity’s reminder time. All-day plans start at 9 AM. Schedules the next 14 days on this device; open KidsSync regularly to refresh. Changes from other devices update here when KidsSync reconnects.',
+    detail: 'Uses reminder times from confirmed calendars you own. Calendars shared with you do not schedule reminders here. All-day plans start at 9 AM. Schedules the next 14 days on this device; open KidsSync regularly to refresh. Changes from other devices update here when KidsSync reconnects.',
     limit: 'Up to 48 upcoming reminders fit at a time. Delivery can be delayed or silenced by Focus, device settings or Android battery limits. No push or email reminders.',
-    disabled: 'Off on this device', scheduled: 'Upcoming reminders scheduled', waiting: 'Waiting for a confirmed calendar',
+    disabled: 'Off on this device', scheduled: 'Upcoming reminders scheduled', waiting: 'Waiting for a confirmed calendar you own',
     loading: 'Checking reminders…', configuring: 'Updating reminders…', 'permission-denied': 'Notifications are blocked. Allow them in system settings, then return here and enable reminders.',
     unsupported: 'Local reminders need the iPhone or Android app.', 'signed-out': 'Sign in to set reminders.',
     error: 'Could not update reminders. Check device settings and retry.', settings: 'Open system settings', retry: 'Retry',
@@ -19,9 +19,9 @@ export const reminderCopy = {
   zh: {
     title: '手机提醒', close: '关闭', toggle: '本地提醒',
     privacy: '锁屏消息仅显示通用提示，不会显示活动名称、人员或地点。',
-    detail: '使用已保存活动的提醒时间。全天活动按上午 9 点开始计算。此设备会安排未来 14 天的提醒；请定期打开 KidsSync 刷新。其他设备的更改会在此应用重新连接后更新。',
+    detail: '使用你拥有且已确认的日历中的提醒时间。他人共享给你的日历不会在此安排提醒。全天活动按上午 9 点开始计算。此设备会安排未来 14 天的提醒；请定期打开 KidsSync 刷新。其他设备的更改会在此应用重新连接后更新。',
     limit: '最多安排 48 条即将到来的提醒。专注模式、设备设置或安卓省电限制可能延迟或静音提醒。不提供远程推送或邮件提醒。',
-    disabled: '此设备已关闭', scheduled: '已安排即将到来的提醒', waiting: '正在等待确认的日历',
+    disabled: '此设备已关闭', scheduled: '已安排即将到来的提醒', waiting: '正在等待你拥有且已确认的日历',
     loading: '正在检查提醒…', configuring: '正在更新提醒…', 'permission-denied': '通知被阻止。请在系统设置中允许通知，返回后开启提醒。',
     unsupported: '本地提醒需要 iPhone 或安卓应用。', 'signed-out': '登录后可设置提醒。',
     error: '无法更新提醒，请检查设备设置后重试。', settings: '打开系统设置', retry: '重试',

@@ -76,7 +76,7 @@ export default function OnboardingScreen({ language, initialDraft, onDraftChange
     <View style={styles.inner}>
       <View style={styles.top}>
         <Pressable accessibilityRole="button" accessibilityLabel={editing ? t.cancel : t.back} disabled={busy} style={styles.back}
-          onPress={() => { if (editing) { setReview(true); setEditing(false); } else if (review) move(4); else if (step) move(step - 1); else onBack(); }}>
+          onPress={() => { if (editing) { setReview(true); setEditing(false); } else if (review && returnToCalendar) onBack(); else if (review) move(4); else if (step) move(step - 1); else onBack(); }}>
           <ChevronLeft size={18} color={colors.primary} /><Text style={styles.link}>{editing ? t.cancel : t.back}</Text>
         </Pressable>
         {!review && <Text style={styles.muted}>{step + 1} {t.step}</Text>}

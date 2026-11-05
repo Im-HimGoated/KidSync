@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } fr
 import calendar from '../lib/calendar';
 import model from './model';
 import getCopy from './copy';
+import weekLayout from './week-layout';
 import { personColor } from './ui';
 import { useAppearance } from '../ui/AppearanceContext';
 
@@ -12,8 +13,8 @@ function useViewStyles() {
   return { colors, palettes, s };
 }
 
-const HOUR_HEIGHT = 60;
-const GUTTER = 42;
+const HOUR_HEIGHT = 64;
+const GUTTER = weekLayout.GUTTER_WIDTH;
 const ownDate = value => value instanceof Date && Number.isFinite(value.getTime()) ? value : new Date();
 const text = value => typeof value === 'string' ? value : typeof value === 'number' && Number.isFinite(value) ? String(value) : '';
 const firstDayValue = value => value === 0 || value === 'sunday' ? 0 : 1;
@@ -134,7 +135,7 @@ export function MonthGrid({ date, firstDay = 1, events = [], kids = [], language
   </ScrollView>;
 }
 
-function EventBlock({ event, date, kids, language, t, onEvent, style, compact = false, occurrenceStartDate }) {
+function EventBlock({ event, date, kids, language, t, onEvent, style, compact = false, narrow = false, occurrenceStartDate }) {
   const { colors, palettes, s } = useViewStyles();
   const palette = colorFor(event, kids, palettes, colors), cancelled = event.status === 'cancelled';
   const segment = calendar.daySegment(event, date, occurrenceStartDate);
@@ -142,7 +143,8 @@ function EventBlock({ event, date, kids, language, t, onEvent, style, compact = 
     accessibilityHint={t.details} onPress={() => onEvent?.(event, date, occurrenceStartDate)}
     style={({ pressed }) => [s.eventBlock, { backgroundColor: palette.soft, borderLeftColor: palette.line },
       compact && s.compactBlock, style, (pressed || cancelled) && { opacity: 0.6 }]}>
-    <Text style={[s.blockTitle, { color: palette.ink }, cancelled && s.cancelled]} numberOfLines={compact ? 2 : 3}>
+    <Text style={[s.blockTitle, narrow && s.narrowBlockTitle, { color: palette.ink }, cancelled && s.cancelled]}
+      numberOfLines={narrow ? 1 : 2} ellipsizeMode="tail">
       {segment?.continuesBefore ? '← ' : ''}{text(event.title) || t.activity}{segment?.continuesAfter ? ' →' : ''}
     </Text>
   </Pressable>;
@@ -171,10 +173,13 @@ function NonTimedRow({ label, rows, dates, colWidth, scrollRef, scrollProps, kid
  */
 export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kids = [], language = 'en', onDate, onEvent }) {
   const { colors, palettes, s } = useViewStyles();
+  const { width: windowWidth } = useWindowDimensions();
   const selected = ownDate(date), first = model.startOfDisplayWeek(selected, firstDayValue(firstDay));
   const dates = Array.from({ length: 7 }, (_, i) => calendar.addDays(first, i));
-  const t = viewCopy(language), width = usePhoneWidth(430), colWidth = (width - GUTTER) / 7;
-  const columns = dates.map(day => model.layoutDay(calendar.eventsForDate(events, day), { date: day, hourHeight: HOUR_HEIGHT, minHeight: 30 }));
+  const t = viewCopy(language), viewportEstimate = Math.max(280, Math.min(windowWidth, 640) - 40);
+  const geometry = weekLayout.weekGeometry(viewportEstimate), colWidth = geometry.dayWidth;
+  const dayEvents = dates.map(day => calendar.eventsForDate(events, day));
+  const columns = dayEvents.map((items, index) => model.layoutDay(items, { date: dates[index], hourHeight: HOUR_HEIGHT, minHeight: 34 }));
   const canvasHeight = Math.max(24 * HOUR_HEIGHT, ...columns.flatMap(column => column.timed.map(item => item.top + item.height + 4)));
   const vertical = useRef(null), horizontal = useRef(null), headers = useRef(null), allDay = useRef(null), untimed = useRef(null);
   const horizontalSource = useRef(horizontal), horizontalOffset = useRef(0), [viewportWidth, setViewportWidth] = useState(0);
@@ -192,11 +197,12 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
     for (const ref of [horizontal, headers, allDay, untimed]) if (ref !== source) ref.current?.scrollTo({ x, animated: false });
   }
   function horizontalProps(source) {
-    return { onScrollBeginDrag: () => { horizontalSource.current = source; }, onScroll: event => syncHorizontal(event, source), scrollEventThrottle: 16 };
+    return { onScrollBeginDrag: () => { horizontalSource.current = source; }, onScroll: event => syncHorizontal(event, source),
+      scrollEventThrottle: 16, snapToInterval: colWidth, decelerationRate: 'fast' };
   }
   function scrollInitially() {
     if (lastInitial.current === scrollKey) return;
-    vertical.current?.scrollTo({ y: startHour * HOUR_HEIGHT, animated: false });
+    vertical.current?.scrollTo({ y: weekLayout.initialScrollOffset(startHour, HOUR_HEIGHT), animated: false });
     lastInitial.current = scrollKey;
   }
   useEffect(() => {
@@ -219,13 +225,14 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
   return <View style={s.weekContainer} onLayout={event => setViewportWidth(Math.max(0, event.nativeEvent.layout.width - GUTTER))}>
     <View style={s.dayHeaders}><View style={s.headerGutter} />
       <ScrollView horizontal ref={headers} {...horizontalProps(headers)} nestedScrollEnabled directionalLockEnabled showsHorizontalScrollIndicator={false} style={s.daysViewport}>
-        <View style={[s.dayHeaderColumns, { width: colWidth * 7 }]}>{dates.map(day => {
+        <View style={[s.dayHeaderColumns, { width: geometry.daysWidth }]}>{dates.map((day, index) => {
           const key = calendar.dateKey(day), chosen = key === selectedKey;
           return <Pressable key={key} accessibilityRole="button" accessibilityState={{ selected: chosen }}
-            accessibilityLabel={formatDate(day, language, { weekday: 'long', month: 'long', day: 'numeric' })}
+            accessibilityLabel={`${formatDate(day, language, { weekday: 'long', month: 'long', day: 'numeric' })}, ${t.activities(dayEvents[index].length)}`}
             onPress={() => onDate?.(day)} style={[s.gridDayHeader, { width: colWidth }, chosen && s.currentColumn]}>
             <Text style={s.weekday}>{formatDate(day, language, { weekday: 'short' }).replace('周', '')}</Text>
             <View style={[s.gridDate, chosen && s.selectedDay]}><Text style={[s.dateNumber, key === today && s.todayNumber, chosen && s.selectedText]}>{day.getDate()}</Text></View>
+            {!!dayEvents[index].length && <View style={[s.dayCount, chosen && s.dayCountSelected]}><Text style={[s.dayCountText, chosen && s.dayCountTextSelected]}>{dayEvents[index].length}</Text></View>}
           </Pressable>;
         })}</View>
       </ScrollView>
@@ -244,7 +251,7 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
         </View>
         <ScrollView ref={horizontal} horizontal nestedScrollEnabled {...horizontalProps(horizontal)}
           showsHorizontalScrollIndicator directionalLockEnabled style={s.daysViewport}>
-          <View style={{ width: colWidth * 7, height: canvasHeight }}>
+          <View style={{ width: geometry.daysWidth, height: canvasHeight }}>
             {Array.from({ length: 25 }, (_, hour) => <View accessible={false} key={hour}
               style={[s.hourLine, { top: hour * HOUR_HEIGHT, width: colWidth * 7 }]} />)}
             {dates.map((day, index) => <View key={calendar.dateKey(day)} pointerEvents="box-none"
@@ -252,7 +259,7 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
               {columns[index].timed.map((item, j) => {
                 const laneWidth = colWidth / Math.max(1, item.lanes);
                 return <EventBlock key={`${item.event.id ?? 'event'}:${item.occurrenceStartDate || ''}:${j}`} event={item.event} date={day}
-                  kids={kids} language={language} t={t} onEvent={chooseEvent} occurrenceStartDate={item.occurrenceStartDate}
+                  kids={kids} language={language} t={t} onEvent={chooseEvent} occurrenceStartDate={item.occurrenceStartDate} narrow={item.lanes > 1}
                   style={{ position: 'absolute', top: item.top, height: item.height,
                     left: item.lane * laneWidth + 1, width: Math.max(1, laneWidth - 2) }} />;
               })}
@@ -261,7 +268,6 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
         </ScrollView>
       </View>
     </ScrollView>
-    <Text style={s.overviewHint}>{t.overview}</Text>
   </View>;
 }
 
@@ -277,18 +283,20 @@ const createStyles = colors => StyleSheet.create({
   monthGrid: { flexDirection: 'row', flexWrap: 'wrap' }, monthCell: { minHeight: 49, alignItems: 'center', justifyContent: 'center' },
   monthDate: { width: 42, minHeight: 44, borderRadius: 13, alignItems: 'center', justifyContent: 'center', gap: 4 },
   monthNumber: { color: colors.ink, fontSize: 15, lineHeight: 20 }, outsideMonth: { color: colors.muted, opacity: 0.65 }, todayNumber: { color: colors.primary, fontWeight: '700' },
-  weekContainer: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, borderRadius: 15, overflow: 'hidden', marginBottom: 17 },
+  weekContainer: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, borderRadius: 18, overflow: 'hidden', marginBottom: 17 },
   dayHeaders: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.line },
   headerGutter: { width: GUTTER, backgroundColor: colors.surface }, daysViewport: { flex: 1 }, dayHeaderColumns: { flexDirection: 'row' },
-  gridDayHeader: { minHeight: 70, alignItems: 'center', justifyContent: 'center', gap: 3, borderLeftWidth: 1, borderLeftColor: colors.line },
+  gridDayHeader: { minHeight: 82, alignItems: 'center', justifyContent: 'center', gap: 3, paddingVertical: 7, borderLeftWidth: 1, borderLeftColor: colors.line },
   gridDate: { width: 35, height: 35, borderRadius: 12, alignItems: 'center', justifyContent: 'center' }, currentColumn: { backgroundColor: colors.primarySoft },
+  dayCount: { minWidth: 22, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6, backgroundColor: colors.surfaceRaised }, dayCountSelected: { backgroundColor: colors.surface },
+  dayCountText: { color: colors.muted, fontSize: 10, lineHeight: 13, fontWeight: '700' }, dayCountTextSelected: { color: colors.primary },
   nonTimed: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.line }, nonTimedGutter: { width: GUTTER, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3 },
   nonTimedLabel: { color: colors.muted, fontSize: 10, lineHeight: 14, textAlign: 'center' }, nonTimedDays: { flexDirection: 'row' },
   nonTimedColumn: { paddingHorizontal: 2, paddingVertical: 3, gap: 3, borderLeftWidth: 1, borderLeftColor: colors.line },
-  hoursViewport: { height: 390, flexGrow: 0 }, timeBody: { flexDirection: 'row' }, timeGutter: { width: GUTTER, backgroundColor: colors.surface },
-  hourLabel: { position: 'absolute', left: 0, right: 0, color: colors.muted, fontSize: 9, lineHeight: 13, paddingTop: 3, paddingRight: 4, textAlign: 'right' },
+  hoursViewport: { height: 416, flexGrow: 0 }, timeBody: { flexDirection: 'row' }, timeGutter: { width: GUTTER, backgroundColor: colors.surface },
+  hourLabel: { position: 'absolute', left: 0, right: 0, color: colors.muted, fontSize: 10, lineHeight: 14, paddingTop: 4, paddingRight: 5, textAlign: 'right' },
   hourLine: { position: 'absolute', height: 1, backgroundColor: colors.line, left: 0 }, dayColumn: { position: 'absolute', top: 0, borderLeftWidth: 1, borderLeftColor: colors.line },
-  eventBlock: { borderLeftWidth: 3, borderRadius: 5, paddingVertical: 3, paddingHorizontal: 3, overflow: 'hidden' },
-  compactBlock: { minHeight: 44, justifyContent: 'center' }, blockTitle: { fontSize: 10, lineHeight: 13, fontWeight: '600' },
-  cancelled: { textDecorationLine: 'line-through' }, overviewHint: { color: colors.muted, fontSize: 11, lineHeight: 17, padding: 11, borderTopWidth: 1, borderTopColor: colors.line },
+  eventBlock: { borderLeftWidth: 4, borderRadius: 8, paddingVertical: 4, paddingHorizontal: 6, overflow: 'hidden' },
+  compactBlock: { minHeight: 44, justifyContent: 'center' }, blockTitle: { fontSize: 12, lineHeight: 16, fontWeight: '600' }, narrowBlockTitle: { fontSize: 11, lineHeight: 15 },
+  cancelled: { textDecorationLine: 'line-through' },
 });

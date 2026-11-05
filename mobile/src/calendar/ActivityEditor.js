@@ -120,10 +120,20 @@ export function ActivityEditor(props) {
   return <EditorBody key={`${props.event?.id ?? 'new'}:${dateIdentity(props.date)}`} {...props} />;
 }
 
-function EditorBody({ event = null, date, kids = [], preferences, language = 'en', busy, disabled = false, error, onSave, onCancel, onDirtyChange, scope }) {
+function EditorBody({ event = null, date, initialDraft, kids = [], preferences, language = 'en', busy, disabled = false, error, onSave, onCancel, onDirtyChange, scope }) {
   const { colors, s } = useEditorStyles();
   const t = COPY[language] || COPY.en;
-  const [form, setForm] = useState(() => model.initialEventForm(event, date, preferences));
+  const [form, setForm] = useState(() => {
+    const seed = !event && initialDraft && typeof initialDraft === 'object' && !Array.isArray(initialDraft) ? initialDraft : null;
+    const seededDate = typeof seed?.startDate === 'string' && Number.isFinite(calendar.parseDateKey(seed.startDate).getTime()) ? seed.startDate : date;
+    const initial = model.initialEventForm(event, seededDate, preferences);
+    // A proposed window seeds a new form; it is never an existing activity or
+    // a source of IDs, recurrence or other activity metadata.
+    if (seed) for (const [source, target] of [['startDate', 'date'], ['endDate', 'endDate'], ['start', 'start'], ['end', 'end']]) {
+      if (typeof seed[source] === 'string') initial[target] = seed[source];
+    }
+    return initial;
+  });
   const initialForm = useRef(form);
   const [errors, setErrors] = useState({});
   const [failure, setFailure] = useState('');

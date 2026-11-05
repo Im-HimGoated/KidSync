@@ -6,9 +6,9 @@ import CalendarPreview from '../ui/CalendarPreview';
 import { AppearanceSheet } from '../ui/AppearanceSettings';
 
 const FAMILY_PHOTOS = [
-  require('../../../assets/kidssync-family-park-signin.jpg'),
-  require('../../../assets/kidssync-family-entryway-signin.jpg'),
-  require('../../../assets/kidssync-family-table-signin.jpg')
+  require('../../assets/kidssync-family-park-signin.jpg'),
+  require('../../assets/kidssync-family-entryway-signin.jpg'),
+  require('../../assets/kidssync-family-table-signin.jpg')
 ];
 
 export const welcomeCopy = {
@@ -17,7 +17,8 @@ export const welcomeCopy = {
     tagline: 'Every kid. Every pickup.',
     headlineAccent: 'One clear plan.',
     description: 'Activities, pickup adults, and what to bring. The little details that keep a family in sync.',
-    setupHint: '10-minute calendar preview · No account needed',
+    setupHint: '5 optional questions · Review before saving',
+    preview: 'Try the calendar without an account',
     personalize: 'Make your calendar yours',
     family: 'Your family, in sync',
     pause: 'Pause family photos',
@@ -36,7 +37,8 @@ export const welcomeCopy = {
     tagline: '每个孩子，每次接送。',
     headlineAccent: '一份清晰的安排。',
     description: '活动、接送人、携带物品。让这些小细节，帮全家一起安排好生活。',
-    setupHint: '10 分钟日历体验 · 无需账户',
+    setupHint: '5 个可选问题 · 保存前可核对',
+    preview: '无需账户，先体验日历',
     personalize: '让日历更适合你',
     family: '\u5bb6\u4eba\u7684\u65f6\u5149\uff0c\u4e00\u8d77\u5b89\u6392',
     pause: '\u6682\u505c\u5bb6\u5ead\u7167\u7247',
@@ -51,7 +53,7 @@ export const welcomeCopy = {
   }
 };
 
-export default function WelcomeScreen({ language, onSignIn, onGetStarted, onPersonalize, onOpenWebsite, error }) {
+export default function WelcomeScreen({ language, onSignIn, onGetStarted, onPreview, onPersonalize, onOpenWebsite, error }) {
   const t = welcomeCopy[language] || welcomeCopy.en;
   const { colors, available } = useAppearance(), styles = useThemeStyles(createStyles);
   const { height, fontScale } = useWindowDimensions();
@@ -108,6 +110,7 @@ export default function WelcomeScreen({ language, onSignIn, onGetStarted, onPers
         {!!onPersonalize && <Pressable accessibilityRole="button" onPress={onPersonalize} style={styles.personalize}><Text style={styles.signInText}>{t.personalize}</Text><ArrowRight size={16} color={colors.primary} aria-hidden={true} /></Pressable>}
         <Pressable accessibilityRole="button" disabled={!available} onPress={() => setAppearanceOpen(true)} style={styles.appearance}><Palette size={18} color={colors.primary} /><Text style={styles.signInText}>{t.appearance}</Text></Pressable>
         <CalendarPreview language={language} compact={compact} showHandoff />
+        {!!onPreview && <Pressable accessibilityRole="button" onPress={onPreview} style={styles.explore}><Text style={styles.signInText}>{t.preview}</Text><ArrowRight size={16} color={colors.primary} /></Pressable>}
         <Pressable accessibilityRole="link" onPress={onOpenWebsite} style={styles.explore}>
           <Text style={styles.link}>{t.explore}</Text>
           <ExternalLink size={15} color={colors.muted} aria-hidden={true} />
