@@ -212,7 +212,7 @@ test('Home destinations leave a previously selected shared calendar and owner Sh
   await app.screen('FamilyScreen').onOpenSharedCalendar(shared);
   app.screen('HomeScreen').onOpenCalendar();
   assert.equal(app.screen('CalendarScreen').calendarId, 'family');
-  assert.equal(app.screen('CalendarScreen').focusDate, '2026-11-04');
+  assert.equal(app.screen('CalendarScreen').focusDate, calendarTools.dateKey(new Date()));
   assert.equal(app.screen('CalendarScreen').focusTime, null);
   app.screen('CalendarScreen').onShareCalendar({ id: 'family' });
   assert.equal(app.screen('FamilyScreen').peopleRequest, 1);

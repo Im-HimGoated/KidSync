@@ -6,6 +6,8 @@ const {changes,peopleFor,adultConflicts,comparisonRuns}=require('../assets/famil
 const {planMove,conflictDetails,date,shift}=require('../assets/reschedule-review.js');
 const {externalEvents,safeGraphUrl}=require('../assets/external-calendars.js');
 const html=fs.readFileSync(require.resolve('../index.html'),'utf8');
+const dashboardPlanning=fs.readFileSync(require.resolve('../assets/dashboard-planning.js'),'utf8');
+const familyCoordination=fs.readFileSync(require.resolve('../assets/family-coordination.js'),'utf8');
 const event={id:'piano',title:'Piano',child:'Sam',startDate:'2026-11-02',start:'15:00',end:'16:00',recurrence:'weekly',repeatDays:[1,3],repeatInterval:1,repeatUntil:'2026-12-30',status:'confirmed',allDay:false};
 test('comparison includes all affected people without mutating attendees or child profiles',()=>{
   const children=['Sam','Alex'], attendees=['Sam'];
@@ -23,6 +25,12 @@ test('shared commitments span adjacent affected columns without covering unrelat
   assert.deepEqual(comparisonRuns(['Sam','Alex','Pat','Lee'],['Sam','Alex','Lee']),[
     {start:0,length:2,active:true},{start:2,length:1,active:false},{start:3,length:1,active:true}
   ]);
+});
+test('Family Handoff Center is named clearly and opens from the dashboard handoff panel',()=>{
+  assert.match(familyCoordination,/title:'Family Handoff Center'/);
+  assert.match(familyCoordination,/title:'家庭交接中心'/);
+  assert.match(dashboardPlanning,/data-dashboard-action="handoff"/);
+  assert.match(dashboardPlanning,/KidsSyncFamily\?\.open\(false, 'compare'\)/);
 });
 test('change summaries report exact logistics/time differences without unrelated fields',()=>{
   assert.deepEqual(changes(event,{...event,start:'15:30',location:'Park'}),[{key:'start',before:'15:00',after:'15:30'},{key:'location',before:'',after:'Park'}]);

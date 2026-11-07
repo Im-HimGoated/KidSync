@@ -5,17 +5,22 @@ KidsSync uses Supabase Auth and row-level-secured data for schedules, recipient-
 1. Create a Supabase project at https://supabase.com/dashboard.
 2. Open **SQL Editor**, paste the contents of `supabase/schema.sql`, and run it.
 3. Open **Project Settings > API** and copy the Project URL and publishable key.
-4. Put those two public values in `supabase-config.js`:
+4. Put those two public values in `shared/backend/config.js` (the web and React Native apps share this file):
 
    ```js
-   window.KIDSSYNC_SUPABASE = {
+   // Edit the existing config object; retain its browser/CommonJS exports.
+   const config = Object.freeze({
      url: "https://YOUR_PROJECT.supabase.co",
      publishableKey: "sb_publishable_YOUR_KEY"
-   };
+   });
    ```
 
 5. In **Authentication > URL Configuration**, set the Site URL to the deployed KidsSync URL. Add local and preview URLs as redirect URLs while testing.
 6. Redeploy the site. Create an account in KidsSync, then sign in with the same email and password on another device.
+
+The React Native app reuses this project's existing Auth users, tables, RLS,
+and Realtime publication. Do not create a new project or rerun schema setup just
+to add mobile. See `mobile/README.md` for native setup and remaining release work.
 
 The sharing rules are enforced in the database:
 

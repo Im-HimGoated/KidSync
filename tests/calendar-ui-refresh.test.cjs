@@ -8,11 +8,13 @@ const css = readFileSync(resolve(__dirname, '../assets/calendar-ui-refresh.css')
 const worker = readFileSync(resolve(__dirname, '../sw.js'), 'utf8');
 
 test('calendar refresh loads before the final shared mobile layer and is cached', () => {
-  const mobileIndex = html.indexOf('./assets/mobile.css?v=95');
+  const mobileAsset = html.match(/href="(\.\/assets\/mobile\.css\?v=\d+)"/)[1];
+  const mobileIndex = html.indexOf(mobileAsset);
   const refreshIndex = html.indexOf('./assets/calendar-ui-refresh.css?v=1');
   assert.ok(refreshIndex >= 0 && mobileIndex > refreshIndex);
   assert.match(worker, /const CACHE_NAME = "kidssync-shell-v\d+"/);
   assert.match(worker, /\.\/assets\/calendar-ui-refresh\.css\?v=1/);
+  assert.ok(worker.includes(`"${mobileAsset}"`));
 });
 
 test('desktop calendar controls collapse into one compact planning strip', () => {

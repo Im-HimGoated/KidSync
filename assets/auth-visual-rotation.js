@@ -8,28 +8,28 @@
   const slides = [
     {
       src: "./assets/kidssync-auth-family-signin.jpg",
-      position: "center",
+      position: "62% center",
       kicker: "auth.visualKicker",
       title: "auth.visualTitle",
       body: "auth.visualBody"
     },
     {
       src: "./assets/kidssync-family-entryway-signin.jpg",
-      position: "58% center",
+      position: "42% center",
       kicker: "auth.visualEntryKicker",
       title: "auth.visualEntryTitle",
       body: "auth.visualEntryBody"
     },
     {
       src: "./assets/kidssync-family-park-signin.jpg",
-      position: "54% center",
+      position: "50% center",
       kicker: "auth.visualParkKicker",
       title: "auth.visualParkTitle",
       body: "auth.visualParkBody"
     },
     {
       src: "./assets/kidssync-family-table-signin.jpg",
-      position: "56% center",
+      position: "55% center",
       kicker: "auth.visualTableKicker",
       title: "auth.visualTableTitle",
       body: "auth.visualTableBody"

@@ -7,7 +7,9 @@ const worker = fs.readFileSync(require.resolve('../sw.js'), 'utf8');
 const planning = fs.readFileSync(require.resolve('../assets/dashboard-planning.js'), 'utf8');
 
 test('the refinement is available offline and preserves the final mobile stylesheet', () => {
-  assert.match(html, /ui-refinement\.css\?v=1">\s*<link rel="stylesheet" href="\.\/assets\/mobile\.css\?v=\d+">\s*<\/head>/);
+  const mobileAsset = html.match(/href="(\.\/assets\/mobile\.css\?v=\d+)">\s*<\/head>/);
+  assert(mobileAsset, 'Shared mobile styles must remain last');
+  assert(html.indexOf('./assets/ui-refinement.css?v=1') < html.indexOf(mobileAsset[1]));
   assert.match(worker, /"\.\/assets\/ui-refinement\.css\?v=1"/);
 });
 

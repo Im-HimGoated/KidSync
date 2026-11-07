@@ -26,7 +26,7 @@ test('photo rotation respects visibility, motion preferences, and offline delive
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.auth-visual-pause \{ display: none; \}/);
   assert.match(script, /function prepareNextSlide\(\)/);
   assert.match(script, /if \(!canRotate\(\)\) return;\s+prepareNextSlide\(\)/);
-  for (const asset of ['./assets/auth-visual-rotation.js?v=1', './assets/kidssync-auth-family-signin.jpg']) assert(worker.includes(`"${asset}"`), asset);
+  for (const asset of ['./assets/auth-visual-rotation.js?v=2', './assets/kidssync-auth-family-signin.jpg']) assert(worker.includes(`"${asset}"`), asset);
   const shell = worker.slice(worker.indexOf('const APP_SHELL'), worker.indexOf('const LAZY_ASSETS'));
   const lazy = worker.slice(worker.indexOf('const LAZY_ASSETS'), worker.indexOf('self.addEventListener("install"'));
   for (const asset of [

@@ -7,6 +7,7 @@ const crypto = require('node:crypto');
 const root = path.resolve(__dirname, '..');
 const app = fs.readFileSync(path.join(root, 'mobile/src/App.js'), 'utf8');
 const welcome = fs.readFileSync(path.join(root, 'mobile/src/screens/WelcomeScreen.js'), 'utf8');
+const signIn = fs.readFileSync(path.join(root, 'mobile/src/screens/SignInScreen.js'), 'utf8');
 const preview = fs.readFileSync(path.join(root, 'mobile/src/ui/CalendarPreview.js'), 'utf8');
 
 test('native entry defaults to welcome after auth restores, and existing sessions bypass it', () => {
@@ -42,6 +43,13 @@ test('welcome is scrollable and uses bundled imagery with accessible actions', (
   const imagePath = welcome.match(/require\('([^']+\.jpg)'\)/)[1];
   assert.ok(fs.existsSync(path.resolve(root, 'mobile/src/screens', imagePath)));
   assert.match(app, /catch \{ setError\(t.linkFailed\); return false; \}/);
+});
+
+test('welcome and sign-in preserve a natural family-photo crop on short phones', () => {
+  assert.match(welcome, /hero: \{ width: '100%', aspectRatio: 1\.55, minHeight: 230, maxHeight: 320/);
+  assert.match(welcome, /heroCompact: \{ minHeight: 210, maxHeight: 240, aspectRatio: 1\.65/);
+  assert.match(signIn, /hero: \{ width: '100%', aspectRatio: 1\.55, minHeight: 230, maxHeight: 300/);
+  assert.match(signIn, /compactHero: \{ minHeight: 210, maxHeight: 230, aspectRatio: 1\.7/);
 });
 
 test('welcome never creates sample accounts, children, or database rows', () => {
@@ -112,7 +120,6 @@ test('mobile welcome explains family-specific benefits and keeps entry actions o
 });
 
 test('mobile welcome and sign-in use four genuinely different image files', () => {
-  const signIn = fs.readFileSync(path.join(root, 'mobile/src/screens/SignInScreen.js'), 'utf8');
   const imagePaths = [...welcome.matchAll(/require\('([^']+\.jpg)'\)/g), ...signIn.matchAll(/require\('([^']+\.jpg)'\)/g)]
     .map(match => path.resolve(root, 'mobile/src/screens', match[1]));
   assert.equal(imagePaths.length, 4);

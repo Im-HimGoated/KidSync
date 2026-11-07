@@ -85,7 +85,7 @@
     en: {
       today: 'Today’s plan', todayHint: 'The whole family, in time order.', attention: 'Needs attention', attentionHint: 'Overlaps in the next 7 days and deadlines within 48 hours.',
       priority: 'Important plans', priorityHint: 'High-importance events and deadlines in the next 7 days.', prep: 'Bring & prepare', prepHint: 'Notes and packing lists for the next 48 hours.',
-      handoffs: 'Family handoffs', handoffsHint: 'Who is listed as responsible over the next 7 days.', special: 'Dates to look forward to', specialHint: 'Holidays, birthdays, and trips in the next 90 days.',
+      handoffs: 'Family Handoff Center', handoffsHint: 'See who is responsible, confirm pickups, and review family changes.', special: 'Dates to look forward to', specialHint: 'Holidays, birthdays, and trips in the next 90 days.',
       outlook: 'Four-week outlook', outlookHint: 'This calendar week and the next three. Overlapping busy time is counted once.',
       scope: 'Current calendar · all family members · calendar filters do not apply', todayEmpty: 'A little room to breathe. Nothing is scheduled for today.',
       todayDone: 'All of today’s timed plans are finished.', progressOne: '{done} of 1 entry finished', progress: '{done} of {total} entries finished', occupied: '{time} occupied',
@@ -95,7 +95,7 @@
       deadline: 'Deadline', important: 'High importance', priorityEmpty: 'No priority plans this week.', priorityEmptyHint: 'Set an event’s importance to High to keep it here.',
       prepEmpty: 'No preparation notes for the next 48 hours.', prepEmptyHint: 'Add items or notes to an event to see them here.', bring: 'Bring', notes: 'Notes', checklist: 'Open notes & checklist',
       noPerson: 'No person listed', unassigned: '{count} plans have no responsible person listed. Add one when a handoff is useful.',
-      noHandoffs: 'No handoff assignments this week.', assignmentHint: 'Use the Responsible adult field in an event to coordinate pickups and care.',
+      noHandoffs: 'No handoff assignments this week.', assignmentHint: 'Use the Responsible adult field in an event to coordinate pickups and care.', openHandoff: 'Open Handoff Center',
       planOne: '1 plan', plans: '{count} plans', noSpecial: 'No special dates in the next 90 days.', thisWeek: 'This week', nextWeek: 'Next week', weekNumber: 'In {count} weeks',
       eventDetails: 'View {title}', begins: 'Begins {time}', ends: 'Ends {time}', holiday: 'Holiday', birthday: 'Birthday', trip: 'Trip',
       allFamily: 'Family', noBusy: 'No timed plans', scopeChanged: 'The calendar changed. Choose an event from the refreshed dashboard.',
@@ -105,7 +105,7 @@
     zh: {
       today: '今天的安排', todayHint: '按时间查看全家人的日程。', attention: '需要留意', attentionHint: '未来 7 天的时间冲突，以及 48 小时内的截止事项。',
       priority: '重要安排', priorityHint: '未来 7 天内的高重要性日程和截止事项。', prep: '携带与准备', prepHint: '未来 48 小时内的备注和打包清单。',
-      handoffs: '家庭接送与分工', handoffsHint: '查看未来 7 天日程中填写的负责人。', special: '值得期待的日子', specialHint: '未来 90 天的节假日、生日和旅行。',
+      handoffs: '家庭交接中心', handoffsHint: '查看负责人、确认接送，并核对家庭日程变更。', special: '值得期待的日子', specialHint: '未来 90 天的节假日、生日和旅行。',
       outlook: '未来四周概览', outlookHint: '本周及接下来三周。重叠的忙碌时间只计算一次。',
       scope: '当前日历 · 所有家庭成员 · 不受日历筛选条件影响', todayEmpty: '今天暂无安排，给自己留一点轻松的空间。',
       todayDone: '今天的定时安排均已结束。', progressOne: '已结束 {done} / 1 项日程', progress: '已结束 {done} / {total} 项日程', occupied: '占用 {time}',
@@ -115,7 +115,7 @@
       deadline: '截止事项', important: '高重要性', priorityEmpty: '本周暂无重要安排。', priorityEmptyHint: '将日程的重要性设为“高”，即可在这里查看。',
       prepEmpty: '未来 48 小时暂无准备备注。', prepEmptyHint: '在日程中添加物品或备注，即可在这里查看。', bring: '携带', notes: '备注', checklist: '打开备注与打包清单',
       noPerson: '尚未填写负责人', unassigned: '{count} 项安排未填写负责人。如需接送或交接，可在日程中添加。',
-      noHandoffs: '本周暂无交接分工。', assignmentHint: '在日程的“负责成人”一栏填写姓名，协调接送与照料。',
+      noHandoffs: '本周暂无交接分工。', assignmentHint: '在日程的“负责成人”一栏填写姓名，协调接送与照料。', openHandoff: '打开交接中心',
       planOne: '1 项安排', plans: '{count} 项安排', noSpecial: '未来 90 天暂无特别日期。', thisWeek: '本周', nextWeek: '下周', weekNumber: '{count} 周后',
       eventDetails: '查看{title}', begins: '{time}开始', ends: '{time}结束', holiday: '节假日', birthday: '生日', trip: '旅行',
       allFamily: '全家', noBusy: '没有定时安排', scopeChanged: '日历已切换，请从更新后的概览中选择日程。',
@@ -202,7 +202,8 @@
   function renderHandoffs(model) {
     const assigned = list(model.handoffs, group => `<article class="dashboard-handoff-person"><div class="dashboard-handoff-heading"><strong>${esc(group.person)}</strong><span>${esc(planCount(group.events.length))}</span></div>${list(group.events, event => eventRow(event), 2)}</article>`, 3);
     const unassigned = model.unassigned.length ? `<details class="dashboard-planning-more" data-dashboard-more="unassigned"><summary>${esc(text('noPerson'))} · ${model.unassigned.length}</summary><p class="dashboard-plan-note">${esc(text('unassigned', { count: model.unassigned.length }))}</p>${list(model.unassigned, event => eventRow(event), 3)}</details>` : '';
-    setPanel('handoffs', `${assigned || empty('noHandoffs', 'assignmentHint')}${unassigned}`, planCount(model.near.filter(event => !event.isBuiltInHoliday && !event.externalSource).length), model.hasPlans);
+    const action = `<div class="dashboard-plan-actions"><button class="small-btn" type="button" data-dashboard-action="handoff">${esc(text('openHandoff'))}</button></div>`;
+    setPanel('handoffs', `${assigned || empty('noHandoffs', 'assignmentHint')}${unassigned}${action}`, planCount(model.near.filter(event => !event.isBuiltInHoliday && !event.externalSource).length), model.hasPlans);
   }
   function renderSpecial(model, now) {
     const body = list(model.special, event => {
@@ -245,6 +246,7 @@
     else if (button.dataset.dashboardAction === 'today') openDate(new Date(), 'today');
     else if (button.dataset.dashboardAction === 'find') window.KidsSyncScheduler.open('find');
     else if (button.dataset.dashboardAction === 'quick') window.KidsSyncScheduler.open('quick');
+    else if (button.dataset.dashboardAction === 'handoff') window.KidsSyncFamily?.open(false, 'compare');
   });
   window.KidsSyncDashboard = { refresh, engine: pure };
   refresh();

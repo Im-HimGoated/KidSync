@@ -283,6 +283,56 @@
   #activityDialog #activityForm .form-actions { position: static; }
 }
 
+/* Touch-sized controls also apply to tablets and a phone turned sideways. */
+@media (max-width: 900px) {
+  #appShell.is-dashboard-view .sidebar-date-controls { display: none; }
+  #appShell :is(.view-option, .language-option, .calendar-workspace select,
+    .planner-options-toggle, .compact-toolbar-action, .calendar-insights-warning,
+    .quick-time-field select, .quick-side-toggle) { min-height: 44px; }
+  #appShell :is(.compact-toolbar-action, .planner-options-toggle) { min-width: 44px; }
+  #appShell .calendar-pulse :is(.quick-time-field select, .quick-side-toggle) { min-height: 44px; }
+  #appShell .date-ribbon { grid-template-columns: 44px minmax(0, 1fr) 44px; }
+  #appShell .date-ribbon-arrow { min-width: 44px; }
+  #appShell .more-actions-menu .more-actions-group :is(button, summary),
+  #dashboardPage .dashboard-section-links button,
+  #dashboardPage .dashboard-section-menu > summary { min-height: 44px; }
+
+  dialog { max-width: calc(100% - 16px); max-height: calc(100dvh - 16px); overscroll-behavior: contain; }
+  dialog .modal-header { position: sticky; top: 0; z-index: 10; gap: 8px; padding: 10px 14px; background: var(--panel); }
+  dialog .modal-header h2 { min-width: 0; overflow-wrap: anywhere; }
+  dialog .close-btn { flex: 0 0 44px; min-width: 44px; min-height: 44px; }
+  dialog :is(.primary-btn, .ghost-btn, .small-btn, .danger-btn, .event-attendee-option) { min-height: 44px; }
+  dialog :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]) { min-height: 44px; font-size: 16px; max-width: 100%; }
+  #settingsDialog .setting-row, #activityForm .check-field,
+  #activityForm .event-template-strip > summary { min-height: 44px; }
+  #activityForm .game-scan-heading { min-height: 44px; }
+  #activityForm .game-scan-text > summary { display: flex; align-items: center; gap: 8px; min-height: 44px; list-style: none; }
+  #activityForm .game-scan-text > summary::before { content: '+'; font-size: 18px; }
+  #activityForm .game-scan-text[open] > summary::before { content: '−'; }
+  #activityForm .game-scan-text > summary::-webkit-details-marker { display: none; }
+  #activityDialog form, #activityDialog :is(label, fieldset, .field-grid) { min-width: 0; }
+  #activityDialog .event-color-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(44px, 1fr)); gap: 8px; }
+  #activityDialog .event-color-swatch { width: 44px; height: 44px; justify-self: center; }
+  #activityDialog .event-attendee-option { position: relative; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+  #activityDialog .event-attendee-option > input { position: absolute; width: 1px; height: 1px; min-width: 0; min-height: 0; clip-path: inset(50%); }
+  #activityDialog .event-attendee-option:focus-within { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+  #welcomeScreen .welcome-wordmark { min-height: 44px; }
+  #welcomeScreen .welcome-nav .welcome-nav-actions .language-switch { flex: 0 0 96px; width: 96px; min-width: 96px; height: 48px; padding: 1px; }
+  #welcomeScreen .welcome-nav .language-option { min-width: 44px; min-height: 44px; }
+  #welcomeScreen .welcome-sample-filters button { min-height: 44px; }
+  #authScreen :is(.auth-back-btn, .auth-tab, .auth-link-btn, .auth-preview-btn, .auth-password-toggle, .auth-visual-dot, .auth-visual-pause) { min-height: 44px; }
+  #authScreen :is(.auth-visual-dot, .auth-visual-pause) { width: 44px; height: 44px; }
+}
+
+/* Keep the close button reachable when landscape or a keyboard reduces height. */
+@media (max-width: 1000px) and (max-height: 500px) {
+  #activityDialog { max-height: calc(100dvh - 12px); margin-block: 6px; }
+  #activityDialog .modal-header { position: sticky; top: 0; z-index: 20; background: var(--panel); }
+  #activityDialog #activityForm .form-actions { position: static; }
+  #activityForm .game-scan-panel:not([open]) { padding-block: 0; }
+}
+
 @media (hover: none) {
   #appShell button:hover, #appShell summary:hover, dialog button:hover { transform: none; }
   .event-color-swatch:hover { transform: none; }

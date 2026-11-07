@@ -70,6 +70,36 @@ test('mobile assets are loaded last and included in the offline shell', () => {
   assert.match(html, /"miniCalendar.mobileBrowse": "日期与日历工具"/);
 });
 
+test('phone and tablet controls share comfortable targets without stretching switches', () => {
+  const touch = css.slice(css.indexOf('/* Touch-sized controls'), css.indexOf('/* Keep the close button'));
+  assert.match(touch, /@media \(max-width: 900px\)/);
+  assert.match(touch, /#appShell\.is-dashboard-view \.sidebar-date-controls \{ display: none; \}/);
+  assert.match(touch, /\.dashboard-section-links button,[\s\S]*?min-height: 44px/);
+  assert.match(touch, /#settingsDialog \.setting-row,[\s\S]*?min-height: 44px/);
+  assert.match(touch, /\.calendar-pulse :is\(\.quick-time-field select, \.quick-side-toggle\) \{ min-height: 44px/);
+  assert.doesNotMatch(touch, /\.setting-toggle\s*\{[^}]*height: 44px/);
+});
+
+test('narrow welcome and sign-in screens keep full-sized language and account controls', () => {
+  assert.match(css, /#welcomeScreen \.welcome-nav \.welcome-nav-actions \.language-switch \{[^}]*flex: 0 0 96px/);
+  assert.match(css, /#welcomeScreen \.welcome-nav \.language-option \{ min-width: 44px; min-height: 44px/);
+  assert.match(css, /#authScreen :is\([^}]*\.auth-link-btn[^}]*\.auth-password-toggle[^}]*\) \{ min-height: 44px/);
+});
+
+test('tablet color and attendee controls cannot stretch the event editor horizontally', () => {
+  assert.match(css, /#activityDialog \.event-color-options \{[^}]*repeat\(auto-fit, minmax\(44px, 1fr\)\)/);
+  assert.match(css, /#activityDialog \.event-attendee-option \{ position: relative; min-width: 0; max-width: 100%/);
+  assert.match(css, /#activityDialog \.event-attendee-option > input \{ position: absolute; width: 1px; height: 1px/);
+  assert.match(css, /#activityDialog \.event-attendee-option:focus-within \{ outline: 2px/);
+});
+
+test('short landscape dialogs retain a reachable header and a non-obstructing footer', () => {
+  const landscape = css.slice(css.indexOf('/* Keep the close button'));
+  assert.match(landscape, /@media \(max-width: 1000px\) and \(max-height: 500px\)/);
+  assert.match(landscape, /#activityDialog \.modal-header \{ position: sticky; top: 0/);
+  assert.match(landscape, /#activityDialog #activityForm \.form-actions \{ position: static/);
+});
+
 test('mobile layout keeps browser zoom, large inputs, and touch targets', () => {
   const viewport = html.match(/<meta name="viewport" content="([^"]+)"/)[1];
   assert.ok(viewport.includes('viewport-fit=cover'));
