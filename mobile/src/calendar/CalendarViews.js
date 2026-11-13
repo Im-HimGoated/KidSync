@@ -380,10 +380,14 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
         <ScrollView ref={horizontal} horizontal nestedScrollEnabled {...horizontalProps(horizontal)} scrollEnabled={!dayOnly}
           showsHorizontalScrollIndicator={!dayOnly} directionalLockEnabled style={s.daysViewport}>
           <View style={{ width: daysWidth, height: canvasHeight }}>
-            {Array.from({ length: 25 }, (_, hour) => <View accessible={false} key={hour}
+            {!dayOnly && <View pointerEvents="none" style={[s.dayColumn, s.currentColumn, {
+              left: dates.findIndex(day => calendar.dateKey(day) === selectedKey) * colWidth,
+              width: colWidth, height: canvasHeight,
+            }]} />}
+            {Array.from({ length: 25 }, (_, hour) => <View accessible={false} pointerEvents="none" key={hour}
               style={[s.hourLine, { top: hour * HOUR_HEIGHT, width: daysWidth }]} />)}
             {dates.map((day, index) => <View key={calendar.dateKey(day)} pointerEvents="box-none"
-              style={[s.dayColumn, { left: index * colWidth, width: colWidth, height: canvasHeight }, calendar.dateKey(day) === selectedKey && s.currentColumn]}>
+              style={[s.dayColumn, { left: index * colWidth, width: colWidth, height: canvasHeight }]}>
               {columns[index].timed.map((item, j) => {
                 const laneWidth = colWidth / Math.max(1, item.lanes);
                 return <EventBlock key={`${item.event.id ?? 'event'}:${item.occurrenceStartDate || ''}:${j}`} event={item.event} date={day}
