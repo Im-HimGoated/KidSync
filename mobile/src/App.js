@@ -4,7 +4,7 @@ import {
   Dimensions, Linking, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { CalendarDays, Home, UsersRound } from 'lucide-react-native';
+import { CalendarDays, CircleUserRound, Home, UsersRound } from 'lucide-react-native';
 import { supabase } from './lib/supabase';
 import schedules from '../../shared/backend/schedules';
 import WelcomeScreen from './screens/WelcomeScreen';
@@ -29,6 +29,7 @@ import AccountSettings from './ui/AccountSettings';
 import useDeviceLanguage from './ui/use-device-language';
 import useScheduleSync from './lib/use-schedule-sync';
 import SyncStatus from './ui/SyncStatus';
+import WeeklyBrief from './ui/WeeklyBrief';
 import { AppearanceProvider, useAppearance } from './ui/AppearanceContext';
 import useLocalReminders from './lib/use-local-reminders';
 import ReminderSettings, { reminderCopy } from './ui/ReminderSettings';
@@ -56,7 +57,7 @@ const copy = {
     trialSaveFailed: 'Could not save the preview to your account. Your plans are still on this device; retry when connected.',
     trialConflict: 'Your account calendar changed. Retry to save alongside its latest plans.',
     trialMarkFailed: 'The calendar is saved to your account, but this device could not mark it complete. Retrying is safe and will not create a duplicate.',
-    home: 'Home', family: 'Family', account: 'Account', accountSettings: 'Calendar preferences', close: 'Close', signedInAs: 'Signed in as'
+    home: 'Home', family: 'Family', account: 'You', accountA11y: 'Account', accountSettings: 'Calendar preferences', close: 'Close', signedInAs: 'Signed in as'
   },
   zh: {
     signIn: '\u767b\u5f55', email: '\u90ae\u7bb1', password: '\u5bc6\u7801', signOut: '\u9000\u51fa',
@@ -75,7 +76,7 @@ const copy = {
     trialSaveFailed: '无法将体验日历保存到账户。计划仍在此设备上，请联网后重试。',
     trialConflict: '账户日历已更改。请重试，在最新安排旁保存体验日历。',
     trialMarkFailed: '日历已保存到账户，但此设备无法标记为完成。可以安全重试，不会重复创建。',
-    home: '首页', family: '家庭', account: '账户', accountSettings: '日历偏好', close: '关闭', signedInAs: '当前账户'
+    home: '首页', family: '家庭', account: '我的', accountA11y: '账户', accountSettings: '日历偏好', close: '关闭', signedInAs: '当前账户'
   }
 };
 
@@ -83,12 +84,12 @@ function BottomNavigation({ language, active, onChange, familyPendingCount = 0 }
   const t = copy[language], { colors } = useAppearance();
   return <View accessibilityRole="tablist" style={[styles.bottomNav, { backgroundColor: colors.surface, borderTopColor: colors.line }]}>
     {[{ key: 'home', label: t.home, icon: Home }, { key: 'calendar', label: t.calendar, icon: CalendarDays },
-      { key: 'family', label: t.family, icon: UsersRound, count: familyPendingCount }].map(item => {
+      { key: 'family', label: t.family, icon: UsersRound, count: familyPendingCount },
+      { key: 'account', label: t.account, accessibilityLabel: t.accountA11y, icon: CircleUserRound }].map(item => {
       const Icon = item.icon, selected = active === item.key;
-      return <Pressable key={item.key} accessibilityRole="tab" accessibilityState={{ selected }} accessibilityLabel={item.label}
-        onPress={() => onChange(item.key)} style={({ pressed }) => [styles.bottomTab, selected && styles.bottomTabSelected, pressed && { opacity: 0.55 }]}>
-        <View style={styles.bottomIcon}>
-          {selected && <View style={[styles.bottomIndicator, { backgroundColor: colors.primary }]} />}
+      return <Pressable key={item.key} accessibilityRole="tab" accessibilityState={{ selected }} accessibilityLabel={item.accessibilityLabel || item.label}
+        onPress={() => onChange(item.key)} style={({ pressed }) => [styles.bottomTab, pressed && { opacity: 0.55 }]}>
+        <View style={[styles.bottomIcon, selected && styles.bottomIndicator, selected && { backgroundColor: colors.primarySoft }]}>
           <Icon size={21} color={selected ? colors.primary : colors.muted} strokeWidth={selected ? 2.4 : 1.8} />
           {!!item.count && <View accessibilityLabel={`${item.count} pending`} style={[styles.bottomBadge, { backgroundColor: colors.error, borderColor: colors.surface }]}><Text style={styles.bottomBadgeText}>{item.count > 9 ? '9+' : item.count}</Text></View>}
         </View>
@@ -113,6 +114,7 @@ function Workspace() {
   const [sharedSource, setSharedSource] = useState(null);
   const [sharedAccess, setSharedAccess] = useState(null);
   const [entryScreen, setEntryScreen] = useState('welcome');
+  const [signInFromSignUp, setSignInFromSignUp] = useState(false);
   const [workspaceView, setWorkspaceView] = useState('home');
   const [familyPendingCount, setFamilyPendingCount] = useState(0);
   const [familyPeopleRequest, setFamilyPeopleRequest] = useState(0);
@@ -124,6 +126,7 @@ function Workspace() {
   const [accountOpen, setAccountOpen] = useState(false);
   const [remindersOpen, setRemindersOpen] = useState(false);
   const [previewDraftOpen, setPreviewDraftOpen] = useState(false);
+  const [syncReviewOpen, setSyncReviewOpen] = useState(false);
   const [onboardingInitial, setOnboardingInitial] = useState(null);
   const [pendingSetup, setPendingSetup] = useState(null);
   const [preferencesUser, setPreferencesUser] = useState(null);
@@ -361,7 +364,11 @@ function Workspace() {
         setPreferencesUser(saved ? userId : null);
         setAccountPreferences({ userId, value: saved || preferences.DEFAULTS });
         if (pendingSetup) setPendingSetup(null);
-      } catch { if (active) setPreferenceError(true); }
+      } catch {
+        if (!active) return;
+        setAccountPreferences({ userId, value: preferences.DEFAULTS });
+        setPreferenceError(true);
+      }
     })();
     return () => { active = false; };
   }, [session?.user.id, pendingSetup, preferenceAttempt]);
@@ -394,9 +401,10 @@ function Workspace() {
     setError(''); setEntryScreen('onboarding');
   }
 
-  async function beginSignIn() {
+  async function beginSignIn(fromSignUp = false) {
     try { setPendingSetup(await preferenceStore.readPending()); }
     catch { setPendingSetup(null); }
+    setSignInFromSignUp(fromSignUp === true);
     setPassword(''); setError(''); setEntryScreen('signin');
   }
 
@@ -440,6 +448,7 @@ function Workspace() {
     setAccountOpen(false);
     setRemindersOpen(false);
     setPreviewDraftOpen(false);
+    setSyncReviewOpen(false);
     setError('');
     if (!session?.user.id) { supabase.auth.stopAutoRefresh(); return; }
     setEntryScreen('welcome');
@@ -517,23 +526,28 @@ function Workspace() {
   const selectedCalendarOwnerId = calendarOwnerId || session?.user.id || null;
   const sharedSelected = !!sharedEntry && selectedCalendarOwnerId === actorSharedAccess.ownerId && selectedCalendarId === actorSharedAccess.calendarId;
   const activePreferences = preferences.forAccount(accountPreferences, session?.user.id);
+  const briefCached = ['OFFLINE', 'ERROR', 'STORAGE_ERROR'].includes(status);
+  const briefReady = loaded && accountPreferences?.userId === session?.user.id
+    && (status === 'SUBSCRIBED' || (!!snapshot && (briefCached || status === 'PENDING' || status === 'CONFLICT')));
+  const openOwnerCalendar = (date, time) => {
+    selectOwnerCalendar(calendar?.id || null);
+    requestCalendarFocus(date, time);
+    setWorkspaceView('calendar');
+  };
   const accountPreview = session?.user.id && trial.data
     && (!trial.data.claimOwner || trial.data.claimOwner === session.user.id)
     && (!trial.data.claimedBy || trial.data.claimedBy === session.user.id) ? trial.data : null;
 
   return <AppearanceProvider accountId={session?.user.id || null}>{appearance => <SafeAreaView style={[styles.page, { backgroundColor: appearance.colors.page }]}>
-    <View style={[styles.appHeader, { backgroundColor: appearance.colors.surface, borderBottomColor: appearance.colors.line }]}>
+    <View style={[styles.appHeader, session && styles.signedInHeader, { backgroundColor: appearance.colors.surface, borderBottomColor: appearance.colors.line }]}>
       <View style={styles.brand}>
-        <Image source={require('../../assets/kidssync-app-icon-192.png')} style={styles.logo} />
-        <Text style={[styles.title, { color: appearance.colors.ink }]}>KidsSync</Text>
+        <Image source={require('../../assets/kidssync-app-icon-192.png')} style={[styles.logo, session && styles.signedInLogo]} />
+        <Text style={[styles.title, session && styles.signedInTitle, { color: appearance.colors.ink }]}>KidsSync</Text>
       </View>
-      <View style={styles.headerActions}><Pressable accessibilityRole="button" accessibilityLabel={language === 'en' ? 'Switch to Chinese' : 'Switch to English'}
+      {!session && <View style={styles.headerActions}><Pressable accessibilityRole="button" accessibilityLabel={language === 'en' ? 'Switch to Chinese' : 'Switch to English'}
           onPress={() => setLanguage(language === 'en' ? 'zh' : 'en')} style={styles.languageButton}>
           <Text style={[styles.languageText, { color: appearance.colors.primary }]}>{language === 'en' ? '\u4e2d\u6587' : 'EN'}</Text>
-        </Pressable>
-        {session && <Pressable accessibilityRole="button" accessibilityLabel={t.account} onPress={() => setAccountOpen(true)} style={({ pressed }) => [styles.avatarButton, { backgroundColor: appearance.colors.primarySoft, borderColor: appearance.colors.line }, pressed && { opacity: 0.55 }]}>
-          <Text style={[styles.avatarText, { color: appearance.colors.primary }]}>{session.user.email?.trim()?.[0]?.toUpperCase() || 'K'}</Text>
-        </Pressable>}</View>
+        </Pressable></View>}
     </View>
     {booting ? <ActivityIndicator accessibilityLabel={t.loading} color={appearance.colors.primary} style={styles.loader} /> : entryScreen === 'personalize' && trial.data && !trial.data.claimedBy ?
       <PersonalizeCalendarScreen language={language} data={trial.data} signedIn={!!session} error={trial.error || (trialImportError ? 'saveFailed' : '')}
@@ -547,14 +561,15 @@ function Workspace() {
         onBack={() => { setEntryScreen(trialSetupReturn ? 'personalize' : 'welcome'); setTrialSetupReturn(false); setAccountSetup(false); }} /> : !session && entryScreen === 'signup' ?
       <SignUpScreen language={language} email={email} hasPreferences={!!pendingSetup} busy={busy} error={error || (trial.error ? trialCopy[language][trial.error] || trialCopy[language].saveFailed : '')} backLabel={trialAuthIntent ? t.trialBack : undefined}
         onEmailChange={value => { setEmail(value); setError(''); }} onCreateAccount={createAccount}
-        onSignIn={beginSignIn} onPreview={() => beginTrial()} onBack={trialAuthIntent ? () => setEntryScreen('personalize') : pendingSetup ? beginSetup : beginSignIn} /> : !session ?
-      <SignInScreen language={language} email={email} password={password} busy={busy} error={error} backLabel={trialAuthIntent ? t.trialBack : undefined}
+        onSignIn={() => beginSignIn(true)} onPreview={() => beginTrial()} onBack={trialAuthIntent ? () => setEntryScreen('personalize') : pendingSetup ? beginSetup : beginSignIn} /> : !session ?
+      <SignInScreen language={language} email={email} password={password} busy={busy} error={error}
+        backLabel={trialAuthIntent ? t.trialBack : signInFromSignUp ? signInCopy[language].backToCreate : undefined}
         onEmailChange={value => { setEmail(value); setError(''); }}
         onPasswordChange={value => { setPassword(value); setError(''); }}
         onSignIn={signIn} onCreateAccount={beginCreateAccount} onGetStarted={beginSetup} onOpenWebsite={openWebsite} onRecover={recoverPassword}
-        onBack={() => { setError(''); setPassword(''); setEntryScreen(trialAuthIntent ? 'personalize' : 'welcome'); }} /> : <View style={styles.content}>
+        onBack={() => { setError(''); setPassword(''); setEntryScreen(trialAuthIntent ? 'personalize' : signInFromSignUp ? 'signup' : 'welcome'); }} /> : <View style={styles.content}>
         {!!error && <Text accessibilityRole="alert" style={[styles.error, { color: appearance.colors.error }]}>{error === 'sync' ? t.failed : error}</Text>}
-        <SyncStatus key={session.user.id} sync={ownerSync} language={language} />
+        <SyncStatus key={session.user.id} sync={ownerSync} language={language} reviewOpen={syncReviewOpen} onReviewOpenChange={setSyncReviewOpen} />
         {accountPreview && <View style={[styles.trialNotice, { backgroundColor: appearance.colors.successSoft, borderColor: appearance.colors.line }]}>
           <Text style={[styles.secondary, { color: appearance.colors.muted }]}>{trial.data.claimedBy ? t.trialSaved : t.trialReady}</Text>
           {!trial.data.claimedBy && <Pressable accessibilityRole="button" disabled={trialSaving} style={styles.button}
@@ -571,8 +586,7 @@ function Workspace() {
             <HomeScreen language={language} userId={session.user.id} calendars={calendars} calendar={calendar} loading={!loaded}
               error={syncError} onRefresh={ownerSync.refresh}
               onSelectCalendar={selectOwnerCalendar} onPreferences={openAccountPreferences}
-              onOpenCalendar={() => { selectOwnerCalendar(calendar?.id || null); requestCalendarFocus(); setWorkspaceView('calendar'); }} onOpenFamily={() => setWorkspaceView('family')}
-              onOpenDate={(date, time) => { selectOwnerCalendar(calendar?.id || null); requestCalendarFocus(date, time); setWorkspaceView('calendar'); }} />
+              onOpenCalendar={openOwnerCalendar} onOpenFamily={() => setWorkspaceView('family')} onOpenDate={openOwnerCalendar} />
           </View>
           <View style={[styles.workspaceScreen, workspaceView !== 'calendar' && styles.hiddenScreen]}>
             <CalendarScreen key={session.user.id} language={language} userId={session.user.id} account={session.user} client={supabase}
@@ -611,12 +625,16 @@ function Workspace() {
               onOpenWebsite={openWebsite} onOpenSharedCalendar={openSharedCalendar} onPendingCount={setFamilyPendingCount} />
           </View>
         </View>
-        <BottomNavigation language={language} active={workspaceView} onChange={view => {
+        <BottomNavigation language={language} active={accountOpen ? 'account' : workspaceView} onChange={view => {
+          if (view === 'account') { setAccountOpen(true); return; }
           if (view === 'home') selectOwnerCalendar(calendar?.id || null);
           else sharedRequest.current += 1;
           if (view === 'calendar') requestCalendarFocus();
           setWorkspaceView(view);
         }} familyPendingCount={familyPendingCount} />
+        <WeeklyBrief key={`weekly-brief:${session.user.id}`} userId={session.user.id} language={language} calendar={calendar}
+          active={workspaceView === 'home' && !accountOpen && !remindersOpen && !previewDraftOpen && !syncReviewOpen && status !== 'AUTH_REQUIRED'}
+          ready={briefReady} cached={briefCached} firstDay={activePreferences.week === 'sunday' ? 0 : 1} onOpenCalendar={openOwnerCalendar} />
       </View>}
     {session && accountOpen && <AccountSettings language={language} email={session.user.email || ''} onClose={() => setAccountOpen(false)}
       onPreferences={() => { setAccountOpen(false); openAccountPreferences(); }} onReminders={() => { setAccountOpen(false); setRemindersOpen(true); }}
@@ -672,14 +690,15 @@ const styles = StyleSheet.create({
     web: { width: '100%', maxWidth: 390, alignSelf: 'center' }
   }) },
   appHeader: { minHeight: 62, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 14, paddingVertical: 8, gap: 10, backgroundColor: '#ffffff', borderBottomWidth: 1, borderBottomColor: '#dce6e8' },
+  signedInHeader: { minHeight: 48, paddingVertical: 5 },
   brand: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   logo: { width: 34, height: 34 },
+  signedInLogo: { width: 28, height: 28 },
   title: { fontSize: 20, fontWeight: '700', color: '#172b3a' },
+  signedInTitle: { fontSize: 18 },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   languageButton: { minWidth: 44, minHeight: 44, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 8 },
   languageText: { color: '#17649b', fontSize: 14, fontWeight: '600' },
-  avatarButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#eaf3fa', borderWidth: 1, borderColor: '#c7ddea', alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: '#1f6898', fontSize: 15, fontWeight: '700' },
   heading: { fontSize: 24, fontWeight: '700', color: '#172b3a' },
   label: { fontSize: 16, color: '#172b3a' },
   button: { minHeight: 44, minWidth: 44, padding: 10, justifyContent: 'center' },
@@ -688,12 +707,13 @@ const styles = StyleSheet.create({
   loader: { margin: 32 },
   content: { flex: 1 },
   workspace: { flex: 1 }, workspaceScreen: { flex: 1 }, hiddenScreen: { display: 'none' },
-  bottomNav: { minHeight: 62, flexDirection: 'row', alignItems: 'stretch', borderTopWidth: 1, borderTopColor: '#dce6e8', backgroundColor: '#ffffff', paddingHorizontal: 18, paddingTop: 5 },
-  bottomTab: { flex: 1, minHeight: 54, alignItems: 'center', justifyContent: 'center', gap: 3 },
-  bottomIcon: { minWidth: 28, minHeight: 23, alignItems: 'center', justifyContent: 'center' }, bottomIndicator: { position: 'absolute', top: -7, width: 24, height: 3, borderRadius: 2 },
+  bottomNav: { minHeight: 62, flexDirection: 'row', alignItems: 'stretch', borderTopWidth: 1, paddingHorizontal: 16, paddingVertical: 4 },
+  bottomTab: { flex: 1, minWidth: 0, minHeight: 54, alignItems: 'center', justifyContent: 'center', gap: 3 },
+  bottomIcon: { width: 54, minHeight: 30, alignItems: 'center', justifyContent: 'center' },
+  bottomIndicator: { borderRadius: 15 },
   bottomBadge: { position: 'absolute', top: -5, right: -8, minWidth: 17, height: 17, borderRadius: 9, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center', backgroundColor: '#b42332', borderWidth: 2, borderColor: '#ffffff' },
   bottomBadgeText: { color: '#ffffff', fontSize: 9, lineHeight: 11, fontWeight: '700' },
-  bottomTabSelected: {}, bottomTabText: { color: '#617680', fontSize: 11, fontWeight: '600' }, bottomTabTextSelected: { color: '#1f6898' },
+  bottomTabText: { fontSize: 11, fontWeight: '600', textAlign: 'center' }, bottomTabTextSelected: { fontWeight: '700' },
   trialNotice: { padding: 14, marginHorizontal: 16, marginBottom: 12, borderWidth: 1, borderColor: '#cfe0d4', borderRadius: 10, backgroundColor: '#f0f7f1' },
   flex: { flexShrink: 1, gap: 4 },
   secondary: { color: '#4c626e', fontSize: 15, lineHeight: 22 },

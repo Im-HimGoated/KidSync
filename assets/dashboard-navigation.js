@@ -2,8 +2,10 @@
 (() => {
   'use strict';
   const sections = ['today', 'attention', 'priority', 'prep', 'handoffs', 'outlook', 'special'];
+  const defaultCollapsed = ['priority', 'prep', 'handoffs', 'outlook', 'special'];
   function preferencesFor(value) {
-    return { collapsed: [...new Set(Array.isArray(value?.collapsed) ? value.collapsed.filter(key => sections.includes(key)) : [])] };
+    const collapsed = Array.isArray(value?.collapsed) ? value.collapsed : defaultCollapsed;
+    return { collapsed: [...new Set(collapsed.filter(key => sections.includes(key)))] };
   }
   function nextPlan(model) {
     return model.near.find(event => !event.allDay && event.eventType !== 'holiday') || model.near[0] || model.special[0] || null;
@@ -41,7 +43,7 @@
   const bar = document.createElement('section');
   bar.id = 'dashboardWayfinding'; bar.className = 'dashboard-wayfinding';
   bar.innerHTML = `<div class="dashboard-wayfinding-top"><button type="button" class="dashboard-next-plan" data-dashboard-next></button><details class="dashboard-section-menu"><summary></summary><div><p data-dashboard-menu-hint></p><button type="button" data-dashboard-sections="expand"></button><button type="button" data-dashboard-sections="collapse"></button></div></details></div><nav class="dashboard-section-links">${sections.map(key => `<button type="button" data-dashboard-jump="${key}"><span data-dashboard-link-label></span><span class="dashboard-section-count" aria-hidden="true"></span></button>`).join('')}</nav><p class="sr-only" role="status" aria-live="polite" data-dashboard-status></p>`;
-  document.getElementById('dashboardNow').before(bar);
+  document.getElementById('dashboardTools').append(bar);
   const menu = bar.querySelector('.dashboard-section-menu'), status = bar.querySelector('[data-dashboard-status]');
   function applyPreferences() {
     panels.forEach((panel, key) => { panel.open = !preferences.collapsed.includes(key); });
@@ -185,7 +187,7 @@
   function orderForScreen() {
     const priority = document.getElementById('dashboardPlanSide');
     if (mobile.matches) document.getElementById('dashboardPlanMain').before(priority);
-    else page.querySelector('.dashboard-side-column').prepend(priority);
+    else page.querySelector('.dashboard-side-column .dashboard-timeline-panel').after(priority);
   }
   mobile.addEventListener('change', orderForScreen); orderForScreen();
   document.addEventListener('scroll', () => {

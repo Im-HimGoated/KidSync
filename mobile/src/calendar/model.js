@@ -21,7 +21,7 @@ function normalizeDisplayPreferences(value = {}) {
   const reminder = own(preferences, 'defaultReminderMinutes')
     ? reminderValue(preferences.defaultReminderMinutes) : reminderValue(preferences.reminders);
   return {
-    view: ['week', 'month'].includes(preferences.view) ? preferences.view : 'agenda',
+    view: ['day', 'week', 'month'].includes(preferences.view) ? preferences.view : 'agenda',
     firstDay: preferences.week === 'sunday' || preferences.firstDay === 0 ? 0 : 1,
     initialHour: ({ morning: 6, afternoon: 12, evening: 18, daytime: 8 })[preferences.hours]
       ?? ([6, 12, 18, 8].includes(preferences.initialHour) ? preferences.initialHour : 8),
@@ -92,7 +92,8 @@ function sortAgenda(events, date) {
   return (Array.isArray(events) ? events : [])
     .filter(event => event && typeof event === 'object' && !Array.isArray(event))
     .map((event, index) => ({ event, index, start: (date ? calendar.daySegment(event, date)?.start : null) ?? timeMinutes(event.start) ?? Infinity }))
-    .sort((a, b) => Number(Boolean(b.event.allDay)) - Number(Boolean(a.event.allDay))
+    .sort((a, b) => Number(Boolean(b.event.isBuiltInHoliday)) - Number(Boolean(a.event.isBuiltInHoliday))
+      || Number(Boolean(b.event.allDay)) - Number(Boolean(a.event.allDay))
       || (a.start === b.start ? 0 : a.start - b.start)
       || importanceRank(a.event) - importanceRank(b.event)
       || String(a.event.title || '').localeCompare(String(b.event.title || ''))
@@ -145,8 +146,25 @@ function layoutDay(events, options = {}) {
       item.lane = lane;
     });
     group.items.forEach(item => { item.lanes = ends.length; });
+    if (options.compact && group.items.length > 1) {
+      let end = group.items[0].end;
+      const connected = group.items.slice(1).every(item => {
+        const overlaps = item.start < end;
+        end = Math.max(end, item.end);
+        return overlaps;
+      });
+      if (!connected) return;
+      const priority = entry => (entry.event.status === 'cancelled' ? 3 : 0) + importanceRank(entry.event);
+      const primary = group.items.reduce((best, item) => priority(item) < priority(best) ? item : best);
+      primary.overlapCount = group.items.length - 1;
+      primary.overlapStart = group.items[0].start;
+      primary.lane = 0;
+      primary.lanes = 1;
+      group.items.forEach(item => { if (item !== primary) item.hiddenInWeek = true; });
+    }
   });
-  return { timed, allDay, untimed, height: Math.max(hourHeight * 24, ...timed.map(item => item.visualEnd)) };
+  return { timed: timed.filter(item => !item.hiddenInWeek), allDay: sortAgenda(allDay), untimed,
+    height: Math.max(hourHeight * 24, ...timed.map(item => item.visualEnd)) };
 }
 
 function initialEventForm(existing, date, preferences = {}) {

@@ -1,6 +1,6 @@
 /* Device-local onboarding choices. No calendar or account data is written remotely. */
 const DEFAULTS = Object.freeze({ people: 'family', view: 'today', week: 'monday', hours: 'daytime', reminders: 'none' });
-const OPTIONS = Object.freeze({ people: ['myself', 'children', 'family'], view: ['today', 'week', 'month'], week: ['monday', 'sunday'], hours: ['morning', 'afternoon', 'evening', 'daytime'], reminders: ['none', 'start', '10', '30'] });
+const OPTIONS = Object.freeze({ people: ['myself', 'children', 'family'], view: ['today', 'day', 'week', 'month'], week: ['monday', 'sunday'], hours: ['morning', 'afternoon', 'evening', 'daytime'], reminders: ['none', 'start', '10', '30'] });
 const PENDING_KEY = 'kidssync:mobile:onboarding:v1:pending';
 const DRAFT_KEY = 'kidssync:mobile:onboarding:v1:draft';
 function normalizePreferences(value) {

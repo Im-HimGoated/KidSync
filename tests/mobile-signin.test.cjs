@@ -58,7 +58,7 @@ test('professional sign-in provides Chinese parity and every validation/error tr
 test('sign-in supports password visibility, keyboard navigation and accessible validation', () => {
   assert.match(screen, /secureTextEntry=\{!showPassword\}/);
   assert.match(screen, /accessibilityLabel=\{showPassword \? t.hide : t.show\}/);
-  assert.match(screen, /onSubmitEditing=\{\(\) => passwordRef.current\?\.focus\(\)\}/);
+  assert.match(screen, /onSubmitEditing=\{recoveryOpen \? recover : \(\) => passwordRef.current\?\.focus\(\)\}/);
   assert.match(screen, /onSubmitEditing=\{submit\}/);
   assert.match(screen, /autoComplete="current-password"/);
   assert.match(screen, /keyboardShouldPersistTaps="handled"/);

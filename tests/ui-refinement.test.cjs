@@ -9,8 +9,9 @@ const planning = fs.readFileSync(require.resolve('../assets/dashboard-planning.j
 test('the refinement is available offline and preserves the final mobile stylesheet', () => {
   const mobileAsset = html.match(/href="(\.\/assets\/mobile\.css\?v=\d+)">\s*<\/head>/);
   assert(mobileAsset, 'Shared mobile styles must remain last');
-  assert(html.indexOf('./assets/ui-refinement.css?v=1') < html.indexOf(mobileAsset[1]));
-  assert.match(worker, /"\.\/assets\/ui-refinement\.css\?v=1"/);
+  const refinementAsset = html.match(/href="(\.\/assets\/ui-refinement\.css\?v=\d+)"/);
+  assert(refinementAsset && refinementAsset.index < mobileAsset.index);
+  assert(worker.includes(`"${refinementAsset[1]}"`));
 });
 
 test('all seven planning sections get decorative, non-focusable vector icons', () => {

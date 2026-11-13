@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
-import { AlertCircle, CalendarClock, CalendarDays, Check, ChevronRight, Clock3, ListChecks, RefreshCw, Search, Settings2, Share2, Star, UserRound, UsersRound, X } from 'lucide-react-native';
+import { ActivityIndicator, AppState, Pressable, RefreshControl, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { AlertCircle, CalendarClock, CalendarDays, Check, ChevronDown, ChevronRight, Clock3, ListChecks, RefreshCw, Search, Settings2, Share2, Star, UserRound, UsersRound, X } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import calendarTools from '../lib/calendar';
 import homeModel from '../home/model';
@@ -11,15 +11,15 @@ import { useAppearance, useThemeStyles } from '../ui/AppearanceContext';
 const copy = {
   en: {
     morning: 'Good morning', afternoon: 'Good afternoon', evening: 'Good evening',
-    intro: 'Here is what your family needs next.', home: 'Home', calendar: 'Open calendar',
-    today: 'Today', weekPlans: '7-day plans', plannedDays: 'days planned', handoffs: 'Needs handoff',
-    next: 'Next up', nextBody: 'The closest plans across your family calendar.',
+    intro: 'Your family’s plans at a glance.', home: 'Home', calendar: 'Open calendar',
+    today: 'Today', weekPlans: '7-day plans', plannedDay: 'day planned', plannedDays: 'days planned', handoffs: 'Needs handoff',
+    next: 'Next up', morePlans: 'More upcoming plans',
     handoffTitle: 'Family Handoff Center', handoffBody: 'Assign an adult before these plans begin.',
     workload: 'Family rhythm', workloadBody: 'Scheduled plans for each child over the next seven days.',
     empty: 'Your week is open.', emptyBody: 'Open the calendar to add the first plan.',
     allDay: 'All day', family: 'Family', pickup: 'Pickup not assigned', preferences: 'Calendar preferences',
     refresh: 'Refresh', live: 'In sync', connecting: 'Connecting', calendars: 'Calendars', coordinate: 'Coordinate pickups',
-    tools: 'Quick planning tools', toolsBody: 'Find a plan, check tomorrow, or share today’s agenda.',
+    tools: 'Quick planning tools', toolsHint: 'Search plans, pin favorites, share today, or check what to bring.', familyAction: 'Family',
     search: 'Find an upcoming plan', searchPlaceholder: 'Plan, person, place, or pickup adult', clearSearch: 'Clear search',
     pinned: 'Pinned', tomorrow: 'Tomorrow', shareToday: 'Share today', results: 'Matching plans',
     noResults: 'No upcoming plans match that search.', noPins: 'No pinned plans yet. Search above and tap the star.',
@@ -30,12 +30,13 @@ const copy = {
     bring: 'Bring', notes: 'Notes',
   },
   zh: {
-    morning: '早上好', afternoon: '下午好', evening: '晚上好', intro: '这是家里接下来最需要关注的安排。',
-    home: '首页', calendar: '打开日历', today: '今天', weekPlans: '七天安排', plannedDays: '天有安排', handoffs: '待安排接送',
-    next: '接下来', nextBody: '家庭日历中即将开始的安排。', handoffTitle: '家庭交接中心', handoffBody: '请在活动开始前安排一位大人。',
+    morning: '早上好', afternoon: '下午好', evening: '晚上好', intro: '一眼掌握全家的日程安排。',
+    home: '首页', calendar: '打开日历', today: '今天', weekPlans: '七天安排', plannedDay: '天有安排', plannedDays: '天有安排', handoffs: '待安排接送',
+    next: '接下来', morePlans: '更多即将开始的安排',
+    handoffTitle: '家庭交接中心', handoffBody: '请在活动开始前安排一位大人。',
     workload: '家庭节奏', workloadBody: '未来七天每个孩子的安排数量。', empty: '这一周还有空闲。', emptyBody: '打开日历，添加第一项安排。',
     allDay: '全天', family: '全家', pickup: '尚未安排接送', preferences: '日历偏好', refresh: '刷新', live: '已同步', connecting: '连接中', calendars: '日历', coordinate: '安排接送',
-    tools: '快捷计划工具', toolsBody: '查找安排、查看明天，或分享今天的日程。',
+    tools: '快捷计划工具', toolsHint: '搜索安排、置顶常用活动、分享今天或查看携带物品。', familyAction: '家庭',
     search: '查找即将开始的安排', searchPlaceholder: '活动、家人、地点或接送人', clearSearch: '清除搜索',
     pinned: '置顶', tomorrow: '明天', shareToday: '分享今天', results: '匹配的安排',
     noResults: '没有匹配的即将开始安排。', noPins: '暂无置顶安排。请在上方搜索并点击星标。', noTomorrow: '明天暂无安排。',
@@ -70,16 +71,16 @@ function focusTimeFor(item) {
   return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
 }
 
-function EventRow({ item, kids, language, t, todayKey, onPress, warning, styles, colors, palettes }) {
+function EventRow({ item, kids, language, t, todayKey, onPress, warning, featured, styles, colors, palettes }) {
   const event = item.event, palette = personPalette(event, kids, palettes);
   const people = calendarTools.kidsForEvent(event, kids).map(kid => kid.name).join(', ') || t.family;
   const time = event.allDay ? t.allDay : calendarTools.formatTime(event.start, language) || t.allDay;
-  return <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.eventRow, pressed && styles.pressed]}>
+  return <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.eventRow, featured && styles.featuredEvent, pressed && styles.pressed]}>
     <View style={[styles.eventAccent, { backgroundColor: warning ? colors.warning : palette.line }]} />
-    <View style={styles.eventIcon}><Text style={styles.eventEmoji}>{event.icon || '📅'}</Text></View>
+    <View style={[styles.eventIcon, { backgroundColor: palette.soft, borderColor: palette.line }]}><Text style={styles.eventEmoji}>{event.icon || '📅'}</Text></View>
     <View style={styles.eventCopy}>
       <Text numberOfLines={1} style={styles.eventTitle}>{event.title || t.calendar}</Text>
-      <Text numberOfLines={1} style={styles.eventMeta}>{dateText(item.date, language, todayKey)} · {time} · {people}</Text>
+      <Text style={styles.eventMeta}>{dateText(item.date, language, todayKey)} · {time} · {people}</Text>
       {warning && <Text numberOfLines={1} style={styles.warningText}>{t.pickup}</Text>}
     </View>
     <ChevronRight size={18} color={colors.muted} />
@@ -121,12 +122,33 @@ export default function HomeScreen({ language = 'en', calendars = [], calendar, 
   const t = copy[String(language).startsWith('zh') ? 'zh' : 'en'];
   const { colors, palettes } = useAppearance(), styles = useThemeStyles(createStyles);
   const [refreshing, setRefreshing] = useState(false);
-  const [toolMode, setToolMode] = useState(''), [toolQuery, setToolQuery] = useState('');
+  const [toolMode, setToolMode] = useState(''), [toolQuery, setToolQuery] = useState(''), [toolsOpen, setToolsOpen] = useState(false);
   const [personal, setPersonal] = useState(emptyPersonalState), [personalLoading, setPersonalLoading] = useState(false);
   const [personalSaving, setPersonalSaving] = useState(false), [toolNotice, setToolNotice] = useState('');
   const personalRequest = useRef(0), personalScopeRef = useRef('');
-  const now = new Date(), events = eventsIn(calendar), kids = kidsIn(calendar);
-  const model = useMemo(() => homeModel.buildHomeModel(events, kids, now), [calendar?.id, calendar?.data]);
+  const [clockMinute, setClockMinute] = useState(() => Math.floor(Date.now() / 60000));
+  const now = useMemo(() => new Date(clockMinute * 60000), [clockMinute]);
+  const kids = kidsIn(calendar);
+  const model = useMemo(() => homeModel.buildHomeModel(eventsIn(calendar), kidsIn(calendar), now), [calendar?.data, now]);
+
+  useEffect(() => {
+    let timer;
+    const update = () => {
+      const time = Date.now();
+      setClockMinute(Math.floor(time / 60000));
+      timer = setTimeout(update, 60000 - (time % 60000));
+    };
+    const onAppState = state => {
+      clearTimeout(timer);
+      if (state === 'active') update();
+    };
+    onAppState(AppState.currentState || 'active');
+    const subscription = AppState.addEventListener('change', onAppState);
+    return () => {
+      clearTimeout(timer);
+      subscription.remove();
+    };
+  }, []);
   const todayKey = calendarTools.dateKey(now), hour = now.getHours();
   const greeting = hour < 12 ? t.morning : hour < 18 ? t.afternoon : t.evening;
   const todayLabel = now.toLocaleDateString(language === 'zh' ? 'zh-CN' : 'en-US', { weekday: 'long', month: 'short', day: 'numeric' });
@@ -221,11 +243,16 @@ export default function HomeScreen({ language = 'en', calendars = [], calendar, 
   }
 
   return <ScrollView style={styles.page} contentContainerStyle={styles.content}
+    keyboardShouldPersistTaps="handled"
     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.blue} />}>
     <View style={styles.hero}>
       <View style={styles.heroTop}><View style={styles.heroCopy}><Text style={styles.todayLabel}>{todayLabel}</Text><Text accessibilityRole="header" style={styles.greeting}>{greeting}</Text><Text style={styles.intro}>{t.intro}</Text></View>
-        <View style={styles.heroActions}><IconButton icon={RefreshCw} label={t.refresh} color={colors.ink} onPress={refresh} disabled={refreshing} />
-          <IconButton icon={Settings2} label={t.preferences} color={colors.ink} onPress={onPreferences} /></View></View>
+        <IconButton icon={RefreshCw} label={t.refresh} color={colors.ink} onPress={refresh} disabled={refreshing} /></View>
+      <View style={styles.heroActions}>
+        <Pressable accessibilityRole="button" onPress={openCurrentCalendar} style={({ pressed }) => [styles.primaryAction, pressed && styles.pressed]}><CalendarDays size={18} color={colors.onPrimary} /><Text numberOfLines={1} style={styles.primaryActionText}>{t.calendar}</Text></Pressable>
+        <Pressable accessibilityRole="button" onPress={openCurrentFamily} style={({ pressed }) => [styles.secondaryAction, pressed && styles.pressed]}><UsersRound size={18} color={colors.primary} /><Text numberOfLines={1} style={styles.secondaryActionText}>{t.familyAction}</Text></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel={t.preferences} onPress={onPreferences} style={({ pressed }) => [styles.iconAction, pressed && styles.pressed]}><Settings2 size={19} color={colors.primary} /></Pressable>
+      </View>
     </View>
 
     {calendars.length > 1 && <View style={styles.calendarSection}><Text style={styles.eyebrow}>{t.calendars}</Text><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.calendarChips}>
@@ -239,12 +266,18 @@ export default function HomeScreen({ language = 'en', calendars = [], calendar, 
     {loading ? <ActivityIndicator accessibilityLabel={t.connecting} color={colors.blue} style={styles.loader} /> : <>
       <View style={styles.metrics}>
         <View style={styles.metric}><Text style={styles.metricValue}>{model.today.length}</Text><Text style={styles.metricLabel}>{t.today}</Text></View>
-        <View style={styles.metric}><Text style={styles.metricValue}>{model.sevenDayCount}</Text><Text style={styles.metricLabel}>{t.weekPlans}</Text><Text style={styles.metricDetail}>{model.daysPlanned} {t.plannedDays}</Text></View>
+        <View style={styles.metric}><Text style={styles.metricValue}>{model.sevenDayCount}</Text><Text style={styles.metricLabel}>{t.weekPlans}</Text><Text style={styles.metricDetail}>{model.daysPlanned} {model.daysPlanned === 1 ? t.plannedDay : t.plannedDays}</Text></View>
         <View style={styles.metric}><Text style={[styles.metricValue, model.handoffCount > 0 && styles.metricWarning]}>{model.handoffCount}</Text><Text style={styles.metricLabel}>{t.handoffs}</Text></View>
       </View>
 
-      <View style={styles.toolsBlock}>
-        <View style={styles.sectionHeading}><View style={styles.sectionIcon}><Search size={18} color={colors.primary} /></View><View style={styles.sectionCopy}><Text accessibilityRole="header" style={styles.sectionTitle}>{t.tools}</Text><Text style={styles.sectionBody}>{t.toolsBody}</Text></View></View>
+      <View style={styles.sectionHeading}><View style={styles.sectionIcon}><Clock3 size={18} color={colors.blue} /></View><View style={styles.sectionCopy}><Text accessibilityRole="header" style={styles.sectionTitle}>{t.next}</Text></View></View>
+      {model.nextUp.length ? model.nextUp.slice(0, 1).map(item => <EventRow key={item.key} item={item} featured kids={kids} language={language} t={t} todayKey={todayKey} styles={styles} colors={colors} palettes={palettes} onPress={() => openCurrentDate(item.dateKey, focusTimeFor(item))} />)
+        : <View style={styles.empty}><CalendarDays size={28} color={colors.green} /><Text style={styles.emptyTitle}>{t.empty}</Text><Text style={styles.emptyBody}>{t.emptyBody}</Text></View>}
+      <View style={[styles.toolsBlock, toolsOpen && styles.toolsBlockOpen]}>
+        <Pressable accessibilityRole="button" accessibilityState={{ expanded: toolsOpen }} onPress={() => setToolsOpen(value => !value)} style={({ pressed }) => [styles.toolsHeader, pressed && styles.pressed]}>
+          <View style={styles.sectionIcon}><Search size={18} color={colors.primary} /></View><View style={styles.sectionCopy}><Text accessibilityRole="header" style={styles.toolsTitle}>{t.tools}</Text><Text style={styles.toolsHint}>{t.toolsHint}</Text></View><View style={[styles.disclosure, toolsOpen && styles.disclosureOpen]}><ChevronDown size={19} color={colors.primary} /></View>
+        </Pressable>
+        {toolsOpen && <>
         <View accessibilityRole="search" style={styles.toolSearch}><Search size={18} color={colors.muted} /><TextInput value={toolQuery}
           onChangeText={value => { setToolQuery(value); if (value) setToolMode(''); }} placeholder={t.searchPlaceholder}
           placeholderTextColor={colors.muted} accessibilityLabel={t.search} returnKeyType="search" style={styles.toolSearchInput} />
@@ -271,14 +304,19 @@ export default function HomeScreen({ language = 'en', calendars = [], calendar, 
             selected={new Set(personal.packed[homeModel.packingKey(item)] || [])} disabled={!personalScope || personalLoading || personalSaving}
             onToggle={togglePacked} styles={styles} colors={colors} />)}
         </View>}
-        <Text style={styles.deviceNote}>{t.deviceOnly}</Text>
+        {(toolMode === 'pinned' || toolQuery.trim().length > 0 || (!toolMode && packingPlans.length > 0)) &&
+          <Text style={styles.deviceNote}>{t.deviceOnly}</Text>}
         {(personalLoading || personalSaving) && <ActivityIndicator accessibilityLabel={t.connecting} size="small" color={colors.primary} />}
         {!!toolNotice && <Text accessibilityLiveRegion="polite" style={[styles.toolNotice, toolNotice === t.saveFailed || toolNotice === t.shareFailed ? styles.toolNoticeError : null]}>{toolNotice}</Text>}
+        </>}
       </View>
 
-      <View style={styles.sectionHeading}><View style={styles.sectionIcon}><Clock3 size={18} color={colors.blue} /></View><View style={styles.sectionCopy}><Text accessibilityRole="header" style={styles.sectionTitle}>{t.next}</Text><Text style={styles.sectionBody}>{t.nextBody}</Text></View></View>
-      {model.nextUp.length ? model.nextUp.map(item => <EventRow key={item.key} item={item} kids={kids} language={language} t={t} todayKey={todayKey} styles={styles} colors={colors} palettes={palettes} onPress={() => openCurrentDate(item.dateKey, focusTimeFor(item))} />)
-        : <View style={styles.empty}><CalendarDays size={28} color={colors.green} /><Text style={styles.emptyTitle}>{t.empty}</Text><Text style={styles.emptyBody}>{t.emptyBody}</Text></View>}
+      {model.nextUp.length > 1 && <View>
+        <View style={styles.sectionHeading}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>{t.morePlans}</Text>
+        </View>
+        {model.nextUp.slice(1).map(item => <EventRow key={item.key} item={item} kids={kids} language={language} t={t} todayKey={todayKey} styles={styles} colors={colors} palettes={palettes} onPress={() => openCurrentDate(item.dateKey, focusTimeFor(item))} />)}
+      </View>}
 
       {model.handoffs.length > 0 && <View style={styles.sectionBlock}>
         <View style={styles.sectionHeading}><View style={[styles.sectionIcon, styles.warningIcon]}><UsersRound size={18} color={colors.warning} /></View><View style={styles.sectionCopy}><Text accessibilityRole="header" style={styles.sectionTitle}>{t.handoffTitle}</Text><Text style={styles.sectionBody}>{t.handoffBody}</Text></View></View>
@@ -294,29 +332,29 @@ export default function HomeScreen({ language = 'en', calendars = [], calendar, 
       </View>}
     </>}
 
-    <Pressable accessibilityRole="button" onPress={openCurrentCalendar} style={({ pressed }) => [styles.calendarButton, pressed && styles.pressed]}>
-      <CalendarDays size={19} color={colors.onPrimary} /><Text style={styles.calendarButtonText}>{t.calendar}</Text><ChevronRight size={18} color={colors.onPrimary} />
-    </Pressable>
   </ScrollView>;
 }
 
 function createStyles(colors) { return StyleSheet.create({
-  page: { flex: 1, backgroundColor: colors.page }, content: { paddingBottom: 28 },
-  hero: { backgroundColor: colors.primarySoft, borderBottomWidth: 1, borderBottomColor: colors.line, paddingHorizontal: 18, paddingTop: 18, paddingBottom: 14, gap: 10 },
-  heroTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 }, heroCopy: { flex: 1, minWidth: 0 }, heroActions: { flexDirection: 'row', alignItems: 'center' }, todayLabel: { color: colors.green, fontSize: 11, lineHeight: 16, fontWeight: '700', textTransform: 'uppercase', marginBottom: 3 }, greeting: { color: colors.ink, fontSize: 25, lineHeight: 31, fontWeight: '700' }, intro: { color: colors.muted, fontSize: 14, lineHeight: 21, marginTop: 3 },
+  featuredEvent: { minHeight: 84, backgroundColor: colors.primarySoft, padding: 13 },
+  page: { flex: 1, backgroundColor: colors.page }, content: { paddingBottom: 28, width: '100%', maxWidth: 600, alignSelf: 'center' },
+  hero: { backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.line, borderRadius: 18, marginHorizontal: 16, marginTop: 12, padding: 15, gap: 13 },
+  heroTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 }, heroCopy: { flex: 1, minWidth: 0 }, heroActions: { flexDirection: 'row', alignItems: 'stretch', gap: 8 }, todayLabel: { color: colors.green, fontSize: 11, lineHeight: 16, fontWeight: '700', textTransform: 'uppercase', marginBottom: 2 }, greeting: { color: colors.ink, fontSize: 25, lineHeight: 31, fontWeight: '700' }, intro: { color: colors.muted, fontSize: 13, lineHeight: 19, marginTop: 2 },
+  primaryAction: { flex: 1.25, minWidth: 0, minHeight: 46, paddingHorizontal: 12, borderRadius: 12, backgroundColor: colors.primary, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 }, primaryActionText: { color: colors.onPrimary, fontSize: 13, fontWeight: '700' },
+  secondaryAction: { flex: 0.9, minWidth: 0, minHeight: 46, paddingHorizontal: 10, borderRadius: 12, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }, secondaryActionText: { color: colors.primary, fontSize: 13, fontWeight: '700' }, iconAction: { width: 46, minHeight: 46, borderRadius: 12, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' },
   calendarSection: { paddingTop: 15 }, eyebrow: { color: colors.muted, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', paddingHorizontal: 18, marginBottom: 8 }, calendarChips: { paddingHorizontal: 18, gap: 8 }, calendarChip: { minHeight: 40, maxWidth: 180, justifyContent: 'center', borderWidth: 1, borderColor: colors.line, borderRadius: 8, paddingHorizontal: 13, backgroundColor: colors.surface }, calendarChipSelected: { borderColor: colors.primary, backgroundColor: colors.primarySoft }, calendarChipText: { color: colors.ink, fontSize: 13, fontWeight: '600' }, calendarChipTextSelected: { color: colors.primary },
-  metrics: { flexDirection: 'row', gap: 8, marginTop: 16, paddingHorizontal: 18 }, metric: { flex: 1, minHeight: 92, alignItems: 'center', justifyContent: 'center', padding: 8, borderWidth: 1, borderColor: colors.line, borderRadius: 8, backgroundColor: colors.surface }, metricValue: { color: colors.ink, fontSize: 24, fontWeight: '700' }, metricWarning: { color: colors.warning }, metricLabel: { color: colors.ink, fontSize: 11, lineHeight: 16, fontWeight: '600', textAlign: 'center' }, metricDetail: { color: colors.muted, fontSize: 10, lineHeight: 14, textAlign: 'center' },
-  toolsBlock: { marginTop: 2 }, toolSearch: { minHeight: 46, marginHorizontal: 18, borderWidth: 1, borderColor: colors.line, borderRadius: 8, backgroundColor: colors.surface, paddingLeft: 12, paddingRight: 2, flexDirection: 'row', alignItems: 'center', gap: 8 }, toolSearchInput: { flex: 1, minWidth: 0, minHeight: 44, color: colors.ink, fontSize: 14, paddingVertical: 8 },
-  toolActions: { flexDirection: 'row', gap: 8, marginHorizontal: 18, marginTop: 10 }, toolAction: { flex: 1, minWidth: 0, minHeight: 54, paddingHorizontal: 6, paddingVertical: 8, borderWidth: 1, borderColor: colors.line, borderRadius: 8, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', gap: 4 }, toolActionSelected: { borderColor: colors.primary, backgroundColor: colors.primarySoft }, toolActionText: { color: colors.muted, fontSize: 11, lineHeight: 15, fontWeight: '600', textAlign: 'center' }, toolActionTextSelected: { color: colors.primary },
+  metrics: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 12, marginHorizontal: 16, paddingVertical: 4, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, borderRadius: 16 }, metric: { flex: 1, minWidth: 80, paddingHorizontal: 10, paddingVertical: 7, gap: 2 }, metricValue: { color: colors.ink, fontSize: 24, fontWeight: '700' }, metricWarning: { color: colors.warning }, metricLabel: { color: colors.ink, fontSize: 11, lineHeight: 16, fontWeight: '600' }, metricDetail: { color: colors.muted, fontSize: 10, lineHeight: 14 },
+  toolsBlock: { marginTop: 18, marginHorizontal: 16, borderRadius: 14, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface, overflow: 'hidden' }, toolsBlockOpen: { paddingBottom: 14 }, toolsHeader: { minHeight: 72, flexDirection: 'row', alignItems: 'center', gap: 11, paddingHorizontal: 14, paddingVertical: 11 }, toolsTitle: { color: colors.ink, fontSize: 16, lineHeight: 21, fontWeight: '700' }, toolsHint: { color: colors.muted, fontSize: 11, lineHeight: 16, marginTop: 2 }, disclosure: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '0deg' }] }, disclosureOpen: { transform: [{ rotate: '180deg' }] }, toolSearch: { minHeight: 46, marginHorizontal: 14, borderWidth: 1, borderColor: colors.line, borderRadius: 12, backgroundColor: colors.input, paddingLeft: 12, paddingRight: 2, flexDirection: 'row', alignItems: 'center', gap: 8 }, toolSearchInput: { flex: 1, minWidth: 0, minHeight: 44, color: colors.ink, fontSize: 14, paddingVertical: 8 },
+  toolActions: { flexDirection: 'row', gap: 8, marginHorizontal: 18, marginTop: 10 }, toolAction: { flex: 1, minWidth: 0, minHeight: 54, paddingHorizontal: 6, paddingVertical: 8, borderWidth: 1, borderColor: colors.line, borderRadius: 12, backgroundColor: colors.surfaceRaised, alignItems: 'center', justifyContent: 'center', gap: 4 }, toolActionSelected: { borderColor: colors.primary, backgroundColor: colors.primarySoft }, toolActionText: { color: colors.muted, fontSize: 11, lineHeight: 15, fontWeight: '600', textAlign: 'center' }, toolActionTextSelected: { color: colors.primary },
   toolResults: { marginHorizontal: 18, marginTop: 12, borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 11 }, toolResultsTitle: { color: colors.ink, fontSize: 13, lineHeight: 19, fontWeight: '700', marginBottom: 3 }, toolEmpty: { color: colors.muted, fontSize: 13, lineHeight: 20, paddingVertical: 12 },
   toolPlan: { minHeight: 66, borderBottomWidth: 1, borderBottomColor: colors.line, flexDirection: 'row', alignItems: 'stretch' }, toolPlanOpen: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 9, paddingVertical: 9 }, toolPlanIcon: { width: 34, height: 34, borderRadius: 8, borderWidth: 1, alignItems: 'center', justifyContent: 'center' }, starButton: { width: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }, disabled: { opacity: 0.42 },
   openTomorrow: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 5 }, openTomorrowText: { color: colors.primary, fontSize: 13, fontWeight: '700' }, deviceNote: { color: colors.muted, fontSize: 11, lineHeight: 17, marginHorizontal: 18, marginTop: 10 }, toolNotice: { color: colors.success, fontSize: 12, lineHeight: 18, marginHorizontal: 18, marginTop: 5 }, toolNoticeError: { color: colors.error },
   packingPlan: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.line, gap: 8 }, packingTop: { flexDirection: 'row', alignItems: 'center', gap: 10 }, packingItems: { gap: 4 }, packingItem: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 9, paddingVertical: 5 }, checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 1, borderColor: colors.strongLine, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface }, checkboxChecked: { backgroundColor: colors.primary, borderColor: colors.primary }, packingText: { flex: 1, minWidth: 0, color: colors.ink, fontSize: 13, lineHeight: 19 }, packingTextDone: { color: colors.muted, textDecorationLine: 'line-through' }, flex: { flex: 1, minWidth: 0 },
-  sectionBlock: { marginTop: 20 }, sectionHeading: { flexDirection: 'row', alignItems: 'flex-start', gap: 11, paddingHorizontal: 18, marginTop: 20, marginBottom: 10 }, sectionIcon: { width: 34, height: 34, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft }, warningIcon: { backgroundColor: colors.warningSoft }, sectionCopy: { flex: 1, minWidth: 0 }, sectionTitle: { color: colors.ink, fontSize: 17, lineHeight: 22, fontWeight: '700' }, sectionBody: { color: colors.muted, fontSize: 12, lineHeight: 18, marginTop: 2 },
-  eventRow: { minHeight: 72, marginHorizontal: 18, borderTopWidth: 1, borderTopColor: colors.line, flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 11 }, eventAccent: { width: 4, height: 38, borderRadius: 2 }, eventIcon: { width: 34, height: 34, borderRadius: 8, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.line }, eventEmoji: { fontSize: 17 }, eventCopy: { flex: 1, minWidth: 0 }, eventTitle: { color: colors.ink, fontSize: 15, lineHeight: 20, fontWeight: '700' }, eventMeta: { color: colors.muted, fontSize: 12, lineHeight: 18, marginTop: 2 }, warningText: { color: colors.warning, fontSize: 11, lineHeight: 16, fontWeight: '600' },
+  sectionBlock: { marginTop: 20 }, sectionHeading: { flexDirection: 'row', alignItems: 'flex-start', gap: 11, paddingHorizontal: 18, marginTop: 20, marginBottom: 10 }, sectionIcon: { width: 34, height: 34, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft }, warningIcon: { backgroundColor: colors.warningSoft }, sectionCopy: { flex: 1, minWidth: 0 }, sectionTitle: { color: colors.ink, fontSize: 19, lineHeight: 25, fontWeight: '700' }, sectionBody: { color: colors.muted, fontSize: 12, lineHeight: 18, marginTop: 2 },
+  eventRow: { minHeight: 72, marginHorizontal: 16, marginBottom: 7, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, borderRadius: 16, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 10 }, eventAccent: { width: 4, height: 38, borderRadius: 2 }, eventIcon: { width: 34, height: 34, borderRadius: 8, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.line }, eventEmoji: { fontSize: 17 }, eventCopy: { flex: 1, minWidth: 0 }, eventTitle: { color: colors.ink, fontSize: 15, lineHeight: 20, fontWeight: '700' }, eventMeta: { color: colors.muted, fontSize: 12, lineHeight: 18, marginTop: 2 }, warningText: { color: colors.warning, fontSize: 11, lineHeight: 16, fontWeight: '600' },
   handoffButton: { minHeight: 46, marginHorizontal: 18, marginTop: 8, paddingHorizontal: 13, borderWidth: 1, borderColor: colors.line, borderRadius: 8, backgroundColor: colors.primarySoft, flexDirection: 'row', alignItems: 'center', gap: 8 }, handoffButtonText: { flex: 1, color: colors.primary, fontSize: 13, fontWeight: '700' },
-  empty: { marginHorizontal: 18, paddingVertical: 26, borderTopWidth: 1, borderBottomWidth: 1, borderColor: colors.line, alignItems: 'center' }, emptyTitle: { color: colors.ink, fontSize: 17, fontWeight: '700', marginTop: 9 }, emptyBody: { color: colors.muted, fontSize: 13, lineHeight: 20, textAlign: 'center', marginTop: 4 },
+  empty: { marginHorizontal: 16, padding: 20, borderWidth: 1, borderColor: colors.line, borderRadius: 18, backgroundColor: colors.surface, alignItems: 'center' }, emptyTitle: { color: colors.ink, fontSize: 17, fontWeight: '700', marginTop: 9 }, emptyBody: { color: colors.muted, fontSize: 13, lineHeight: 20, textAlign: 'center', marginTop: 4 },
   workload: { marginHorizontal: 18, borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 12, gap: 11 }, workloadRow: { minHeight: 34, flexDirection: 'row', alignItems: 'center', gap: 8 }, workloadAvatar: { width: 30, height: 30, borderRadius: 15, borderWidth: 1, alignItems: 'center', justifyContent: 'center' }, workloadAvatarText: { fontSize: 13, fontWeight: '700' }, workloadName: { width: 68, color: colors.ink, fontSize: 13, fontWeight: '600' }, workloadTrack: { flex: 1, height: 8, backgroundColor: colors.surfaceRaised, borderRadius: 4, overflow: 'hidden' }, workloadBar: { height: 8, borderRadius: 4 }, workloadCount: { width: 22, textAlign: 'right', color: colors.muted, fontSize: 12, fontWeight: '600' },
-  calendarButton: { minHeight: 50, marginHorizontal: 18, marginTop: 24, paddingHorizontal: 16, borderRadius: 8, backgroundColor: colors.primary, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 9 }, calendarButtonText: { color: colors.onPrimary, fontSize: 15, fontWeight: '700', flex: 1, textAlign: 'center' }, pressed: { opacity: 0.58 },
+  pressed: { opacity: 0.58 },
   error: { margin: 18, marginBottom: 0, padding: 12, backgroundColor: colors.errorSoft, borderRadius: 8, flexDirection: 'row', alignItems: 'flex-start', gap: 9 }, errorText: { color: colors.error, fontSize: 13, lineHeight: 19, flex: 1 }, loader: { margin: 34 },
 }); }

@@ -145,3 +145,57 @@ html.dark-mode #appShell {
 }
 html.reduce-motion #dashboardPage :is(button, summary),
 html.reduce-motion #appShell .sidebar-nav-item { transition: none; }
+
+/* Keep the main actions visible and put occasional controls behind disclosures. */
+#appShell.is-dashboard-view .sidebar-date-controls,
+#appShell .sidebar-tools > [data-sidebar-action="help"],
+#appShell .schedule-actions > .view-switch { display: none; }
+#appShell .schedule-actions > .calendar-view-menu { display: block; }
+#appShell .calendar-view-menu > summary { min-height: 44px; border-radius: 8px; }
+#appShell > .toolbar { box-shadow: none; }
+#appShell :is(.calendar-workspace, .toolbar-leading > .language-switch) { box-shadow: none; }
+#appShell:not(.is-dashboard-view) #calendarEmptyState { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; padding: 6px 12px; background: var(--panel); border-color: var(--line); }
+#appShell #calendarEmptyState h2 { font-size: 14px; }
+#appShell #calendarEmptyState .empty-actions { display: flex; flex-wrap: wrap; gap: 6px; width: auto; }
+
+#appShell #dashboardStart { margin: 0 0 8px; padding: 8px 0; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; }
+#appShell #dashboardStart h2 { font-size: 15px; }
+#dashboardPage .dashboard-now-grid { grid-template-columns: minmax(0, 1fr); }
+#dashboardPage .dashboard-tools { margin: 4px 0 16px; border-bottom: 1px solid var(--line); }
+#dashboardPage .dashboard-tools > summary { min-height: 44px; padding: 12px 0; color: var(--refine-accent); font-weight: 700; cursor: pointer; }
+#dashboardPage .dashboard-tool-actions { display: flex; flex-wrap: wrap; gap: 8px; padding-block: 4px 12px; }
+#dashboardPage .dashboard-tool-actions > button { min-height: 44px; }
+#dashboardPage .dashboard-tools .dashboard-wayfinding { position: static; box-shadow: none; }
+#dashboardPage .dashboard-panel, #dashboardPage .dashboard-planning-panel { box-shadow: none; }
+#dashboardPage .dashboard-planning-panel > summary { min-height: 64px; }
+#dashboardPage .dashboard-planning-panel:not([open]) .dashboard-planning-subtitle { display: none; }
+#dashboardPage .dashboard-timeline-item .dashboard-event-date { background: var(--soft-line); }
+
+/* Date, time and zoom controls share the existing calendar menu. */
+#appShell #moreActions #calendarZoom:not([hidden]) { display: flex; justify-content: space-between; width: 100%; box-shadow: none; }
+#appShell #moreActions #calendarZoom > button { flex: 0 0 44px; width: 44px; min-height: 44px; padding: 0; text-align: center; }
+#appShell #moreActions .more-actions-menu .ghost-btn { border-color: transparent; background: transparent; box-shadow: none; }
+#appShell #moreActions .more-actions-menu .ghost-btn:is(:hover, :focus-visible) { background: var(--refine-tint); }
+#appShell #calendarShortcuts[open] > #calendarPulse { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin: 6px 0 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
+#appShell #calendarShortcuts #calendarPulse > * { grid-column: 1; grid-row: auto; }
+#appShell #calendarShortcuts .calendar-pulse-summary { display: none; }
+#appShell #calendarShortcuts .calendar-next-spotlight { width: 100%; min-width: 0; }
+#appShell #calendarShortcuts .date-ribbon { display: grid; grid-template-columns: 36px minmax(0, 1fr) 36px; gap: 4px; }
+#appShell #calendarShortcuts .date-ribbon-days { display: grid; grid-template-columns: repeat(7, minmax(40px, 1fr)); gap: 4px; overflow-x: auto; }
+#appShell #calendarShortcuts .date-ribbon :is(button, .date-ribbon-day) { min-height: 44px; padding-inline: 0; text-align: center; }
+#appShell #calendarShortcuts #calendarPulse > .quick-calendar-nav { display: grid; grid-template-columns: minmax(0, 1fr); width: 100%; gap: 8px; padding: 0; background: transparent; }
+#appShell #calendarShortcuts .quick-calendar-nav label:not([hidden]) { display: grid; gap: 4px; }
+#appShell #calendarShortcuts .quick-calendar-nav :is(input, select) { width: 100%; min-height: 44px; }
+#appShell #calendarShortcuts .quick-calendar-nav .quick-side-toggle { display: inline-flex; min-height: 44px; }
+
+#authScreen .auth-schedule-card { display: none; }
+
+@media (min-width: 741px) {
+  #appShell .schedule-actions { display: flex; flex-wrap: wrap; align-items: center; }
+  #appShell #moreActions > .more-actions-menu { width: min(390px, calc(100vw - 40px)); max-height: min(70dvh, 560px); overflow-y: auto; }
+}
+
+@media (max-width: 740px) {
+  #appShell:not(.panels-hide-controls) .mobile-action-dock { display: none; }
+  #appShell:not(.panels-hide-controls) :is(.more-actions-menu, .planner-options-panel, .calendar-view-menu-panel) { bottom: max(8px, env(safe-area-inset-bottom)); }
+}

@@ -79,11 +79,11 @@
         <span><small id="calendarNextKicker"></small><strong id="calendarNextTitle"></strong><span id="calendarNextMeta"></span></span>
       </button>
       <nav class="date-ribbon" id="dateRibbon" aria-label="Quick date navigator">
-        <button class="date-ribbon-arrow" type="button" data-ribbon-shift="-7" aria-label="Previous seven days" title="Previous seven days">‹</button>
+        <button class="date-ribbon-arrow" type="button" data-ribbon-shift="-7" data-keep-menu-open aria-label="Previous seven days" title="Previous seven days">‹</button>
         <div class="date-ribbon-days" id="dateRibbonDays"></div>
-        <button class="date-ribbon-arrow" type="button" data-ribbon-shift="7" aria-label="Next seven days" title="Next seven days">›</button>
+        <button class="date-ribbon-arrow" type="button" data-ribbon-shift="7" data-keep-menu-open aria-label="Next seven days" title="Next seven days">›</button>
       </nav>`;
-    document.getElementById('calendarInsights').after(pulse);
+    document.getElementById('calendarShortcuts').append(pulse);
     const previousNextCommitment = document.getElementById('mobileNextCommitment');
     if (previousNextCommitment) previousNextCommitment.hidden = true;
     pulse.addEventListener('click', event => {

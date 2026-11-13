@@ -43,7 +43,7 @@ const hooks = { ...React,
     }
   }
 };
-const ownerSync = { userId: null, loaded: true, row: { schedule: {} }, confirmedRow: { schedule: {} }, status: 'SYNCED',
+const ownerSync = { userId: null, loaded: true, row: { schedule: {} }, confirmedRow: { schedule: {} }, status: 'SUBSCRIBED',
   refresh: async () => {}, acceptConfirmed: async () => {}, saveActivity: async () => {}, deleteActivity: async () => {} };
 const client = { auth: {
   onAuthStateChange(fn) { authListener = fn; return { data: { subscription: { unsubscribe() {} } } }; },
@@ -54,12 +54,15 @@ const client = { auth: {
 const realLoad = Module._load;
 Module._load = function (request, parent) {
   if (request === 'react') return hooks;
-  if (request === 'react-native') return { ActivityIndicator: 'Spinner', View: 'View', Text: 'Text', Pressable: 'Pressable', Image: 'Image',
+  if (request === 'react-native') return { ActivityIndicator: 'Spinner', View: 'View', Text: 'Text', Pressable: 'Pressable', Image: 'Image', ScrollView: 'ScrollView',
     StyleSheet: { create: value => value }, AppState: { currentState: 'active', addEventListener: () => ({ remove() {} }) },
     Linking: { openURL: async () => { if (websiteFails) throw Error('unavailable'); } }, Platform: { OS: 'ios', select: value => value.ios || value.default } };
   if (request === 'react-native-safe-area-context') return { SafeAreaView: 'SafeAreaView', SafeAreaProvider: 'SafeAreaProvider' };
   if (request === '@react-native-async-storage/async-storage') return storage;
   if (request === 'lucide-react-native') return new Proxy({}, { get: (_object, key) => key === '__esModule' ? false : String(key) });
+  if (request === '../ui/AppearanceContext' && parent?.filename === path.join(mobile, 'src/screens/OnboardingScreen.js')) {
+    return { useAppearance: () => appearance, useThemeStyles: createStyles => createStyles(appearance.colors) };
+  }
   if (parent?.filename === path.join(mobile, 'src/App.js')) {
     if (/\.(png|jpg)$/.test(request)) return 'bundled-image';
     if (request === './lib/supabase') return { supabase: client };
@@ -80,17 +83,24 @@ Module._load = function (request, parent) {
     const names = { './screens/WelcomeScreen': 'WelcomeScreen', './screens/OnboardingScreen': 'OnboardingScreen',
       './screens/SignInScreen': 'SignInScreen', './screens/SignUpScreen': 'SignUpScreen', './screens/TrialCalendarScreen': 'TrialCalendarScreen',
       './screens/PersonalizeCalendarScreen': 'PersonalizeCalendarScreen', './screens/HomeScreen': 'HomeScreen',
-      './screens/FamilyScreen': 'FamilyScreen', './calendar/CalendarScreen': 'CalendarScreen', './ui/AccountSettings': 'AccountSettings', './ui/SyncStatus': 'SyncStatus', './ui/PreviewDraftReview': 'PreviewDraftReview' };
-    if (names[request]) return { __esModule: true, default: names[request], signInCopy: { en: {} }, signUpCopy: { en: {} }, trialCopy: { en: {} } };
+      './screens/FamilyScreen': 'FamilyScreen', './calendar/CalendarScreen': 'CalendarScreen', './ui/AccountSettings': 'AccountSettings', './ui/SyncStatus': 'SyncStatus',
+      './ui/PreviewDraftReview': 'PreviewDraftReview', './ui/WeeklyBrief': 'WeeklyBrief' };
+    if (names[request]) return { __esModule: true, default: names[request], signInCopy: { en: { backToCreate: 'Back to create account' } }, signUpCopy: { en: {} }, trialCopy: { en: {} } };
   }
   return realLoad.apply(this, arguments);
 };
-const filename = path.join(mobile, 'src/App.js');
-const compiled = new Module(filename, module); compiled.filename = filename; compiled.paths = Module._nodeModulePaths(path.dirname(filename));
-compiled._compile(babel.transformSync(fs.readFileSync(filename, 'utf8'), { filename, babelrc: false, configFile: false,
-  plugins: [[jsx, { runtime: 'automatic' }], commonjs] }).code + '\nexports.__Workspace = Workspace; exports.__BottomNavigation = BottomNavigation;', filename);
-const Workspace = compiled.exports.__Workspace;
-const BottomNavigation = compiled.exports.__BottomNavigation;
+function compileScreen(relativePath, exportCode = '') {
+  const filename = path.join(mobile, relativePath);
+  const compiled = new Module(filename, module);
+  compiled.filename = filename;
+  compiled.paths = Module._nodeModulePaths(path.dirname(filename));
+  const { code } = babel.transformSync(fs.readFileSync(filename, 'utf8'), { filename, babelrc: false, configFile: false,
+    plugins: [[jsx, { runtime: 'automatic' }], commonjs] });
+  compiled._compile(code + exportCode, filename);
+  return compiled.exports;
+}
+const { __Workspace: Workspace, __BottomNavigation: BottomNavigation } = compileScreen('src/App.js',
+  '\nexports.__Workspace = Workspace; exports.__BottomNavigation = BottomNavigation;');
 function find(element, type, predicate = () => true) {
   if (!element || typeof element !== 'object') return null;
   if (element.type === type && predicate(element)) return element;
@@ -98,9 +108,10 @@ function find(element, type, predicate = () => true) {
   for (const child of [children].flat(Infinity)) { const result = find(child, type, predicate); if (result) return result; }
   return null;
 }
-async function mount() {
+async function mount(session = null) {
   for (const cell of previousHost?.cells || []) cell?.cleanup?.();
-  values.clear(); currentSession = null; preview = null; lastImport = null; websiteFails = false;
+  values.clear(); currentSession = session; preview = null; lastImport = null; websiteFails = false;
+  Object.assign(ownerSync, { loaded: true, row: { schedule: {} }, status: 'SUBSCRIBED' });
   ownerSync.acceptConfirmed = async () => {};
   sharedRead = async source => ({ ownerId: source.ownerId, calendarId: source.id, canWrite: false,
     calendar: { id: source.id, name: source.name, ownerId: source.ownerId, data: {} } });
@@ -113,6 +124,56 @@ async function mount() {
   await app.settle(); return app;
 }
 const answers = { people: 'children', view: 'week', week: 'sunday', hours: 'evening', reminders: '30' };
+test('early setup review keeps the selected answer and applies only confirmed edits', async () => {
+  const { default: OnboardingScreen } = compileScreen('src/screens/OnboardingScreen.js');
+  const state = { cells: [], cursor: 0, effects: [] };
+  let saved;
+  const props = { language: 'en', onDraftChange: async () => {}, onBack: () => {},
+    onComplete: async value => { saved = value; } };
+  const pressable = label => {
+    host = state; state.cursor = 0;
+    const tree = OnboardingScreen(props);
+    for (const effect of state.effects.splice(0)) effect();
+    return find(tree, 'Pressable', element => (element.props.accessibilityLabel ?? find(element, 'Text')?.props.children) === label)?.props;
+  };
+  assert.equal(pressable('The whole family · Default').accessibilityState.checked, true);
+  pressable('My children').onPress();
+  pressable('Review choices now').onPress();
+  assert.ok(pressable('Edit Planning for. Current choice is My children.'));
+  pressable('Edit Opening view. Current choice is Agenda.').onPress();
+  pressable('Month').onPress();
+  pressable('Cancel').onPress();
+  pressable('Edit Opening view. Current choice is Agenda.').onPress();
+  pressable('Day').onPress();
+  pressable('Apply choice').onPress();
+  await pressable('Save & continue').onPress();
+  assert.deepEqual(saved, { ...preferences.DEFAULTS, people: 'children', view: 'day' });
+});
+test('restored sign-in offers the weekly brief only after the Home schedule is available', async () => {
+  const app = await mount({ user: { id: 'account-a', email: 'test@example.com' } });
+  Object.assign(ownerSync, { row: null, status: 'CONNECTING' });
+  assert.equal(app.screen('WeeklyBrief').ready, false);
+  ownerSync.status = 'OFFLINE';
+  assert.equal(app.screen('WeeklyBrief').ready, false);
+  ownerSync.row = { schedule: { calendars: [{ id: 'sports', name: 'Sports' }], calendarData: { sports: { activities: [] } } } };
+  let brief = app.screen('WeeklyBrief');
+  assert.equal(brief.userId, 'account-a');
+  assert.equal(brief.calendar.id, 'sports');
+  assert.equal(brief.ready, true);
+  assert.equal(brief.cached, true);
+  assert.equal(brief.active, true);
+  app.screen('SyncStatus').onReviewOpenChange(true);
+  assert.equal(app.screen('WeeklyBrief').active, false);
+  app.screen('SyncStatus').onReviewOpenChange(false);
+  assert.equal(app.screen('WeeklyBrief').active, true);
+  brief.onOpenCalendar('2026-11-08');
+  assert.equal(app.screen('CalendarScreen').focusDate, '2026-11-08');
+  assert.equal(app.screen('WeeklyBrief').active, false);
+  Object.assign(ownerSync, { row: null, status: 'SUBSCRIBED' });
+  brief = app.screen('WeeklyBrief');
+  assert.equal(brief.ready, true);
+  assert.equal(brief.calendar, undefined);
+});
 test('primary entry reaches questions, review survives signup→preview→welcome→review', async () => {
   const app = await mount(); await app.screen('WelcomeScreen').onGetStarted();
   assert.ok(app.screen('OnboardingScreen')); assert.equal(preview, null);
@@ -134,11 +195,15 @@ test('direct preview does not require questions or an account and resumes the sa
 test('reviewed answers reach the authenticated calendar and remain editable through Account', async () => {
   const app = await mount(); await app.screen('WelcomeScreen').onGetStarted();
   await app.screen('OnboardingScreen').onComplete(answers); await app.screen('SignUpScreen').onSignIn();
+  assert.equal(app.screen('SignInScreen').backLabel, 'Back to create account');
+  app.screen('SignInScreen').onBack();
+  assert.equal(app.screen('SignUpScreen').hasPreferences, true);
+  await app.screen('SignUpScreen').onSignIn();
   app.screen('SignInScreen').onEmailChange('test@example.com'); app.screen('SignInScreen').onPasswordChange('test-password');
   await app.screen('SignInScreen').onSignIn(); await app.settle();
   assert.deepEqual(app.screen('CalendarScreen').preferences, answers);
   app.screen('HomeScreen').onOpenDate('2026-01-30', '05:00');
-  find(app.render(), 'Pressable', element => element.props.accessibilityLabel === 'Account').props.onPress();
+  find(app.render(), BottomNavigation).props.onChange('account');
   app.screen('AccountSettings').onPreferences(); await app.settle();
   assert.equal(app.screen('OnboardingScreen').initialDraft.review, true);
   const updated = { ...answers, hours: 'morning' };
@@ -146,7 +211,7 @@ test('reviewed answers reach the authenticated calendar and remain editable thro
   assert.deepEqual(app.screen('CalendarScreen').preferences, updated);
   assert.equal(app.screen('CalendarScreen').focusDate, calendarTools.dateKey(new Date()));
   assert.equal(app.screen('CalendarScreen').focusTime, null);
-  find(app.render(), 'Pressable', element => element.props.accessibilityLabel === 'Account').props.onPress();
+  find(app.render(), BottomNavigation).props.onChange('account');
   app.screen('AccountSettings').onPreferences(); await app.settle();
   app.screen('OnboardingScreen').onBack();
   assert.ok(app.screen('HomeScreen'));

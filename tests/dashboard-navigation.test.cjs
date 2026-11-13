@@ -6,9 +6,11 @@ const { preferencesFor, nextPlan, countdownPhase, sections } = require('../asset
 const engine = require('../assets/dashboard-planning.js');
 
 test('dashboard preferences accept only known section names and keep no duplicate values', () => {
-  assert.deepEqual(preferencesFor(null), { collapsed: [] });
+  const defaults = { collapsed: ['priority', 'prep', 'handoffs', 'outlook', 'special'] };
+  assert.deepEqual(preferencesFor(null), defaults);
+  assert.deepEqual(preferencesFor({ collapsed: [] }), { collapsed: [] });
   assert.deepEqual(preferencesFor({ collapsed: ['today', 'today', 'unknown', {}, 'prep'] }), { collapsed: ['today', 'prep'] });
-  assert.deepEqual(preferencesFor({ collapsed: 'all' }), { collapsed: [] });
+  assert.deepEqual(preferencesFor({ collapsed: 'all' }), defaults);
 });
 test('Next up prioritizes ongoing or upcoming timed plans ahead of all-day items', () => {
   const holiday = { id: 'holiday', allDay: true, eventType: 'holiday' }, timed = { id: 'lesson', start: '17:00' };
@@ -48,7 +50,8 @@ function fixture({ saved, blocked = false, small = false } = {}) {
       return [];
     }
     before(child) { moves.push([this.name, 'before', child.name]); }
-    prepend(child) { moves.push([this.name, 'prepend', child.name]); }
+    after(child) { moves.push([this.name, 'after', child.name]); }
+    append(child) { moves.push([this.name, 'append', child.name]); }
     focus() { focus.push(this); }
     getBoundingClientRect() { return { left: 0, right: 500, top: 0, bottom: 1000, width: 500 }; }
     scrollTo() {}
@@ -89,7 +92,7 @@ test('collapsed sections persist per calendar and returning to a calendar restor
   f.toggle('outlook');
   assert.deepEqual(JSON.parse(f.store.get('family:dashboard-sections-v1')).collapsed, ['prep', 'outlook']);
   f.scope('work'); f.window.KidsSyncDashboard.refresh();
-  assert(f.panelNodes.get('prep').open); assert(f.panelNodes.get('outlook').open);
+  assert.equal(f.panelNodes.get('prep').open, false); assert.equal(f.panelNodes.get('outlook').open, false);
   f.scope('family'); f.window.KidsSyncDashboard.refresh();
   assert.equal(f.panelNodes.get('prep').open, false); assert.equal(f.panelNodes.get('outlook').open, false);
 });
@@ -97,7 +100,7 @@ test('blocked storage retains choices in this session and announces that limit a
   const f = fixture({ blocked: true }); f.toggle('prep');
   assert.match(f.bar.querySelector('[data-dashboard-status]').textContent, /session only/);
   f.scope('work'); f.window.KidsSyncDashboard.refresh(); f.scope('family'); f.window.KidsSyncDashboard.refresh();
-  assert.equal(f.panelNodes.get('prep').open, false);
+  assert.equal(f.panelNodes.get('prep').open, true);
   assert.equal(f.store.size, 0);
 });
 test('section shortcuts expand the destination, respect reduced motion and save the choice', () => {
@@ -143,5 +146,5 @@ test('the phone layout promotes important plans and preparation before the outlo
   const f = fixture({ small: true });
   assert.deepEqual(f.moves.at(-1), ['dashboardPlanMain', 'before', 'dashboardPlanSide']);
   f.media.matches = false; f.media.handlers.change();
-  assert.deepEqual(f.moves.at(-1), ['.dashboard-side-column', 'prepend', 'dashboardPlanSide']);
+  assert.deepEqual(f.moves.at(-1), ['.dashboard-side-column .dashboard-timeline-panel', 'after', 'dashboardPlanSide']);
 });

@@ -23,12 +23,12 @@ test('welcome leads with a family-specific headline and an explicitly labelled p
   assert.equal((welcome.match(/<h1\b/g) || []).length, 1);
   assert.match(welcome, /class="welcome-hero-peek" aria-labelledby="welcomeExampleTitle"/);
   assert.match(welcome, /data-i18n="welcome.heroExample">Example family plans/);
-  assert.match(welcome, /class="welcome-board-link" href="#welcomePreview"/);
+  assert.match(welcome, /class="welcome-secondary-btn" href="#welcomePreview"/);
   assert.doesNotMatch(welcome, /class="welcome-hero-visual" aria-hidden="true"/);
   assert.match(welcome, /fetchpriority="high" width="1920" height="1281"/);
-  assert(welcome.indexOf('welcome-overview-band') > welcome.indexOf('welcome-hero'));
+  assert(welcome.indexOf('welcome-preview-section') > welcome.indexOf('welcome-hero'));
   assert(!welcome.includes('welcome-scroll-link'));
-  for (const id of ['welcomeTryHero', 'welcomeSignInHero', 'welcomeTryPreview', 'welcomeTryHow']) assert(welcome.includes(`id="${id}"`), id);
+  for (const id of ['welcomeTryHero', 'welcomeSignIn', 'welcomeTryPreview']) assert(welcome.includes(`id="${id}"`), id);
 });
 
 test('the product-led hero uses normal layout flow and keeps its example visible on phones', () => {
@@ -40,8 +40,7 @@ test('the product-led hero uses normal layout flow and keeps its example visible
   assert.match(html, /"welcome.heroExample": "家庭日程示例"/);
   assert.match(css, /\.welcome-hero-visual::after \{ display: none/);
   assert.match(css, /scroll-margin-top: 96px/);
-  assert.match(css, /\.welcome-trial-points \{[^}]*display: flex/);
-  assert.match(html, /"welcome.previewBlank": "从空白日历开始"/);
+  assert.match(html, /"welcome.howActionCopy": "体验从空白日历开始，无需账户。"/);
 });
 
 test('welcome has a phone layout and reduced motion support', () => {
@@ -59,7 +58,7 @@ test('landing touch controls do not depend on unreleased calendar mobile styles'
 });
 
 test('hero shows supported family differences without touching the real schedule', () => {
-  const hero = html.slice(html.indexOf('<section class="welcome-hero">'), html.indexOf('<div class="welcome-overview-band">'));
+  const hero = html.slice(html.indexOf('<section class="welcome-hero">'), html.indexOf('<section class="welcome-preview-section"'));
   assert.equal((hero.match(/class="welcome-family-lane /g) || []).length, 2);
   assert.equal((hero.match(/class="welcome-handoff-details"/g) || []).length, 2);
   for (const key of ['heroPickup', 'heroBring', 'heroConflictTitle', 'heroConflictBody']) assert(hero.includes(`data-i18n="welcome.${key}"`));

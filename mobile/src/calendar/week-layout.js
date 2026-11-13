@@ -1,12 +1,12 @@
 const GUTTER_WIDTH = 48;
-const MIN_DAY_WIDTH = 100;
+const MIN_DAY_WIDTH = 76;
 const MAX_DAY_WIDTH = 116;
 const INITIAL_LEAD_MINUTES = 30;
 
 function weekGeometry(viewportWidth) {
-  const viewport = Number.isFinite(Number(viewportWidth)) ? Math.max(280, Number(viewportWidth)) : 350;
+  const viewport = Number.isFinite(Number(viewportWidth)) ? Math.max(1, Number(viewportWidth)) : 350;
   const dayWidth = Math.max(MIN_DAY_WIDTH, Math.min(MAX_DAY_WIDTH,
-    Math.round((viewport - GUTTER_WIDTH) / 5)));
+    Math.floor((viewport - GUTTER_WIDTH) / 3)));
   return {
     gutterWidth: GUTTER_WIDTH,
     dayWidth,
@@ -16,9 +16,14 @@ function weekGeometry(viewportWidth) {
 }
 
 function initialScrollOffset(initialHour, hourHeight) {
-  const hour = Number.isFinite(Number(initialHour)) ? Math.max(0, Math.min(23, Number(initialHour))) : 8;
+  const hour = Number.isFinite(Number(initialHour)) ? Math.max(0, Math.min(24, Number(initialHour))) : 8;
   const height = Number.isFinite(Number(hourHeight)) && Number(hourHeight) > 0 ? Number(hourHeight) : 64;
   return Math.max(0, (hour - INITIAL_LEAD_MINUTES / 60) * height);
 }
 
-module.exports = { GUTTER_WIDTH, MIN_DAY_WIDTH, MAX_DAY_WIDTH, INITIAL_LEAD_MINUTES, weekGeometry, initialScrollOffset };
+function weekOffset(selectedIndex, dayWidth, viewportWidth) {
+  const left = (selectedIndex - 1) * dayWidth;
+  return Math.max(0, Math.min(left, dayWidth * 7 - viewportWidth));
+}
+
+module.exports = { GUTTER_WIDTH, MIN_DAY_WIDTH, MAX_DAY_WIDTH, INITIAL_LEAD_MINUTES, weekGeometry, initialScrollOffset, weekOffset };

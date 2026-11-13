@@ -24,6 +24,20 @@ test('home model expands recurrence and keeps only future-relevant plans in Next
   assert.equal(upcomingOccurrences(events, new Date(2026, 9, 30), 8).filter(item => item.event.id === 'weekly').length, 1);
 });
 
+test('Home keeps overnight activities visible until the segment for today ends', () => {
+  const overnight = {
+    id: 'overnight', title: 'Camp', startDate: '2026-10-30', endDate: '2026-10-31',
+    start: '21:00', end: '06:00',
+  };
+  const openingDay = buildHomeModel([overnight], [], new Date(2026, 9, 30, 22));
+  assert.equal(openingDay.nextUp[0]?.dateKey, '2026-10-30');
+  const morning = buildHomeModel([overnight], [], new Date(2026, 9, 31, 5, 59));
+  assert.equal(morning.nextUp[0]?.dateKey, '2026-10-31');
+  const ended = buildHomeModel([overnight], [], new Date(2026, 9, 31, 6));
+  assert.equal(ended.nextUp.length, 0);
+  assert.equal(ended.today.length, 1);
+});
+
 test('handoff attention is limited to child-specific timed plans without an assigned adult', () => {
   assert.equal(needsHandoff(events[1], kids), true);
   assert.equal(needsHandoff(events[2], kids), false);

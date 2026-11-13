@@ -17,14 +17,16 @@ function Version({ label, event, t }) {
   </View>;
 }
 
-/** Small persistent owner-sync status; destructive queue discard is confirmed. */
-export default function SyncStatus({ sync, language = 'en' }) {
+/** Owner-sync status shown only while saving or when something needs attention. */
+export default function SyncStatus({ sync, language = 'en', reviewOpen, onReviewOpenChange }) {
   const { colors } = useAppearance();
   const s = useThemeStyles(createStyles);
   const t = copy[language] || copy.en;
-  const [open, setOpen] = useState(false), [confirm, setConfirm] = useState(false), [busy, setBusy] = useState(false), [failed, setFailed] = useState(false);
+  const [confirm, setConfirm] = useState(false), [busy, setBusy] = useState(false), [failed, setFailed] = useState(false);
   if (!sync?.userId) return null;
   const status = sync.status, count = sync.pendingCount || 0;
+  // A healthy, fully saved calendar does not need to take up permanent screen space.
+  if (status === 'SUBSCRIBED' && count === 0 && !reviewOpen) return null;
   const warning = ['CONFLICT', 'AUTH_REQUIRED', 'STORAGE_ERROR', 'ERROR'].includes(status);
   const Icon = warning ? TriangleAlert : status === 'OFFLINE' ? CloudOff : status === 'SUBSCRIBED' ? CloudCheck : RefreshCw;
   async function run(action) {
@@ -32,16 +34,16 @@ export default function SyncStatus({ sync, language = 'en' }) {
     try { await action(); setConfirm(false); } catch { setFailed(true); }
     finally { setBusy(false); }
   }
-  const close = () => { if (!busy) { setOpen(false); setConfirm(false); setFailed(false); } };
+  const close = () => { if (!busy) { onReviewOpenChange(false); setConfirm(false); setFailed(false); } };
   return <>
     <View style={[s.bar, warning && s.warning]}>
       <Icon size={17} color={warning ? colors.red : colors.muted} />
       <View style={{ flex: 1 }}><Text accessibilityLiveRegion="polite" style={s.status}>{t[status] || t.ERROR}</Text>
         {count > 0 && <Text style={s.hint}>{t.pending(count)}</Text>}</View>
-      {(count > 0 || warning) ? <Button secondary onPress={() => setOpen(true)} style={s.action}>{t.review}</Button>
+      {(count > 0 || warning) ? <Button secondary onPress={() => onReviewOpenChange(true)} style={s.action}>{t.review}</Button>
         : ['OFFLINE', 'CACHED', 'ERROR'].includes(status) && <Button secondary onPress={() => run(sync.refresh)} disabled={busy} style={s.action}>{t.retry}</Button>}
     </View>
-    {open && <Sheet title={t.review} closeLabel={t.close} onClose={close} busy={busy}>
+    {reviewOpen && <Sheet title={t.review} closeLabel={t.close} onClose={close} busy={busy}>
       <ScrollView contentContainerStyle={s.body} keyboardShouldPersistTaps="handled">
         <Text style={s.text}>{status === 'CONFLICT' ? t.conflict : status === 'STORAGE_ERROR' ? t.storage : status === 'AUTH_REQUIRED' ? t.auth : count ? t.retained : t.cached}</Text>
         {(sync.pending || []).map(operation => {

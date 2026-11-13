@@ -11,7 +11,7 @@ import { useAppearance, useThemeStyles } from '../ui/AppearanceContext';
 
 export const familyCopy = {
   en: {
-    title: 'Family', subtitle: 'People, permissions and pickups in one place.', people: 'People', inbox: 'Inbox', pickups: 'Pickups', refresh: 'Refresh family access',
+    title: 'Family', subtitle: 'People, permissions and pickups in one place.', people: 'People', inbox: 'Inbox', pickups: 'Pickups', summaryPerson: 'person', summaryPeople: 'people', summaryPending: 'pending', summaryHandoffs: 'handoffs', refresh: 'Refresh family access',
     calendar: 'Calendar', owner: 'Owner', you: 'You', members: 'Calendar access', membersBody: 'Invite trusted adults and choose exactly what they can do.',
     invite: 'Invite someone', email: 'Email address', note: 'Optional note', noteHint: 'For example, School pickups and practice updates',
     role: 'Permission', viewer: 'Viewer', commenter: 'Commenter', editor: 'Editor', pending: 'Pending', active: 'Active', declined: 'Declined', banned: 'Blocked',
@@ -25,21 +25,21 @@ export const familyCopy = {
     upcoming: 'Upcoming plans', noUpcoming: 'No upcoming plans in this shared calendar.', comments: 'Calendar comments', comment: 'Write a comment', commentHint: 'Keep the whole family updated', sendComment: 'Post comment', noComments: 'No comments yet.', commentsUnavailable: 'Comments could not be loaded. Refresh and try again.',
     handoff: 'Family Handoff Center', handoffBody: 'Ask an accepted calendar member to confirm a pickup.', noPickupEvents: 'No upcoming activities need a handoff.',
     assign: 'Assign pickup', assignTo: 'Responsible adult', request: 'Request confirmation', awaiting: 'Awaiting confirmation', accepted: 'Accepted', pickupDeclined: 'Declined', cancelled: 'Cancelled', unassigned: 'Not assigned',
-    yourRequests: 'Your pickup requests', noRequests: 'No pickup requests need your response.', pickupAccept: 'I can do it', pickupDecline: 'I cannot',
+    yourRequests: 'Your pickup requests', requestsBody: 'Confirm or decline requests assigned to you.', noRequests: 'No pickup requests need your response.', pickupAccept: 'I can do it', pickupDecline: 'I cannot',
     pickupUnavailable: 'Shared pickup coordination is unavailable. The family-coordination database migration may still need to be applied.',
     loadFailed: 'Family access could not be fully loaded. Check your connection and refresh.', sharedLoadFailed: 'Some shared calendars could not be loaded. Open an invitation to try again.', saveFailed: 'That change was not confirmed. Refresh and try again.',
     familyDetails: 'Family details', familyDetailsBody: 'Keep calendar updates here. Add or rename children on the KidsSync website.', openComments: 'Open calendar comments', ownerCommentHint: 'Use this thread for updates tied to your family calendar.', manageProfiles: 'Manage family profiles (Web)', webFailed: 'The KidsSync website could not be opened. Check your connection and try again.',
     close: 'Close', saving: 'Saving…', web: 'Open web calendar', family: 'Family', allDay: 'All day', notAvailable: 'Unavailable',
   },
   zh: {
-    title: '家庭', subtitle: '统一管理成员、权限与接送。', people: '成员', inbox: '收件箱', pickups: '接送', refresh: '刷新家庭权限', calendar: '日历', owner: '所有者', you: '你',
+    title: '家庭', subtitle: '统一管理成员、权限与接送。', people: '成员', inbox: '收件箱', pickups: '接送', summaryPerson: '位成员', summaryPeople: '位成员', summaryPending: '项待处理', summaryHandoffs: '项接送', refresh: '刷新家庭权限', calendar: '日历', owner: '所有者', you: '你',
     members: '日历权限', membersBody: '邀请信任的成人，并明确选择他们可以做什么。', invite: '邀请成员', email: '邮箱地址', note: '备注（选填）', noteHint: '例如：负责学校接送和训练更新',
     role: '权限', viewer: '查看者', commenter: '评论者', editor: '编辑者', pending: '待接受', active: '已加入', declined: '已拒绝', banned: '已屏蔽',
     viewerHint: '可以查看日历', commenterHint: '可以查看和评论', editorHint: '可在支持的编辑器中修改', sendInvite: '创建邀请', inviteCreated: '邀请已创建', inviteHonesty: '邀请会显示在对方的 KidsSync 收件箱中，不会自动发送电子邮件。',
     shareLink: '共享邀请链接', shared: '已打开共享菜单', shareFailed: '无法打开共享菜单。邀请仍会显示在对方的 KidsSync 收件箱中。', noMembers: '尚未与其他人共享。', memberDetails: '权限详情', saveRole: '保存权限', remove: '移除权限', removeConfirm: '从日历中移除此成员？', keep: '保留权限',
     incoming: '日历邀请', incomingBody: '接受邀请后才能查看日历和接送请求。', noInvites: '目前没有日历邀请。', accept: '接受', decline: '拒绝', openShared: '打开共享日历', openCalendar: '在日历中查看', from: '来自', invitationNote: '备注',
     sharedCalendar: '共享日历', readOnly: '查看者权限为只读。', canComment: '你可以查看并评论此日历。', editorActive: '编辑需要此设备具备受支持且已验证的写入连接，否则此日历保持只读。', upcoming: '即将开始', noUpcoming: '此共享日历暂无即将开始的安排。', comments: '日历评论', comment: '写评论', commentHint: '让全家了解最新情况', sendComment: '发布评论', noComments: '暂无评论。', commentsUnavailable: '无法加载评论，请刷新重试。',
-    handoff: '家庭交接中心', handoffBody: '请已接受邀请的日历成员确认接送。', noPickupEvents: '近期没有需要交接的活动。', assign: '安排接送', assignTo: '负责人', request: '请求确认', awaiting: '等待确认', accepted: '已接受', pickupDeclined: '已拒绝', cancelled: '已取消', unassigned: '未安排', yourRequests: '你的接送请求', noRequests: '目前没有需要回复的接送请求。', pickupAccept: '我可以', pickupDecline: '我无法接送', pickupUnavailable: '共享接送暂不可用，可能仍需应用 family-coordination 数据库迁移。',
+    handoff: '家庭交接中心', handoffBody: '请已接受邀请的日历成员确认接送。', noPickupEvents: '近期没有需要交接的活动。', assign: '安排接送', assignTo: '负责人', request: '请求确认', awaiting: '等待确认', accepted: '已接受', pickupDeclined: '已拒绝', cancelled: '已取消', unassigned: '未安排', yourRequests: '你的接送请求', requestsBody: '确认或拒绝分配给你的接送请求。', noRequests: '目前没有需要回复的接送请求。', pickupAccept: '我可以', pickupDecline: '我无法接送', pickupUnavailable: '共享接送暂不可用，可能仍需应用 family-coordination 数据库迁移。',
     loadFailed: '无法完整加载家庭权限，请检查网络后刷新。', sharedLoadFailed: '部分共享日历无法加载。请打开邀请重试。', saveFailed: '服务器未确认此更改，请刷新重试。',
     familyDetails: '家庭资料', familyDetailsBody: '在这里查看日历更新。请前往 KidsSync 网站添加或重命名孩子。', openComments: '打开日历评论', ownerCommentHint: '使用此讨论串记录与家庭日历相关的更新。', manageProfiles: '管理家庭资料（网页）', webFailed: '无法打开 KidsSync 网站，请检查网络后重试。',
     close: '关闭', saving: '保存中…', web: '打开网页日历', family: '全家', allDay: '全天', notAvailable: '不可用',
@@ -64,9 +64,14 @@ function Badge({ children, tone = 'neutral' }) {
   return <View style={[s.badge, tone === 'good' && s.badgeGood, tone === 'warn' && s.badgeWarn]}><Text style={[s.badgeText, tone === 'good' && s.badgeGoodText, tone === 'warn' && s.badgeWarnText]}>{children}</Text></View>;
 }
 
-function SectionHeading({ icon: Icon, title, body, action }) {
+function SectionHeading({ icon: Icon, title, body, action, actionLabel }) {
   const { colors } = useAppearance(), s = useThemeStyles(createStyles);
-  return <View style={s.sectionHeading}><View style={s.sectionIcon}><Icon size={19} color={colors.primary} /></View><View style={s.flex}><Text accessibilityRole="header" style={s.sectionTitle}>{title}</Text>{!!body && <Text style={s.body}>{body}</Text>}</View>{action}</View>;
+  return <View style={s.sectionHeading}><View style={s.sectionIcon}><Icon size={19} color={colors.primary} /></View><View style={s.flex}><Text accessibilityRole="header" style={s.sectionTitle}>{title}</Text>{!!body && <Text style={s.body}>{body}</Text>}</View>{!!action && <Pressable accessibilityRole="button" accessibilityLabel={actionLabel} onPress={action} style={({ pressed }) => [s.sectionAction, pressed && s.pressed]}><MailPlus size={17} color={colors.primary} /><Text style={s.sectionActionText}>{actionLabel}</Text></Pressable>}</View>;
+}
+
+function EmptyState({ icon: Icon, title, body }) {
+  const { colors } = useAppearance(), s = useThemeStyles(createStyles);
+  return <View style={s.emptyState}><View style={s.emptyIcon}><Icon size={20} color={colors.primary} /></View><View style={s.flex}><Text style={s.emptyTitle}>{title}</Text>{!!body && <Text style={s.body}>{body}</Text>}</View></View>;
 }
 
 function EventLine({ event, occurrenceDate, language, t, trailing, onPress }) {
@@ -286,6 +291,12 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
     } catch { if (mounted.current) setError(t.webFailed); }
   }
 
+  function beginInvite() {
+    setInvite({ email: '', role: 'viewer', note: '' });
+    setCreatedInvite(null); setSheetError(''); setNotice('');
+    presentSheet({ type: 'invite' });
+  }
+
   async function postComment() {
     const context = sheet?.context;
     if (!context) return;
@@ -305,11 +316,13 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
     ...sharedContexts.flatMap(context => context.pickups.map(pickup => ({ pickup, calendar: context.calendar, events: context.calendar.data.activities })))]
     .filter(item => item.pickup.status === 'pending' && sameEmail(item.pickup.assignee_email, account.email));
   const inboxPending = invitations.filter(item => item.status === 'pending').length + incomingPickups.length;
+  const peopleCount = members.filter(item => item.status === 'active').length + 1;
   const pickupFor = occurrence => ownerPickups.find(item => String(item.event_id) === String(occurrence.event.id) && item.occurrence_date === occurrence.dateKey && item.status !== 'cancelled');
 
   return <View style={s.page}>
     <View style={s.header}><View style={s.flex}><Text accessibilityRole="header" style={s.title}>{t.title}</Text><Text style={s.body}>{t.subtitle}</Text></View><IconButton icon={RefreshCw} label={t.refresh} onPress={() => load({ pull: true })} disabled={refreshing || !!busy} /></View>
     {calendars.length > 1 && <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.calendars}>{calendars.map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityState={{ selected: item.id === calendar?.id }} onPress={() => onSelectCalendar?.(item.id)} style={[s.calendarChip, item.id === calendar?.id && s.calendarSelected]}><Text numberOfLines={1} style={[s.calendarText, item.id === calendar?.id && s.calendarTextSelected]}>{item.name}</Text></Pressable>)}</ScrollView>}
+    {!loading && <Text style={s.overview}>{peopleCount} {peopleCount === 1 ? t.summaryPerson : t.summaryPeople} · {inboxPending} {t.summaryPending} · {upcoming.length} {t.summaryHandoffs}</Text>}
     <View accessibilityRole="tablist" style={s.tabs}>{[
       ['people', t.people, UsersRound, 0], ['inbox', t.inbox, Inbox, inboxPending], ['pickups', t.pickups, Bell, 0],
     ].map(([value, label, Icon, count]) => <Pressable key={value} accessibilityRole="tab" accessibilityState={{ selected: tab === value }} onPress={() => setTab(value)} style={[s.tab, tab === value && s.tabSelected]}><View><Icon size={17} color={tab === value ? colors.onPrimary : colors.muted} />{!!count && <View style={[s.tabBadge, tab === value && s.tabBadgeSelected]}><Text style={[s.tabBadgeText, tab === value && s.tabBadgeTextSelected]}>{count > 9 ? '9+' : count}</Text></View>}</View><Text style={[s.tabText, tab === value && s.tabTextSelected]}>{label}</Text></Pressable>)}</View>
@@ -317,21 +330,20 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
       {!!error && <Text accessibilityRole="alert" style={u.error}>{error}</Text>}
       {!!notice && <Text accessibilityRole="status" style={s.notice}>{notice}</Text>}
       {loading ? <ActivityIndicator color={colors.primary} style={s.loader} /> : tab === 'people' ? <>
-        <SectionHeading icon={ShieldCheck} title={t.members} body={t.membersBody} action={ownerCalendar && <IconButton icon={MailPlus} label={t.invite} onPress={() => { setInvite({ email: '', role: 'viewer', note: '' }); setCreatedInvite(null); setSheetError(''); setNotice(''); presentSheet({ type: 'invite' }); }} />} />
+        <SectionHeading icon={ShieldCheck} title={t.members} body={t.membersBody} action={ownerCalendar ? beginInvite : null} actionLabel={t.invite} />
         <View style={s.personRow}><View style={s.avatar}><UserRound size={19} color={colors.primary} /></View><View style={s.flex}><Text style={s.rowTitle}>{account.email}</Text><Text style={s.body}>{t.you}</Text></View><Badge tone="good">{t.owner}</Badge></View>
-        {members.length ? members.map(member => <Pressable key={member.id} accessibilityRole="button" onPress={() => { setMemberRole(member.role); setRemoveConfirm(false); setSheetError(''); presentSheet({ type: 'member', member }); }} style={({ pressed }) => [s.personRow, pressed && s.pressed]}><View style={s.avatar}><UserRound size={19} color={colors.primary} /></View><View style={s.flex}><Text numberOfLines={1} style={s.rowTitle}>{member.member_email}</Text><Text style={s.body}>{statusLabel(member.status, t)}</Text></View><Badge tone={member.status === 'active' ? 'good' : 'warn'}>{t[member.role] || member.role}</Badge><ChevronRight size={18} color={colors.muted} /></Pressable>) : <Text style={s.empty}>{t.noMembers}</Text>}
-        <Button secondary icon={MailPlus} onPress={() => { setInvite({ email: '', role: 'viewer', note: '' }); setCreatedInvite(null); setSheetError(''); setNotice(''); presentSheet({ type: 'invite' }); }} disabled={!ownerCalendar}>{t.invite}</Button>
+        {members.length ? members.map(member => <Pressable key={member.id} accessibilityRole="button" onPress={() => { setMemberRole(member.role); setRemoveConfirm(false); setSheetError(''); presentSheet({ type: 'member', member }); }} style={({ pressed }) => [s.personRow, pressed && s.pressed]}><View style={s.avatar}><UserRound size={19} color={colors.primary} /></View><View style={s.flex}><Text numberOfLines={1} style={s.rowTitle}>{member.member_email}</Text><Text style={s.body}>{statusLabel(member.status, t)}</Text></View><Badge tone={member.status === 'active' ? 'good' : 'warn'}>{t[member.role] || member.role}</Badge><ChevronRight size={18} color={colors.muted} /></Pressable>) : <EmptyState icon={UsersRound} title={t.noMembers} body={t.membersBody} />}
         <SectionHeading icon={UserRound} title={t.familyDetails} body={t.familyDetailsBody} />
         <Button secondary icon={MessageCircle} onPress={openOwnerComments} disabled={!ownerCalendar}>{t.openComments}</Button>
         <Button secondary icon={UsersRound} onPress={openFamilyProfiles}>{t.manageProfiles}</Button>
       </> : tab === 'inbox' ? <>
-        <SectionHeading icon={Bell} title={t.yourRequests} body={t.noRequests} />
+        <SectionHeading icon={Bell} title={t.yourRequests} body={t.requestsBody} />
         {incomingPickups.length ? incomingPickups.map(({ pickup, calendar: pickupCalendar, events }) => {
           const event = safeArray(events).find(item => String(item.id) === String(pickup.event_id));
           return <View key={pickup.id} style={s.request}><Text style={s.rowTitle}>{event?.title || pickupCalendar?.name || t.pickups}</Text><Text style={s.body}>{dateLabel(pickup.occurrence_date, language)} · {pickupCalendar?.name}</Text><View style={s.actions}><Button secondary disabled={!!busy} onPress={() => answerPickup(pickup, 'declined')}>{t.pickupDecline}</Button><Button disabled={!!busy} onPress={() => answerPickup(pickup, 'accepted')}>{t.pickupAccept}</Button></View></View>;
-        }) : <Text style={s.empty}>{t.noRequests}</Text>}
+        }) : <EmptyState icon={Bell} title={t.noRequests} />}
         <SectionHeading icon={Inbox} title={t.incoming} body={t.incomingBody} />
-        {invitations.length ? invitations.map(invitation => <View key={invitation.id} style={s.invitation}><View style={s.rowTop}><View style={s.flex}><Text style={s.rowTitle}>{invitation.calendar_name}</Text><Text style={s.body}>{t.from}: {invitation.owner_email}</Text></View><Badge tone={invitation.status === 'active' ? 'good' : 'warn'}>{t[invitation.role] || invitation.role}</Badge></View>{!!invitation.invitation_note && <Text style={s.note}>{t.invitationNote}: {invitation.invitation_note}</Text>}{invitation.status === 'pending' ? <View style={s.actions}><Button secondary disabled={!!busy} onPress={() => respondInvitation(invitation, 'declined')}>{t.decline}</Button><Button disabled={!!busy} onPress={() => respondInvitation(invitation, 'active')}>{t.accept}</Button></View> : <Button secondary icon={CalendarDays} onPress={() => openShared(invitation)}>{t.openShared}</Button>}</View>) : <Text style={s.empty}>{t.noInvites}</Text>}
+        {invitations.length ? invitations.map(invitation => <View key={invitation.id} style={s.invitation}><View style={s.rowTop}><View style={s.flex}><Text style={s.rowTitle}>{invitation.calendar_name}</Text><Text style={s.body}>{t.from}: {invitation.owner_email}</Text></View><Badge tone={invitation.status === 'active' ? 'good' : 'warn'}>{t[invitation.role] || invitation.role}</Badge></View>{!!invitation.invitation_note && <Text style={s.note}>{t.invitationNote}: {invitation.invitation_note}</Text>}{invitation.status === 'pending' ? <View style={s.actions}><Button secondary disabled={!!busy} onPress={() => respondInvitation(invitation, 'declined')}>{t.decline}</Button><Button disabled={!!busy} onPress={() => respondInvitation(invitation, 'active')}>{t.accept}</Button></View> : <Button secondary icon={CalendarDays} onPress={() => openShared(invitation)}>{t.openShared}</Button>}</View>) : <EmptyState icon={Inbox} title={t.noInvites} body={t.incomingBody} />}
       </> : <>
         <SectionHeading icon={UsersRound} title={t.handoff} body={t.handoffBody} />
         {!!pickupError && <Text accessibilityRole="alert" style={u.error}>{pickupError}</Text>}
@@ -339,7 +351,7 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
           const pickup = pickupFor(occurrence), mine = pickup && sameEmail(pickup.assignee_email, account.email);
           const trailing = pickup ? <Badge tone={pickup.status === 'accepted' ? 'good' : 'warn'}>{statusLabel(pickup.status, t)}</Badge> : <Badge>{t.unassigned}</Badge>;
           return <View key={occurrence.key}><EventLine event={occurrence.event} occurrenceDate={occurrence.dateKey} language={language} t={t} trailing={trailing} onPress={() => { setAssignee(pickup?.assignee_email || pickupMembers[0]?.email || ''); setSheetError(''); presentSheet({ type: 'pickup', occurrence, pickup }); }} />{mine && pickup.status === 'pending' && <View style={s.inlineActions}><Pressable accessibilityRole="button" onPress={() => answerPickup(pickup, 'declined')} style={s.textButton}><Text style={s.textButtonLabel}>{t.pickupDecline}</Text></Pressable><Pressable accessibilityRole="button" onPress={() => answerPickup(pickup, 'accepted')} style={s.textButton}><Text style={s.textButtonLabel}>{t.pickupAccept}</Text></Pressable></View>}</View>;
-        }) : <Text style={s.empty}>{t.noPickupEvents}</Text>}
+        }) : <EmptyState icon={UsersRound} title={t.noPickupEvents} body={t.handoffBody} />}
       </>}
     </ScrollView>
 
@@ -384,15 +396,15 @@ function SharedCalendarContent({ language, t, context, comments, commentsLoading
 
 function createStyles(colors) { return StyleSheet.create({
   page: { flex: 1, backgroundColor: colors.page }, flex: { flex: 1, minWidth: 0 }, pressed: { opacity: 0.55 },
-  header: { minHeight: 62, paddingHorizontal: 17, paddingVertical: 9, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.line }, title: { color: colors.ink, fontSize: 22, fontWeight: '700' }, body: { color: colors.muted, fontSize: 12, lineHeight: 18 },
+  header: { minHeight: 62, paddingHorizontal: 17, paddingVertical: 9, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.line }, title: { color: colors.ink, fontSize: 22, fontWeight: '700' }, body: { color: colors.muted, fontSize: 12, lineHeight: 18 }, overview: { color: colors.muted, fontSize: 11, lineHeight: 16, fontWeight: '600', paddingHorizontal: 18, paddingTop: 9 },
   calendars: { paddingHorizontal: 16, paddingVertical: 9, gap: 8 }, calendarChip: { minHeight: 40, maxWidth: 180, justifyContent: 'center', paddingHorizontal: 13, borderWidth: 1, borderColor: colors.line, borderRadius: 8, backgroundColor: colors.surface }, calendarSelected: { borderColor: colors.primary, backgroundColor: colors.primarySoft }, calendarText: { color: colors.ink, fontSize: 13, fontWeight: '600' }, calendarTextSelected: { color: colors.primary },
   tabs: { marginHorizontal: 16, marginVertical: 9, minHeight: 45, flexDirection: 'row', backgroundColor: colors.surfaceRaised, borderRadius: 8, padding: 3, gap: 3 }, tab: { flex: 1, minHeight: 39, borderRadius: 6, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5 }, tabSelected: { backgroundColor: colors.primary }, tabText: { color: colors.muted, fontSize: 11, fontWeight: '700' }, tabTextSelected: { color: colors.onPrimary },
   tabBadge: { position: 'absolute', top: -7, right: -9, minWidth: 16, height: 16, borderRadius: 8, paddingHorizontal: 3, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.error }, tabBadgeSelected: { backgroundColor: colors.surface }, tabBadgeText: { color: colors.white, fontSize: 9, fontWeight: '700' }, tabBadgeTextSelected: { color: colors.error },
   scroll: { flex: 1 }, content: { padding: 17, paddingBottom: 32, gap: 12 }, loader: { margin: 30 }, notice: { color: colors.success, backgroundColor: colors.successSoft, borderRadius: 8, padding: 11, fontSize: 12, lineHeight: 18 },
-  sectionHeading: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 6, marginBottom: 3 }, sectionIcon: { width: 35, height: 35, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft }, sectionTitle: { color: colors.ink, fontSize: 17, fontWeight: '700', lineHeight: 22 },
+  sectionHeading: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 6, marginBottom: 3 }, sectionIcon: { width: 35, height: 35, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft }, sectionTitle: { color: colors.ink, fontSize: 17, fontWeight: '700', lineHeight: 22 }, sectionAction: { minHeight: 40, flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 9, borderRadius: 8, backgroundColor: colors.primarySoft }, sectionActionText: { color: colors.primary, fontSize: 11, fontWeight: '700' },
   personRow: { minHeight: 68, flexDirection: 'row', alignItems: 'center', gap: 10, borderTopWidth: 1, borderTopColor: colors.line, paddingVertical: 11 }, avatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' }, rowTitle: { color: colors.ink, fontSize: 14, lineHeight: 20, fontWeight: '700' }, rowTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   badge: { minHeight: 24, maxWidth: 100, borderRadius: 8, backgroundColor: colors.surfaceRaised, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' }, badgeText: { color: colors.muted, fontSize: 10, fontWeight: '700' }, badgeGood: { backgroundColor: colors.successSoft }, badgeGoodText: { color: colors.success }, badgeWarn: { backgroundColor: colors.warningSoft }, badgeWarnText: { color: colors.warning },
-  empty: { color: colors.muted, fontSize: 13, lineHeight: 20, paddingVertical: 16, textAlign: 'center' }, invitation: { borderTopWidth: 1, borderTopColor: colors.line, paddingVertical: 14, gap: 10 }, note: { color: colors.ink, fontSize: 12, lineHeight: 19, backgroundColor: colors.surface, padding: 10, borderRadius: 8 }, actions: { flexDirection: 'row', gap: 8, alignItems: 'center' }, request: { borderWidth: 1, borderColor: colors.line, borderRadius: 8, padding: 12, gap: 9, backgroundColor: colors.surface },
+  empty: { color: colors.muted, fontSize: 13, lineHeight: 20, paddingVertical: 16, textAlign: 'center' }, emptyState: { minHeight: 76, flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 13, borderTopWidth: 1, borderTopColor: colors.line }, emptyIcon: { width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft }, emptyTitle: { color: colors.ink, fontSize: 13, lineHeight: 19, fontWeight: '700' }, invitation: { borderTopWidth: 1, borderTopColor: colors.line, paddingVertical: 14, gap: 10 }, note: { color: colors.ink, fontSize: 12, lineHeight: 19, backgroundColor: colors.surface, padding: 10, borderRadius: 8 }, actions: { flexDirection: 'row', gap: 8, alignItems: 'center' }, request: { borderWidth: 1, borderColor: colors.line, borderRadius: 8, padding: 12, gap: 9, backgroundColor: colors.surface },
   eventLine: { minHeight: 65, flexDirection: 'row', alignItems: 'center', gap: 9, borderTopWidth: 1, borderTopColor: colors.line, paddingVertical: 10 }, eventIcon: { width: 34, height: 34, borderRadius: 8, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }, eventEmoji: { fontSize: 17 }, inlineActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8, paddingBottom: 8 }, textButton: { minHeight: 40, justifyContent: 'center', paddingHorizontal: 10 }, textButtonLabel: { color: colors.primary, fontSize: 12, fontWeight: '700' },
   sheetContent: { paddingHorizontal: 19, paddingTop: 6, paddingBottom: 30, gap: 14 }, roleHint: { color: colors.muted, fontSize: 12, lineHeight: 18 }, honesty: { color: colors.muted, fontSize: 12, lineHeight: 19, borderLeftWidth: 3, borderLeftColor: colors.primary, paddingLeft: 10 }, success: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.successSoft, borderRadius: 8, padding: 11 }, successText: { color: colors.success, fontSize: 13, fontWeight: '700' }, confirm: { gap: 10, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.line },
   assignees: { borderTopWidth: 1, borderTopColor: colors.line }, assignee: { minHeight: 54, flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: 1, borderBottomColor: colors.line, paddingHorizontal: 8 }, assigneeSelected: { backgroundColor: colors.primarySoft }, sharedTitle: { color: colors.ink, fontSize: 20, lineHeight: 26, fontWeight: '700' }, capability: { color: colors.muted, fontSize: 13, lineHeight: 21, backgroundColor: colors.primarySoft, borderRadius: 8, padding: 11 }, sheetHeading: { color: colors.ink, fontSize: 16, lineHeight: 22, fontWeight: '700', marginTop: 8 }, commentLoader: { minHeight: 48 }, comment: { borderTopWidth: 1, borderTopColor: colors.line, paddingVertical: 10, gap: 3 }, commentBody: { color: colors.muted, fontSize: 13, lineHeight: 20 },

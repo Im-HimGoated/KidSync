@@ -74,9 +74,13 @@ function dayBrief(occurrences, options = {}) {
 function eventIsStillRelevant(occurrence, now) {
   if (occurrence.dateKey !== calendar.dateKey(now)) return true;
   if (occurrence.event.allDay) return true;
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const date = occurrence.date || calendar.parseDateKey(occurrence.dateKey);
+  const segment = calendar.daySegment(occurrence.event, date);
+  if (segment) return segment.end > nowMinutes;
   const match = /^(\d{1,2}):(\d{2})$/.exec(occurrence.event.end || occurrence.event.start || '');
   if (!match) return true;
-  return Number(match[1]) * 60 + Number(match[2]) >= now.getHours() * 60 + now.getMinutes();
+  return Number(match[1]) * 60 + Number(match[2]) >= nowMinutes;
 }
 
 function needsHandoff(event, kids) {
@@ -89,7 +93,8 @@ function buildHomeModel(events, kids, now = new Date()) {
   const date = isDate(now) ? new Date(now) : new Date();
   date.setHours(0, 0, 0, 0);
   const all = upcomingOccurrences(events, date, 90);
-  const nextWeek = all.filter(item => item.date < calendar.addDays(date, 7) && !isCancelled(item.event));
+  const weekEnd = calendar.addDays(date, 7);
+  const nextWeek = all.filter(item => item.date < weekEnd && !isCancelled(item.event));
   const todayKey = calendar.dateKey(date);
   const today = nextWeek.filter(item => item.dateKey === todayKey);
   const upcoming = all.filter(item => !isCancelled(item.event) && eventIsStillRelevant(item, now));

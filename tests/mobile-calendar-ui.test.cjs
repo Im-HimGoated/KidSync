@@ -181,6 +181,23 @@ test('minimum-height short events receive disjoint visual lanes and independent 
   assert.equal(layout.timed[2].lanes, 1);
 });
 
+test('compact Week gives the highest-priority active conflict its real time and Day retains every event', () => {
+  const earlier = activity({ id: 'early', start: '14:00', end: '15:30', importance: 'low' });
+  const important = activity({ id: 'priority', start: '15:00', end: '16:00', importance: 'high' });
+  const cancelled = activity({ id: 'cancelled', start: '14:15', end: '15:15', importance: 'high', status: 'cancelled' });
+  const other = activity({ id: 'separate', start: '17:00', end: '18:00' });
+  const holiday = activity({ id: 'holiday', title: 'Z holiday', allDay: true, isBuiltInHoliday: true });
+  const allDay = activity({ id: 'all-day', title: 'A all day', allDay: true });
+  const events = [other, earlier, cancelled, important, allDay, holiday];
+  const week = layoutDay(events, { compact: true });
+  assert.deepEqual(week.timed.map(item => item.event.id), ['priority', 'separate']);
+  assert.equal(week.timed[0].start, 15 * 60);
+  assert.equal(week.timed[0].overlapStart, 14 * 60);
+  assert.equal(week.timed[0].overlapCount, 2);
+  assert.deepEqual(week.allDay.map(item => item.id), ['holiday', 'all-day']);
+  assert.deepEqual(layoutDay(events).timed.map(item => item.event.id), ['early', 'cancelled', 'priority', 'separate']);
+});
+
 test('overlap grouping uses displayed bounds, preserves numeric IDs and includes late-night minimum-height blocks', () => {
   const events = [activity({ id: 1, start: '12:00', end: '13:00' }), activity({ id: 2, start: '12:30', end: '13:30' }),
     activity({ id: 3, start: '13:15', end: '14:00' }), activity({ id: 4, start: '23:58', end: '23:59' })];

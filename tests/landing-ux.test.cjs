@@ -84,7 +84,7 @@ test('landing additions are scoped, accessible, bilingual and offline-ready', ()
   assert.match(welcome, /href="#welcomeHeadline"[^>]+data-i18n="welcome.skip"/);
   assert.match(welcome, /aria-controls="welcomeSections"/);
   assert.match(welcome, /role="status" aria-live="polite"/);
-  assert.match(welcome, /class="welcome-trial-note welcome-trial-points"/);
+  assert.match(welcome, /class="welcome-trial-note"[^>]*>Your preview starts blank and does not require an account\./);
   assert.match(welcome, /data-i18n="welcome\.openPlanner">Start with a blank calendar/);
   assert(!/localStorage|sessionStorage|\bstate\.\w|saveState|openNewEvent/.test(script));
   assert.match(css, /#welcomeScreen \[hidden\] \{ display: none !important; \}/);

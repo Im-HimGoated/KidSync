@@ -11,7 +11,7 @@ const experience = fs.readFileSync(path.join(root, 'assets/experience.js'), 'utf
 const experienceCss = fs.readFileSync(path.join(root, 'assets/experience.css'), 'utf8');
 
 test('first-run and navigation keep direct actions without blocking appearance setup', () => {
-  assert.match(html, /id="dashboardStart"[\s\S]*id="dashboardStartEvent"[\s\S]*id="dashboardStartChild"/);
+  assert.match(html, /id="dashboardStart"[\s\S]*id="dashboardStartChild"[\s\S]*id="dashboardStartExample"/);
   assert.match(html, /id="moreActions"[\s\S]*class="more-actions-group"/);
   assert.doesNotMatch(html, /setTimeout\(maybeShowAppearancePrompt/);
   assert.match(html, /calendarZoom: 0\.75/);
@@ -81,7 +81,8 @@ test('sharing uses separate accessible people and file panels', () => {
   assert.match(html, /id="shareFilesPanel" role="tabpanel" aria-labelledby="shareFilesTab"/);
   assert.match(html, /KidsSyncExperience\?\.openShare\(isCalendarOwner\(\)\)/);
   assert.match(worker, /"\.\/assets\/experience\.css"/);
-  assert.match(worker, /"\.\/assets\/experience\.js"/);
+  const scriptAsset = html.match(/src="(\.\/assets\/experience\.js\?v=\d+)"/);
+  assert(scriptAsset && worker.includes(`"${scriptAsset[1]}"`));
 });
 
 test('share tabs keep owner tasks separate and hide member controls from non-owners', () => {
@@ -101,7 +102,7 @@ test('share tabs keep owner tasks separate and hide member controls from non-own
     shareDialog: element({ querySelectorAll() { return tabs; } }),
     shareAccessPanel: element(), ownerCommentsPanel: element(), shareFilesPanel: element(),
     shareDialogIntro: element(), shareTabs: element(),
-    dashboardStartEvent: element(), dashboardStartChild: element(), dashboardStartExample: element()
+    dashboardStartChild: element(), dashboardStartExample: element()
   };
   const window = {};
   vm.runInNewContext(experience, {

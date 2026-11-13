@@ -5,6 +5,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, X } from 'lucide-react-native';
 import trial from '../lib/native-trial';
 import trialEditor from '../lib/trial-editor';
+import calendar from '../lib/calendar';
+import model from '../calendar/model';
+import getCalendarCopy from '../calendar/copy';
+import { CalendarViewPicker, DateStrip, MonthGrid, WeekGrid } from '../calendar/CalendarViews';
 import { Button } from '../calendar/ui';
 
 export const trialCopy = {
@@ -46,10 +50,6 @@ export const trialCopy = {
   }
 };
 
-function moveDay(key, amount) {
-  const [year, month, day] = key.split('-').map(Number);
-  return trial.dateKey(new Date(year, month - 1, day + amount));
-}
 function displayDate(key, language) {
   const [year, month, day] = key.split('-').map(Number);
   return new Date(year, month - 1, day).toLocaleDateString(language === 'zh' ? 'zh-CN' : 'en-US', { month: 'short', day: 'numeric', weekday: 'short' });
@@ -57,14 +57,31 @@ function displayDate(key, language) {
 
 export default function TrialCalendarScreen({ language, data, preferences, error, onSave, onDraft, onDelete, onRetry, onPersonalize, onBack }) {
   const t = trialCopy[language] || trialCopy.en;
+  const calendarCopy = getCalendarCopy(language), display = model.normalizeDisplayPreferences(preferences);
   const { colors } = useAppearance(), styles = useThemeStyles(createStyles);
   const [date, setDate] = useState(trial.dateKey());
+  const [view, setView] = useState(display.view);
+  const [focusedHour, setFocusedHour] = useState(display.initialHour);
+  const [focusRequest, setFocusRequest] = useState(0);
   const [editor, setEditor] = useState(null), [saving, setSaving] = useState(false), [deleting, setDeleting] = useState(null);
   const [pendingEditor, setPendingEditor] = useState(null), [opening, setOpening] = useState(false), [localError, setLocalError] = useState(false);
   const savingRef = useRef(false), openingRef = useRef(false);
-  const events = data.events.filter(event => event.startDate === date).sort((a, b) => Number(b.allDay) - Number(a.allDay) || a.start.localeCompare(b.start));
+  const selected = calendar.parseDateKey(date);
+  const events = model.sortAgenda(calendar.eventsForDate(data.events, selected), selected);
   const expired = data.elapsedMs >= trial.LIMIT_MS;
   const locked = saving || opening || expired;
+  const selectDate = value => setDate(calendar.dateKey(value));
+  function openDay(value, hour = focusedHour) {
+    selectDate(value);
+    setFocusedHour(hour);
+    setView('day');
+  }
+  function goToday() {
+    const now = new Date();
+    selectDate(now);
+    setFocusedHour(now.getHours() + now.getMinutes() / 60);
+    setFocusRequest(value => value + 1);
+  }
   async function persistEditor(values) {
     if (savingRef.current || openingRef.current || expired) return;
     openingRef.current = true; setOpening(true); setLocalError(false);
@@ -102,14 +119,20 @@ export default function TrialCalendarScreen({ language, data, preferences, error
       <Text style={styles.clock}>{trial.remainingLabel(data.elapsedMs)} {t.left}</Text>
     </View>
     <View style={styles.dateNav}>
-      <Pressable accessibilityRole="button" accessibilityLabel={t.previous} onPress={() => setDate(moveDay(date, -1))} style={styles.iconButton}><ChevronLeft size={20} color={colors.primary} /></Pressable>
+      <Pressable accessibilityRole="button" accessibilityLabel={calendarCopy.previousPeriod[view]} onPress={() => selectDate(model.movePeriod(selected, view, -1))} style={styles.iconButton}><ChevronLeft size={20} color={colors.primary} /></Pressable>
       <View style={styles.flex}><Text style={styles.date}>{displayDate(date, language)}</Text></View>
-      <Pressable accessibilityRole="button" onPress={() => setDate(trial.dateKey())} style={styles.textButton}><Text style={styles.link}>{t.today}</Text></Pressable>
-      <Pressable accessibilityRole="button" accessibilityLabel={t.next} onPress={() => setDate(moveDay(date, 1))} style={styles.iconButton}><ChevronRight size={20} color={colors.primary} /></Pressable>
+      <Pressable accessibilityRole="button" onPress={goToday} style={styles.textButton}><Text style={styles.link}>{t.today}</Text></Pressable>
+      <Pressable accessibilityRole="button" accessibilityLabel={calendarCopy.nextPeriod[view]} onPress={() => selectDate(model.movePeriod(selected, view, 1))} style={styles.iconButton}><ChevronRight size={20} color={colors.primary} /></Pressable>
     </View>
+    <View style={styles.viewPicker}><CalendarViewPicker view={view} language={language} onChange={setView} /></View>
     <ScrollView contentContainerStyle={styles.list} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
       {!!(error || localError) && <View style={styles.notice}><Text accessibilityRole="alert" style={styles.error}>{t[error] || t.saveFailed}</Text><Pressable accessibilityRole="button" disabled={saving || opening} onPress={() => { setLocalError(false); onRetry(); }} style={styles.textButton}><Text style={styles.link}>{t.retry}</Text></Pressable></View>}
       {data.draft && <Pressable accessibilityRole="button" disabled={locked} onPress={() => setEditor(data.draft)} style={styles.resume}><Pencil size={16} color={colors.primary} /><Text style={styles.link}>{t.resume}</Text></Pressable>}
+      {view === 'month' ? <MonthGrid date={selected} firstDay={display.firstDay} events={data.events} language={language} onDate={openDay} />
+        : view !== 'week' && <DateStrip date={selected} firstDay={display.firstDay} events={data.events} language={language} compact onDate={selectDate} />}
+      {(view === 'day' || view === 'week') && <WeekGrid key={focusRequest} date={selected} dayOnly={view === 'day'}
+        firstDay={display.firstDay} initialHour={focusedHour} events={data.events} language={language} onDate={selectDate}
+        onOpenDay={openDay} onEvent={openEditor} />}
       {!events.length && <View style={styles.empty}><CalendarDays size={36} color={colors.primary} /><Text style={styles.emptyTitle}>{t.empty}</Text><Text style={styles.secondary}>{t.emptyBody}</Text></View>}
       {events.map(event => <View key={event.id} style={[styles.event, event.child && styles.childEvent]}>
         <View style={styles.eventTop}><View style={styles.flex}><Text style={styles.time}>{event.allDay ? t.allDay : `${event.start}–${event.end}`}</Text><Text style={styles.eventTitle}>{event.title}</Text><Text style={styles.secondary}>{event.child || t.family}</Text></View>
@@ -190,6 +213,7 @@ function createStyles(colors, palettes) { return StyleSheet.create({
   clock: { color: colors.primary, fontSize: 12, fontVariant: ['tabular-nums'], backgroundColor: colors.primarySoft, padding: 9, borderRadius: 8 },
   iconButton: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }, textButton: { minWidth: 44, minHeight: 44, paddingHorizontal: 10, alignItems: 'center', justifyContent: 'center' },
   dateNav: { paddingHorizontal: 8, paddingVertical: 5, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderColor: colors.line, backgroundColor: colors.surface2 }, date: { color: colors.ink, fontSize: 15, fontWeight: '600' },
+  viewPicker: { paddingHorizontal: 16, paddingTop: 10 },
   list: { padding: 16, gap: 12, flexGrow: 1 }, empty: { paddingVertical: 34, alignItems: 'center', gap: 14 }, emptyTitle: { textAlign: 'center', fontSize: 22, lineHeight: 29, color: colors.ink, fontWeight: '600' },
   secondary: { color: colors.muted, fontSize: 14, lineHeight: 22 }, local: { fontSize: 11, lineHeight: 18, color: colors.muted, textAlign: 'center', marginTop: 10 },
   event: { borderWidth: 1, borderColor: colors.line, borderLeftWidth: 4, borderLeftColor: palettes.green.line, borderRadius: 12, padding: 13, backgroundColor: palettes.green.soft, gap: 5 },

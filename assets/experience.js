@@ -77,7 +77,8 @@
     groups.forEach(other => { if (other !== group) other.open = false; });
   }));
   more.addEventListener('click', event => {
-    if (event.target.closest('button')) more.open = false;
+    const button = event.target.closest('button');
+    if (button && !button.closest('[data-keep-menu-open]')) more.open = false;
   });
   tabs.forEach((tab, index) => {
     tab.addEventListener('click', () => selectShareTab(tab.dataset.shareTab));
@@ -89,7 +90,6 @@
       selectShareTab(tabs[target].dataset.shareTab, true);
     });
   });
-  document.getElementById('dashboardStartEvent').addEventListener('click', () => document.getElementById('dashboardAddEvent').click());
   document.getElementById('dashboardStartChild').addEventListener('click', () => document.getElementById('emptyAddKid').click());
   document.getElementById('dashboardStartExample').addEventListener('click', () => document.getElementById('loadPreset').click());
   localize();

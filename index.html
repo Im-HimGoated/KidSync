@@ -9829,13 +9829,13 @@
   <link rel="stylesheet" href="./assets/micro-motion.css?v=1">
   <link rel="stylesheet" href="./assets/calendar-ui-refresh.css?v=1">
   <link rel="stylesheet" href="./assets/landing-ux.css?v=1">
-  <link rel="stylesheet" href="./assets/welcome-refresh.css?v=5">
+  <link rel="stylesheet" href="./assets/welcome-refresh.css?v=6">
   <link rel="stylesheet" href="./assets/calendar-ux.css?v=1">
   <link rel="stylesheet" href="./assets/dashboard-planning.css?v=2">
   <link rel="stylesheet" href="./assets/dashboard-navigation.css?v=1">
   <link rel="stylesheet" href="./assets/dashboard-productivity.css?v=1">
   <link rel="stylesheet" href="./assets/calendar-planning.css?v=1">
-  <link rel="stylesheet" href="./assets/ui-refinement.css?v=1">
+  <link rel="stylesheet" href="./assets/ui-refinement.css?v=2">
   <link rel="stylesheet" href="./assets/mobile.css?v=96">
 </head>
 <body>
@@ -9878,7 +9878,6 @@
           <button class="language-option" type="button" data-language="zh" aria-pressed="false">中文</button>
         </div>
         <button class="welcome-signin-btn" type="button" id="welcomeSignIn" data-i18n="auth.signIn">Sign In</button>
-        <button class="welcome-primary-btn" type="button" id="welcomeTryNav" data-i18n="welcome.tryPlanner">Start free preview</button>
       </div>
       <button class="welcome-menu-toggle" id="welcomeMenuToggle" type="button" aria-expanded="false" aria-controls="welcomeSections" aria-label="Explore this page" data-i18n-aria="welcome.explorePage" hidden><span aria-hidden="true">☰</span></button>
     </header>
@@ -9888,21 +9887,16 @@
         <div class="welcome-hero-copy">
           <p class="welcome-eyebrow" data-i18n="welcome.eyebrow">A calendar built around family life</p>
           <h1 class="welcome-hero-tagline" id="welcomeHeadline" tabindex="-1"><span data-i18n="welcome.headline">Every kid. Every pickup.</span><span class="welcome-headline-accent" data-i18n="welcome.headlineAccent">One clear plan.</span></h1>
-          <p class="welcome-hero-description" data-i18n="welcome.description">A time on a calendar is only half the plan. Keep each child’s activities, the pickup adult, and what to bring together—so the next person has the whole picture.</p>
+          <p class="welcome-hero-description" data-i18n="welcome.description">See each child’s activities, who’s picking them up, and what to bring in one family calendar.</p>
           <div class="welcome-hero-actions">
             <button class="welcome-primary-btn" type="button" id="welcomeTryHero" data-i18n="welcome.tryPlanner">Start free preview</button>
-            <a class="welcome-secondary-btn" href="#welcomePreview" data-i18n="welcome.exploreSample">See KidsSync in action ↓</a>
+            <a class="welcome-secondary-btn" href="#welcomePreview" data-i18n="welcome.exploreSample">See a sample week</a>
           </div>
-          <ul class="welcome-trial-note welcome-trial-points" aria-label="Preview details" data-i18n-aria="welcome.previewDetails">
-            <li data-i18n="welcome.previewNoAccount">No account needed</li>
-            <li data-i18n="welcome.previewBlank">Starts with a blank calendar</li>
-            <li data-i18n="welcome.previewSave">Sign in only to save and sync</li>
-          </ul>
-          <p class="welcome-returning"><span data-i18n="welcome.alreadyHere">Already have a calendar?</span> <button type="button" id="welcomeSignInHero" data-i18n="auth.signIn">Sign In</button></p>
+          <p class="welcome-trial-note" data-i18n="welcome.howActionCopy">Your preview starts blank and does not require an account.</p>
         </div>
         <div class="welcome-hero-visual">
           <section class="welcome-hero-peek" aria-labelledby="welcomeExampleTitle">
-            <div class="welcome-board-topline"><span class="welcome-board-brand"><span class="welcome-peek-dot" aria-hidden="true"></span>KidsSync</span><span class="welcome-example-badge" data-i18n="welcome.heroExample">Example family plans</span></div>
+            <p class="welcome-example-badge" data-i18n="welcome.heroExample">Example family plans</p>
             <div class="welcome-board-heading"><div><p data-i18n="welcome.heroDay">Monday · After school</p><h2 id="welcomeExampleTitle" data-i18n="welcome.heroPlanTitle">The little details. Handled.</h2></div><img class="welcome-board-photo" src="./assets/kidssync-family-hero.jpg" alt="" decoding="async" fetchpriority="high" width="1920" height="1281"></div>
             <div class="welcome-family-lanes">
               <article class="welcome-family-lane welcome-lane-maya">
@@ -9917,27 +9911,10 @@
               </article>
             </div>
             <div class="welcome-conflict-example"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><div><strong data-i18n="welcome.heroConflictTitle">Same afternoon. Different kids.</strong><span data-i18n="welcome.heroConflictBody">Overlapping times don’t always mean a double booking.</span></div></div>
-            <a class="welcome-board-link" href="#welcomePreview"><span data-i18n="welcome.heroExplore">Explore the sample week</span><span aria-hidden="true">↗</span></a>
           </section>
         </div>
       </div>
     </section>
-    <div class="welcome-overview-band">
-          <ul class="welcome-capabilities" aria-label="What KidsSync helps families do" data-i18n-aria="welcome.highlights">
-            <li class="welcome-capability">
-              <span class="welcome-capability-number" aria-hidden="true">1</span>
-              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityPlan">Each kid has their own color</strong><small data-i18n="welcome.capabilityPlanDetail">Their plans stay distinct. Your week stays together.</small></span>
-            </li>
-            <li class="welcome-capability">
-              <span class="welcome-capability-number" aria-hidden="true">2</span>
-              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityConflicts">Conflicts that make sense</strong><small data-i18n="welcome.capabilityConflictsDetail">Spot double bookings for the same person.</small></span>
-            </li>
-            <li class="welcome-capability">
-              <span class="welcome-capability-number" aria-hidden="true">3</span>
-              <span class="welcome-capability-copy"><strong data-i18n="welcome.capabilityShare">Ready for the next caregiver</strong><small data-i18n="welcome.capabilityShareDetail">Pickup adults, places, and packing notes—not just a time.</small></span>
-            </li>
-          </ul>
-    </div>
 
     <section class="welcome-preview-section" id="welcomePreview">
       <div class="welcome-section-inner">
@@ -10004,49 +9981,35 @@
           </div>
         </div>
 
-        <div class="welcome-benefits">
-          <article class="welcome-benefit">
-            <span class="welcome-benefit-icon" aria-hidden="true">◫</span>
-            <h3 data-i18n="welcome.benefitOneTitle">One shared view</h3>
-            <p data-i18n="welcome.benefitOneBody">School, activities, birthdays, holidays, and routines stay together instead of scattered across apps.</p>
-          </article>
-          <article class="welcome-benefit">
-            <span class="welcome-benefit-icon" aria-hidden="true">!</span>
-            <h3 data-i18n="welcome.benefitTwoTitle">Catch conflicts early</h3>
-            <p data-i18n="welcome.benefitTwoBody">Overlapping plans stand out so pickup changes and double bookings do not become last-minute surprises.</p>
-          </article>
-          <article class="welcome-benefit">
-            <span class="welcome-benefit-icon" aria-hidden="true">✦</span>
-            <h3 data-i18n="welcome.benefitThreeTitle">Start without pressure</h3>
-            <p data-i18n="welcome.benefitThreeBody">Try the full planner first. Sign in when you are ready to keep the family schedule across devices.</p>
-          </article>
-        </div>
 
-        <section class="welcome-details" aria-labelledby="welcomeDetailsTitle">
-          <div class="welcome-details-copy">
-            <p class="welcome-section-kicker" data-i18n="welcome.detailsKicker">The details that make a plan useful</p>
-            <h2 id="welcomeDetailsTitle" data-i18n="welcome.detailsTitle">More than colored blocks on a calendar.</h2>
-            <p data-i18n="welcome.detailsBody">KidsSync keeps the context behind every commitment close to the schedule, so the next person knows what is happening and what they need to do.</p>
-          </div>
-          <dl class="welcome-detail-list">
-            <div class="welcome-detail-item">
-              <dt data-i18n="welcome.detailContextTitle">Plan with context</dt>
-              <dd data-i18n="welcome.detailContextBody">Keep locations, pickup notes, deadlines, and repeating rules attached to the event.</dd>
+        <details class="welcome-feature-details">
+          <summary data-i18n="welcome.featureDetails">Explore more features</summary>
+          <section class="welcome-details" aria-labelledby="welcomeDetailsTitle">
+            <div class="welcome-details-copy">
+              <p class="welcome-section-kicker" data-i18n="welcome.detailsKicker">The details that make a plan useful</p>
+              <h2 id="welcomeDetailsTitle" data-i18n="welcome.detailsTitle">More than colored blocks on a calendar.</h2>
+              <p data-i18n="welcome.detailsBody">KidsSync keeps the context behind every commitment close to the schedule, so the next person knows what is happening and what they need to do.</p>
             </div>
-            <div class="welcome-detail-item">
-              <dt data-i18n="welcome.detailAccessTitle">Share with clear access</dt>
-              <dd data-i18n="welcome.detailAccessBody">Owners manage access, editors update plans, and read-only viewers can follow along without changing anything.</dd>
-            </div>
-            <div class="welcome-detail-item">
-              <dt data-i18n="welcome.detailHandoffTitle">Family Handoff Center</dt>
-              <dd data-i18n="welcome.detailHandoffBody">Compare responsibilities, request pickup confirmations, and review schedule changes in one place.</dd>
-            </div>
-            <div class="welcome-detail-item">
-              <dt data-i18n="welcome.detailDashboardTitle">Understand the whole week</dt>
-              <dd data-i18n="welcome.detailDashboardBody">Compare busy days, workload by child, conflicts, and upcoming deadlines from one dashboard.</dd>
-            </div>
-          </dl>
-        </section>
+            <dl class="welcome-detail-list">
+              <div class="welcome-detail-item">
+                <dt data-i18n="welcome.detailContextTitle">Plan with context</dt>
+                <dd data-i18n="welcome.detailContextBody">Keep locations, pickup notes, deadlines, and repeating rules attached to the event.</dd>
+              </div>
+              <div class="welcome-detail-item">
+                <dt data-i18n="welcome.detailAccessTitle">Share with clear access</dt>
+                <dd data-i18n="welcome.detailAccessBody">Owners manage access, editors update plans, and read-only viewers can follow along without changing anything.</dd>
+              </div>
+              <div class="welcome-detail-item">
+                <dt data-i18n="welcome.detailHandoffTitle">Family Handoff Center</dt>
+                <dd data-i18n="welcome.detailHandoffBody">Compare responsibilities, request pickup confirmations, and review schedule changes in one place.</dd>
+              </div>
+              <div class="welcome-detail-item">
+                <dt data-i18n="welcome.detailDashboardTitle">Understand the whole week</dt>
+                <dd data-i18n="welcome.detailDashboardBody">Compare busy days, workload by child, conflicts, and upcoming deadlines from one dashboard.</dd>
+              </div>
+            </dl>
+          </section>
+        </details>
       </div>
     </section>
 
@@ -10083,10 +10046,6 @@
           </li>
         </ol>
 
-        <div class="welcome-how-action">
-          <span data-i18n="welcome.howActionCopy">Your preview starts blank and does not require an account.</span>
-          <button class="welcome-primary-btn" type="button" id="welcomeTryHow" data-i18n="welcome.tryNow">Start free preview</button>
-        </div>
       </div>
     </section>
 
@@ -10124,10 +10083,6 @@
           <details><summary data-i18n="welcome.questionConnections">Do I need to connect other services?</summary><p data-i18n="welcome.answerConnections">No. You can use the planner without connecting another service. Shared calendars require sign-in, while Google or Outlook imports require provider setup.</p></details>
         </div>
       </div>
-    </section>
-    <section class="welcome-final-cta" aria-labelledby="welcomeFinalTitle">
-      <div><p class="welcome-section-kicker" data-i18n="welcome.finalKicker">Less coordinating. More living.</p><h2 id="welcomeFinalTitle" data-i18n="welcome.finalTitle">Make room for a calmer week.</h2><p data-i18n="welcome.finalBody">Start with your family’s next plan. Build the rest at your own pace.</p></div>
-      <div class="welcome-final-actions"><button class="welcome-primary-btn" type="button" data-welcome-start data-i18n="welcome.tryPlanner">Start free preview</button><span data-i18n="welcome.finalNote">Starts blank · No account needed · Sign in to save</span></div>
     </section>
     <footer class="welcome-footer">
       <div class="welcome-wordmark"><span class="welcome-mark" aria-hidden="true"></span><span>Kids<span>Sync</span></span></div>
@@ -10371,46 +10326,46 @@
     <section class="dashboard-page" id="dashboardPage" aria-labelledby="dashboardPageTitle" hidden>
       <header class="dashboard-page-header">
         <div>
-          <p class="dashboard-page-kicker" data-i18n="dashboard.overviewKicker">Family overview</p>
           <h1 id="dashboardPageTitle" data-i18n="dashboard.title">Family Dashboard</h1>
           <p class="dashboard-greeting" id="dashboardGreeting"></p>
         </div>
         <div class="dashboard-page-actions" aria-label="Dashboard actions" data-i18n-aria="dashboard.actions">
           <button class="primary-btn" type="button" id="dashboardAddEvent"><span aria-hidden="true">＋</span><span data-i18n="dashboard.addEvent">Add event</span></button>
-          <button class="ghost-btn" type="button" id="dashboardScanGame"><span aria-hidden="true">▣</span><span data-i18n="gameScan.dashboardAction">Scan document</span></button>
-          <button class="ghost-btn" type="button" id="dashboardOpenLists"><span aria-hidden="true">☷</span><span data-i18n="dashboard.openLists">Open lists</span></button>
           <button class="ghost-btn" type="button" id="dashboardGoCalendar"><span aria-hidden="true">▣</span><span data-i18n="dashboard.openCalendar">Open calendar</span></button>
         </div>
       </header>
 
       <section class="dashboard-start" id="dashboardStart" aria-labelledby="dashboardStartTitle" hidden>
         <div>
-          <p class="dashboard-start-kicker" data-experience-text="startKicker">Get started</p>
           <h2 id="dashboardStartTitle" data-experience-text="startTitle">Build your family schedule</h2>
-          <p data-experience-text="startBody">Personalize the children or add your first event. You can explore with example events at any time.</p>
         </div>
         <div class="dashboard-start-actions">
-          <button class="primary-btn" type="button" id="dashboardStartEvent" data-experience-text="startEvent">Add first event</button>
           <button class="ghost-btn" type="button" id="dashboardStartChild" data-experience-text="startChild">Set up children</button>
           <button class="ghost-btn" type="button" id="dashboardStartExample" data-experience-text="startExample">Try example</button>
         </div>
       </section>
 
-      <div id="dashboardNow" class="dashboard-now-grid"></div>
-      <div class="dashboard-stats" id="dashboardStats"></div>
+      <details class="dashboard-tools" id="dashboardTools">
+        <summary data-i18n="dashboard.tools">Planning tools</summary>
+        <div class="dashboard-tool-actions">
+          <button class="ghost-btn" type="button" id="dashboardScanGame" data-i18n="gameScan.dashboardAction">Scan document</button>
+          <button class="ghost-btn" type="button" id="dashboardOpenLists" data-i18n="dashboard.openLists">Open lists</button>
+        </div>
+      </details>
 
       <div class="dashboard-page-grid">
         <div class="dashboard-main-column">
+          <div id="dashboardNow" class="dashboard-now-grid"></div>
           <div id="dashboardPlanMain" class="dashboard-planning-stack"></div>
           <section class="dashboard-panel dashboard-week-panel" aria-labelledby="dashboardWeekTitle">
             <div class="dashboard-panel-heading">
               <div>
-                <p class="dashboard-panel-kicker" data-i18n="dashboard.thisWeek">This week</p>
                 <h2 id="dashboardWeekTitle" data-i18n="dashboard.busyDays">Busy days</h2>
                 <p id="dashboardWeekRange"></p>
               </div>
             </div>
             <div class="dashboard-week-body">
+              <div class="dashboard-stats" id="dashboardStats"></div>
               <div class="dashboard-week-chart" id="dashboardWeekChart"></div>
               <h3 data-i18n="dashboard.workload">Workload by child</h3>
               <div class="kid-load-list" id="dashboardWeekWorkload"></div>
@@ -10420,9 +10375,7 @@
           <section class="dashboard-panel dashboard-updates-panel" aria-labelledby="dashboardUpdatesTitle">
             <div class="dashboard-panel-heading">
               <div>
-                <p class="dashboard-panel-kicker" data-i18n="dashboard.activityKicker">Family activity</p>
                 <h2 id="dashboardUpdatesTitle" data-i18n="dashboard.updatesTitle">Recent updates</h2>
-                <p data-i18n="dashboard.updatesNote">Changes and recently completed activities, with live timestamps.</p>
               </div>
             </div>
             <div class="dashboard-feed" id="dashboardUpdates"></div>
@@ -10430,25 +10383,21 @@
         </div>
 
         <aside class="dashboard-side-column" aria-label="Activity timeline" data-i18n-aria="dashboard.timelineAria">
-          <div id="dashboardPlanSide" class="dashboard-planning-stack"></div>
           <section class="dashboard-panel dashboard-timeline-panel" aria-labelledby="dashboardUpcomingTitle">
             <div class="dashboard-panel-heading">
               <div>
-                <p class="dashboard-panel-kicker" data-i18n="dashboard.nextKicker">Next up</p>
                 <h2 id="dashboardUpcomingTitle" data-i18n="dashboard.upcomingTitle">Upcoming events</h2>
-                <p data-i18n="dashboard.upcomingNote">The next activities and important dates.</p>
               </div>
             </div>
             <div class="dashboard-timeline" id="dashboardUpcoming"></div>
           </section>
 
+          <div id="dashboardPlanSide" class="dashboard-planning-stack"></div>
           <div id="dashboardSpecial" class="dashboard-planning-stack"></div>
           <section class="dashboard-panel dashboard-timeline-panel dashboard-past-panel" aria-labelledby="dashboardPastTitle">
             <div class="dashboard-panel-heading">
               <div>
-                <p class="dashboard-panel-kicker" data-i18n="dashboard.completedKicker">Recently completed</p>
                 <h2 id="dashboardPastTitle" data-i18n="dashboard.pastTitle">Past events</h2>
-                <p data-i18n="dashboard.pastNote">A record of what already happened.</p>
               </div>
             </div>
             <div class="dashboard-timeline" id="dashboardPast"></div>
@@ -10514,12 +10463,6 @@
             <button type="button" id="toggleWeekendsMenu"><span data-i18n="view.showWeekends">Show weekends</span><kbd aria-hidden="true">✓</kbd></button>
           </div>
         </details>
-        <div class="calendar-zoom" id="calendarZoom" role="group" aria-label="Calendar zoom" data-i18n-aria="aria.calendarZoom">
-          <button class="calendar-zoom-button" type="button" id="zoomOut" aria-label="Zoom out calendar" title="Zoom out calendar" data-i18n-aria="aria.zoomOut" data-i18n-title="aria.zoomOut"><span aria-hidden="true">−</span></button>
-          <span class="calendar-zoom-level" id="zoomLevel" aria-live="polite">100%</span>
-          <button class="calendar-zoom-button" type="button" id="zoomIn" aria-label="Zoom in calendar" title="Zoom in calendar" data-i18n-aria="aria.zoomIn" data-i18n-title="aria.zoomIn"><span aria-hidden="true">+</span></button>
-        </div>
-        <button class="ghost-btn feature-btn compact-toolbar-action sidebar-tooltip" type="button" id="openDashboard" aria-label="Dashboard" title="Dashboard" data-tooltip="Dashboard" data-i18n-aria="dashboard.open" data-i18n-title="dashboard.open" data-i18n-tooltip="dashboard.open"><span class="button-icon" aria-hidden="true">▦</span><span class="compact-toolbar-label" data-i18n="dashboard.open">Dashboard</span></button>
         <button class="primary-btn compact-toolbar-action sidebar-tooltip" type="button" id="addActivity" aria-label="Add Event" title="Add Event" data-tooltip="Add Event" aria-keyshortcuts="N" data-i18n-aria="actions.addActivity" data-i18n-title="actions.addActivity" data-i18n-tooltip="actions.addActivity"><span class="compact-toolbar-symbol" aria-hidden="true">+</span><span class="compact-toolbar-label" data-i18n="dashboard.addEvent">Add event</span></button>
         <details class="more-actions" id="moreActions">
           <summary class="compact-toolbar-action sidebar-tooltip sidebar-tooltip-right" aria-label="More" title="More" data-tooltip="More" data-i18n-aria="actions.more" data-i18n-title="actions.more" data-i18n-tooltip="actions.more"><span class="compact-toolbar-symbol compact-toolbar-more" aria-hidden="true">•••</span><span class="compact-toolbar-label" data-i18n="actions.more">More</span></summary>
@@ -10529,6 +10472,9 @@
             <button class="ghost-btn" type="button" id="openCommandPalette" data-command-palette aria-haspopup="dialog" aria-controls="commandPalette" data-i18n="command.open">Quick actions</button>
             <button class="ghost-btn feature-btn" type="button" id="openReminders"><span class="button-icon" aria-hidden="true">🔔</span><span data-i18n="reminders.open">Reminders</span><span class="reminder-badge" id="reminderBadge" hidden>0</span></button>
             <button class="ghost-btn feature-btn share-btn" type="button" id="shareSchedule"><span class="button-icon" aria-hidden="true">↗</span><span data-i18n="sharing.share">Share</span></button>
+            <details class="more-actions-group" id="calendarShortcuts">
+              <summary data-i18n="layout.calendarShortcuts">Calendar shortcuts</summary>
+            </details>
             <details class="more-actions-group">
               <summary data-experience-text="menuPlan">Plan and review</summary>
               <div>
@@ -10542,9 +10488,14 @@
             <details class="more-actions-group">
               <summary data-experience-text="menuView">View and display</summary>
               <div>
-                <button class="ghost-btn" type="button" data-sidebar-action="dashboard" data-i18n="dashboard.open">Dashboard</button>
+                <button class="ghost-btn" type="button" id="openDashboard" data-i18n="dashboard.open">Dashboard</button>
                 <button class="ghost-btn" type="button" data-open-visual-preferences aria-haspopup="dialog" aria-controls="visualPreferencesDialog" data-visual-text="display">Display options</button>
                 <button class="ghost-btn" type="button" id="toggleWeekends" aria-pressed="false" data-i18n="actions.hideWeekends">Hide weekends</button>
+                <div class="calendar-zoom" id="calendarZoom" role="group" aria-label="Calendar zoom" data-i18n-aria="aria.calendarZoom" data-keep-menu-open>
+                  <button class="calendar-zoom-button" type="button" id="zoomOut" aria-label="Zoom out calendar" title="Zoom out calendar" data-i18n-aria="aria.zoomOut" data-i18n-title="aria.zoomOut"><span aria-hidden="true">−</span></button>
+                  <span class="calendar-zoom-level" id="zoomLevel" aria-live="polite">100%</span>
+                  <button class="calendar-zoom-button" type="button" id="zoomIn" aria-label="Zoom in calendar" title="Zoom in calendar" data-i18n-aria="aria.zoomIn" data-i18n-title="aria.zoomIn"><span aria-hidden="true">+</span></button>
+                </div>
               </div>
             </details>
             <details class="more-actions-group">
@@ -10591,13 +10542,9 @@
     </section>
 
     <section class="calendar-empty-state" id="calendarEmptyState" hidden>
-      <div>
-        <h2 data-i18n="empty.title">Start your family calendar</h2>
-        <p data-i18n="empty.body">Add a child, add a family event, or load the example schedule.</p>
-      </div>
+      <h2 data-i18n="empty.title">Start your family calendar</h2>
       <div class="empty-actions">
-        <button class="primary-btn" type="button" id="emptyAddKid" data-i18n="empty.addKid">Add child</button>
-        <button class="ghost-btn" type="button" id="emptyAddEvent" data-i18n="empty.addEvent">Add family event</button>
+        <button class="ghost-btn" type="button" id="emptyAddKid" data-i18n="empty.addKid">Add child</button>
         <button class="ghost-btn" type="button" id="emptyLoadExample" data-i18n="empty.loadExample">Load example</button>
       </div>
     </section>
@@ -11796,7 +11743,8 @@
         "welcome.skip": "Skip to main content",
         "welcome.explorePage": "Explore this page",
         "welcome.navQuestions": "Questions",
-        "welcome.exploreSample": "See KidsSync in action ↓",
+        "welcome.exploreSample": "See a sample week",
+        "welcome.featureDetails": "Explore more features",
         "welcome.seeHow": "See how it works ↓",
         "welcome.alreadyHere": "Already have a calendar?",
         "welcome.previewDetails": "Preview details",
@@ -11855,7 +11803,7 @@
         "welcome.heroPeekTitle": "One clear plan.",
         "welcome.heroPeekNote": "A glimpse of the sample week",
         "welcome.heroPeekAria": "Explore these example family plans",
-        "welcome.description": "A time on a calendar is only half the plan. Keep each child’s activities, the pickup adult, and what to bring together—so the next person has the whole picture.",
+        "welcome.description": "See each child’s activities, who’s picking them up, and what to bring in one family calendar.",
         "welcome.signInAccount": "Sign in to your account",
         "welcome.highlights": "What KidsSync helps families do",
         "welcome.trialNote": "Explore for 10 minutes without an account. Sign in to keep and sync your calendar.",
@@ -12526,6 +12474,8 @@
         "dashboard.greetingGuest": "Welcome to your family dashboard.",
         "dashboard.overviewKicker": "Family overview",
         "dashboard.actions": "Dashboard actions",
+        "dashboard.tools": "Planning tools",
+        "layout.calendarShortcuts": "Calendar shortcuts",
         "dashboard.addEvent": "Add event",
         "dashboard.openLists": "Open lists",
         "dashboard.upcomingTitle": "Upcoming events",
@@ -12970,7 +12920,8 @@
         "welcome.skip": "跳至主要内容",
         "welcome.explorePage": "浏览本页",
         "welcome.navQuestions": "常见问题",
-        "welcome.exploreSample": "看看 KidsSync 如何安排 ↓",
+        "welcome.exploreSample": "查看一周示例",
+        "welcome.featureDetails": "了解更多功能",
         "welcome.seeHow": "查看使用方法 ↓",
         "welcome.alreadyHere": "已有日历？",
         "welcome.previewDetails": "体验说明",
@@ -13029,7 +12980,7 @@
         "welcome.heroPeekTitle": "一份清晰的家庭安排。",
         "welcome.heroPeekNote": "示例周计划一览",
         "welcome.heroPeekAria": "查看这些家庭日程示例",
-        "welcome.description": "日历上的时间只是计划的一半。把每个孩子的活动、接送人和携带物品放在一起，让接手的人也能看清完整安排。",
+        "welcome.description": "在同一个家庭日历里查看每个孩子的活动、接送人和要带的物品。",
         "welcome.signInAccount": "登录你的账户",
         "welcome.highlights": "KidsSync 能帮助家庭完成什么",
         "welcome.trialNote": "无需账户即可体验 10 分钟。登录后即可保存并在不同设备上同步日历。",
@@ -13686,6 +13637,8 @@
         "dashboard.greetingGuest": "欢迎来到家庭概览。",
         "dashboard.overviewKicker": "家庭概览",
         "dashboard.actions": "概览操作",
+        "dashboard.tools": "计划工具",
+        "layout.calendarShortcuts": "日历快捷操作",
         "dashboard.addEvent": "添加事件",
         "dashboard.openLists": "打开列表",
         "dashboard.upcomingTitle": "即将发生的事件",
@@ -17904,9 +17857,6 @@
       calendarEmptyState.hidden = !isEmpty;
       document.getElementById("appShell").classList.toggle("is-calendar-empty", isEmpty);
       document.getElementById("emptyAddKid").hidden = kidProfiles.length > 0;
-      const addEventButton = document.getElementById("emptyAddEvent");
-      addEventButton.classList.toggle("primary-btn", kidProfiles.length > 0);
-      addEventButton.classList.toggle("ghost-btn", kidProfiles.length === 0);
     }
 
     function renderSearchEmptyState() {
@@ -21886,12 +21836,10 @@
         input.focus();
       });
     });
-    ["welcomeTryNav", "welcomeTryHero", "welcomeTryPreview", "welcomeTryHow"].forEach(id => {
+    ["welcomeTryHero", "welcomeTryPreview"].forEach(id => {
       document.getElementById(id).addEventListener("click", showGuestPreview);
     });
-    ["welcomeSignIn", "welcomeSignInHero"].forEach(id => {
-      document.getElementById(id).addEventListener("click", () => showAuthScreen("signin"));
-    });
+    document.getElementById("welcomeSignIn").addEventListener("click", () => showAuthScreen("signin"));
     document.getElementById("signInForm").addEventListener("submit", handleSignIn);
     document.getElementById("signUpForm").addEventListener("submit", handleSignUp);
     document.getElementById("passwordResetRequestForm").addEventListener("submit", handlePasswordResetRequest);
@@ -22324,7 +22272,6 @@
     document.getElementById("addActivity").addEventListener("click", () => { setSidebarActive("activities"); openDialog(); });
     document.getElementById("loadPreset").addEventListener("click", loadAndrewMarkPreset);
     document.getElementById("emptyAddKid").addEventListener("click", openKidsDialogWithStarter);
-    document.getElementById("emptyAddEvent").addEventListener("click", () => openNewEventForDate(selectedDate, FAMILY_CHILD));
     document.getElementById("emptyLoadExample").addEventListener("click", loadAndrewMarkPreset);
     document.getElementById("managePresets").addEventListener("click", openPresetDialog);
     document.getElementById("closeDialog").addEventListener("click", requestCloseEventDialog);
@@ -22531,9 +22478,6 @@
     plannerOptionsMenu.addEventListener("toggle", () => {
       if (plannerOptionsMenu.open) moreActionsMenu.open = false;
     });
-    document.querySelectorAll("#moreActions button").forEach(button => button.addEventListener("click", () => {
-      moreActionsMenu.open = false;
-    }));
     document.addEventListener("click", event => {
       const menu = document.getElementById("moreActions");
       if (menu.open && !menu.contains(event.target)) menu.open = false;
@@ -22566,7 +22510,7 @@
       side: document.getElementById("calendarSide")
     };
     const WORKSPACE_LAYOUT_KEY = "kidssync.workspace-layout.v1";
-    const DEFAULT_WORKSPACE_LAYOUT = { density: "comfortable", textSize: 14, sideWidth: 260, sidePosition: "right", weather: true, details: true, hiddenPanels: [], collapsedDashboard: [] };
+    const DEFAULT_WORKSPACE_LAYOUT = { density: "comfortable", textSize: 14, sideWidth: 260, sidePosition: "right", weather: true, details: true, hiddenPanels: [], collapsedDashboard: ["week", "past"] };
     function loadWorkspaceLayout() {
       try {
         const saved = JSON.parse(localStorage.getItem(WORKSPACE_LAYOUT_KEY) || "{}");
@@ -22578,7 +22522,7 @@
           weather: saved.weather !== false,
           details: saved.details !== false,
           hiddenPanels: Array.isArray(saved.hiddenPanels) ? saved.hiddenPanels.filter(name => Object.hasOwn(workspacePanels, name)) : [],
-          collapsedDashboard: Array.isArray(saved.collapsedDashboard) ? saved.collapsedDashboard.filter(name => typeof name === "string") : []
+          collapsedDashboard: Array.isArray(saved.collapsedDashboard) ? saved.collapsedDashboard.filter(name => typeof name === "string") : DEFAULT_WORKSPACE_LAYOUT.collapsedDashboard
         };
       } catch { return { ...DEFAULT_WORKSPACE_LAYOUT }; }
     }
@@ -22676,7 +22620,7 @@
       });
     });
     document.getElementById("resetWorkspaceLayout").addEventListener("click", () => {
-      workspaceLayout = { ...DEFAULT_WORKSPACE_LAYOUT, hiddenPanels: [], collapsedDashboard: [] };
+      workspaceLayout = { ...DEFAULT_WORKSPACE_LAYOUT };
       hiddenWorkspacePanels.clear();
       workspaceFocusSnapshot = null;
       applyWorkspaceLayout();
@@ -23214,17 +23158,17 @@
   <script src="./assets/mobile-agenda.js"></script>
   <script src="./assets/planner-tools.js?v=2"></script>
   <script src="./assets/ui-features.js"></script>
-  <script src="./assets/interface-upgrades.js?v=4"></script>
+  <script src="./assets/interface-upgrades.js?v=5"></script>
   <script src="./assets/smart-scheduling.js?v=4"></script>
   <script src="./assets/family-polls.js?v=2"></script>
-  <script src="./assets/experience.js"></script>
+  <script src="./assets/experience.js?v=2"></script>
   <script src="./assets/quick-ux.js"></script>
   <script src="./assets/auth-visual-rotation.js?v=2"></script>
   <script src="./assets/landing-ux.js?v=1"></script>
   <script src="./assets/calendar-ux.js?v=1"></script>
   <script src="./assets/calendar-planning.js?v=1"></script>
   <script src="./assets/dashboard-planning.js?v=4"></script>
-  <script src="./assets/dashboard-navigation.js?v=1"></script>
+  <script src="./assets/dashboard-navigation.js?v=2"></script>
   <script src="./assets/dashboard-productivity.js?v=1"></script>
   <script src="./assets/live-sync.js?v=2"></script>
 </body>

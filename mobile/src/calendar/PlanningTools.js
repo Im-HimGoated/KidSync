@@ -20,7 +20,7 @@ export const planningCopy = {
     share: 'Share agenda', shareHint: 'Review before sharing. Includes all seven days and everyone in this calendar.',
     viewName: 'View name', saveView: 'Save current view', apply: 'Open view', remove: 'Remove saved view', noViews: 'No saved views',
     viewHint: 'Saves this date, view, search and person filter. Up to eight named views.', limit: 'Up to eight views and 730 day notes can be saved.',
-    find: 'Search', query: 'Activity, person, place or notes', from: 'From', through: 'Through', more: 'Show 20 more', retry: 'Retry', viewLabels: { agenda: 'Agenda', week: 'Week', month: 'Month' },
+    find: 'Search', query: 'Activity, person, place or notes', from: 'From', through: 'Through', more: 'Show 20 more', retry: 'Retry', viewLabels: { agenda: 'Agenda', day: 'Day', week: 'Week', month: 'Month' },
     discard: 'Discard unsaved note?', discardBody: 'Your unsaved note changes will be lost.', keep: 'Keep editing', discardButton: 'Discard', show: 'Show day', clearNote: 'Save an empty note to remove it.'
   },
   zh: {
@@ -35,7 +35,7 @@ export const planningCopy = {
     share: '分享安排', shareHint: '分享前请核对，包含此日历一周七天及所有成员。',
     viewName: '视图名称', saveView: '保存当前视图', apply: '打开视图', remove: '移除已存视图', noViews: '暂无已存视图',
     viewHint: '保存当前日期、视图、搜索及成员筛选。最多八个命名视图。', limit: '最多保存八个视图和 730 天的笔记。',
-    find: '搜索', query: '活动、成员、地点或备注', from: '从', through: '至', more: '再显示 20 项', retry: '重试', viewLabels: { agenda: '日程', week: '周', month: '月' },
+    find: '搜索', query: '活动、成员、地点或备注', from: '从', through: '至', more: '再显示 20 项', retry: '重试', viewLabels: { agenda: '日程', day: '日', week: '周', month: '月' },
     discard: '放弃未保存的笔记？', discardBody: '未保存的笔记更改将丢失。', keep: '继续编辑', discardButton: '放弃', show: '查看当天', clearNote: '保存空白笔记即可移除。'
   }
 };

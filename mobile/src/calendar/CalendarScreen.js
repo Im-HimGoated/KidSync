@@ -5,7 +5,7 @@ import scheduleReader from '../../../shared/backend/schedules';
 import calendar from '../lib/calendar';
 import model from './model';
 import { ActivityDetails, ActivityEditor } from './ActivityEditor';
-import { DateStrip, MonthGrid, WeekGrid } from './CalendarViews';
+import { CalendarViewPicker, DateStrip, FullMonthPage, WeekGrid } from './CalendarViews';
 import { Button, ChoiceRow, Field, IconButton, personColor, Sheet, useCalendarUi } from './ui';
 import getCopy, { dateLabel } from './copy';
 import { useAppearance } from '../ui/AppearanceContext';
@@ -55,6 +55,8 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
   const initial = initialDate instanceof Date ? initialDate : calendar.parseDateKey(initialDate);
   const [date, setDate] = useState(() => validDate(initial) ? new Date(initial) : new Date());
   const [view, setView] = useState(display.view), [person, setPerson] = useState('all'), [query, setQuery] = useState('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [fullMonthOpen, setFullMonthOpen] = useState(display.view === 'month');
   const [localId, setLocalId] = useState(null), [sheet, setSheet] = useState(null), [busy, setBusy] = useState(false);
   const [localOwnerId, setLocalOwnerId] = useState(null);
   const [refreshing, setRefreshing] = useState(false), [message, setMessage] = useState(''), [notice, setNotice] = useState('');
@@ -68,6 +70,7 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
   const sheetVersion = useRef(0);
   const handledCommentsRequest = useRef(0);
   const viewPreference = useRef(display.view);
+  const monthReturnView = useRef(display.view === 'month' ? 'agenda' : display.view);
   const rowSnapshot = snapshot?.schedule || snapshot;
   const entries = Array.isArray(calendars) ? calendars : scheduleReader.calendarEntries(rowSnapshot);
   const selectedId = calendarId ?? activeCalendarId ?? localId ?? rowSnapshot?.activeCalendarId;
@@ -79,6 +82,7 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
   const filtered = model.filterActivities(events, kids, { person, query });
   const dayEvents = model.sortAgenda(calendar.eventsForDate(filtered, date), date);
   const searchActive = !!query.trim(), filtersActive = searchActive || person !== 'all';
+  const activeFilterCount = (searchActive ? 1 : 0) + (person !== 'all' ? 1 : 0);
   const shownEvents = searchActive ? model.sortAgenda(filtered).sort((a, b) => String(a.startDate || '').localeCompare(String(b.startDate || ''))) : dayEvents;
   const access = model.calendarAccess({ userId, client, calendar: active, onSchedule, readOnly, sharedAccess, sharedActivityActions, onSharedSchedule });
   const isShared = access.shared, blocked = sharedBlocked?.scopeId === scopeId;
@@ -92,18 +96,22 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
 
   useLayoutEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   useEffect(() => {
-    if (viewPreference.current !== display.view) { viewPreference.current = display.view; setView(display.view); }
+    if (viewPreference.current !== display.view) {
+      viewPreference.current = display.view;
+      if (display.view === 'month') { monthReturnView.current = 'agenda'; setView('month'); setFullMonthOpen(true); }
+      else { monthReturnView.current = display.view; setView(display.view); setFullMonthOpen(false); }
+    }
     setFocusedHour(display.initialHour);
   }, [display.view, display.initialHour]);
   useEffect(() => {
     const focused = calendar.parseDateKey(focusDate);
     if (validDate(focused)) {
-      setDate(focused); setQuery(''); setPerson('all');
+      setDate(focused); setQuery(''); setPerson('all'); setFiltersOpen(false);
       setFocusedHour(focus.hourForTime(focusTime, display.initialHour));
       setAcceptedFocusRequest(value => value + 1);
     }
   }, [focusDate, focusTime, focusRequest]);
-  useEffect(() => { setPerson('all'); setQuery(''); setSheet(null); setMessage(''); setUndo(null); setSharedBlocked(null); setDiscardConfirm(false); draftDirty.current = false; }, [active?.id, active?.ownerId]);
+  useEffect(() => { setPerson('all'); setQuery(''); setFiltersOpen(false); setSheet(null); setMessage(''); setUndo(null); setSharedBlocked(null); setDiscardConfirm(false); draftDirty.current = false; }, [active?.id, active?.ownerId]);
   useEffect(() => {
     const id = Number(commentsRequest?.id);
     if (!commentsAvailable || !Number.isFinite(id) || id <= handledCommentsRequest.current || sheet || busy || planningBusy
@@ -206,8 +214,37 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
     if (!sheet?.event || busy) return;
     open(sheet.operation === 'delete' ? 'delete' : 'edit', { event: sheet.event, occurrenceDate: sheet.occurrenceDate, scope: 'series' });
   }
-  function selectDate(value) { if (validDate(value)) { setDate(new Date(value)); setQuery(''); setFocusedHour(display.initialHour); } }
-  function resetFilters() { setPerson('all'); setQuery(''); }
+  function selectDate(value) { if (validDate(value)) { setDate(new Date(value)); setQuery(''); } }
+  function goToday() {
+    const now = new Date();
+    selectDate(now);
+    setFocusedHour(now.getHours() + now.getMinutes() / 60);
+    setAcceptedFocusRequest(value => value + 1);
+  }
+  function changeView(value) {
+    if (value === 'month') { openFullMonth(); return; }
+    setFullMonthOpen(false);
+    setView(value);
+    setQuery('');
+  }
+  function openDay(value, hour = focusedHour) {
+    selectDate(value);
+    setFocusedHour(hour);
+    changeView('day');
+  }
+  function openFullMonth() {
+    if (busy) return;
+    monthReturnView.current = view === 'month' ? 'agenda' : view;
+    setQuery(''); setPerson('all'); setFiltersOpen(false); setSheet(null); setView('month'); setFullMonthOpen(true);
+  }
+  function closeFullMonth() { setFullMonthOpen(false); setView(monthReturnView.current === 'month' ? 'agenda' : monthReturnView.current); }
+  function openMonthDay(value) {
+    if (!validDate(value)) return;
+    setPerson('all');
+    openDay(value);
+  }
+  function addFromMonth() { setView('agenda'); setFullMonthOpen(false); open('new'); }
+  function resetFilters() { setPerson('all'); setQuery(''); setFiltersOpen(false); }
   async function saveActivity(event, options) {
     if (!active || !writableEvent(options?.original)) return false;
     return mutate(() => sheet?.scope === 'occurrence'
@@ -252,47 +289,62 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
   };
   const filters = [{ value: 'all', label: t.everyone }, ...kids.map(kid => ({ value: kid.name, label: kid.name, color: personColor({ child: kid.name }, kids, palettes).line }))];
   const pending = loading && !active;
+  const showingFullMonth = fullMonthOpen && !!active;
 
   return <View style={s.page}>
-    <View style={s.controls}>
+    {!showingFullMonth && <View style={s.controls}>
       <View style={s.calendarRow}>
         {onOpenDashboard && <IconButton icon={Home} label={t.dashboard} onPress={onOpenDashboard} />}
-        <Pressable accessibilityRole="button" accessibilityLabel={t.calendars} onPress={() => open('calendars')} disabled={busy} style={s.calendarSelector}>
-          <CalendarDays size={20} color={colors.primary} /><Text numberOfLines={1} style={s.calendarName}>{displayText(active?.name) || t.calendars}</Text><ChevronDown size={17} color={colors.muted} />
+        <Pressable accessibilityRole="button" accessibilityLabel={t.calendars} accessibilityHint={displayText(active?.name)} onPress={() => open('calendars')} disabled={busy} style={s.calendarSelector}>
+          <Text numberOfLines={1} ellipsizeMode="tail" style={s.calendarName}>{displayText(active?.name) || t.calendars}</Text>
+          <ChevronDown size={17} color={colors.muted} />
         </Pressable>
-        {!!onShareCalendar && <Button secondary icon={UserPlus} onPress={() => onShareCalendar(active)} disabled={!active || busy} style={{ paddingHorizontal: 12 }}>{t.share}</Button>}
-        {!!active && canWrite && <IconButton icon={Plus} label={t.add} onPress={() => open('new')} disabled={busy} />}
+        {!!onShareCalendar && <IconButton icon={UserPlus} label={t.share} color={colors.primary} onPress={() => onShareCalendar(active)} disabled={!active || busy} style={s.toolbarAction} />}
+        {!!active && canWrite && <IconButton icon={Plus} label={t.add} color={colors.onPrimary} onPress={() => open('new')} disabled={busy} style={s.addAction} />}
         {!!active && <IconButton icon={SlidersHorizontal} label={language === 'zh' ? '日历工具' : 'Calendar tools'} disabled={busy} onPress={() => open('tools')} />}
         {!active && !!onPreferences && <IconButton icon={Settings2} label={t.openPreferences} onPress={onPreferences} />}
       </View>
       <View style={s.dateRow}>
         <Pressable accessibilityRole="button" accessibilityLabel={t.datePicker} onPress={() => { setJump(calendar.dateKey(date)); open('date'); }} style={s.dateButton}>
-          <Text style={s.period}>{dateLabel(date, language, { month: 'long', year: 'numeric' })}</Text><ChevronDown size={15} color={colors.muted} />
+          <Text numberOfLines={1} ellipsizeMode="tail" style={s.period}>{dateLabel(date, language, { month: 'short', year: 'numeric' })}</Text><ChevronDown size={15} color={colors.muted} />
         </Pressable>
-        <View style={u.row}><IconButton icon={ChevronLeft} label={t.previousPeriod[view]} onPress={() => selectDate(model.movePeriod(date, view, -1))} /><Pressable accessibilityRole="button" accessibilityLabel={t.goToday} onPress={() => selectDate(new Date())} style={s.today}><Text style={s.todayText}>{t.today}</Text></Pressable><IconButton icon={ChevronRight} label={t.nextPeriod[view]} onPress={() => selectDate(model.movePeriod(date, view, 1))} /></View>
+        <View style={u.row}><IconButton icon={ChevronLeft} label={t.previousPeriod[view]} onPress={() => selectDate(model.movePeriod(date, view, -1))} /><Pressable accessibilityRole="button" accessibilityLabel={t.goToday} onPress={goToday} style={s.today}><Text style={s.todayText}>{t.today}</Text></Pressable><IconButton icon={ChevronRight} label={t.nextPeriod[view]} onPress={() => selectDate(model.movePeriod(date, view, 1))} /></View>
       </View>
-      <View style={s.views}>{['agenda', 'week', 'month'].map(value => <Pressable key={value} accessibilityRole="button" accessibilityState={{ selected: view === value }} onPress={() => { setView(value); setQuery(''); }} style={[s.viewButton, view === value && s.viewSelected]}><Text style={[s.viewText, view === value && { color: colors.onPrimary }]}>{t[value]}</Text></Pressable>)}</View>
-    </View>
+      <CalendarViewPicker view={view} language={language} onChange={changeView} />
+    </View>}
     {!!notice && <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={s.notice}>{notice}</Text>}
     {!!undo && undo.scopeId === scopeId && <View style={s.undoBanner}><Text style={[u.body, { flex: 1 }]}>{t.deletedUndo}</Text><Button secondary icon={Undo2} disabled={busy} onPress={undoDelete}>{t.undo}</Button><IconButton icon={X} label={t.dismissUndo} disabled={busy} onPress={() => setUndo(null)} /></View>}
     {!!error && <Pressable accessibilityRole="button" accessibilityLabel={`${t.loadFailed} ${t.refresh}`} accessibilityState={{ disabled: refreshing || busy }} disabled={refreshing || busy} onPress={refresh} style={s.errorBanner}><Text style={[u.error, { flex: 1 }]}>{t.loadFailed}</Text><RefreshCw size={18} color={colors.error} /></Pressable>}
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />}>
-      <View style={s.search}><Search size={18} color={colors.muted} /><TextInput accessibilityLabel={t.search} value={query} onChangeText={setQuery} placeholder={t.searchPlaceholder} placeholderTextColor={colors.muted} style={s.searchInput} autoCorrect={false} returnKeyType="search" />{!!query && <IconButton icon={X} label={t.clear} onPress={() => setQuery('')} />}</View>
-      <View style={s.commentsAccessRow}><Text style={[s.planning, { flex: 1, marginBottom: 0 }]}>{isShared ? `${commentsCopy.sharedCalendar} · ${commentsCopy[commentRole] || commentsCopy.viewer}` : t.planning[display.people]}</Text>
-        {commentsAvailable && <Button label={commentsCopy.title} secondary icon={MessageCircle} disabled={busy || planningBusy} style={{ paddingHorizontal: 12 }} onPress={() => open('comments')}>{commentsCopy.action}</Button>}</View>
-      {searchActive && <Text style={s.searchScope}>{t.searchScope}</Text>}
-      {!!kids.length && <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 14 }}><ChoiceRow options={filters} value={person} onChange={setPerson} label={t.everyone} /></ScrollView>}
+    {showingFullMonth ? <FullMonthPage date={date} firstDay={display.firstDay} events={events} kids={kids} language={language}
+      calendarName={displayText(active?.name) || t.calendar} canWrite={canWrite} onBack={closeFullMonth} onMonth={selectDate}
+      onDate={openMonthDay} onEvent={showEvent} onAdd={addFromMonth} /> : <ScrollView style={{ flex: 1 }} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />}>
+      <View style={s.filterBlock}>
+        <Pressable accessibilityRole="button" accessibilityState={{ expanded: filtersOpen }} accessibilityHint={t.findFilterHint}
+          onPress={() => setFiltersOpen(value => !value)} style={s.filterToggle}>
+          <Search size={19} color={colors.primary} />
+          <View style={s.filterCopy}><Text style={s.filterTitle}>{t.findFilter}</Text><Text style={s.filterHint}>{filtersActive ? t.filtersOn : t.findFilterHint}</Text></View>
+          {!!activeFilterCount && <View style={s.filterCount}><Text style={s.filterCountText}>{activeFilterCount}</Text></View>}
+          <ChevronDown size={18} color={colors.muted} style={filtersOpen && s.filterExpanded} />
+        </Pressable>
+        {filtersOpen && <View style={s.filterPanel}>
+          <View style={s.search}><Search size={18} color={colors.muted} /><TextInput accessibilityLabel={t.search} value={query} onChangeText={setQuery} placeholder={t.searchPlaceholder} placeholderTextColor={colors.muted} style={s.searchInput} autoCorrect={false} returnKeyType="search" />{!!query && <IconButton icon={X} label={t.clear} onPress={() => setQuery('')} />}</View>
+          {searchActive && <Text style={s.searchScope}>{t.searchScope}</Text>}
+          {!!kids.length && <ScrollView horizontal showsHorizontalScrollIndicator={false}><ChoiceRow options={filters} value={person} onChange={setPerson} label={t.everyone} /></ScrollView>}
+        </View>}
+      </View>
       {pending ? <View style={u.empty}><ActivityIndicator color={colors.primary} accessibilityLabel={t.loading} /><Text style={u.body}>{t.loading}</Text></View> : !active ? <View style={u.empty}><CalendarDays size={36} color={colors.primary} /><Text style={[u.heading, s.center]}>{t.noCalendar}</Text><Text style={[u.body, s.center]}>{t.noCalendarBody}</Text>{canCreate && <Button icon={Plus} onPress={() => open('create')}>{t.createCalendar}</Button>}</View> : <>
-        {view === 'agenda' && <DateStrip date={date} firstDay={display.firstDay} events={filtered} kids={kids} language={language} onDate={selectDate} />}
-        {view === 'month' && <MonthGrid date={date} firstDay={display.firstDay} events={filtered} kids={kids} language={language} onDate={selectDate} />}
-        {view === 'week' && <WeekGrid key={`focus:${acceptedFocusRequest}`} date={date} firstDay={display.firstDay} initialHour={focusedHour} events={filtered} kids={kids} language={language} onDate={selectDate} onEvent={showEvent} />}
-        <View style={s.agendaHeading}><Text accessibilityRole="header" style={s.agendaTitle}>{searchActive ? t.searchResults : headerDate}</Text><View style={s.count}><Text style={s.countText}>{shownEvents.length}</Text></View></View>
+        {!searchActive && view !== 'week' && <DateStrip date={date} firstDay={display.firstDay} events={filtered} kids={kids}
+          language={language} onDate={selectDate} compact={view !== 'agenda'} />}
+        {!searchActive && (view === 'week' || view === 'day') && <WeekGrid key={`focus:${acceptedFocusRequest}`}
+          date={date} dayOnly={view === 'day'} firstDay={display.firstDay} initialHour={focusedHour} events={filtered} kids={kids}
+          language={language} onDate={selectDate} onOpenDay={openDay} onEvent={showEvent} />}
+        <View style={s.agendaHeading}><Text accessibilityRole="header" style={s.agendaTitle}>{searchActive ? t.searchResults : headerDate}</Text><View style={s.agendaActions}><View style={s.count}><Text style={s.countText}>{shownEvents.length}</Text></View>{commentsAvailable && <IconButton icon={MessageCircle} label={commentsCopy.title} disabled={busy || planningBusy} onPress={() => open('comments')} />}</View></View>
         {shownEvents.length ? shownEvents.map((event, index) => <ActivityCard key={`${event.id ?? 'activity'}:${index}`} event={event} date={date} kids={kids} language={language} showDate={searchActive} onPress={() => showEvent(event, searchActive && validDate(calendar.parseDateKey(event.startDate)) ? calendar.parseDateKey(event.startDate) : date)} />) : <View style={u.empty}><CalendarDays size={28} color={colors.success} /><Text style={[u.heading, s.center]}>{filtersActive ? t.noResults : t.empty}</Text><Text style={[u.body, s.center]}>{filtersActive ? t.filteredBody : t.emptyBody}</Text>{filtersActive ? <Button secondary icon={X} onPress={resetFilters}>{t.resetFilters}</Button> : canWrite && <Button secondary icon={Plus} onPress={() => open('new')}>{t.add}</Button>}</View>}
         <View style={s.syncRow}><Text style={s.syncText}>{refreshing ? t.refreshing : t.refresh}</Text><IconButton icon={RefreshCw} label={t.refresh} onPress={refresh} disabled={refreshing || busy} color={colors.muted} /></View>
         {!canWrite && <Text style={[u.body, s.center]}>{isShared && sharedAccess?.stale ? t.sharedStale
           : isShared && (access.setupRequired || sharedBlocked?.code === 'SETUP_REQUIRED') ? t.sharedSetup : t.readOnly}</Text>}
       </>}
-    </ScrollView>
+    </ScrollView>}
     <Sheet visible={!!sheet} title={sheetTitle} closeLabel={t.close} busy={busy || planningBusy} onClose={requestClose}>
     {!!sheet && <>
       {discardConfirm && <View style={s.discardConfirm}>
@@ -310,8 +362,10 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
       events={events} kids={kids} date={date} language={language} firstDay={display.firstDay} canWrite={canWrite}
       selectedView={{ view, date: calendar.dateKey(date), query, person }} onClose={closeSheet}
       onPlan={draft => { setDate(calendar.parseDateKey(draft.startDate)); open('new', { initialDraft: draft }); }}
-      onShowDate={value => { setDate(calendar.parseDateKey(value)); setView('agenda'); setQuery(''); setPerson('all'); closeSheet(); }}
-      onApplyView={value => { setDate(calendar.parseDateKey(value.date)); setView(value.view); setQuery(value.query); setPerson(filters.some(item => item.value === value.person) ? value.person : 'all'); closeSheet(); }} /></View>}
+      onShowDate={value => { setDate(calendar.parseDateKey(value)); setFullMonthOpen(false); setView('agenda'); setQuery(''); setPerson('all'); setFiltersOpen(false); closeSheet(); }}
+      onApplyView={value => { const nextPerson = filters.some(item => item.value === value.person) ? value.person : 'all'; setDate(calendar.parseDateKey(value.date)); setQuery(value.query); setPerson(nextPerson); setFiltersOpen(!!value.query?.trim() || nextPerson !== 'all'); closeSheet();
+        if (value.view === 'month') { monthReturnView.current = 'agenda'; setView('month'); setFullMonthOpen(true); }
+        else { monthReturnView.current = value.view; setFullMonthOpen(false); setView(value.view); } }} /></View>}
       {!!message && <View style={s.sheetFeedback}><Text accessibilityRole="alert" style={u.error}>{message}</Text>{conflicted && <Button secondary icon={RefreshCw} onPress={refresh} disabled={refreshing}>{t.conflictRefresh}</Button>}</View>}
       {sheet.type === 'details' && <ActivityDetails event={sheet.event} occurrenceDate={sheet.occurrenceDate} occurrenceStartDate={sheet.occurrenceStartDate} kids={kids} language={language} canEdit={writableEvent(sheet.event)} busy={busy} onEdit={event => chooseScope('edit', event)} onDelete={deleteActivity} onDeleteRequest={repeated(sheet.event) ? event => chooseScope('delete', event) : undefined} />}
       {['new', 'edit'].includes(sheet.type) && (canWrite || isShared) && <View accessibilityElementsHidden={discardConfirm} importantForAccessibility={discardConfirm ? 'no-hide-descendants' : 'auto'} style={{ flexShrink: 1, display: discardConfirm ? 'none' : 'flex' }}>
@@ -354,20 +408,20 @@ function ActivityCard({ event, date, kids, language, onPress, showDate }) {
   const time = overlapping ? t.multipleOccurrences : event.allDay ? t.allDay : `${startTime}${endTime ? ` – ${endTime}` : ''}`;
   const label = [cancelled && t.cancelled, title, showDate && (displayText(event.startDate) || t.noDate), time, person, location, responsible].filter(Boolean).join(', ');
   return <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={({ pressed }) => [s.activity, { borderLeftColor: palette.line }, (pressed || cancelled) && { opacity: 0.6 }]}>
-    <View style={s.cardTop}><Text style={[s.time, { color: palette.ink }]}>{time}</Text>{event.importance === 'high' && <Text style={s.important}>!</Text>}<ChevronRight size={17} color={colors.muted} /></View>
+    <View style={s.cardTop}><Text numberOfLines={2} style={[s.activityTitle, cancelled && { textDecorationLine: 'line-through' }]}>{displayText(event.icon) || '📅'}  {title}</Text>{event.importance === 'high' && <Text style={s.important}>!</Text>}<ChevronRight size={17} color={colors.muted} /></View>
     {!!showDate && <Text style={s.meta}>{displayText(event.startDate) || t.noDate}</Text>}
-    <Text style={[s.activityTitle, cancelled && { textDecorationLine: 'line-through' }]}>{displayText(event.icon) || '📅'}  {title}</Text>
-    <View style={u.row}><View style={[s.dot, { backgroundColor: palette.line }]} /><Text style={[s.person, { color: palette.ink }]}>{person}</Text>{cancelled && <Text style={{ color: colors.error, fontSize: 12 }}>{t.cancelled}</Text>}</View>
+    <View style={s.eventSummary}><Text numberOfLines={1} style={[s.time, { color: palette.ink }]}>{time}</Text><View style={[s.dot, { backgroundColor: palette.line }]} /><Text numberOfLines={1} style={[s.person, { color: palette.ink }]}>{person}</Text>{cancelled && <Text style={{ color: colors.error, fontSize: 12 }}>{t.cancelled}</Text>}</View>
     {!!location && <View style={u.row}><MapPin size={14} color={colors.muted} /><Text style={s.meta}>{location}</Text></View>}
-    <View style={s.cardFooter}><UserRound size={14} color={colors.muted} /><Text style={[s.meta, { flex: 1 }]}>{t.pickup}: {responsible || t.noAdult}</Text>{!!event.recurrence && event.recurrence !== 'none' && <Repeat2 size={15} color={colors.muted} />}</View>
+    {(!!responsible || (!!event.recurrence && event.recurrence !== 'none')) && <View style={s.cardFooter}>{!!responsible && <><UserRound size={14} color={colors.muted} /><Text numberOfLines={1} style={[s.meta, { flex: 1 }]}>{t.pickup}: {responsible}</Text></>}{!!event.recurrence && event.recurrence !== 'none' && <Repeat2 size={15} color={colors.muted} />}</View>}
   </Pressable>;
 }
 
 const createStyles = colors => StyleSheet.create({
-  commentsAccessRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
+  toolbarAction: { backgroundColor: colors.primarySoft },
+  addAction: { backgroundColor: colors.primary },
   scopeContent: { gap: 14 }, undoBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, backgroundColor: colors.successSoft },
   searchScope: { color: colors.muted, fontSize: 12, lineHeight: 18, marginBottom: 12 }, discardConfirm: { padding: 20, paddingTop: 8, gap: 12, backgroundColor: colors.warningSoft, borderBottomWidth: 1, borderBottomColor: colors.line },
-  page: { flex: 1, backgroundColor: colors.page }, controls: { paddingHorizontal: 16, paddingTop: 9, paddingBottom: 12, backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.line }, calendarRow: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 12 }, calendarSelector: { flex: 1, minWidth: 0, minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 9, borderWidth: 1, borderColor: colors.line, borderRadius: 14, paddingHorizontal: 12, backgroundColor: colors.surface }, calendarName: { flex: 1, color: colors.ink, fontSize: 16, fontWeight: '700' }, dateRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', marginBottom: 11 }, dateButton: { flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 44 }, period: { fontSize: 18, fontWeight: '700', color: colors.ink }, today: { minHeight: 44, paddingHorizontal: 12, justifyContent: 'center', borderWidth: 1, borderColor: colors.line, borderRadius: 12 }, todayText: { color: colors.primary, fontSize: 13, fontWeight: '600' }, views: { flexDirection: 'row', backgroundColor: colors.input, borderRadius: 13, borderWidth: 1, borderColor: colors.line, overflow: 'hidden' }, viewButton: { flex: 1, minHeight: 45, alignItems: 'center', justifyContent: 'center', borderRadius: 12 }, viewSelected: { backgroundColor: colors.primary }, viewText: { color: colors.ink, fontSize: 14, fontWeight: '600' },
-  content: { padding: 16, paddingBottom: 32 }, planning: { color: colors.muted, fontSize: 12, lineHeight: 18, marginBottom: 12 }, search: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 46, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, borderRadius: 13, paddingLeft: 12, paddingRight: 3, marginBottom: 13 }, searchInput: { flex: 1, minWidth: 0, minHeight: 46, fontSize: 14, color: colors.ink }, agendaHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginTop: 17, marginBottom: 13 }, agendaTitle: { color: colors.ink, fontSize: 18, fontWeight: '700', flex: 1 }, count: { minWidth: 25, minHeight: 25, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft }, countText: { color: colors.muted, fontSize: 12, fontWeight: '600' }, center: { textAlign: 'center' }, activity: { borderWidth: 1, borderColor: colors.line, borderLeftWidth: 4, borderRadius: 17, backgroundColor: colors.surface, padding: 15, marginBottom: 12, gap: 9 }, cardTop: { flexDirection: 'row', alignItems: 'center', gap: 9 }, time: { flex: 1, fontSize: 13, fontWeight: '600' }, important: { color: colors.error, fontSize: 17, fontWeight: '800' }, activityTitle: { color: colors.ink, fontSize: 18, fontWeight: '700', lineHeight: 25 }, dot: { width: 7, height: 7, borderRadius: 4 }, person: { fontSize: 13, fontWeight: '600', flexShrink: 1 }, meta: { color: colors.muted, fontSize: 13, lineHeight: 20, flexShrink: 1 }, cardFooter: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors.line }, syncRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }, syncText: { fontSize: 12, color: colors.muted },
+  page: { flex: 1, backgroundColor: colors.page }, controls: { paddingHorizontal: 16, paddingTop: 9, paddingBottom: 12, backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.line }, calendarRow: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 10 }, calendarSelector: { flex: 1, minWidth: 0, minHeight: 46, flexDirection: 'row', alignItems: 'center', gap: 9, borderWidth: 1, borderColor: colors.line, borderRadius: 13, paddingHorizontal: 12, backgroundColor: colors.surface }, calendarName: { flex: 1, color: colors.ink, fontSize: 16, fontWeight: '700' }, dateRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 6, marginBottom: 9 }, dateButton: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 44 }, period: { flex: 1, minWidth: 0, fontSize: 18, fontWeight: '700', color: colors.ink }, today: { minHeight: 44, paddingHorizontal: 10, justifyContent: 'center', borderWidth: 1, borderColor: colors.line, borderRadius: 12 }, todayText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
+  content: { padding: 16, paddingBottom: 32 }, filterBlock: { borderWidth: 1, borderColor: colors.line, borderRadius: 13, backgroundColor: colors.surface, overflow: 'hidden', marginBottom: 12 }, filterToggle: { minHeight: 50, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 13 }, filterCopy: { flex: 1, minWidth: 0 }, filterTitle: { color: colors.ink, fontSize: 14, lineHeight: 19, fontWeight: '700' }, filterHint: { color: colors.muted, fontSize: 11, lineHeight: 15 }, filterCount: { minWidth: 24, height: 24, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft }, filterCountText: { color: colors.primary, fontSize: 11, fontWeight: '700' }, filterExpanded: { transform: [{ rotate: '180deg' }] }, filterPanel: { padding: 12, borderTopWidth: 1, borderTopColor: colors.line, gap: 10 }, search: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 46, backgroundColor: colors.input, borderWidth: 1, borderColor: colors.line, borderRadius: 11, paddingLeft: 12, paddingRight: 3 }, searchInput: { flex: 1, minWidth: 0, minHeight: 46, fontSize: 14, color: colors.ink }, agendaHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginTop: 14, marginBottom: 11 }, agendaTitle: { color: colors.ink, fontSize: 18, fontWeight: '700', flex: 1 }, agendaActions: { flexDirection: 'row', alignItems: 'center', gap: 4 }, count: { minWidth: 25, minHeight: 25, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft }, countText: { color: colors.muted, fontSize: 12, fontWeight: '600' }, center: { textAlign: 'center' }, activity: { borderWidth: 1, borderColor: colors.line, borderLeftWidth: 4, borderRadius: 14, backgroundColor: colors.surface, padding: 14, marginBottom: 10, gap: 8 }, cardTop: { flexDirection: 'row', alignItems: 'center', gap: 8 }, eventSummary: { minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 8 }, time: { maxWidth: '56%', fontSize: 13, fontWeight: '700' }, important: { color: colors.error, fontSize: 17, fontWeight: '800' }, activityTitle: { flex: 1, minWidth: 0, color: colors.ink, fontSize: 17, fontWeight: '700', lineHeight: 23 }, dot: { width: 7, height: 7, borderRadius: 4 }, person: { minWidth: 0, fontSize: 13, fontWeight: '600', flexShrink: 1 }, meta: { color: colors.muted, fontSize: 13, lineHeight: 20, flexShrink: 1 }, cardFooter: { minHeight: 22, flexDirection: 'row', alignItems: 'center', gap: 7 }, syncRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }, syncText: { fontSize: 12, color: colors.muted },
   notice: { backgroundColor: colors.successSoft, padding: 12, color: colors.success, fontSize: 13 }, errorBanner: { backgroundColor: colors.errorSoft, padding: 13, flexDirection: 'row', alignItems: 'center', gap: 10 }, sheetFeedback: { paddingHorizontal: 20, paddingBottom: 12, gap: 9 }, sheetContent: { padding: 20, paddingTop: 10, paddingBottom: 26 }, calendarOption: { minHeight: 62, flexDirection: 'row', alignItems: 'center', gap: 12, borderBottomWidth: 1, borderBottomColor: colors.line, paddingVertical: 15, marginBottom: 10 }, inlineError: { padding: 12, backgroundColor: colors.errorSoft },
 });

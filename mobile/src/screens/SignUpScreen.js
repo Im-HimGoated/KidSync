@@ -1,16 +1,16 @@
 import React, { useRef, useState } from 'react';
 import { useAppearance, useThemeStyles } from '../ui/AppearanceContext';
 import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { ArrowLeft, ArrowRight, Check, CircleAlert, Eye, EyeOff, Mail } from 'lucide-react-native';
+import { ArrowLeft, ArrowRight, CircleAlert, Eye, EyeOff } from 'lucide-react-native';
 import signUp from '../lib/sign-up';
 
 export const signUpCopy = {
   en: {
-    review: 'Review', back: 'Back to sign in', saved: 'Your setup answers are saved', preview: 'Preview the calendar first', previewHint: '10 minutes · No account needed · Plans stay on this device',
-    heading: 'Create your account', description: 'Bring your family’s plans together.',
+    review: 'Review answers', back: 'Back to sign in', saved: 'Setup answers saved on this device.', preview: 'Preview the calendar first', previewHint: '10 minutes without an account',
+    heading: 'Create your account',
     email: 'Email address', emailPlaceholder: 'name@example.com', password: 'Password', passwordPlaceholder: 'Create a password',
     confirmation: 'Confirm password', confirmationPlaceholder: 'Re-enter your password', passwordHint: 'Use at least 8 characters.',
-    create: 'Create account', creating: 'Creating account…', note: 'Your preferences will be linked to your account on this device.',
+    create: 'Create account', creating: 'Creating account…',
     returning: 'Already have an account?', signIn: 'Sign in', show: 'Show password', hide: 'Hide password',
     showConfirmation: 'Show confirmation password', hideConfirmation: 'Hide confirmation password',
     emailRequired: 'Enter your email address.', emailInvalid: 'Enter a valid email address.', passwordRequired: 'Create a password.',
@@ -21,15 +21,15 @@ export const signUpCopy = {
     rateLimited: 'Too many attempts. Please wait a little and try again.', connectionFailed: 'Could not connect. Check your internet connection and try again.',
     authFailed: 'Could not create your account. Please try again.',
     checkEmail: 'Check your email', confirmationIntro: 'Check your inbox for a confirmation link. Open it, then return to this app and sign in.',
-    confirmationExisting: 'Already registered? You can sign in below. If no email arrives, check spam or use Forgot password on the sign-in screen.',
-    confirmationNote: 'Your setup answers remain saved on this device while you confirm your email.', changeEmail: 'Use a different email'
+    confirmationExisting: 'If the email doesn’t arrive, check spam. Already registered? Sign in below or use Forgot password.',
+    changeEmail: 'Use a different email'
   },
   zh: {
-    review: '核对答案', back: '返回登录', saved: '你的设置答案已保存', preview: '先体验日历', previewHint: '10 分钟 · 无需账户 · 日程保留在此设备上',
-    heading: '创建你的账户', description: '一起安排全家人的计划。',
+    review: '核对答案', back: '返回登录', saved: '设置答案已保存在此设备上。', preview: '先体验日历', previewHint: '无需账户，体验 10 分钟',
+    heading: '创建你的账户',
     email: '邮箱地址', emailPlaceholder: 'name@example.com', password: '密码', passwordPlaceholder: '创建密码',
     confirmation: '确认密码', confirmationPlaceholder: '再次输入密码', passwordHint: '请至少使用 8 个字符。',
-    create: '创建账户', creating: '正在创建账户…', note: '偏好将为你的账户保存在此设备上。',
+    create: '创建账户', creating: '正在创建账户…',
     returning: '已有账户？', signIn: '登录', show: '显示密码', hide: '隐藏密码',
     showConfirmation: '显示确认密码', hideConfirmation: '隐藏确认密码',
     emailRequired: '请输入邮箱地址。', emailInvalid: '请输入有效的邮箱地址。', passwordRequired: '请创建密码。',
@@ -40,8 +40,8 @@ export const signUpCopy = {
     rateLimited: '尝试次数过多，请稍后重试。', connectionFailed: '无法连接，请检查网络后重试。',
     authFailed: '无法创建账户，请重试。',
     checkEmail: '请查收邮件', confirmationIntro: '请在收件箱中找到确认链接。打开链接后，返回此应用并登录。',
-    confirmationExisting: '已注册？可在下方登录。如果未收到邮件，请检查垃圾邮件，或在登录页面选择忘记密码。',
-    confirmationNote: '确认邮箱期间，设置答案会保留在此设备上。', changeEmail: '使用其他邮箱'
+    confirmationExisting: '如果未收到邮件，请检查垃圾邮件。已注册？可在下方登录或选择忘记密码。',
+    changeEmail: '使用其他邮箱'
   }
 };
 
@@ -83,13 +83,12 @@ export default function SignUpScreen({ language, email, onEmailChange, onCreateA
           <ArrowLeft size={18} color={colors.primary} aria-hidden={true} /><Text style={styles.link}>{backLabel || (hasPreferences ? t.review : t.back)}</Text>
         </Pressable>
         <View style={styles.main}>
-          {hasPreferences && <View style={styles.saved}><View style={styles.check}><Check size={16} color={colors.success} aria-hidden={true} /></View><Text style={styles.savedText}>{t.saved}</Text></View>}
           <Text accessibilityRole="header" style={styles.heading}>{confirmationEmail ? t.checkEmail : t.heading}</Text>
-          <Text style={styles.description}>{confirmationEmail ? t.confirmationIntro : t.description}</Text>
+          {hasPreferences && <Text style={styles.savedText}>{t.saved}</Text>}
           {confirmationEmail ? <View style={styles.confirmation} accessibilityLiveRegion="polite">
-            <Mail size={30} color={colors.primary} aria-hidden={true} /><Text style={styles.emailValue}>{confirmationEmail}</Text>
+            <Text style={styles.emailValue}>{confirmationEmail}</Text>
+            <Text style={styles.secondary}>{t.confirmationIntro}</Text>
             <Text style={styles.secondary}>{t.confirmationExisting}</Text>
-            {hasPreferences && <Text style={styles.secondary}>{t.confirmationNote}</Text>}
             <Pressable accessibilityRole="button" style={styles.textButton} onPress={() => { setConfirmationEmail(null); onEmailChange(email); }}><Text style={styles.link}>{t.changeEmail}</Text></Pressable>
           </View> : <View style={styles.form}>
             <View style={styles.field}>
@@ -127,27 +126,25 @@ export default function SignUpScreen({ language, email, onEmailChange, onCreateA
               <Text style={styles.primaryText}>{busy ? t.creating : t.create}</Text>
               {busy ? <ActivityIndicator color={colors.onPrimary} /> : <ArrowRight size={20} color={colors.onPrimary} aria-hidden={true} />}
             </Pressable>
-            {hasPreferences && <Text style={styles.note}>{t.note}</Text>}
-            {!!onPreview && <Pressable accessibilityRole="button" accessibilityHint={t.previewHint} disabled={busy} onPress={onPreview} style={styles.preview}><Text style={styles.link}>{t.preview}</Text><Text style={styles.note}>{t.previewHint}</Text></Pressable>}
+            {!!onPreview && <Pressable accessibilityRole="button" accessibilityLabel={t.preview} accessibilityHint={t.previewHint} disabled={busy} onPress={onPreview} style={styles.preview}><Text style={styles.link}>{t.preview}</Text><Text style={styles.note}>{t.previewHint}</Text></Pressable>}
           </View>}
+        </View>
+        <View style={styles.returning}>
+          <Text style={styles.secondary}>{t.returning}</Text><Pressable accessibilityRole="button" disabled={busy} onPress={onSignIn} style={styles.textButton}><Text style={styles.signIn}>{t.signIn}</Text></Pressable>
         </View>
       </View>
     </ScrollView>
-    <View style={styles.returning}>
-      <Text style={styles.secondary}>{t.returning}</Text><Pressable accessibilityRole="button" disabled={busy} onPress={onSignIn} style={styles.textButton}><Text style={styles.signIn}>{t.signIn}</Text></Pressable>
-    </View>
   </KeyboardAvoidingView>;
 }
 
-function createStyles(colors, palettes) { return StyleSheet.create({
+function createStyles(colors) { return StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface }, scroller: { flex: 1 }, scroll: { flexGrow: 1, alignItems: 'center' },
   inner: { width: '100%', maxWidth: 420, flexGrow: 1, paddingHorizontal: 24, paddingBottom: 16 },
   back: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, alignSelf: 'flex-start' },
-  main: { paddingTop: 8, paddingBottom: 12 }, saved: { flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 20 },
-  check: { width: 29, height: 29, borderRadius: 15, backgroundColor: colors.successSoft, justifyContent: 'center', alignItems: 'center' },
-  savedText: { flex: 1, color: colors.success, fontSize: 14, lineHeight: 21 },
-  heading: { fontSize: 29, lineHeight: 36, fontWeight: '700', color: colors.ink, marginBottom: 8, letterSpacing: -0.5 }, description: { color: colors.muted, fontSize: 15, lineHeight: 24 },
-  form: { marginTop: 24, gap: 16 }, field: { gap: 8 }, label: { color: colors.ink, fontSize: 14, lineHeight: 20, fontWeight: '600' },
+  main: { paddingTop: 8, paddingBottom: 8 },
+  savedText: { color: colors.success, fontSize: 13, lineHeight: 19, marginTop: 5 },
+  heading: { fontSize: 29, lineHeight: 36, fontWeight: '700', color: colors.ink, letterSpacing: -0.5 },
+  form: { marginTop: 18, gap: 14 }, field: { gap: 6 }, label: { color: colors.ink, fontSize: 14, lineHeight: 20, fontWeight: '600' },
   inputRow: { minHeight: 52, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: colors.line, borderRadius: 13, backgroundColor: colors.surface },
   input: { flex: 1, minWidth: 0, minHeight: 50, color: colors.ink, fontSize: 16, paddingHorizontal: 14, paddingVertical: 12 },
   emailInput: { flex: 0, borderWidth: 1, borderColor: colors.line, borderRadius: 13 }, focused: { borderColor: colors.primary, backgroundColor: colors.inputFocused }, invalid: { borderColor: colors.error },
@@ -155,9 +152,9 @@ function createStyles(colors, palettes) { return StyleSheet.create({
   primary: { minHeight: 54, flexDirection: 'row', gap: 10, justifyContent: 'center', alignItems: 'center', padding: 14, backgroundColor: colors.primary, borderRadius: 13, marginTop: 6 },
   primaryText: { color: colors.onPrimary, fontSize: 17, lineHeight: 23, fontWeight: '600', flexShrink: 1 }, pressed: { opacity: 0.7 },
   preview: { minHeight: 52, alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 8 },
-  note: { color: colors.muted, fontSize: 12, lineHeight: 19, textAlign: 'center' }, returning: { width: '100%', maxWidth: 420, alignSelf: 'center', paddingHorizontal: 24, paddingTop: 4, paddingBottom: 12, flexDirection: 'row', flexWrap: 'wrap', columnGap: 4, justifyContent: 'center', alignItems: 'center' },
+  note: { color: colors.muted, fontSize: 12, lineHeight: 19, textAlign: 'center' }, returning: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 4, justifyContent: 'center', alignItems: 'center' },
   textButton: { minWidth: 44, minHeight: 44, justifyContent: 'center', paddingHorizontal: 3 }, link: { color: colors.primary, fontSize: 14, lineHeight: 21, fontWeight: '500' },
   signIn: { color: colors.primary, fontSize: 15, lineHeight: 22, fontWeight: '600', textDecorationLine: 'underline' }, secondary: { color: colors.muted, fontSize: 14, lineHeight: 22 },
   fieldError: { color: colors.error, fontSize: 13, lineHeight: 19 }, errorRow: { flexDirection: 'row', gap: 8, alignItems: 'flex-start' }, error: { flex: 1, color: colors.error, fontSize: 14, lineHeight: 21 },
-  confirmation: { marginTop: 28, gap: 16, alignItems: 'flex-start' }, emailValue: { fontSize: 17, lineHeight: 25, fontWeight: '600', color: colors.ink, alignSelf: 'stretch' }
+  confirmation: { marginTop: 18, gap: 10, alignItems: 'flex-start' }, emailValue: { fontSize: 17, lineHeight: 25, fontWeight: '600', color: colors.ink, alignSelf: 'stretch' }
 }); }

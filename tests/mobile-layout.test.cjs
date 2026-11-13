@@ -113,7 +113,7 @@ test('mobile layout keeps browser zoom, large inputs, and touch targets', () => 
   assert.match(css, /#appShell \.calendar-stage-main \{ grid-column: 1; grid-row: 2/);
   assert.match(css, /\.event-attendee-option > input \{[^}]*width: 1px; height: 1px/);
   assert.match(html, /<dialog id="activityDialog" aria-labelledby="dialogTitle">/);
-  assert.match(html, /data-sidebar-action="dashboard" data-i18n="dashboard.open"/);
+  assert.match(html, /id="openDashboard" data-i18n="dashboard.open"/);
   assert.match(html, /mobile-menu-item[^>]*data-sidebar-action="help"/);
   assert.match(html, /mobile-menu-item[^>]*data-sidebar-action="settings"/);
   assert.match(css, /@media \(max-width: 900px\)[\s\S]*?#appShell \.sidebar-calendar-row,[\s\S]*?min-height: 44px;/);
