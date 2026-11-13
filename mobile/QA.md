@@ -367,3 +367,15 @@ account and iPhone simulator checks remain pending until performed above.
 - All **698** isolated automated tests and fresh iOS, Android and web exports
   passed on this frozen runtime. Only verification documentation changed after
   those checks.
+
+## Live iPhone sign-in acceptance (November 12, 2026)
+
+- iPhone 16 Pro simulator, iOS 26.5, Expo Go. The tester signed into the
+  production KidsSync account in the native app. Home opened, and **Open
+  calendar** loaded the account’s calendar in its saved Agenda view.
+- Account → Calendar preferences showed all five setup answers. Choosing Week
+  and cancelling the edit returned to the review with Agenda still selected.
+  The simulator was left on signed-in Home.
+- The landing page, all five questions, editing and saving an answer, the
+  account creation handoff, and password-reset navigation were checked earlier
+  on the same simulator. The 721 automated tests passed on release `69b0c20`.
