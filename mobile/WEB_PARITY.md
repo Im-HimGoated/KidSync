@@ -1,8 +1,7 @@
 # Website tools in the phone app
 
-This inventory covers the native parity slice added after the frozen
-`f3c1752` release candidate. It does not claim that every website workflow has
-been rewritten natively or that live account/device acceptance has passed.
+This inventory describes the phone app's website feature coverage. The route
+inventory lives in [FEATURE_ACCESS.md](FEATURE_ACCESS.md).
 
 ## Native calendar tools
 
@@ -17,6 +16,13 @@ Open Calendar and select the sliders icon to open Calendar tools.
 | Saved views | Up to eight named date/view/search/person-filter presets; open or remove without modifying events. |
 | Event finder | Bounded date range of up to 366 days, recurring occurrences, text/person/location/notes search and paged results. Opens the selected day with calendar filters cleared. |
 | Calendar preferences | Existing native preference review remains accessible through the toolbox. |
+| Quick Add | Turns English or Chinese text into a draft for review in the event editor. |
+| Find family time | Uses the website's scheduling rules for selected people, notice, travel, buffers and daily limits. |
+| Family poll | Compare up to five times, record replies on this device, share options and review an available time. |
+| Activity lists | Review upcoming and past calendar occurrences, including recurring events. |
+| Activity history | Reads the calendar's saved audit history and shared changes. Shared acknowledgements require the deployed family coordination migration. |
+| Versions and presets | Owners can restore a saved version or preset and save a new preset. Restores keep a checkpoint. |
+| Calendar files | Pick and review an iCalendar or KidsSync JSON file before importing events. Export iCalendar, JSON and weekly PDF, print, or compose a weekly email. |
 
 Open-time suggestions cover only the current calendar and do not reserve a
 slot. Review the event before saving; normal owner/shared access checks and
@@ -31,19 +37,22 @@ than silently erased. Simultaneous local writes are serialized.
 
 ## Native Home shortcuts
 
-Home adds upcoming-plan search over 90 days, pinned next occurrences, tomorrow's
-preview, today's agenda sharing, and packing checklists/progress. Pins and packing
-progress are also device-local and account/owner/calendar scoped. The app shell
-passes the authenticated user ID; missing scope disables personal mutations.
+Home greets the family, shows upcoming holidays and plans, and displays recent
+calendar activity when available. Search covers 90 days. Pins, packing progress
+and family polls are device-local. The native event editor supports templates,
+one-off duplication, colors, attendees, event types, status, icons and buffers
+using the web event fields. Week and 4 days show a GMT offset and a scrollable
+24-hour timeline. Tapping an hour starts a draft with the selected date and time.
+Family profiles are editable under Family → People. Removing a profile keeps
+its events and reassigns them to the family.
 
 ## Explicit website handoffs
 
-Scan document, Google/Outlook connections, Google Calendar import, activity
-history, calendar version history, file export and printing are marked **Web**.
-Choosing them opens the existing KidsSync website; the user then selects that
-tool there. There is no invented native OAuth, scanning, history or file-export
-implementation. Browser sign-in and provider configuration may be required.
-An unavailable native callback is not advertised as a working native feature.
+Document scanning, Google/Outlook connections and Google Calendar import open
+the website. Opening the exact browser tool requires deployment of the matching
+website changes. Browser sign-in and provider configuration may be required.
+Phone reminders use the device's local notifications. Remote push and automatic
+email delivery need a separate backend integration.
 
 ## Validation and remaining work
 
@@ -65,8 +74,5 @@ unsavable note cannot trap the user in a dirty draft. Closing a planning sheet
 returns to the calendar; opening a found day clears filters, while opening a
 saved view restores its saved filters.
 
-The new-activity editor accepts only date/time fields from a planning suggestion;
-it remains a new activity with no original event or inherited ID. Event templates,
-duplicate-event controls and richer icon-picker parity are separate follow-up
-work, not completed by this slice. Do not include unverified parity changes in a
-previously frozen release merely because they share the local working directory.
+Planning suggestions create new drafts. Native print, document picking, real
+notification delivery and live two-account behavior still require phone testing.

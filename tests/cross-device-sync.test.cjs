@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const sync = require('../assets/cloud-snapshot-sync.js');
 
 const html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
 function source(name, async = false) {
@@ -16,8 +17,7 @@ function source(name, async = false) {
 // Supabase SDK boundary. These are not a substitute for live RLS/device checks.
 function database() {
   const rows = new Map();
-  let version = 0;
-  return { rows, nextVersion: () => `server-${++version}`, failWrites: false, beforeWrite: null };
+  return { rows, failWrites: false, beforeWrite: null };
 }
 
 function device(db, userId = 'same-account') {
@@ -28,38 +28,43 @@ function device(db, userId = 'same-account') {
     from(table) {
       assert.equal(table, 'family_schedules');
       let payload;
-      let requestedUser;
+      let requestedUser, previousVersion, inserting;
       return {
-        upsert(value, options) {
-          assert.equal(options.onConflict, 'user_id');
+        insert(value) {
           assert.equal(value.user_id, userId);
           payload = JSON.parse(JSON.stringify(value));
+          inserting = true;
           return this;
         },
+        update(value) { payload = JSON.parse(JSON.stringify(value)); return this; },
         select() { return this; },
         eq(column, value) {
-          assert.equal(column, 'user_id');
-          requestedUser = value;
+          if (column === 'user_id') requestedUser = value;
+          else { assert.equal(column, 'updated_at'); previousVersion = value; }
           return this;
         },
-        async single() {
-          if (db.failWrites) return { error: new Error('Simulated network failure') };
-          if (db.beforeWrite) db.beforeWrite();
-          const updated_at = db.nextVersion();
-          db.rows.set(userId, { schedule: payload.schedule, updated_at });
-          return { data: { updated_at }, error: null };
-        },
         async maybeSingle() {
-          assert.equal(requestedUser, userId);
+          if (!inserting) assert.equal(requestedUser, userId);
           const row = db.rows.get(requestedUser);
+          if (payload) {
+            if (db.failWrites) return { error: new Error('Simulated network failure') };
+            if (db.beforeWrite) db.beforeWrite();
+            const latest = db.rows.get(userId);
+            if (inserting && latest) return { error: { code: '23505' } };
+            if (!inserting && latest?.updated_at !== previousVersion) return { data: null };
+            const data = { schedule: payload.schedule, updated_at: payload.updated_at };
+            db.rows.set(userId, data);
+            return { data: JSON.parse(JSON.stringify(data)), error: null };
+          }
           return { data: row ? JSON.parse(JSON.stringify(row)) : null, error: null };
         }
       };
     }
   };
   const context = vm.createContext({
-    cloudClient: client, cloudSession: { user: { id: userId } }, activeAccount: { provider: 'supabase' },
+    cloudClient: client, cloudSession: { user: { id: userId } }, activeAccount: { id: userId, provider: 'supabase' },
     cloudSyncBusy: false, cloudSyncRequested: false, cloudSaveTimer: null,
+    cloudBaseline: null, CLOUD_UPDATED_KEY: 'updated', CLOUD_BASE_KEY: 'baseline', accountDataKey: (_user, key) => key,
     navigator: { onLine: true }, snapshot: { activities: [] },
     localStorage: {
       getItem: key => storage.get(key) ?? null,
@@ -68,12 +73,13 @@ function device(db, userId = 'same-account') {
     },
     cloudPendingKey: () => 'pending', cloudUpdatedKey: () => 'updated',
     setCloudSaveState: status => statuses.push(status), reportClientError() {}, openWelcomeBackIfNeeded() {},
-    window: { clearTimeout() {}, setTimeout: (fn, delay) => scheduled.push({ fn, delay }) }
+    window: { KidsSyncCloudSnapshotSync: sync, clearTimeout() {}, setTimeout: (fn, delay) => scheduled.push({ fn, delay }) }
   });
   context.buildCloudSnapshot = () => JSON.parse(JSON.stringify(context.snapshot));
   context.applyCloudSnapshot = value => { context.snapshot = JSON.parse(JSON.stringify(value)); };
   vm.runInContext([
     source('hasPendingCloudSave'), source('markCloudSavePending'),
+    source('getCloudBaseline'), source('rememberCloudBaseline'),
     source('flushCloudSave', true), source('hydrateCloudSchedule', true)
   ].join('\n'), context);
   return {
@@ -153,4 +159,46 @@ test('edits arriving during an upload remain pending and trigger another save', 
   await first.scheduled.at(-1).fn();
   assert.equal(first.storage.has('pending'), false);
   assert.equal(db.rows.get('same-account').schedule.activities.length, 2);
+});
+
+test('a pre-existing cloud row without an acknowledged baseline retains a browser draft for recovery', async () => {
+  const db = database();
+  const phone = device(db);
+  phone.edit([{ id: 'phone', title: 'Phone plan' }]);
+  assert.equal(await phone.save(), true);
+  const browser = device(db);
+  browser.storage.set('updated', db.rows.get('same-account').updated_at);
+  browser.edit([{ id: 'legacy-offline', title: 'Unsynced browser plan' }]);
+  assert.equal(await browser.save(), false);
+  assert.equal(browser.statuses.at(-1), 'syncConflict');
+  assert.equal(browser.storage.get('pending'), 'local-edit');
+  assert.equal(browser.context.snapshot.activities[0].id, 'legacy-offline');
+  assert.equal(db.rows.get('same-account').schedule.activities[0].id, 'phone');
+});
+
+test('conflict recovery backs up before applying cloud data and aborts if pending edits change', async () => {
+  const db = database();
+  const phone = device(db);
+  phone.edit([{ id: 'phone' }]);
+  await phone.save();
+  const browser = device(db);
+  const operations = [];
+  browser.context.window.confirm = () => true;
+  browser.context.t = text => text;
+  browser.context.renderCloudSettings = () => {};
+  browser.context.downloadCalendarFile = content => operations.push(['backup', JSON.parse(content).activities[0].id]);
+  const apply = browser.context.applyCloudSnapshot;
+  browser.context.applyCloudSnapshot = snapshot => { operations.push(['apply', snapshot.activities[0].id]); apply(snapshot); };
+  vm.runInContext(source('recoverCloudSchedule', true), browser.context);
+  browser.edit([{ id: 'browser' }]);
+  browser.context.cloudSaveState = 'syncConflict';
+  const interrupted = browser.context.recoverCloudSchedule();
+  browser.edit([{ id: 'newer' }], 'newer-version');
+  await interrupted;
+  assert.deepEqual(operations, []);
+  assert.equal(browser.storage.get('pending'), 'newer-version');
+  await browser.context.recoverCloudSchedule();
+  assert.deepEqual(operations, [['backup', 'newer'], ['apply', 'phone']]);
+  assert.equal(browser.storage.has('pending'), false);
+  assert.equal(browser.statuses.at(-1), 'cloud');
 });

@@ -114,6 +114,15 @@ function isOffline(error) {
     || /network|fetch|offline|connection|timeout/i.test(`${error?.name || ''} ${error?.message || ''}`);
 }
 
+function olderVersion(incoming, current) {
+  const first = Date.parse(incoming?.updated_at), second = Date.parse(current?.updated_at);
+  if (!Number.isFinite(first) || !Number.isFinite(second)) return false;
+  if (first !== second) return first < second;
+  // PostgreSQL retains microseconds while Date.parse only keeps milliseconds.
+  const fraction = value => (value.match(/\.(\d+)/)?.[1] || '').padEnd(6, '0').slice(3, 6);
+  return fraction(incoming.updated_at) < fraction(current.updated_at);
+}
+
 function createScheduleSync({ client, storage, userId, onChange = () => {}, isCurrent = () => true } = {}) {
   const key = keyForUser(userId);
   if (!storage?.getItem || !storage?.setItem) throw failure('STORAGE_ERROR');
@@ -123,6 +132,7 @@ function createScheduleSync({ client, storage, userId, onChange = () => {}, isCu
   const lock = deviceLocks.get(key);
   let state = { schema: 1, userId, row: null, cachedAt: null, pending: [] };
   let loaded = false, ready = false, stopped = false, status = 'CONNECTING', error = null, offline = false, syncing = null;
+  let queuedRefresh = null;
   function current() { return !stopped && isCurrent(); }
   function assertCurrent() { if (!current()) throw failure('STALE_SCOPE'); }
   function info() {
@@ -282,8 +292,11 @@ function createScheduleSync({ client, storage, userId, onChange = () => {}, isCu
     assertCurrent();
     if (!ready) await load();
     if (!record(row) || !record(row.schedule) || typeof row.updated_at !== 'string') throw failure('INVALID_DATA');
-    lock.confirmedGeneration += 1;
-    await persist(next => ({ ...next, row: copy({ schedule: row.schedule, updated_at: row.updated_at }), cachedAt: Date.now() }));
+    await persist(next => {
+      if (olderVersion(row, next.row)) return next;
+      lock.confirmedGeneration += 1;
+      return { ...next, row: copy({ schedule: row.schedule, updated_at: row.updated_at }), cachedAt: Date.now() };
+    });
     emit(); return info();
   }
   async function retry() {
@@ -292,6 +305,16 @@ function createScheduleSync({ client, storage, userId, onChange = () => {}, isCu
     await persist(next => ({ ...next, pending: next.pending.map(item => ({ ...item, blocked: null })) }));
     return sync();
   }
+  function refresh({ afterInFlight = false } = {}) {
+    if (!afterInFlight || !syncing) return sync();
+    // A Realtime event can arrive after the current request read its snapshot.
+    // Keep one follow-up read even when multiple notifications arrive together.
+    if (!queuedRefresh) queuedRefresh = syncing.then(() => {
+      queuedRefresh = null;
+      return current() ? sync() : info();
+    });
+    return queuedRefresh;
+  }
   async function discardPending() {
     // Caller must obtain explicit confirmation. Discarding is local only; writes
     // already acknowledged remotely are never undone by deleting this queue.
@@ -299,7 +322,7 @@ function createScheduleSync({ client, storage, userId, onChange = () => {}, isCu
     await persist(next => ({ ...next, pending: [] }));
     error = null; status = offline ? 'OFFLINE' : 'CACHED'; emit(); return info();
   }
-  return { load, refresh: sync, retry, acceptConfirmed, discardPending, getState: info,
+  return { load, refresh, retry, acceptConfirmed, discardPending, getState: info,
     saveActivity: (calendarId, event, { original = null } = {}) => enqueue('save', calendarId, event, original),
     deleteActivity: (calendarId, eventId, { original } = {}) => enqueue('delete', calendarId, eventId, original),
     stop() { stopped = true; } };

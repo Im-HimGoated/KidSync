@@ -45,6 +45,8 @@ function viewCopy(language) {
     nextMonth: zh ? '下个月' : 'Next month',
     today: zh ? '今天' : 'Today',
     add: zh ? '添加活动' : 'Add activity',
+    viewDay: zh ? '查看当天' : 'View day',
+    noActivities: zh ? '这一天还没有安排。' : 'Nothing planned for this day.',
     more: count => `+${count}`,
   };
 }
@@ -89,11 +91,11 @@ function useRevealSelectedDay(scroll, width, index) {
   return event => setViewport(event.nativeEvent.layout.width);
 }
 
-export function CalendarViewPicker({ view, language, onChange }) {
+export function CalendarViewPicker({ view, language, onChange, fourDays = false }) {
   const { s } = useViewStyles();
   const t = getCopy(language);
   return <View style={s.views}>
-    {['agenda', 'day', 'week', 'month'].map(value => <Pressable key={value} accessibilityRole="button"
+    {(fourDays ? ['agenda', 'day', 'week', 'four', 'month'] : ['agenda', 'day', 'week', 'month']).map(value => <Pressable key={value} accessibilityRole="button"
       accessibilityState={{ selected: value === view }} onPress={() => onChange(value)}
       style={[s.viewButton, value === view && s.selectedDay]}>
       <Text style={[s.viewLabel, value === view && s.selectedText]}>{t[value]}</Text>
@@ -162,17 +164,19 @@ export function MonthGrid({ date, firstDay = 1, events = [], kids = [], language
 
 /** Dedicated full-month page with readable event labels on phone screens. */
 export function FullMonthPage({ date, firstDay = 1, events = [], kids = [], language = 'en', calendarName,
-  canWrite = false, onBack, onMonth, onDate, onEvent, onAdd }) {
+  canWrite = false, onBack, onMonth, onDate, onOpenDay, onEvent, onAdd }) {
   const { colors, palettes, s } = useViewStyles();
   const { width } = useWindowDimensions();
   const selected = ownDate(date), first = model.startOfDisplayWeek(selected, firstDayValue(firstDay));
   const fullDays = model.displayMonthDays(selected, firstDayValue(firstDay));
   const days = fullDays.slice(35).some(day => day.getMonth() === selected.getMonth()) ? fullDays : fullDays.slice(0, 35);
   const gridWidth = Math.max(280, Math.min(width, 640) - 24), cellWidth = (gridWidth - 2) / 7;
-  const cellHeight = Math.max(76, Math.min(96, cellWidth * 1.55));
-  const maxItems = cellHeight >= 84 ? 3 : 2;
+  const cellHeight = Math.max(64, Math.min(72, cellWidth * 1.25));
+  const maxItems = 2;
   const today = calendar.dateKey(new Date()), selectedKey = calendar.dateKey(selected), t = viewCopy(language);
   const monthLabel = formatDate(selected, language, { month: 'long', year: 'numeric' });
+  const selectedLabel = formatDate(selected, language, { weekday: 'long', month: 'long', day: 'numeric' });
+  const selectedEvents = model.sortAgenda(calendar.eventsForDate(events, selected), selected);
   const move = amount => onMonth?.(model.movePeriod(selected, 'month', amount));
 
   return <View style={s.fullPage}>
@@ -230,6 +234,34 @@ export function FullMonthPage({ date, firstDay = 1, events = [], kids = [], lang
           </View>;
         })}</View>
       </View>
+      <View style={[s.fullAgenda, { width: gridWidth }]}>
+        <View style={s.fullAgendaHeader}>
+          <View style={s.fullAgendaHeading}>
+            <Text accessibilityRole="header" numberOfLines={2} style={s.fullAgendaTitle}>{selectedLabel}</Text>
+            <Text style={s.fullAgendaCount}>{t.activities(selectedEvents.length)}</Text>
+          </View>
+          {!!onOpenDay && <Pressable accessibilityRole="button" accessibilityLabel={`${t.viewDay}: ${selectedLabel}`}
+            onPress={() => onOpenDay(selected)} style={s.fullViewDay}>
+            <Text style={s.fullViewDayText}>{t.viewDay}</Text><ChevronRight size={16} color={colors.primary} />
+          </Pressable>}
+        </View>
+        {selectedEvents.length ? selectedEvents.map((event, index) => {
+          const palette = colorFor(event, kids, palettes, colors);
+          const start = calendar.formatTime(event.start, language), end = calendar.formatTime(event.end, language);
+          const time = event.allDay ? t.allDay : start ? `${start}${end ? ` – ${end}` : ''}` : t.untimed;
+          return <Pressable key={`${event.id ?? 'event'}:${index}`} accessibilityRole="button"
+            accessibilityLabel={eventLabel(event, selected, kids, language, t)} onPress={() => onEvent?.(event, selected)}
+            style={({ pressed }) => [s.fullAgendaEvent, pressed && s.fullAgendaEventPressed]}>
+            <View style={[s.fullAgendaDot, { backgroundColor: palette.line }]} />
+            <View style={s.fullAgendaEventCopy}>
+              <Text style={s.fullAgendaTime}>{time}</Text>
+              <Text numberOfLines={2} style={s.fullAgendaEventTitle}>{text(event.title) || t.activity}</Text>
+              <Text numberOfLines={1} style={s.fullAgendaPerson}>{attendee(event, kids, t)}</Text>
+            </View>
+            <ChevronRight size={18} color={colors.muted} />
+          </Pressable>;
+        }) : <Text style={s.fullAgendaEmpty}>{t.noActivities}</Text>}
+      </View>
     </ScrollView>
   </View>;
 }
@@ -282,11 +314,14 @@ function NonTimedRow({ label, rows, dates, colWidth, scrollRef, scrollProps, kid
  * Compact week overview. The parent also renders a full-width selected-day
  * agenda so narrow overlap lanes are not the only way to reach an activity.
  */
-export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kids = [], language = 'en', onDate, onEvent, onOpenDay, dayOnly = false }) {
+export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kids = [], language = 'en', onDate, onEvent, onOpenDay, onAddAtTime,
+  dayOnly = false, fourDays = false, hideWeekends = false }) {
   const { s } = useViewStyles();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-  const selected = ownDate(date), first = model.startOfDisplayWeek(selected, firstDayValue(firstDay));
-  const dates = dayOnly ? [selected] : Array.from({ length: 7 }, (_, i) => calendar.addDays(first, i));
+  const selected = ownDate(date), first = fourDays ? selected : model.startOfDisplayWeek(selected, firstDayValue(firstDay));
+  const dates = dayOnly ? [selected] : Array.from({ length: fourDays ? 4 : 7 }, (_, i) => calendar.addDays(first, i))
+    .filter(day => fourDays || !hideWeekends || (day.getDay() !== 0 && day.getDay() !== 6));
+  const selectedColumn = dates.findIndex(day => calendar.dateKey(day) === calendar.dateKey(selected));
   const vertical = useRef(null), horizontal = useRef(null), headers = useRef(null), allDay = useRef(null), untimed = useRef(null);
   const horizontalSource = useRef(horizontal), [viewportWidth, setViewportWidth] = useState(0);
   const verticalOffset = useRef(0), lastInitial = useRef('');
@@ -307,6 +342,8 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
     return () => clearInterval(timer);
   }, []);
   const today = calendar.dateKey(now);
+  const offset = -selected.getTimezoneOffset();
+  const zone = `GMT${offset < 0 ? '−' : '+'}${String(Math.floor(Math.abs(offset) / 60)).padStart(2, '0')}${offset % 60 ? `:${String(Math.abs(offset) % 60).padStart(2, '0')}` : ''}`;
   const clock = minutes => calendar.formatTime(`${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`, language);
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const hasUntimed = columns.some(column => column.untimed.length);
@@ -326,6 +363,12 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
   }
   function horizontalProps(source) {
     return { onScrollBeginDrag: () => { horizontalSource.current = source; }, onScroll: event => syncHorizontal(event, source),
+      onMomentumScrollEnd: event => {
+        if (dayOnly || fourDays || horizontalSource.current !== source || !viewportWidth) return;
+        const x = event.nativeEvent.contentOffset.x;
+        const index = Math.max(0, Math.min(dates.length - 1, Math.round((x + viewportWidth / 2) / colWidth - 0.5)));
+        if (calendar.dateKey(dates[index]) !== selectedKey) onDate?.(dates[index]);
+      },
       scrollEventThrottle: 16, snapToInterval: colWidth, decelerationRate: 'fast' };
   }
   function scrollInitially() {
@@ -340,16 +383,15 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
   }, [scrollKey]);
   useEffect(() => {
     if (!viewportWidth || dayOnly) return;
-    const index = (selected.getDay() - firstDayValue(firstDay) + 7) % 7;
-    const x = weekLayout.weekOffset(index, colWidth, viewportWidth);
+    const x = weekLayout.weekOffset(selectedColumn, colWidth, viewportWidth, dates.length);
     for (const ref of [horizontal, headers, allDay, untimed]) ref.current?.scrollTo({ x, animated: false });
-  }, [selectedKey, firstDay, colWidth, viewportWidth, hasUntimed, dayOnly]);
+  }, [selectedKey, selectedColumn, dates.length, colWidth, viewportWidth, hasUntimed, dayOnly]);
 
   function openDay(day) { onOpenDay?.(day, verticalOffset.current / HOUR_HEIGHT + 0.5); }
 
   return <View {...daySwipe.panHandlers} style={s.weekContainer}
     onLayout={event => setViewportWidth(Math.max(0, event.nativeEvent.layout.width - GUTTER - 2))}>
-    {!dayOnly && <View style={s.dayHeaders}><View style={s.headerGutter} />
+    {!dayOnly && <View style={s.dayHeaders}><View style={s.headerGutter}><Text style={s.zone}>{zone}</Text></View>
       <ScrollView horizontal ref={headers} {...horizontalProps(headers)} nestedScrollEnabled directionalLockEnabled showsHorizontalScrollIndicator={false} style={s.daysViewport}>
         <View style={[s.dayHeaderColumns, { width: daysWidth }]}>{dates.map((day, index) => {
           const key = calendar.dateKey(day), chosen = key === selectedKey;
@@ -364,6 +406,7 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
         })}</View>
       </ScrollView>
     </View>}
+    {dayOnly && <Text style={s.dayZone}>{zone}</Text>}
     <NonTimedRow label={t.allDay} rows={columns.map(column => column.allDay)} dates={dates} colWidth={colWidth}
       scrollRef={allDay} scrollProps={horizontalProps(allDay)} kids={kids} language={language} t={t} onEvent={onEvent} onOpenDay={!dayOnly && onOpenDay ? openDay : undefined} />
     {hasUntimed && <NonTimedRow label={t.untimed} rows={columns.map(column => column.untimed)} dates={dates} colWidth={colWidth}
@@ -388,6 +431,10 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
               style={[s.hourLine, { top: hour * HOUR_HEIGHT, width: daysWidth }]} />)}
             {dates.map((day, index) => <View key={calendar.dateKey(day)} pointerEvents="box-none"
               style={[s.dayColumn, { left: index * colWidth, width: colWidth, height: canvasHeight }]}>
+              {!!onAddAtTime && Array.from({ length: 24 }, (_, hour) => <Pressable key={hour}
+                accessibilityRole="button" accessibilityLabel={`${t.add}, ${formatDate(day, language, { month: 'short', day: 'numeric' })}, ${clock(hour * 60)}`}
+                style={{ position: 'absolute', top: hour * HOUR_HEIGHT, left: 0, right: 0, height: HOUR_HEIGHT }}
+                onPress={() => onAddAtTime(day, hour)} />)}
               {columns[index].timed.map((item, j) => {
                 const laneWidth = colWidth / Math.max(1, item.lanes);
                 return <EventBlock key={`${item.event.id ?? 'event'}:${item.occurrenceStartDate || ''}:${j}`} event={item.event} date={day}
@@ -422,7 +469,7 @@ const createStyles = colors => StyleSheet.create({
   fullToday: { minHeight: 40, minWidth: 88, paddingHorizontal: 18, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: colors.primarySoft },
   fullTodayText: { color: colors.primary, fontSize: 13, fontWeight: '700' },
   fullScroll: { flex: 1 }, fullScrollContent: { alignItems: 'center', paddingHorizontal: 12, paddingTop: 12, paddingBottom: 28 },
-  fullCalendar: { overflow: 'hidden', borderWidth: 1, borderColor: colors.line, borderRadius: 16, backgroundColor: colors.surface, ...Platform.select({ web: { boxSizing: 'border-box' }, default: {} }) },
+  fullCalendar: { overflow: 'hidden', borderTopWidth: 1, borderBottomWidth: 1, borderColor: colors.line, backgroundColor: colors.surface, ...Platform.select({ web: { boxSizing: 'border-box' }, default: {} }) },
   fullWeekdays: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.line, backgroundColor: colors.surfaceRaised },
   fullWeekday: { color: colors.muted, fontSize: 11, lineHeight: 15, fontWeight: '700', textAlign: 'center', paddingVertical: 9 },
   fullGrid: { flexDirection: 'row', flexWrap: 'wrap' },
@@ -436,6 +483,21 @@ const createStyles = colors => StyleSheet.create({
   fullEvents: { zIndex: 1, gap: 2, flex: 1, paddingTop: 2 },
   fullEvent: { minHeight: 14, borderLeftWidth: 2, borderRadius: 3, justifyContent: 'center', paddingHorizontal: 3, overflow: 'hidden' },
   fullEventText: { fontSize: 9, lineHeight: 12, fontWeight: '600' }, fullMore: { color: colors.muted, fontSize: 9, lineHeight: 12, fontWeight: '700', paddingLeft: 3 },
+  fullAgenda: { marginTop: 18 },
+  fullAgendaHeader: { minHeight: 54, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, paddingBottom: 10 },
+  fullAgendaHeading: { flex: 1, minWidth: 0 },
+  fullAgendaTitle: { color: colors.ink, fontSize: 18, lineHeight: 24, fontWeight: '700' },
+  fullAgendaCount: { color: colors.muted, fontSize: 12, lineHeight: 18, marginTop: 2 },
+  fullViewDay: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 2, paddingHorizontal: 8 },
+  fullViewDayText: { color: colors.primary, fontSize: 13, fontWeight: '700' },
+  fullAgendaEvent: { minHeight: 66, flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderTopWidth: 1, borderTopColor: colors.line },
+  fullAgendaEventPressed: { opacity: 0.6 },
+  fullAgendaDot: { width: 9, height: 9, borderRadius: 5 },
+  fullAgendaEventCopy: { flex: 1, minWidth: 0 },
+  fullAgendaTime: { color: colors.muted, fontSize: 11, lineHeight: 16, fontWeight: '600' },
+  fullAgendaEventTitle: { color: colors.ink, fontSize: 14, lineHeight: 19, fontWeight: '700' },
+  fullAgendaPerson: { color: colors.muted, fontSize: 12, lineHeight: 17 },
+  fullAgendaEmpty: { color: colors.muted, fontSize: 14, lineHeight: 20, paddingVertical: 20, borderTopWidth: 1, borderTopColor: colors.line },
   stripScroll: { flexGrow: 0, marginBottom: 14 }, strip: { flexDirection: 'row' },
   stripDay: { flex: 1, minWidth: 44, minHeight: 76, borderRadius: 14, alignItems: 'center', justifyContent: 'center', gap: 7 },
   weekday: { color: colors.muted, fontSize: 12, lineHeight: 17, textAlign: 'center' },
@@ -450,6 +512,8 @@ const createStyles = colors => StyleSheet.create({
   weekContainer: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, borderRadius: 16, overflow: 'hidden', marginBottom: 14 },
   dayHeaders: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.line },
   headerGutter: { width: GUTTER, backgroundColor: colors.surface }, daysViewport: { flex: 1 }, dayHeaderColumns: { flexDirection: 'row' },
+  zone: { color: colors.muted, fontSize: 9, textAlign: 'center', marginTop: 8 },
+  dayZone: { color: colors.muted, fontSize: 10, padding: 5, textAlign: 'left' },
   compactStrip: { marginBottom: 8 },
   compactStripDay: { minWidth: 0, minHeight: 60, gap: 1, borderRadius: 11 },
   stripCount: { color: colors.muted, fontSize: 11, fontVariant: ['tabular-nums'] },

@@ -42,14 +42,14 @@ export default function AppearanceSettings({ language = 'en' }) {
   return <View style={s.content}>
     <Text style={s.intro}>{t.intro}</Text>
     <Text accessibilityRole="header" style={s.label}>{t.mode}</Text>
-    <View style={s.modes} accessibilityLabel={t.mode}>
+    <View accessibilityRole="radiogroup" style={s.modes} accessibilityLabel={t.mode}>
       {[[Smartphone, 'system'], [Sun, 'light'], [Moon, 'dark']].map(([Icon, value]) => <Pressable key={value} accessibilityRole="radio" accessibilityLabel={t[value]} aria-checked={settings.mode === value} accessibilityState={{ checked: settings.mode === value, disabled }} disabled={disabled} onPress={() => setAppearance({ mode: value })} style={({ pressed }) => [s.mode, settings.mode === value && s.modeSelected, pressed && s.pressed]}>
         <Icon size={24} color={settings.mode === value ? colors.primary : colors.muted} /><Text style={[s.modeText, settings.mode === value && s.selectedText]}>{t[value]}</Text><View style={[s.radio, settings.mode === value && s.radioSelected]}>{settings.mode === value && <Check size={13} color={colors.onPrimary} />}</View>
       </Pressable>)}
     </View>
     <Text style={s.hint}>{t.systemHint} {settings.mode === 'system' ? appearance.isDark ? t.activeDark : t.activeLight : ''}</Text>
     <Text accessibilityRole="header" style={s.label}>{t.accent}</Text>
-    <View style={s.accents} accessibilityLabel={t.accent}>{theme.ACCENTS.map(value => <Pressable key={value} accessibilityRole="radio" accessibilityLabel={t[value]} aria-checked={settings.accent === value} accessibilityState={{ checked: settings.accent === value, disabled }} disabled={disabled} onPress={() => setAppearance({ accent: value })} style={({ pressed }) => [s.accent, settings.accent === value && s.accentSelected, pressed && s.pressed]}>
+    <View accessibilityRole="radiogroup" style={s.accents} accessibilityLabel={t.accent}>{theme.ACCENTS.map(value => <Pressable key={value} accessibilityRole="radio" accessibilityLabel={t[value]} aria-checked={settings.accent === value} accessibilityState={{ checked: settings.accent === value, disabled }} disabled={disabled} onPress={() => setAppearance({ accent: value })} style={({ pressed }) => [s.accent, settings.accent === value && s.accentSelected, pressed && s.pressed]}>
       <View style={[s.swatch, { backgroundColor: theme.accentColors[value][appearance.isDark ? 'dark' : 'light'] }]} />
       <Text style={[s.accentText, settings.accent === value && s.selectedText]}>{t[value]}</Text>{settings.accent === value && <Check size={16} color={colors.primary} />}
     </Pressable>)}</View>

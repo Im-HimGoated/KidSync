@@ -26,18 +26,19 @@ views and collaboration tools are available after authentication.
 
 | Area | Access and features |
 | --- | --- |
-| Home bottom tab | Today and seven-day counts, next plans, handoff needs, family rhythm, calendar selection |
+| Home bottom tab | Greeting, upcoming plans and holidays, recent calendar changes, handoff needs and family rhythm |
 | Home → Quick planning tools | Upcoming search, pins, tomorrow, today's share preview, packing checklists |
 | Home plan or date | Opens that owned calendar/date; timed plans focus their start in Week, and repeat taps re-center the timeline |
-| Calendar bottom tab | Opens Today using the saved view/hour; Agenda, Week, Month, date navigation, search and person filters remain available |
-| Calendar selector | Switch calendars or create an owned calendar |
-| Calendar → + / activity card | Add, inspect, edit or delete; time/all-day, person, location, pickup, packing, notes, importance, reminders, recurrence |
+| Calendar bottom tab | Agenda, Day, Week, 4 days and Month with date navigation, search, person and category filters |
+| Calendar selector | Switch calendars or create, rename or delete an owned calendar |
+| Calendar → + / activity card | Add, inspect, edit, duplicate or delete. Event options include type, color, icon, attendees, status, travel, buffers and recurrence |
 | Recurring activity actions | Choose a single occurrence or the whole series; supported confirmed operations offer Undo |
-| Week view | Roomy day columns with synchronized horizontal day snapping, a 24-hour grid, holidays/all-day band, activity counts and the selected-day agenda |
-| Calendar → sliders → Plan & review | Open time, compare days, private day notes, review/share a week |
-| Calendar → sliders → Find & customize | Event finder, saved views and original setup-answer review |
+| Week view | Scrollable 24-hour grid, tap an hour to add, GMT offset, optional weekend columns and a holiday band |
+| Calendar → sliders → Plan & review | Quick Add, family poll, find family time, open time, compare days, private day notes and review/share a week |
+| Calendar → sliders → Find & customize | Event finder, upcoming/past activities, saved views and setup preferences |
+| Calendar → sliders → History & files | Activity history and acknowledgements, owner version restore and presets, phone calendar-file import/export, weekly PDF, printing and email draft |
 | Calendar → Share | Family → People for that owned calendar |
-| Family bottom tab → People | Access management, owner comments in the real calendar, family-profile website handoff |
+| Family bottom tab → People | Access management, owner comments in the real calendar and family profiles |
 | Family → Inbox | Invitations, direct access to accepted shared calendars and incoming pickup requests |
 | Calendar → Comments | Comments for the selected real calendar; posting follows owner/commenter/editor permissions |
 | Family → Pickups | Assign and review occurrence-based pickup coordination |
@@ -55,14 +56,13 @@ Back returns directly to the calling workspace. Appearance offers device default
 light/dark and four accent palettes. Phone reminders are opt-in and apply to
 confirmed calendars the user owns; shared recipient calendars are excluded.
 
-Tools marked Web open KidsSync in the browser: scan document, connected Google or
-Outlook calendars, Google import, activity history, version history, file export
-and printing. Family's Manage family profiles (Web) explains where to add or
-rename children. These handoffs open the website; the user chooses the named tool
-there and may need to sign in or configure its provider.
+Scan document, connected Google or Outlook calendars and Google import use the
+browser. Once the matching website change is deployed, those links open the
+requested tool after website sign-in. Provider configuration may be required.
+The weekly email action opens a draft in the phone's email app.
 
-Day notes, saved views, pins, packing progress, appearance and setup preferences
+Day notes, saved views, polls, pins, packing progress, appearance and setup preferences
 are device-local with account/calendar scope where applicable. Calendar activity
 data uses the existing account sync. Private day notes are excluded from shared
-agendas. Event templates, duplicate-event controls and richer icon parity are
-separate work and are not advertised as completed native tools.
+agendas. Activity acknowledgements and edits by other accounts require the
+existing Supabase family coordination migration.

@@ -3,13 +3,14 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { Check, ChevronDown, ChevronLeft, ChevronRight, CircleHelp, Bell, Palette, Globe2, LogOut, Settings2 } from 'lucide-react-native';
 import { Button, Sheet } from '../calendar/ui';
 import AppearanceSettings, { appearanceCopy } from './AppearanceSettings';
+import ReminderSettings, { reminderCopy } from './ReminderSettings';
 import { useAppearance, useThemeStyles } from './AppearanceContext';
 
 export const accountCopy = {
   en: {
     title: 'You & settings', close: 'Close', back: 'Back to settings', signedIn: 'Signed in as',
     preferencesSection: 'Preferences', supportSection: 'Help', accountSection: 'Account',
-    appearance: 'Appearance', reminders: 'Phone reminders',
+    appearance: 'Appearance',
     remindersHelp: 'Open You & settings, then Phone reminders, for confirmed calendars you own. Calendars shared with you do not schedule reminders here. Reminder times refresh when the app reopens. Push and email are not provided.',
     preferences: 'Calendar preferences', preferencesHint: 'Edit your setup answers',
     opening: 'Opening…', openFailed: 'Could not open this. Tap again to retry.',
@@ -28,7 +29,7 @@ export const accountCopy = {
   zh: {
     title: '个人与设置', close: '关闭', back: '返回设置', signedIn: '当前账户',
     preferencesSection: '偏好设置', supportSection: '帮助', accountSection: '账户',
-    appearance: '外观', reminders: '手机提醒',
+    appearance: '外观',
     remindersHelp: '在“个人与设置”中打开“手机提醒”，为你拥有且已确认的日历开启提醒。他人共享给你的日历不会在此安排提醒。重新打开应用时会刷新提醒时间。暂不提供推送或邮件通知。',
     preferences: '日历偏好', preferencesHint: '修改设置答案',
     opening: '正在打开…', openFailed: '无法打开，请再次点击重试。',
@@ -53,10 +54,15 @@ function Row({ icon: Icon, title, detail, onPress, danger, disabled, opening, er
   </Pressable>;
 }
 
-export default function AccountSettings({ language, email, onClose, onPreferences, onSignOut, onLanguage, onWebsite, onReminders, reminderHint }) {
+export default function AccountSettings({ language, email, onClose, onPreferences, onSignOut, onLanguage, onWebsite, reminders }) {
   const t = accountCopy[language] || accountCopy.en;
   const { colors, settings } = useAppearance(), s = useThemeStyles(createStyles);
   const appearanceText = appearanceCopy[language] || appearanceCopy.en;
+  const reminderText = reminderCopy[language] || reminderCopy.en;
+  const reminderStatus = reminders?.state.status;
+  const reminderHint = reminderStatus === 'scheduled'
+    ? `${reminderText.scheduled} · ${reminders.state.scheduled || 0}`
+    : reminderText[reminderStatus] || reminderText.waiting;
   const [page, setPage] = useState('account'), [question, setQuestion] = useState(-1), [busy, setBusy] = useState(false), [failure, setFailure] = useState('');
   const [opening, setOpening] = useState(''), [navigationFailure, setNavigationFailure] = useState('');
   const request = useRef(false), navigationRequest = useRef(false), mounted = useRef(true);
@@ -75,9 +81,11 @@ export default function AccountSettings({ language, email, onClose, onPreference
     catch { setFailure(t.signOutFailed); }
     finally { request.current = false; if (mounted.current) setBusy(false); }
   }
-  return <Sheet title={page === 'appearance' ? t.appearance : page === 'help' ? t.help : page === 'language' ? t.language : page === 'signout' ? t.confirm : t.title} closeLabel={t.close} busy={busy} onClose={onClose}>
-    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={s.content}>
-      {page !== 'account' && <Pressable accessibilityRole="button" onPress={() => { setPage('account'); setFailure(''); setNavigationFailure(''); }} disabled={busy} style={s.back}><ChevronLeft size={18} color={colors.primary} /><Text style={s.link}>{t.back}</Text></Pressable>}
+  const pageTitle = { appearance: t.appearance, reminders: reminderText.title, help: t.help, language: t.language, signout: t.confirm };
+  const sheetBusy = busy || opening === 'preferences' || (page === 'reminders' && reminderStatus === 'configuring');
+  return <Sheet title={pageTitle[page] || t.title} closeLabel={t.close} busy={sheetBusy} onClose={onClose}>
+    <ScrollView key={page} keyboardShouldPersistTaps="handled" contentContainerStyle={s.content}>
+      {page !== 'account' && <Pressable accessibilityRole="button" onPress={() => { setPage('account'); setFailure(''); setNavigationFailure(''); }} disabled={sheetBusy} style={s.back}><ChevronLeft size={18} color={colors.primary} /><Text style={s.link}>{t.back}</Text></Pressable>}
       {page === 'account' ? <>
         <View style={s.identity}>
           <Text style={s.body}>{t.signedIn}</Text>
@@ -86,8 +94,8 @@ export default function AccountSettings({ language, email, onClose, onPreference
         <Text style={s.sectionLabel}>{t.preferencesSection}</Text>
         <View style={s.group}>
           <Row icon={Palette} title={t.appearance} detail={`${appearanceText[settings.mode]} · ${appearanceText[settings.accent]}`} disabled={!!opening} onPress={() => setPage('appearance')} />
-          {onReminders && <Row icon={Bell} title={t.reminders} detail={opening === 'reminders' ? t.opening : reminderHint}
-            disabled={!!opening} opening={opening === 'reminders'} error={navigationFailure === 'reminders' ? t.openFailed : ''} onPress={() => navigate('reminders', onReminders)} />}
+          {reminders && <Row icon={Bell} title={reminderText.title} detail={reminderHint}
+            disabled={!!opening} onPress={() => setPage('reminders')} />}
           <Row icon={Settings2} title={t.preferences} detail={opening === 'preferences' ? t.opening : t.preferencesHint}
             disabled={!!opening || typeof onPreferences !== 'function'} opening={opening === 'preferences'} error={navigationFailure === 'preferences' ? t.openFailed : ''} onPress={() => navigate('preferences', onPreferences)} />
           {onLanguage && <Row icon={Globe2} title={t.language} detail={language === 'zh' ? '中文' : 'English'} disabled={!!opening} onPress={() => setPage('language')} />}
@@ -100,7 +108,7 @@ export default function AccountSettings({ language, email, onClose, onPreference
         </View>
         <Text style={s.sectionLabel}>{t.accountSection}</Text>
         <View style={s.group}><Row icon={LogOut} title={t.signOut} danger disabled={!!opening} onPress={() => { setFailure(''); setPage('signout'); }} /></View>
-      </> : page === 'appearance' ? <AppearanceSettings language={language} /> : page === 'help' ? t.faqs.map(([title, originalAnswer], index) => <View key={index} style={s.faq}><Pressable accessibilityRole="button" accessibilityState={{ expanded: question === index }} onPress={() => setQuestion(question === index ? -1 : index)} style={s.question}><Text style={[s.rowTitle, s.flex]}>{title}</Text><ChevronDown size={18} color={colors.muted} /></Pressable>{question === index && <Text style={s.answer}>{index === 4 && onReminders ? t.remindersHelp : originalAnswer}</Text>}</View>) : page === 'language' ? [['en', 'English'], ['zh', '中文']].map(([value, label]) => <Pressable key={value} accessibilityRole="radio" aria-checked={language === value} accessibilityLabel={label} accessibilityState={{ checked: language === value }} onPress={() => onLanguage(value)} style={s.language}><Text style={[s.rowTitle, s.flex]}>{label}</Text>{language === value && <Check size={20} color={colors.primary} />}</Pressable>) : <>
+      </> : page === 'appearance' ? <AppearanceSettings language={language} /> : page === 'reminders' ? <ReminderSettings language={language} reminders={reminders} /> : page === 'help' ? t.faqs.map(([title, originalAnswer], index) => <View key={index} style={s.faq}><Pressable accessibilityRole="button" accessibilityState={{ expanded: question === index }} onPress={() => setQuestion(question === index ? -1 : index)} style={s.question}><Text style={[s.rowTitle, s.flex]}>{title}</Text><ChevronDown size={18} color={colors.muted} /></Pressable>{question === index && <Text style={s.answer}>{index === 4 && reminders ? t.remindersHelp : originalAnswer}</Text>}</View>) : page === 'language' ? [['en', 'English'], ['zh', '中文']].map(([value, label]) => <Pressable key={value} accessibilityRole="radio" aria-checked={language === value} accessibilityLabel={label} accessibilityState={{ checked: language === value }} onPress={() => onLanguage(value)} style={s.language}><Text style={[s.rowTitle, s.flex]}>{label}</Text>{language === value && <Check size={20} color={colors.primary} />}</Pressable>) : <>
         <Text style={s.answer}>{t.confirmBody}</Text>{!!failure && <Text accessibilityRole="alert" style={s.error}>{failure}</Text>}<Button secondary onPress={() => { setFailure(''); setPage('account'); }} disabled={busy}>{t.stay}</Button><Button danger onPress={signOut} disabled={busy}>{busy ? t.signingOut : t.signOut}</Button>
       </>}
     </ScrollView>

@@ -63,7 +63,8 @@ function syncSetup({ online = true, pending = false, response = { data: null, er
   const calls = [];
   const query = { select() { return this; }, eq(key, value) { calls.push([key, value]); return this; }, async maybeSingle() { return response; } };
   const context = vm.createContext({
-    cloudClient: { from: table => { calls.push(table); return query; } }, cloudSession: { user: { id: 'test-user' } }, activeAccount: { provider: 'supabase' },
+    cloudClient: { from: table => { calls.push(table); return query; } }, cloudSession: { user: { id: 'test-user' } }, activeAccount: { id: 'test-user', provider: 'supabase' },
+    cloudSyncBusy: false, getCloudBaseline: () => null, buildCloudSnapshot: () => ({}), rememberCloudBaseline() {},
     hasPendingCloudSave: () => pending, flushCloudSave: async () => { calls.push('flush'); return true; },
     navigator: { onLine: online }, setCloudSaveState: value => calls.push(value),
     markCloudSavePending: () => calls.push('pending'), localStorage: { getItem: () => null, setItem: () => calls.push('timestamp') },

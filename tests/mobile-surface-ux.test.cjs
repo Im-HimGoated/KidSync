@@ -47,15 +47,29 @@ test('calendar search and person filters use one progressive disclosure', () => 
   assert.doesNotMatch(calendarScreen, /commentsAccessRow/);
   assert.match(calendarCopy, /findFilter: 'Search or filter'/);
   assert.match(calendarCopy, /findFilter: '搜索或筛选'/);
+  assert.match(calendarScreen, /planning\.findEvents\(filtered, from, through, ''\)/);
+  assert.match(calendarScreen, /occurrenceDate=\{searchActive \? item\.occurrenceDate : ''\}/);
+  assert.match(calendarScreen, /events=\{filtered\}/);
 });
 
 test('mobile Week uses one date header and keeps its timeline height responsive', () => {
   const calendarViews = read('mobile/src/calendar/CalendarViews.js');
   const trialCalendar = read('mobile/src/screens/TrialCalendarScreen.js');
-  assert.match(calendarScreen, /!searchActive && view !== 'week' && <DateStrip/);
+  assert.match(calendarScreen, /!searchActive && view !== 'week' && view !== 'four' && <DateStrip/);
   assert.match(trialCalendar, /view !== 'week' && <DateStrip/);
   assert.match(calendarViews, /const timelineHeight = Math\.max\(360, Math\.min\(520, windowHeight - \(dayOnly \? 300 : 330\)\)\)/);
   assert.match(calendarViews, /style=\{\[s\.hoursViewport, \{ height: timelineHeight \}\]\}/);
+  assert.match(calendarViews, /onMomentumScrollEnd/);
+  assert.match(calendarViews, /onDate\?\.\(dates\[index\]\)/);
+});
+
+test('settings choices expose labeled radio groups and navigation badges stay localized', () => {
+  const onboarding = read('mobile/src/screens/OnboardingScreen.js');
+  const appearance = read('mobile/src/ui/AppearanceSettings.js');
+  assert.match(onboarding, /accessibilityRole="radiogroup" accessibilityLabel=\{current\[0\]\}/);
+  assert.equal((appearance.match(/accessibilityRole="radiogroup"/g) || []).length, 2);
+  assert.match(app, /language === 'zh' \? `\$\{item\.count\} 项待处理` : `\$\{item\.count\} pending`/);
+  assert.match(app, /importantForAccessibility="no"/);
 });
 
 test('family actions and empty states stay visible and informative', () => {

@@ -60,6 +60,16 @@ function packingKey(occurrence) {
   return date ? `${event.id}:${date}` : '';
 }
 
+function packingOccurrences(occurrences) {
+  const seen = new Set();
+  return (Array.isArray(occurrences) ? occurrences : []).filter(item => {
+    const key = packingKey(item);
+    if (!key || seen.has(key) || !packingItems(item.event.items).length) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function dayBrief(occurrences, options = {}) {
   const rows = (Array.isArray(occurrences) ? occurrences : []).filter(item => !isCancelled(item?.event)).map(item => {
     const event = item.event;
@@ -89,7 +99,7 @@ function needsHandoff(event, kids) {
   return calendar.kidsForEvent(event, kids).length > 0;
 }
 
-function buildHomeModel(events, kids, now = new Date()) {
+function buildHomeModel(events, kids, now = new Date(), pickups = []) {
   const date = isDate(now) ? new Date(now) : new Date();
   date.setHours(0, 0, 0, 0);
   const all = upcomingOccurrences(events, date, 90);
@@ -99,7 +109,13 @@ function buildHomeModel(events, kids, now = new Date()) {
   const today = nextWeek.filter(item => item.dateKey === todayKey);
   const upcoming = all.filter(item => !isCancelled(item.event) && eventIsStillRelevant(item, now));
   const tomorrowKey = calendar.dateKey(calendar.addDays(date, 1));
-  const handoffs = nextWeek.filter(item => needsHandoff(item.event, kids));
+  const assigned = new Set();
+  for (const pickup of pickups) {
+    if (pickup?.event_id == null || !['pending', 'accepted'].includes(pickup.status)) continue;
+    assigned.add(JSON.stringify([String(pickup.event_id), pickup.occurrence_date]));
+  }
+  const handoffs = upcoming.filter(item => item.date < weekEnd && needsHandoff(item.event, kids)
+    && !assigned.has(JSON.stringify([String(item.event.id), item.dateKey])));
   const profiles = Array.isArray(kids) ? kids.filter(kid => kid && kid.name) : [];
   const workload = profiles.map(kid => ({ ...kid, count: nextWeek.filter(item =>
     calendar.kidsForEvent(item.event, profiles).some(person => String(person.id ?? person.name) === String(kid.id ?? kid.name))).length }));
@@ -116,5 +132,5 @@ function buildHomeModel(events, kids, now = new Date()) {
   };
 }
 
-module.exports = { upcomingOccurrences, searchOccurrences, pinnedOccurrences, packingItems, packingKey, dayBrief,
+module.exports = { upcomingOccurrences, searchOccurrences, pinnedOccurrences, packingItems, packingKey, packingOccurrences, dayBrief,
   eventIsStillRelevant, needsHandoff, buildHomeModel };

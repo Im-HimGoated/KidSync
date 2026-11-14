@@ -19,12 +19,15 @@ export default function useScheduleSync({ client, userId, storage = AsyncStorage
       onChange: next => { if (active && scope.current === userId) setState(next); } });
     controller.current = { userId, store };
     const refresh = () => { if (active && scope.current === userId && AppState.currentState === 'active') void store.refresh(); };
+    const refreshAfterNotification = () => {
+      if (active && scope.current === userId && AppState.currentState === 'active') void store.refresh({ afterInFlight: true });
+    };
     // The subscription's status alone never claims that a schedule was saved.
     // An authenticated read or acknowledged write establishes the data state.
     try {
       channel = client.channel(`native-owner-sync:${userId}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'family_schedules', filter: `user_id=eq.${userId}` }, refresh)
-        .subscribe(status => { if (status === 'SUBSCRIBED') refresh(); });
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'family_schedules', filter: `user_id=eq.${userId}` }, refreshAfterNotification)
+        .subscribe(status => { if (status === 'SUBSCRIBED') refreshAfterNotification(); });
     } catch { /* Five-second foreground catch-up also works without Realtime. */ }
     void store.load().then(refresh).catch(() => {});
     const listener = AppState.addEventListener('change', next => { if (next === 'active') refresh(); });

@@ -14,7 +14,7 @@ import { Button } from '../calendar/ui';
 export const trialCopy = {
   en: {
     title: 'Your calendar', preview: 'Device-only preview', left: 'left', back: 'Back to welcome', today: 'Today',
-    previous: 'Previous day', next: 'Next day', add: 'Add event', edit: 'Edit event', empty: 'A little room for your first plan.',
+    previous: 'Previous day', next: 'Next day', add: 'Add event', edit: 'Edit event', viewDay: 'View day', noDayEvents: 'Nothing planned for this day.', empty: 'A little room for your first plan.',
     emptyBody: 'Add an activity, pickup, or early flight. This calendar starts blank—no example plans to delete.',
     personalize: 'Make your calendar yours', local: 'Saved on this device · Not shared or synced yet',
     titleLabel: 'Event name', date: 'Date (YYYY-MM-DD)', start: 'Start time (HH:MM)', end: 'End time (HH:MM)',
@@ -32,7 +32,7 @@ export const trialCopy = {
   },
   zh: {
     title: '你的日历', preview: '仅此设备上的体验', left: '剩余', back: '返回欢迎页', today: '今天',
-    previous: '前一天', next: '后一天', add: '添加日程', edit: '编辑日程', empty: '给第一个计划留点空间。',
+    previous: '前一天', next: '后一天', add: '添加日程', edit: '编辑日程', viewDay: '查看当天', noDayEvents: '这一天还没有安排。', empty: '给第一个计划留点空间。',
     emptyBody: '添加活动、接送或清晨航班。日历从空白开始，无需删除示例。',
     personalize: '让日历更适合你', local: '已保存在此设备 · 尚未共享或同步',
     titleLabel: '日程名称', date: '日期（YYYY-MM-DD）', start: '开始时间（HH:MM）', end: '结束时间（HH:MM）',
@@ -55,7 +55,7 @@ function displayDate(key, language) {
   return new Date(year, month - 1, day).toLocaleDateString(language === 'zh' ? 'zh-CN' : 'en-US', { month: 'short', day: 'numeric', weekday: 'short' });
 }
 
-export default function TrialCalendarScreen({ language, data, preferences, error, onSave, onDraft, onDelete, onRetry, onPersonalize, onBack }) {
+export default function TrialCalendarScreen({ language, data, preferences, error, onSave, onDraft, onDelete, onRetry, onPersonalize, onBack, backLabel }) {
   const t = trialCopy[language] || trialCopy.en;
   const calendarCopy = getCalendarCopy(language), display = model.normalizeDisplayPreferences(preferences);
   const { colors } = useAppearance(), styles = useThemeStyles(createStyles);
@@ -68,6 +68,11 @@ export default function TrialCalendarScreen({ language, data, preferences, error
   const savingRef = useRef(false), openingRef = useRef(false);
   const selected = calendar.parseDateKey(date);
   const events = model.sortAgenda(calendar.eventsForDate(data.events, selected), selected);
+  const selectedCount = language === 'zh' ? `${events.length} 项活动` : `${events.length} ${events.length === 1 ? 'activity' : 'activities'}`;
+  const visibleDates = view === 'week'
+    ? Array.from({ length: 7 }, (_, index) => calendar.addDays(model.startOfDisplayWeek(selected, display.firstDay), index))
+    : view === 'month' ? model.displayMonthDays(selected, display.firstDay) : [selected];
+  const visibleHasEvents = visibleDates.some(day => calendar.eventsForDate(data.events, day).length > 0);
   const expired = data.elapsedMs >= trial.LIMIT_MS;
   const locked = saving || opening || expired;
   const selectDate = value => setDate(calendar.dateKey(value));
@@ -114,7 +119,7 @@ export default function TrialCalendarScreen({ language, data, preferences, error
   }
   return <View style={styles.screen}>
     <View style={styles.top}>
-      <Pressable accessibilityRole="button" accessibilityLabel={t.back} disabled={saving || opening} onPress={onBack} style={styles.iconButton}><ArrowLeft size={20} color={colors.primary} /></Pressable>
+      <Pressable accessibilityRole="button" accessibilityLabel={backLabel || t.back} disabled={saving || opening} onPress={onBack} style={styles.iconButton}><ArrowLeft size={20} color={colors.primary} /></Pressable>
       <View style={styles.flex}><Text accessibilityRole="header" style={styles.heading}>{data.profile.calendarName ? `${data.profile.icon} ${data.profile.calendarName}` : t.title}</Text><Text style={styles.caption}>{t.preview}</Text></View>
       <Text style={styles.clock}>{trial.remainingLabel(data.elapsedMs)} {t.left}</Text>
     </View>
@@ -125,15 +130,20 @@ export default function TrialCalendarScreen({ language, data, preferences, error
       <Pressable accessibilityRole="button" accessibilityLabel={calendarCopy.nextPeriod[view]} onPress={() => selectDate(model.movePeriod(selected, view, 1))} style={styles.iconButton}><ChevronRight size={20} color={colors.primary} /></Pressable>
     </View>
     <View style={styles.viewPicker}><CalendarViewPicker view={view} language={language} onChange={setView} /></View>
-    <ScrollView contentContainerStyle={styles.list} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
+    <ScrollView nestedScrollEnabled contentContainerStyle={styles.list} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
       {!!(error || localError) && <View style={styles.notice}><Text accessibilityRole="alert" style={styles.error}>{t[error] || t.saveFailed}</Text><Pressable accessibilityRole="button" disabled={saving || opening} onPress={() => { setLocalError(false); onRetry(); }} style={styles.textButton}><Text style={styles.link}>{t.retry}</Text></Pressable></View>}
       {data.draft && <Pressable accessibilityRole="button" disabled={locked} onPress={() => setEditor(data.draft)} style={styles.resume}><Pencil size={16} color={colors.primary} /><Text style={styles.link}>{t.resume}</Text></Pressable>}
-      {view === 'month' ? <MonthGrid date={selected} firstDay={display.firstDay} events={data.events} language={language} onDate={openDay} />
+      {view === 'month' ? <MonthGrid date={selected} firstDay={display.firstDay} events={data.events} language={language} onDate={selectDate} />
         : view !== 'week' && <DateStrip date={selected} firstDay={display.firstDay} events={data.events} language={language} compact onDate={selectDate} />}
+      {view === 'month' && <View style={styles.monthAgendaHead}>
+        <View style={styles.flex}><Text accessibilityRole="header" style={styles.monthAgendaTitle}>{displayDate(date, language)}</Text><Text style={styles.monthAgendaCount}>{selectedCount}</Text></View>
+        <Pressable accessibilityRole="button" accessibilityLabel={`${t.viewDay}: ${displayDate(date, language)}`} onPress={() => openDay(selected)} style={styles.monthDayButton}><Text style={styles.link}>{t.viewDay}</Text><ChevronRight size={16} color={colors.primary} /></Pressable>
+      </View>}
       {(view === 'day' || view === 'week') && <WeekGrid key={focusRequest} date={selected} dayOnly={view === 'day'}
         firstDay={display.firstDay} initialHour={focusedHour} events={data.events} language={language} onDate={selectDate}
         onOpenDay={openDay} onEvent={openEditor} />}
-      {!events.length && <View style={styles.empty}><CalendarDays size={36} color={colors.primary} /><Text style={styles.emptyTitle}>{t.empty}</Text><Text style={styles.secondary}>{t.emptyBody}</Text></View>}
+      {!visibleHasEvents && <View style={styles.empty}><CalendarDays size={36} color={colors.primary} /><Text style={styles.emptyTitle}>{t.empty}</Text><Text style={styles.secondary}>{t.emptyBody}</Text></View>}
+      {view === 'month' && visibleHasEvents && !events.length && <Text style={styles.monthEmpty}>{t.noDayEvents}</Text>}
       {events.map(event => <View key={event.id} style={[styles.event, event.child && styles.childEvent]}>
         <View style={styles.eventTop}><View style={styles.flex}><Text style={styles.time}>{event.allDay ? t.allDay : `${event.start}–${event.end}`}</Text><Text style={styles.eventTitle}>{event.title}</Text><Text style={styles.secondary}>{event.child || t.family}</Text></View>
           <Pressable accessibilityRole="button" accessibilityLabel={`${t.edit}: ${event.title}`} disabled={locked} onPress={() => openEditor(event)} style={styles.iconButton}><Pencil size={18} color={colors.primary} /></Pressable>
@@ -215,6 +225,11 @@ function createStyles(colors, palettes) { return StyleSheet.create({
   dateNav: { paddingHorizontal: 8, paddingVertical: 5, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderColor: colors.line, backgroundColor: colors.surface2 }, date: { color: colors.ink, fontSize: 15, fontWeight: '600' },
   viewPicker: { paddingHorizontal: 16, paddingTop: 10 },
   list: { padding: 16, gap: 12, flexGrow: 1 }, empty: { paddingVertical: 34, alignItems: 'center', gap: 14 }, emptyTitle: { textAlign: 'center', fontSize: 22, lineHeight: 29, color: colors.ink, fontWeight: '600' },
+  monthAgendaHead: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: colors.line },
+  monthAgendaTitle: { color: colors.ink, fontSize: 18, lineHeight: 24, fontWeight: '700' },
+  monthAgendaCount: { color: colors.muted, fontSize: 12, lineHeight: 18 },
+  monthDayButton: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 6 },
+  monthEmpty: { color: colors.muted, fontSize: 14, lineHeight: 20, paddingVertical: 16 },
   secondary: { color: colors.muted, fontSize: 14, lineHeight: 22 }, local: { fontSize: 11, lineHeight: 18, color: colors.muted, textAlign: 'center', marginTop: 10 },
   event: { borderWidth: 1, borderColor: colors.line, borderLeftWidth: 4, borderLeftColor: palettes.green.line, borderRadius: 12, padding: 13, backgroundColor: palettes.green.soft, gap: 5 },
   childEvent: { backgroundColor: palettes.blue.soft, borderColor: palettes.blue.line, borderLeftColor: palettes.blue.line }, eventTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 2 }, time: { color: colors.ink, fontSize: 12, fontWeight: '600' },

@@ -8,14 +8,15 @@ const pure = source.slice(source.indexOf('export const toolboxCopy'), source.ind
 const { toolboxCopy, toolboxSections, resolveToolAction, runToolAction } = vm.runInNewContext(`${pure}; ({toolboxCopy, toolboxSections, resolveToolAction, runToolAction})`);
 const plain = value => JSON.parse(JSON.stringify(value));
 const nativeIds = ['open-time', 'compare-days', 'day-notes', 'share-week', 'find-events', 'saved-views'];
-const webIds = ['scan-document', 'connected-calendars', 'google-import', 'activity-history', 'version-history', 'export-calendar', 'print-schedule'];
+const workspaceIds = ['quick-add', 'family-poll', 'family-time', 'activity-lists', 'activity-history', 'version-history', 'presets', 'export-calendar', 'print-schedule'];
+const webIds = ['scan-document', 'connected-calendars', 'google-import'];
 
 test('tool directory covers each agreed native and website intent once with complete EN/ZH copy', () => {
   assert.deepEqual(Object.keys(toolboxCopy.en), Object.keys(toolboxCopy.zh));
   const tools = toolboxSections.flatMap(section => section.tools);
   const ids = Array.from(tools, tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.deepEqual(ids.slice().sort(), [...nativeIds, ...webIds, 'calendar-preferences'].sort());
+  assert.deepEqual(ids.slice().sort(), [...nativeIds, ...workspaceIds, ...webIds, 'calendar-preferences'].sort());
   for (const language of ['en', 'zh']) {
     const copy = toolboxCopy[language];
     for (const section of toolboxSections) assert(copy[section.id]);
@@ -64,7 +65,18 @@ test('preferences use their dedicated callback and use an explicit Web fallback 
   assert.deepEqual(calls, ['native', 'calendar-preferences']);
 });
 
-test('scan, connections, import, history, export and print always stay explicit Web actions', async () => {
+test('workspace tools use native routes only when enabled and supported', async () => {
+  const calls = [];
+  for (const id of workspaceIds) {
+    const options = { onTool: value => calls.push(value), onWebsite: () => assert.fail('unexpected web route'), nativeAvailability: { [id]: true } };
+    assert.deepEqual(plain(await runToolAction(id, options)), { ok: true, kind: 'native' });
+    assert.equal(resolveToolAction(id, { ...options, nativeAvailability: {} }).kind, 'web');
+    assert.equal(resolveToolAction(id, { ...options, onTool: undefined }).kind, 'web');
+  }
+  assert.deepEqual(calls, workspaceIds);
+});
+
+test('scanning and provider connections remain explicit Web actions', async () => {
   const calls = [], options = { nativeAvailability: Object.fromEntries(webIds.map(id => [id, true])), onPlanning: () => { throw new Error('wrong route'); }, onTool: () => { throw new Error('wrong route'); }, onWebsite: id => calls.push(id) };
   for (const id of webIds) {
     assert.equal(resolveToolAction(id, options).kind, 'web');
@@ -78,7 +90,7 @@ test('unknown commands and missing callbacks are unavailable without side effect
   for (const id of [null, '', 'https://example.com', 'javascript:alert(1)', '__proto__', 'not-a-tool']) {
     assert.deepEqual(plain(await runToolAction(id, { onWebsite: () => { calls++; } })), { ok: false, reason: 'unavailable' });
   }
-  for (const id of [...nativeIds, ...webIds, 'calendar-preferences']) assert.equal(resolveToolAction(id, {}).kind, 'unavailable');
+  for (const id of [...nativeIds, ...workspaceIds, ...webIds, 'calendar-preferences']) assert.equal(resolveToolAction(id, {}).kind, 'unavailable');
   assert.equal(calls, 0);
 });
 

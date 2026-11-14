@@ -9825,11 +9825,11 @@
   <link rel="stylesheet" href="./assets/family-workspace.css">
   <link rel="stylesheet" href="./assets/experience.css">
   <link rel="stylesheet" href="./assets/quick-ux.css">
-  <link rel="stylesheet" href="./assets/marketing-auth.css?v=3">
+  <link rel="stylesheet" href="./assets/marketing-auth.css?v=4">
   <link rel="stylesheet" href="./assets/micro-motion.css?v=1">
   <link rel="stylesheet" href="./assets/calendar-ui-refresh.css?v=1">
   <link rel="stylesheet" href="./assets/landing-ux.css?v=1">
-  <link rel="stylesheet" href="./assets/welcome-refresh.css?v=6">
+  <link rel="stylesheet" href="./assets/welcome-refresh.css?v=7">
   <link rel="stylesheet" href="./assets/calendar-ux.css?v=1">
   <link rel="stylesheet" href="./assets/dashboard-planning.css?v=2">
   <link rel="stylesheet" href="./assets/dashboard-navigation.css?v=1">
@@ -10170,7 +10170,7 @@
 
       <aside class="auth-visual" id="authVisual" aria-label="A family planning their week" data-i18n-aria="auth.visualLabel">
         <div class="auth-visual-media" aria-hidden="true">
-          <img class="auth-visual-image is-active" src="./assets/kidssync-auth-family-signin.jpg" alt="" loading="lazy" decoding="async">
+          <img class="auth-visual-image is-active" src="./assets/kidssync-family-hero.jpg" alt="" loading="lazy" decoding="async">
           <img class="auth-visual-image" alt="" loading="lazy" decoding="async">
         </div>
         <div class="auth-visual-shade" aria-hidden="true"></div>
@@ -11374,7 +11374,6 @@
       <button class="close-btn" type="button" id="closeSharedEvent" aria-label="Close" data-i18n-aria="aria.close">×</button>
     </div>
     <form class="shared-event-form" id="sharedEventForm">
-      <input type="hidden" id="sharedEventId">
       <div class="field-grid">
         <label><span data-i18n="form.eventName">Event name</span><input id="sharedEventTitle" type="text" maxlength="80" required></label>
         <label><span data-i18n="form.child">Child</span><select id="sharedEventChild" required></select></label>
@@ -11436,6 +11435,7 @@
         <div class="cloud-sync-row">
           <p class="cloud-sync-copy" id="cloudSyncCopy"></p>
           <button class="small-btn cloud-sync-action" type="button" id="cloudSyncAction"></button>
+          <button class="small-btn cloud-sync-action" type="button" id="cloudSyncRecover" hidden></button>
         </div>
       </section>
 
@@ -11718,6 +11718,7 @@
 
   <script src="./shared/backend/config.js"></script>
   <script src="./supabase-config.js"></script>
+  <script src="./assets/cloud-snapshot-sync.js?v=1"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./assets/jspdf.umd.min.js"></script>
   <script src="./assets/lucide.min.js"></script>
@@ -12106,6 +12107,8 @@
         "settings.syncCloud": "Your family calendar is backed up and synced across devices.",
         "settings.syncSetup": "Connect the cloud service before accounts can sync.",
         "settings.syncNow": "Sync now",
+        "settings.syncRecover": "Back up and load cloud copy",
+        "settings.syncRecoverConfirm": "Download a backup of this browser’s calendar data, then replace it with the current cloud copy?",
         "settings.syncSignIn": "Sign in",
         "settings.syncRetry": "Retry",
         "settings.title": "Settings",
@@ -12304,6 +12307,7 @@
         "invitations.deleteEvent": "Delete event",
         "invitations.saved": "Shared calendar updated.",
         "invitations.saveFailed": "The shared calendar could not be updated.",
+        "invitations.saveConflict": "This plan or calendar changed. Copy any unsaved details, close the editor, then reopen the plan.",
         "invitations.confirmDelete": "Delete this event from the shared calendar?",
         "invitations.noEvents": "No events are scheduled on this calendar yet.",
         "invitations.unavailable": "This shared calendar is unavailable right now.",
@@ -12532,6 +12536,7 @@
         "save.syncing": "Saving to cloud...",
         "save.offline": "Saved here; syncs when online",
         "save.syncFailed": "Saved here; cloud sync paused",
+        "save.syncConflict": "Changes saved here. The same calendar data changed on another device.",
         "save.failed": "Could not save",
         "brand.ribbon": "Family Weekly Planner",
         "brand.subtitle": "A shared schedule for parents managing school, activities, homework, and family time.",
@@ -13283,6 +13288,8 @@
         "settings.syncCloud": "你的家庭日历已备份并在设备间同步。",
         "settings.syncSetup": "需要先连接云服务，账户才能同步。",
         "settings.syncNow": "立即同步",
+        "settings.syncRecover": "备份并加载云端副本",
+        "settings.syncRecoverConfirm": "下载此浏览器的日历数据备份，再用当前云端副本替换本机数据吗？",
         "settings.syncSignIn": "登录",
         "settings.syncRetry": "重试",
         "settings.title": "设置",
@@ -13481,6 +13488,7 @@
         "invitations.deleteEvent": "删除事件",
         "invitations.saved": "共享日历已更新。",
         "invitations.saveFailed": "无法更新共享日历。",
+        "invitations.saveConflict": "活动或日历已更改。请复制尚未保存的内容，关闭编辑窗口，再重新打开活动。",
         "invitations.confirmDelete": "从共享日历中删除此事件吗？",
         "invitations.noEvents": "此日历尚未安排事件。",
         "invitations.unavailable": "此共享日历暂时不可用。",
@@ -13695,6 +13703,7 @@
         "save.syncing": "正在保存到云端...",
         "save.offline": "已保存到本机；联网后同步",
         "save.syncFailed": "已保存到本机；云同步已暂停",
+        "save.syncConflict": "修改已保存在本机。另一台设备修改了同一份日历数据。",
         "save.failed": "无法保存",
         "brand.ribbon": "家庭每周计划",
         "brand.subtitle": "帮助家长共同管理上学、课外活动、作业和家庭时间。",
@@ -14095,6 +14104,7 @@
     const ACCOUNT_DATA_KEYS = ["kids", "activities", "presets", "history", "view", "settings", "members", "profile", "generic-startup"];
     const CLOUD_PENDING_KEY = "cloud-pending";
     const CLOUD_UPDATED_KEY = "cloud-updated-at";
+    const CLOUD_BASE_KEY = "cloud-sync-base";
     const inviteTokenParam = new URLSearchParams(location.search).get("invite") || "";
     let passwordRecoveryMode = new URLSearchParams(location.search).get("recovery") === "1";
     let pendingInviteToken = /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(inviteTokenParam) ? inviteTokenParam : "";
@@ -14116,6 +14126,7 @@
     let cloudHydrating = false;
     let cloudSyncBusy = false;
     let cloudSyncRequested = false;
+    let cloudBaseline = null;
     let guestPreviewTimer = null;
     let guestPreviewElapsed = Math.max(0, Number(localStorage.getItem(AUTH_GUEST_PREVIEW_ELAPSED_KEY)) || 0);
     let guestPreviewLastTick = 0;
@@ -15545,6 +15556,12 @@
       const copy = document.getElementById("cloudSyncCopy");
       const action = document.getElementById("cloudSyncAction");
       if (!copy || !action) return;
+      const recover = document.getElementById("cloudSyncRecover");
+      if (recover) {
+        recover.hidden = !(cloudClient && activeAccount?.provider === "supabase" && cloudSaveState === "syncConflict");
+        recover.disabled = cloudSyncBusy;
+        recover.textContent = t("settings.syncRecover");
+      }
 
       action.hidden = false;
       action.disabled = cloudSyncBusy;
@@ -15566,7 +15583,7 @@
         return;
       }
 
-      copy.textContent = t("settings.syncCloud");
+      copy.textContent = t(cloudSaveState === "syncConflict" ? "save.syncConflict" : "settings.syncCloud");
       action.textContent = t("settings.syncNow");
     }
 
@@ -15584,6 +15601,38 @@
       if (hasPendingCloudSave()) await flushCloudSave();
       else await hydrateCloudSchedule();
       renderCloudSettings();
+    }
+
+    async function recoverCloudSchedule() {
+      if (cloudSyncBusy || cloudSaveState !== "syncConflict" || !cloudClient || !cloudSession
+        || activeAccount?.provider !== "supabase" || !window.confirm(t("settings.syncRecoverConfirm"))) return;
+      const userId = cloudSession.user.id;
+      if (activeAccount.id !== userId) return;
+      const pendingKey = cloudPendingKey();
+      const pendingVersion = localStorage.getItem(pendingKey);
+      const version = localStorage.getItem(cloudUpdatedKey());
+      const isCurrent = () => cloudSession?.user.id === userId && activeAccount?.id === userId && activeAccount.provider === "supabase";
+      cloudSyncBusy = true;
+      setCloudSaveState("syncing");
+      try {
+        const { data, error } = await cloudClient.from("family_schedules").select("schedule, updated_at").eq("user_id", userId).maybeSingle();
+        if (!isCurrent()) return;
+        if (error || !data?.schedule || !data.updated_at || localStorage.getItem(pendingKey) !== pendingVersion
+          || localStorage.getItem(cloudUpdatedKey()) !== version) throw error || new Error("Cloud recovery could not safely load a copy.");
+        downloadCalendarFile(JSON.stringify(buildCloudSnapshot(), null, 2), "application/json;charset=utf-8", "json", "kidssync-local-conflict-backup.json");
+        applyCloudSnapshot(data.schedule, { preserveView: true });
+        rememberCloudBaseline(userId, data, buildCloudSnapshot());
+        localStorage.removeItem(pendingKey);
+        setCloudSaveState("cloud");
+      } catch (error) {
+        if (isCurrent()) {
+          reportClientError(error, "cloud-recovery");
+          setCloudSaveState("syncConflict");
+        }
+      } finally {
+        cloudSyncBusy = false;
+        if (isCurrent()) renderCloudSettings();
+      }
     }
 
     function renderSettingsDialog() {
@@ -15961,10 +16010,11 @@
         syncing: "save.syncing",
         offline: "save.offline",
         syncFailed: "save.syncFailed",
+        syncConflict: "save.syncConflict",
         failed: "save.failed"
       }[cloudSaveState] || "save.saved";
       status.textContent = t(key);
-      status.classList.toggle("is-error", cloudSaveState === "failed" || cloudSaveState === "syncFailed");
+      status.classList.toggle("is-error", ["failed", "syncFailed", "syncConflict"].includes(cloudSaveState));
       status.classList.toggle("is-syncing", cloudSaveState === "syncing");
       status.setAttribute("aria-busy", String(cloudSaveState === "syncing"));
       status.classList.toggle("is-offline", cloudSaveState === "offline");
@@ -15994,6 +16044,34 @@
 
     function cloudUpdatedKey() {
       return activeAccount ? accountDataKey(activeAccount.id, CLOUD_UPDATED_KEY) : "";
+    }
+
+    function getCloudBaseline(userId) {
+      if (cloudBaseline?.userId === userId) return cloudBaseline.value;
+      const storedVersion = localStorage.getItem(accountDataKey(userId, CLOUD_UPDATED_KEY));
+      try {
+        const parsed = JSON.parse(localStorage.getItem(accountDataKey(userId, CLOUD_BASE_KEY)));
+        const value = parsed?.version === storedVersion ? parsed : null;
+        cloudBaseline = { userId, value };
+        return value;
+      } catch {
+        cloudBaseline = { userId, value: null };
+        return null;
+      }
+    }
+
+    function rememberCloudBaseline(userId, row, local, awaitingApply = false) {
+      const value = { version: row.updated_at, local, remote: row.schedule, awaitingApply };
+      cloudBaseline = { userId, value };
+      try {
+        localStorage.setItem(accountDataKey(userId, CLOUD_UPDATED_KEY), row.updated_at);
+        localStorage.setItem(accountDataKey(userId, CLOUD_BASE_KEY), JSON.stringify(value));
+      } catch (error) {
+        // A large cached schedule may exceed quota. The active tab still has
+        // the baseline, and a reload can re-establish it once online.
+        reportClientError(error, "cloud-cache");
+      }
+      window.KidsSyncLiveSync?.rememberVersion?.(row.updated_at);
     }
 
     function welcomeBackSeenKey() {
@@ -16153,7 +16231,7 @@
     function markCloudSavePending() {
       const key = cloudPendingKey();
       if (!key) return;
-      localStorage.setItem(key, new Date().toISOString());
+      localStorage.setItem(key, `${Date.now()}-${Math.random().toString(36).slice(2)}`);
     }
 
     function buildCloudSnapshot() {
@@ -16216,38 +16294,36 @@
       cloudSyncRequested = false;
       let syncSucceeded = false;
       setCloudSaveState("syncing");
+      const userId = cloudSession.user.id;
+      const isCurrent = () => cloudSession?.user.id === userId && activeAccount?.id === userId && activeAccount.provider === "supabase";
       const pendingKey = cloudPendingKey();
-      const pendingVersion = localStorage.getItem(pendingKey) || new Date().toISOString();
+      const pendingVersion = localStorage.getItem(pendingKey);
 
       try {
-        const { data, error } = await cloudClient
-          .from("family_schedules")
-          .upsert({
-            user_id: cloudSession.user.id,
-            schedule: buildCloudSnapshot(),
-            updated_at: new Date().toISOString()
-          }, { onConflict: "user_id" })
-          .select("updated_at")
-          .single();
-        if (error) throw error;
-
-        if (localStorage.getItem(pendingKey) === pendingVersion) {
-          localStorage.removeItem(pendingKey);
-        }
-        if (data?.updated_at) {
-          localStorage.setItem(cloudUpdatedKey(), data.updated_at);
-          window.KidsSyncLiveSync?.rememberVersion?.(data.updated_at);
-        }
+        const sync = window.KidsSyncCloudSnapshotSync;
+        const local = buildCloudSnapshot();
+        const row = await sync.writeSchedule({ client: cloudClient, userId, local, baseline: getCloudBaseline(userId), isCurrent });
+        if (!isCurrent()) return false;
+        const moreEdits = localStorage.getItem(pendingKey) !== pendingVersion;
+        const merged = !sync.equal(local, row.schedule);
+        // Preserve the active editor and any saves made during the upload.
+        // The next read or queued upload incorporates the merged snapshot.
+        const awaitingApply = merged && (moreEdits || window.KidsSyncLiveSync?.isEditing());
+        if (merged && !awaitingApply) applyCloudSnapshot(row.schedule, { preserveView: true });
+        rememberCloudBaseline(userId, row, moreEdits || awaitingApply ? local : buildCloudSnapshot(), Boolean(awaitingApply));
+        if (!moreEdits) localStorage.removeItem(pendingKey);
         syncSucceeded = true;
         setCloudSaveState(hasPendingCloudSave() ? "syncing" : "cloud");
+        if (awaitingApply && !moreEdits) window.KidsSyncLiveSync?.refresh();
         return true;
       } catch (syncError) {
+        if (!isCurrent() || syncError.code === "STALE_SCOPE") return false;
         reportClientError(syncError, "cloud-save");
-        setCloudSaveState(navigator.onLine ? "syncFailed" : "offline");
+        setCloudSaveState(syncError.code === "SYNC_CONFLICT" ? "syncConflict" : navigator.onLine ? "syncFailed" : "offline");
         return false;
       } finally {
         cloudSyncBusy = false;
-        if (cloudSyncRequested || (syncSucceeded && hasPendingCloudSave())) {
+        if (isCurrent() && (cloudSyncRequested || (syncSucceeded && hasPendingCloudSave()))) {
           window.clearTimeout(cloudSaveTimer);
           cloudSaveTimer = window.setTimeout(flushCloudSave, 900);
         }
@@ -16263,8 +16339,10 @@
       const allKidsVisible = kidProfiles.every(kid => visibleKids.has(kid.name));
       cloudHydrating = true;
       try {
-        if (Array.isArray(snapshot.calendars) && snapshot.calendars.length && snapshot.calendarData) {
-          calendars = snapshot.calendars.filter(calendar => calendar?.id && calendar?.name);
+        if (Array.isArray(snapshot.calendars) && snapshot.calendarData) {
+          const nextCalendars = snapshot.calendars.filter(calendar => calendar?.id && calendar?.name);
+          if (!nextCalendars.length) throw new Error("The cloud calendar list could not be loaded safely.");
+          calendars = nextCalendars;
           currentCalendarId = preserveView && calendars.some(calendar => calendar.id === localCalendarId)
             ? localCalendarId
             : snapshot.activeCalendarId && calendars.some(calendar => calendar.id === snapshot.activeCalendarId)
@@ -16283,36 +16361,25 @@
         if (snapshotProfile && typeof snapshotProfile === "object") {
           localStorage.setItem(profileStorageKey(), JSON.stringify(normalizeFamilyProfile(snapshotProfile)));
         }
-        if (Array.isArray(snapshot.kids)) {
-          kidProfiles = snapshot.kids
-            .filter(kid => kid && typeof kid.name === "string" && palettes[kid.palette])
-            .map((kid, index) => normalizeKidProfile(kid, index));
-          localStorage.setItem(scheduleStorageKey("kids"), JSON.stringify(kidProfiles));
-        }
+        kidProfiles = (Array.isArray(snapshot.kids) ? snapshot.kids : [])
+          .filter(kid => kid && typeof kid.name === "string" && kid.name.trim())
+          .map((kid, index) => normalizeKidProfile(kid, index));
+        localStorage.setItem(scheduleStorageKey("kids"), JSON.stringify(kidProfiles));
         kids = buildKids(kidProfiles);
         state.visibleKids = new Set(kidProfiles.filter(kid => !preserveView || allKidsVisible || visibleKids.has(kid.name)).map(kid => kid.name));
 
-        if (Array.isArray(snapshot.activities)) {
-          state.activities = snapshot.activities.map(activity => ({ ...activity }));
-          localStorage.setItem(scheduleStorageKey("activities"), JSON.stringify(state.activities));
-        }
-        if (Array.isArray(snapshot.presets)) {
-          savedPresets = snapshot.presets.map(preset => ({ ...preset }));
-          localStorage.setItem(scheduleStorageKey("presets"), JSON.stringify(savedPresets));
-        }
-        if (Array.isArray(snapshot.history)) {
-          scheduleHistory = snapshot.history.slice(0, 20).map(entry => ({ ...entry }));
-          localStorage.setItem(scheduleStorageKey("history"), JSON.stringify(scheduleHistory));
-        }
-        if (Array.isArray(snapshot.audit)) {
-          activityAudit = snapshot.audit.slice(0, 100).map(entry => ({ ...entry }));
-          localStorage.setItem(scheduleStorageKey("audit"), JSON.stringify(activityAudit));
-        }
-        if (snapshot.settings && typeof snapshot.settings === "object") {
-          localStorage.setItem(scheduleStorageKey("settings"), JSON.stringify(snapshot.settings));
-          userSettings = loadSettings();
-          state.showWeekends = userSettings.showWeekends;
-        }
+        const list = (name, limit) => (Array.isArray(snapshot[name]) ? snapshot[name].slice(0, limit) : [])
+          .filter(item => item && typeof item === "object" && !Array.isArray(item)).map(item => ({ ...item }));
+        state.activities = list("activities");
+        savedPresets = list("presets");
+        scheduleHistory = list("history", 20);
+        activityAudit = list("audit", 100);
+        Object.entries({ activities: state.activities, presets: savedPresets, history: scheduleHistory, audit: activityAudit })
+          .forEach(([key, value]) => localStorage.setItem(scheduleStorageKey(key), JSON.stringify(value)));
+        const settings = snapshot.settings && typeof snapshot.settings === "object" && !Array.isArray(snapshot.settings) ? snapshot.settings : {};
+        localStorage.setItem(scheduleStorageKey("settings"), JSON.stringify(settings));
+        userSettings = loadSettings();
+        state.showWeekends = userSettings.showWeekends;
         if (preserveView) {
           currentView = localView;
           localStorage.setItem(scheduleStorageKey("view"), currentView);
@@ -16353,22 +16420,24 @@
           .select("schedule, updated_at")
           .eq("user_id", requestedUserId)
           .maybeSingle();
-        if (cloudSession?.user.id !== requestedUserId || activeAccount?.provider !== "supabase") return false;
-        if (live && (cloudSyncBusy || hasPendingCloudSave() || window.KidsSyncLiveSync?.isEditing()
-          || localStorage.getItem(cloudUpdatedKey()) !== requestedVersion)) return false;
+        if (cloudSession?.user.id !== requestedUserId || activeAccount?.id !== requestedUserId || activeAccount.provider !== "supabase") return false;
+        if (cloudSyncBusy || hasPendingCloudSave() || localStorage.getItem(cloudUpdatedKey()) !== requestedVersion
+          || (live && window.KidsSyncLiveSync?.isEditing())) return false;
         if (error) throw error;
         if (!data) {
+          if (getCloudBaseline(requestedUserId)) {
+            setCloudSaveState("syncConflict");
+            return false;
+          }
           markCloudSavePending();
           return flushCloudSave();
         }
 
-        const localUpdatedAt = live && window.KidsSyncLiveSync?.version
-          ? window.KidsSyncLiveSync.version()
-          : localStorage.getItem(cloudUpdatedKey());
+        const baseline = getCloudBaseline(requestedUserId);
         let receivedRemoteUpdate = false;
-        if (!localUpdatedAt || localUpdatedAt !== data.updated_at) {
+        if (!baseline || baseline.version !== data.updated_at || baseline.awaitingApply) {
           applyCloudSnapshot(data.schedule, { preserveView: live });
-          localStorage.setItem(cloudUpdatedKey(), data.updated_at);
+          rememberCloudBaseline(requestedUserId, data, buildCloudSnapshot());
           receivedRemoteUpdate = true;
         }
         if (receivedRemoteUpdate && !live) window.setTimeout(openWelcomeBackIfNeeded, 300);
@@ -16430,6 +16499,8 @@
         await hydrateCloudSchedule();
         window.KidsSyncLiveSync?.start();
         await refreshInvitations();
+        window.KidsSyncCloudReady = true;
+        window.dispatchEvent(new Event("kidssync:cloud-ready"));
         queueWeeklySummary(500);
       } catch (syncError) {
         reportClientError(syncError, "cloud-initialization");
@@ -21210,12 +21281,12 @@
       list.innerHTML = events.length ? events.map(activity => {
         const profile = profileMap[activity.child];
         const child = activity.child === FAMILY_CHILD ? t("calendar.family") : `${profile?.avatar || ""} ${activity.child || ""}`.trim();
-        const editButton = canEditSharedCalendar() ? `<button class="small-btn edit-shared-event" type="button" data-event-id="${escapeHtml(activity.id)}">${escapeHtml(t("invitations.editEvent"))}</button>` : "";
+        const editButton = canEditSharedCalendar() && !activity.externalSource && !activity.isBuiltInHoliday ? `<button class="small-btn edit-shared-event" type="button" data-event-id="${escapeHtml(activity.id)}">${escapeHtml(t("invitations.editEvent"))}</button>` : "";
         return `<article class="shared-event" data-importance="${eventImportance(activity)}"><span class="shared-event-copy"><strong>${escapeHtml(`${activity.icon || MISC_ICON} ${activity.title || ""}`.trim())}</strong>${eventImportanceBadge(activity)}<span>${escapeHtml([activityDateRangeText(activity) || activity.startDate, activity.allDay ? t("calendar.allDay") : `${activity.start || ""} - ${activity.end || ""}`, child].filter(Boolean).join(" · "))}</span></span><span class="shared-event-actions">${editButton}</span></article>`;
       }).join("") : `<p class="invitation-empty">${escapeHtml(t("invitations.noEvents"))}</p>`;
       list.querySelectorAll(".edit-shared-event").forEach(button => button.addEventListener("click", () => {
-        const activity = sharedCalendarState.shared.activities.find(item => item.id === button.dataset.eventId);
-        openSharedEventDialog(activity);
+        const matches = sharedCalendarState.shared.activities.filter(item => String(item.id) === button.dataset.eventId);
+        if (matches.length === 1) openSharedEventDialog(matches[0]);
       }));
       window.KidsSyncFamily?.shared();
     }
@@ -21375,12 +21446,15 @@
 
     async function refreshSharedCalendarLive() {
       if (sharedCalendarRefreshBusy || document.hidden || !navigator.onLine || !sharedCalendarState?.invitation || !cloudClient) return;
+      const scope = sharedCalendarState;
+      const previousShared = scope.shared;
+      if (scope.savingEvent) return;
       sharedCalendarRefreshBusy = true;
-      const { invitation } = sharedCalendarState;
+      const { invitation } = scope;
       try {
         let schedule = {};
         let shared = {};
-        if (sharedCalendarState.publicPreview) {
+        if (scope.publicPreview) {
           const { data, error } = await cloudClient.rpc("get_shared_calendar_preview", { shared_invite_token: pendingInviteToken });
           if (error) throw error;
           shared = data?.shared || {};
@@ -21393,7 +21467,8 @@
           schedule = data?.schedule || {};
           shared = schedule.calendarData?.[invitation.calendar_id] || schedule;
         }
-        const previousActivities = JSON.stringify(sharedCalendarState.shared?.activities || []);
+        if (sharedCalendarState !== scope || scope.shared !== previousShared || scope.savingEvent) return;
+        const previousActivities = JSON.stringify(previousShared?.activities || []);
         const nextActivities = JSON.stringify(shared?.activities || []);
         sharedCalendarState.schedule = schedule;
         sharedCalendarState.shared = shared;
@@ -21436,14 +21511,20 @@
     }
 
     function openSharedEventDialog(activity = null) {
-      if (!canEditSharedCalendar()) return;
+      if (!canEditSharedCalendar() || sharedCalendarState.savingEvent || activity?.externalSource || activity?.isBuiltInHoliday) return;
       const profiles = Array.isArray(sharedCalendarState.shared.kids) ? sharedCalendarState.shared.kids.map(normalizeKidProfile) : [];
       const childSelect = document.getElementById("sharedEventChild");
-      childSelect.innerHTML = `<option value="${FAMILY_CHILD}">${escapeHtml(t("calendar.family"))}</option>${profiles.map(profile => `<option value="${escapeHtml(profile.name)}">${escapeHtml(`${profile.avatar || ""} ${profile.name}`.trim())}</option>`).join("")}`;
+      const child = profiles.find(profile => String(profile.id) === String(activity?.child)) || profiles.find(profile => profile.name === activity?.child);
+      const legacyChild = activity && typeof activity.child === "string" && activity.child !== FAMILY_CHILD && !child ? activity.child : "";
+      childSelect.innerHTML = `<option value="${FAMILY_CHILD}">${escapeHtml(t("calendar.family"))}</option>${profiles.map(profile => `<option value="${escapeHtml(profile.name)}">${escapeHtml(`${profile.avatar || ""} ${profile.name}`.trim())}</option>`).join("")}${legacyChild ? `<option value="${escapeHtml(legacyChild)}">${escapeHtml(legacyChild)}</option>` : ""}`;
       document.getElementById("sharedEventDialogTitle").textContent = t(activity ? "invitations.editEvent" : "invitations.addEvent");
-      document.getElementById("sharedEventId").value = activity?.id || "";
       document.getElementById("sharedEventTitle").value = activity?.title || "";
-      childSelect.value = activity?.child || profiles[0]?.name || FAMILY_CHILD;
+      childSelect.value = child?.name || legacyChild || (activity ? FAMILY_CHILD : profiles[0]?.name || FAMILY_CHILD);
+      sharedCalendarState.eventDraft = {
+        id: activity?.id ?? makeId("activity"),
+        original: activity ? JSON.parse(JSON.stringify(activity)) : null,
+        childChoice: childSelect.value
+      };
       document.getElementById("sharedEventDate").value = activity?.startDate || dateKey(new Date());
       document.getElementById("sharedEventEndDate").value = activity?.eventType === "trip" ? (activity?.endDate || activity?.startDate || dateKey(new Date())) : "";
       document.getElementById("sharedEventType").value = activity?.eventType || "activity";
@@ -21464,34 +21545,60 @@
       return { trip: "✈️", deadline: "📌", birthday: "🎂", holiday: "🎉", activity: "📅" }[type] || MISC_ICON;
     }
 
-    async function persistSharedCalendarActivities(activities) {
-      if (!canEditSharedCalendar() || !cloudClient) throw new Error("Editor access required");
-      const { invitation } = sharedCalendarState;
-      const { data, error } = await cloudClient.from("family_schedules").select("schedule").eq("user_id", invitation.owner_id).maybeSingle();
+    async function persistSharedCalendarActivities(change, scope, actorId) {
+      const isCurrent = () => sharedCalendarState === scope && cloudSession?.user?.id === actorId && canEditSharedCalendar();
+      if (!actorId || !cloudClient || !isCurrent()) return false;
+      const { invitation } = scope;
+      const { data, error } = await cloudClient.from("family_schedules").select("updated_at").eq("user_id", invitation.owner_id).maybeSingle();
+      if (!isCurrent()) return false;
       if (error) throw error;
-      const schedule = JSON.parse(JSON.stringify(data?.schedule || {}));
-      let shared;
-      if (schedule.calendarData && typeof schedule.calendarData === "object") {
-        shared = { ...(schedule.calendarData[invitation.calendar_id] || sharedCalendarState.shared), activities };
-        schedule.calendarData[invitation.calendar_id] = shared;
-      } else {
-        schedule.activities = activities;
-        shared = schedule;
-      }
-      const { error: updateError } = await cloudClient.rpc("update_shared_calendar_activities", {
+      if (!data?.updated_at) throw new Error("Shared calendar is unavailable");
+      const { data: result, error: updateError } = await cloudClient.rpc("mutate_shared_calendar_activities_checked", {
         calendar_owner_id: invitation.owner_id,
         shared_calendar_id: invitation.calendar_id,
-        next_activities: activities
+        expected_updated_at: data.updated_at,
+        changes: [change],
+        expected_actor_id: actorId
       });
+      if (!isCurrent()) return false;
       if (updateError) throw updateError;
-      sharedCalendarState.schedule = schedule;
-      sharedCalendarState.shared = shared;
+      if (result?.ownerId !== invitation.owner_id || result.calendarId !== invitation.calendar_id
+        || result.canWrite !== true || !Array.isArray(result.calendar?.data?.activities) || !Array.isArray(result.calendar.data.kids)) {
+        throw new Error("Shared calendar confirmation is invalid");
+      }
+      scope.shared = result.calendar.data;
       renderSharedCalendarEvents();
+      return true;
+    }
+
+    async function submitSharedEvent(event, operation) {
+      const scope = sharedCalendarState;
+      if (!canEditSharedCalendar() || !scope?.eventDraft || scope.savingEvent) return;
+      const draft = scope.eventDraft;
+      const actorId = cloudSession.user.id;
+      const dialog = document.getElementById("sharedEventDialog");
+      const status = document.getElementById("sharedEventStatus");
+      let conflicted = false;
+      scope.savingEvent = true;
+      status.textContent = t("save.syncing");
+      try {
+        const saved = await persistSharedCalendarActivities({ original: draft.original, event }, scope, actorId);
+        if (saved && dialog.open) dialog.close();
+      } catch (error) {
+        if (sharedCalendarState !== scope || cloudSession?.user?.id !== actorId || !dialog.open) return;
+        reportClientError(error, operation);
+        conflicted = error?.code === "40001";
+        status.textContent = t(conflicted ? "invitations.saveConflict" : "invitations.saveFailed");
+      } finally {
+        scope.savingEvent = false;
+        if (conflicted) void refreshSharedCalendarLive();
+      }
     }
 
     async function saveSharedEvent(event) {
       event.preventDefault();
-      if (!canEditSharedCalendar()) return;
+      const draft = sharedCalendarState?.eventDraft;
+      if (!canEditSharedCalendar() || !draft || sharedCalendarState.savingEvent) return;
       const allDay = document.getElementById("sharedEventAllDay").checked;
       const start = document.getElementById("sharedEventStart").value;
       const end = document.getElementById("sharedEventEnd").value;
@@ -21502,19 +21609,17 @@
         document.getElementById("sharedEventStatus").textContent = t("validation.endDateAfter");
         return;
       }
-      if (!allDay && minutes(end) <= minutes(start)) {
+      if (!allDay && !(endDate > startDate) && minutes(end) <= minutes(start)) {
         document.getElementById("sharedEventStatus").textContent = t("validation.endAfter");
         return;
       }
-      const id = document.getElementById("sharedEventId").value || makeId("activity");
-      const activities = Array.isArray(sharedCalendarState.shared.activities) ? sharedCalendarState.shared.activities.slice() : [];
-      const index = activities.findIndex(activity => activity.id === id);
-      const existing = index >= 0 ? activities[index] : {};
+      const existing = draft.original || {};
+      const selectedChild = document.getElementById("sharedEventChild").value;
       const activity = {
         ...existing,
-        id,
+        id: draft.id,
         title: document.getElementById("sharedEventTitle").value.trim(),
-        child: document.getElementById("sharedEventChild").value,
+        child: draft.original && draft.childChoice === selectedChild && existing.child != null ? existing.child : selectedChild,
         startDate,
         endDate,
         eventType: type,
@@ -21533,31 +21638,13 @@
         responsible: existing.responsible || "",
         items: existing.items || ""
       };
-      if (index >= 0) activities[index] = activity;
-      else activities.push(activity);
-      const status = document.getElementById("sharedEventStatus");
-      status.textContent = t("save.syncing");
-      try {
-        await persistSharedCalendarActivities(activities);
-        document.getElementById("sharedEventDialog").close();
-      } catch (error) {
-        reportClientError(error, "shared-event-save");
-        status.textContent = t("invitations.saveFailed");
-      }
+      await submitSharedEvent(activity, "shared-event-save");
     }
 
     async function deleteSharedEvent() {
-      if (!canEditSharedCalendar()) return;
-      const id = document.getElementById("sharedEventId").value;
-      if (!id || !confirm(t("invitations.confirmDelete"))) return;
-      const activities = sharedCalendarState.shared.activities.filter(activity => activity.id !== id);
-      try {
-        await persistSharedCalendarActivities(activities);
-        document.getElementById("sharedEventDialog").close();
-      } catch (error) {
-        reportClientError(error, "shared-event-delete");
-        document.getElementById("sharedEventStatus").textContent = t("invitations.saveFailed");
-      }
+      if (!canEditSharedCalendar() || !sharedCalendarState.eventDraft?.original || sharedCalendarState.savingEvent
+        || !confirm(t("invitations.confirmDelete"))) return;
+      await submitSharedEvent(null, "shared-event-delete");
     }
 
     function openShareDialog() {
@@ -22220,6 +22307,7 @@
       openSettingsDialog();
     });
     document.getElementById("cloudSyncAction").addEventListener("click", handleCloudSyncAction);
+    document.getElementById("cloudSyncRecover").addEventListener("click", recoverCloudSchedule);
     document.getElementById("notificationSignIn").addEventListener("click", handleEmailSummaryAction);
     document.getElementById("closeSettings").addEventListener("click", closeSettingsDialog);
     document.getElementById("doneSettings").addEventListener("click", closeSettingsDialog);
@@ -23163,7 +23251,7 @@
   <script src="./assets/family-polls.js?v=2"></script>
   <script src="./assets/experience.js?v=2"></script>
   <script src="./assets/quick-ux.js"></script>
-  <script src="./assets/auth-visual-rotation.js?v=2"></script>
+  <script src="./assets/auth-visual-rotation.js?v=4"></script>
   <script src="./assets/landing-ux.js?v=1"></script>
   <script src="./assets/calendar-ux.js?v=1"></script>
   <script src="./assets/calendar-planning.js?v=1"></script>
@@ -23171,5 +23259,6 @@
   <script src="./assets/dashboard-navigation.js?v=2"></script>
   <script src="./assets/dashboard-productivity.js?v=1"></script>
   <script src="./assets/live-sync.js?v=2"></script>
+  <script src="./assets/mobile-tool-handoff.js?v=1"></script>
 </body>
 </html>

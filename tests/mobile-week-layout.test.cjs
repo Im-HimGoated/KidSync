@@ -17,6 +17,8 @@ test('phone week geometry keeps readable day columns and scrolls the full week',
   assert.ok(narrowPhone.visibleDays >= 3 && narrowPhone.visibleDays < 3.1);
   assert.equal(layout.weekOffset(0, narrowPhone.dayWidth, 238), 0);
   assert.equal(layout.weekOffset(6, narrowPhone.dayWidth, 238), narrowPhone.daysWidth - 238);
+  assert.equal(layout.weekOffset(4, 100, 300, 5), 200);
+  assert.equal(layout.weekOffset(0, 100, 300, 4), 0);
 
   const tablet = layout.weekGeometry(600);
   assert.ok(tablet.dayWidth <= 116);

@@ -15,18 +15,21 @@ test('sign-in page exposes a controllable four-scene photo story', () => {
   assert.equal((html.match(/data-auth-visual-index=/g) || []).length, 4);
   assert.match(html, /id="authVisualPause"/);
   assert.equal((script.match(/src: "\.\/assets\/kidssync-[^"]+"/g) || []).length, 4);
-  assert.match(script, /const rotationDelay = 9000/);
+  assert.match(script, /src: "\.\/assets\/kidssync-family-hero\.jpg"/);
+  assert.match(script, /const rotationDelay = 6500/);
 });
 
 test('photo rotation respects visibility, motion preferences, and offline delivery', () => {
   assert.match(script, /document\.hidden/);
   assert.match(script, /prefers-reduced-motion: reduce/);
+  assert.doesNotMatch(script, /mouseenter|focusin|interactionPaused/);
   assert.match(script, /MutationObserver/);
   assert.match(css, /\.auth-visual-image\.is-active/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.auth-visual-pause \{ display: none; \}/);
   assert.match(script, /function prepareNextSlide\(\)/);
   assert.match(script, /if \(!canRotate\(\)\) return;\s+prepareNextSlide\(\)/);
-  for (const asset of ['./assets/auth-visual-rotation.js?v=2', './assets/kidssync-auth-family-signin.jpg']) assert(worker.includes(`"${asset}"`), asset);
+  for (const asset of ['./assets/auth-visual-rotation.js?v=4', './assets/kidssync-family-hero.jpg']) assert(worker.includes(`"${asset}"`), asset);
+  assert.doesNotMatch(script, /kidssync-auth-family-signin\.jpg/);
   const shell = worker.slice(worker.indexOf('const APP_SHELL'), worker.indexOf('const LAZY_ASSETS'));
   const lazy = worker.slice(worker.indexOf('const LAZY_ASSETS'), worker.indexOf('self.addEventListener("install"'));
   for (const asset of [
@@ -45,6 +48,7 @@ test('mobile account access stays compact and hides empty cloud status', () => {
   assert.match(css, /\.auth-screen \.auth-preview-btn \{[\s\S]*min-height: 42px;[\s\S]*background: #f7fafb;/);
   assert.match(css, /\.auth-screen \.auth-cloud-note\[hidden\] \{ display: none !important; \}/);
   assert.match(html, /note\.hidden = cloudConfigured;\s+note\.textContent = cloudConfigured \? "" : t\("auth\.cloudSetup"\);/);
-  assert.match(html, /marketing-auth\.css\?v=3/);
-  assert.match(worker, /marketing-auth\.css\?v=3/);
+  assert.match(css, /\.auth-screen \.auth-visual \{ min-height: 250px; aspect-ratio: 3 \/ 2; \}/);
+  assert.match(html, /marketing-auth\.css\?v=4/);
+  assert.match(worker, /marketing-auth\.css\?v=4/);
 });

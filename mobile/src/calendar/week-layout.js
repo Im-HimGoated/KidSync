@@ -21,9 +21,9 @@ function initialScrollOffset(initialHour, hourHeight) {
   return Math.max(0, (hour - INITIAL_LEAD_MINUTES / 60) * height);
 }
 
-function weekOffset(selectedIndex, dayWidth, viewportWidth) {
+function weekOffset(selectedIndex, dayWidth, viewportWidth, days = 7) {
   const left = (selectedIndex - 1) * dayWidth;
-  return Math.max(0, Math.min(left, dayWidth * 7 - viewportWidth));
+  return Math.max(0, Math.min(left, dayWidth * days - viewportWidth));
 }
 
 module.exports = { GUTTER_WIDTH, MIN_DAY_WIDTH, MAX_DAY_WIDTH, INITIAL_LEAD_MINUTES, weekGeometry, initialScrollOffset, weekOffset };

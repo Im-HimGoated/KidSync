@@ -3,11 +3,12 @@ import {
   Pressable, ScrollView, StyleSheet, Switch, Text, View
 } from 'react-native';
 import {
-  Bell, CalendarDays, Flag, MapPin, NotebookPen, Package,
+  Bell, CalendarDays, Clock3, Copy, Flag, MapPin, NotebookPen, Package,
   Pencil, Repeat2, Trash2, UserRound, Users
 } from 'lucide-react-native';
 import calendar from '../lib/calendar';
 import model from './model';
+import options from './event-options';
 import { Button, Field } from './ui';
 import { useAppearance } from '../ui/AppearanceContext';
 
@@ -91,6 +92,23 @@ const repeated = model.isRecurringActivity;
 const readOnlyEvent = event => !!(event?.externalSource || event?.isBuiltInHoliday);
 const reminderKey = value => value == null ? 'none' : String(value);
 const reminderNumber = value => value === 'none' ? null : Number(value);
+const optionCopy = {
+  en: { more: 'Event options', shortcuts: 'Event shortcuts', duplicate: 'Duplicate', type: 'Event type', color: 'Color', icon: 'Icon',
+    attendees: 'Attendees', status: 'Status', travel: 'Travel time before', noTravel: 'None',
+    duration: 'Event length', minutes: 'min', conflict: 'Schedule conflict', optionInvalid: 'Choose an available option.', iconInvalid: 'Enter an emoji or short icon.',
+    before: 'Buffer before (minutes)', after: 'Buffer after (minutes)', bufferInvalid: 'Enter a whole number from 0 to 120.',
+    activity: 'Activity', trip: 'Trip', deadline: 'Deadline', birthday: 'Birthday', holiday: 'Holiday',
+    confirmed: 'Confirmed', tentative: 'Tentative', cancelled: 'Cancelled', school: 'School', sports: 'Sports', bedtime: 'Bedtime', chores: 'Chores',
+    colors: ['Default', 'Red', 'Yellow', 'Purple', 'Coral', 'Green', 'Orange', 'Teal', 'Gray', 'Indigo', 'Cyan', 'Brown'] },
+  zh: { more: '活动选项', shortcuts: '活动快捷模板', duplicate: '复制', type: '活动类型', color: '颜色', icon: '图标',
+    attendees: '参与者', status: '状态', travel: '活动前的交通时间', noTravel: '无',
+    duration: '活动时长', minutes: '分钟', conflict: '日程冲突', optionInvalid: '请选择可用选项。', iconInvalid: '请输入表情或简短图标。',
+    before: '活动前缓冲时间（分钟）', after: '活动后缓冲时间（分钟）', bufferInvalid: '请输入 0 到 120 的整数。',
+    activity: '活动', trip: '旅行', deadline: '截止日期', birthday: '生日', holiday: '节日',
+    confirmed: '已确认', tentative: '待定', cancelled: '已取消', school: '上学', sports: '体育', bedtime: '睡觉', chores: '家务',
+    colors: ['默认', '红色', '黄色', '紫色', '珊瑚色', '绿色', '橙色', '蓝绿色', '灰色', '靛蓝色', '青色', '棕色'] },
+};
+const eventOptions = ['eventType', 'icon', 'color', 'attendees', 'status', 'travelMinutes', 'bufferBeforeMinutes', 'bufferAfterMinutes'];
 
 function FormChoices({ label, options, value, onChange, disabled, error, onLayout }) {
   const { colors, s } = useEditorStyles();
@@ -120,13 +138,15 @@ export function ActivityEditor(props) {
   return <EditorBody key={`${props.event?.id ?? 'new'}:${dateIdentity(props.date)}`} {...props} />;
 }
 
-function EditorBody({ event = null, date, initialDraft, kids = [], preferences, language = 'en', busy, disabled = false, error, onSave, onCancel, onDirtyChange, scope }) {
+function EditorBody({ event = null, date, initialDraft, copyDraft, kids = [], events = [], preferences, language = 'en', busy, disabled = false, error, onSave, onCancel, onDirtyChange, scope }) {
   const { colors, s } = useEditorStyles();
   const t = COPY[language] || COPY.en;
+  const extra = optionCopy[language] || optionCopy.en;
+  const [optionsOpen, setOptionsOpen] = useState(false);
   const [form, setForm] = useState(() => {
     const seed = !event && initialDraft && typeof initialDraft === 'object' && !Array.isArray(initialDraft) ? initialDraft : null;
     const seededDate = typeof seed?.startDate === 'string' && Number.isFinite(calendar.parseDateKey(seed.startDate).getTime()) ? seed.startDate : date;
-    const initial = model.initialEventForm(event, seededDate, preferences);
+    const initial = model.initialEventForm(event || copyDraft, seededDate, preferences);
     // A proposed window seeds a new form; it is never an existing activity or
     // a source of IDs, recurrence or other activity metadata.
     if (seed) for (const [source, target] of [['startDate', 'date'], ['endDate', 'endDate'], ['start', 'start'], ['end', 'end']]) {
@@ -135,6 +155,7 @@ function EditorBody({ event = null, date, initialDraft, kids = [], preferences, 
     return initial;
   });
   const initialForm = useRef(form);
+  const conflicts = useMemo(() => options.conflictingEvents(form, events, event?.id), [form, events, event?.id]);
   const [errors, setErrors] = useState({});
   const [failure, setFailure] = useState('');
   const [saving, setSaving] = useState(false);
@@ -157,13 +178,14 @@ function EditorBody({ event = null, date, initialDraft, kids = [], preferences, 
   const reminderOptions = [{ value: 'none', label: t.noReminder }, { value: '0', label: t.atStart }, { value: '10', label: t.before10 }, { value: '30', label: t.before30 }];
   const currentReminder = reminderKey(form.reminderMinutes);
   if (!reminderOptions.some(option => option.value === currentReminder)) reminderOptions.push({ value: currentReminder, label: language === 'zh' ? `提前 ${currentReminder} 分钟` : `${currentReminder} min before` });
-  const fieldError = key => errors[key] ? t.errors[errors[key]] || t.validation : '';
+  const fieldError = key => errors[key] ? t.errors[errors[key]] || extra[errors[key]] || t.validation : '';
   const position = key => layout => { positions.current[key] = layout.nativeEvent.layout.y; };
   const field = key => ({ inputRef: input => { inputs.current[key] = input; }, onLayout: position(key) });
 
   function revealError(nextErrors) {
     const first = ['title', 'child', 'date', 'endDate', 'start', 'end', 'location', 'responsible', 'items', 'notes',
-      'importance', 'reminderMinutes', 'recurrence', 'repeatInterval', 'repeatDays', 'repeatUntil'].find(key => nextErrors[key]);
+      'importance', 'reminderMinutes', 'recurrence', 'repeatInterval', 'repeatDays', 'repeatUntil',
+      ...eventOptions].find(key => nextErrors[key]);
     const reveal = () => {
       if (!active.current) return;
       scroll.current?.scrollTo({ y: Math.max(0, (positions.current[first] || 0) - 12), animated: true });
@@ -188,6 +210,31 @@ function EditorBody({ event = null, date, initialDraft, kids = [], preferences, 
     if (value === 'weekly' && !form.repeatDays?.length && Number.isFinite(anchor.getTime())) change('repeatDays', [anchor.getDay()]);
   }
 
+  function applyTemplate(key) {
+    const template = options.templates[key];
+    const anchor = calendar.parseDateKey(form.date);
+    Object.entries({ title: extra[key], items: '', eventType: 'activity', allDay: false,
+      endDate: key === 'trip' ? form.date : '', repeatInterval: '1', repeatUntil: '',
+      repeatDays: [Number.isFinite(anchor.getTime()) ? anchor.getDay() : 1], ...template })
+      .forEach(([name, value]) => change(name, value));
+  }
+
+  function setDuration(minutes) {
+    const start = model.timeMinutes(form.start);
+    if (start === null || !Number.isFinite(calendar.parseDateKey(form.date).getTime())) return;
+    const end = start + minutes;
+    const endDate = end >= 1440 ? calendar.dateKey(calendar.addDays(calendar.parseDateKey(form.date), 1)) : '';
+    change('end', `${String(Math.floor(end / 60) % 24).padStart(2, '0')}:${String(end % 60).padStart(2, '0')}`);
+    if (endDate) change('endDate', endDate);
+    else if (form.endDate <= form.date && form.eventType !== 'trip') change('endDate', '');
+  }
+
+  function toggleAttendee(name) {
+    const selected = form.attendees || [];
+    const next = selected.includes(name) ? selected.filter(item => item !== name) : [...selected.filter(item => item !== 'all'), name];
+    change('attendees', name === 'all' || !next.length ? ['all'] : next);
+  }
+
   async function save() {
     if (locked || request.current || typeof onSave !== 'function') return;
     request.current = true;
@@ -199,14 +246,20 @@ function EditorBody({ event = null, date, initialDraft, kids = [], preferences, 
     if (event) for (const key of ['responsible', 'items', 'importance', 'reminderMinutes']) {
       if (!touched.current.has(key) || form[key] === initialForm.current[key]) delete submission[key];
     }
-    if (form.endDate && (!event?.eventType || event.eventType === 'activity')) submission.eventType = 'trip';
-    else if (!form.endDate && event?.eventType === 'trip') submission.eventType = 'activity';
+    if (event) for (const key of eventOptions) {
+      if (!touched.current.has(key)) delete submission[key];
+    }
+    if (!touched.current.has('eventType') && touched.current.has('endDate') && ['activity', 'trip'].includes(form.eventType)
+      && (!form.endDate || !form.start || !form.end || form.end > form.start)) {
+      submission.eventType = form.endDate ? 'trip' : 'activity';
+    }
     let result;
     try { result = model.buildCalendarEvent(event, submission, kids, preferences); }
     catch { result = { event: null, errors: { event: 'eventReadOnly' } }; }
     setErrors(result.errors || {});
     if (!result.event) {
       request.current = false;
+      if (eventOptions.some(key => result.errors?.[key])) setOptionsOpen(true);
       revealError(result.errors || {});
       return;
     }
@@ -226,15 +279,52 @@ function EditorBody({ event = null, date, initialDraft, kids = [], preferences, 
       {readOnly && <Text accessibilityRole="alert" style={s.error}>{t.readOnly}</Text>}
       {!!(Object.keys(errors).length > 0 || error || failure) && <View style={s.errorBox}><Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={s.error}>{error || failure || t.validation}</Text></View>}
       <Field label={t.title} value={text(form.title)} onChangeText={value => change('title', value)} error={fieldError('title')} placeholder={t.titleHint} autoCapitalize="sentences" {...field('title')} {...inputProps} />
+      {!event && <FormChoices label={extra.shortcuts} options={Object.keys(options.templates).map(value => ({ value, label: `${options.templates[value].icon} ${extra[value]}` }))} disabled={locked} onChange={applyTemplate} />}
       <FormChoices label={t.person} options={people} value={childValue} disabled={locked} error={fieldError('child')} onChange={value => change('child', value)} onLayout={position('child')} />
       <Field label={t.date} value={text(form.date)} onChangeText={value => change('date', value)} error={fieldError('date')} placeholder={t.dateHint} maxLength={10} autoCapitalize="none" {...field('date')} {...inputProps} />
       <Field label={t.endDate} value={text(form.endDate)} onChangeText={value => change('endDate', value)} error={fieldError('endDate')} placeholder={t.dateHint} maxLength={10} autoCapitalize="none" {...field('endDate')} {...inputProps} />
       <View style={s.toggleRow}><Text style={s.toggleLabel}>{t.allDay}</Text><Switch accessibilityLabel={t.allDay} value={!!form.allDay} disabled={locked} onValueChange={value => change('allDay', value)} trackColor={{ false: colors.line, true: colors.primary }} thumbColor={colors.onPrimary} /></View>
       {!form.allDay && <><View style={s.timeRow} onLayout={layout => { position('start')(layout); position('end')(layout); }}><View style={s.flex}><Field label={t.start} value={text(form.start)} onChangeText={value => change('start', value)} error={fieldError('start')} placeholder="09:00" maxLength={5} inputRef={input => { inputs.current.start = input; }} {...inputProps} /></View><View style={s.flex}><Field label={t.end} value={text(form.end)} onChangeText={value => change('end', value)} error={fieldError('end')} placeholder="10:00" maxLength={5} inputRef={input => { inputs.current.end = input; }} {...inputProps} /></View></View><Text style={s.hint}>{t.timeHint}</Text></>}
+      {!form.allDay && model.timeMinutes(form.start) !== null && <FormChoices label={extra.duration}
+        options={[15, 30, 60, 90].map(value => ({ value, label: `${value} ${extra.minutes}` }))} disabled={locked} onChange={setDuration} />}
+      {!!conflicts.length && <View style={s.notice}><Text accessibilityLiveRegion="polite" style={s.noticeText}>
+        {extra.conflict} · {conflicts.slice(0, 3).map(item => text(item.title) || t.title).join(', ')}
+      </Text></View>}
       <Field label={t.location} value={text(form.location)} onChangeText={value => change('location', value)} placeholder={t.placeHint} {...field('location')} {...inputProps} />
       <Field label={t.responsible} value={text(form.responsible)} onChangeText={value => change('responsible', value)} error={fieldError('responsible')} placeholder={t.adultHint} maxLength={60} {...field('responsible')} {...inputProps} />
       <Field label={t.items} value={text(form.items)} onChangeText={value => change('items', value)} error={fieldError('items')} placeholder={t.itemsHint} maxLength={160} {...field('items')} {...inputProps} />
       <Field label={t.notes} value={text(form.notes)} onChangeText={value => change('notes', value)} multiline placeholder={t.notesHint} {...field('notes')} {...inputProps} />
+      <Pressable accessibilityRole="button" accessibilityState={{ expanded: optionsOpen }} style={s.toggleRow} onPress={() => setOptionsOpen(value => !value)}>
+        <Text style={s.label}>{extra.more}</Text><Text style={s.label}>{optionsOpen ? '−' : '+'}</Text>
+      </Pressable>
+      {optionsOpen && <>
+        <FormChoices label={extra.type} options={options.types.map(value => ({ value, label: extra[value] }))}
+          value={form.eventType} disabled={locked} error={fieldError('eventType')} onChange={value => change('eventType', value)} />
+        <FormChoices label={extra.status} options={options.statuses.map(value => ({ value, label: extra[value] }))}
+          value={form.status} disabled={locked} error={fieldError('status')} onChange={value => change('status', value)} />
+        <FormChoices label={extra.travel} options={options.travelTimes.map(value => ({ value, label: value ? `${value} ${extra.minutes}` : extra.noTravel }))}
+          value={form.travelMinutes} disabled={locked} error={fieldError('travelMinutes')} onChange={value => change('travelMinutes', value)} />
+        {[['bufferBeforeMinutes', extra.before], ['bufferAfterMinutes', extra.after]].map(([key, label]) =>
+          <Field key={key} label={label} value={form[key]} onChangeText={value => change(key, value)} error={fieldError(key)}
+            keyboardType="number-pad" maxLength={3} {...field(key)} {...inputProps} />)}
+        <Text style={s.label}>{extra.color}</Text>
+        <View style={s.optionWrap}>{options.colorIds.map((id, index) => <Pressable key={id} accessibilityRole="radio"
+          accessibilityLabel={extra.colors[index]} accessibilityState={{ checked: form.color === id, disabled: locked }} disabled={locked}
+          onPress={() => change('color', id)} style={s.swatchButton}>
+          <View style={[s.swatch, { borderColor: options.colors[id][0], backgroundColor: form.color === id ? options.colors[id][0] : colors.surface }]} />
+        </Pressable>)}</View>
+        <FormChoices label={extra.icon} options={options.icons.map(value => ({ value, label: value }))}
+          value={form.icon} disabled={locked} onChange={value => change('icon', value)} />
+        <Field label={extra.icon} value={text(form.icon)} onChangeText={value => change('icon', value)} error={fieldError('icon')} maxLength={12} {...inputProps} />
+        <Text style={s.label}>{extra.attendees}</Text>
+        <View style={s.optionWrap}>{[{ name: 'all', label: t.family }, ...profiles.filter(person => person.name !== 'all').map(person => ({ name: person.name, label: person.name }))].map(({ name, label }) => {
+          const checked = form.attendees.includes(name);
+          return <Pressable key={name} accessibilityRole="checkbox" accessibilityState={{ checked, disabled: locked }} disabled={locked}
+            onPress={() => toggleAttendee(name)} style={[s.choice, checked && s.choiceSelected]}>
+            <Text style={[s.choiceText, checked && s.choiceSelectedText]}>{label}</Text>
+          </Pressable>;
+        })}</View>
+      </>}
       <FormChoices label={t.importance} options={importance} value={form.importance || 'normal'} disabled={locked} error={fieldError('importance')} onChange={value => change('importance', value)} onLayout={position('importance')} />
       <FormChoices label={t.reminder} options={reminderOptions} value={currentReminder} disabled={locked} error={fieldError('reminderMinutes')} onChange={value => change('reminderMinutes', reminderNumber(value))} onLayout={position('reminderMinutes')} />
       <Text style={s.hint}>{t.reminderHint}</Text>
@@ -260,10 +350,12 @@ function DetailRow({ icon: Icon, label, children }) {
   return <View style={s.detailRow}><View style={s.detailIcon}><Icon size={20} color={colors.primary} /></View><View style={s.detailCopy}><Text style={s.detailLabel}>{label}</Text>{typeof children === 'string' ? <Text style={s.detailValue}>{children}</Text> : children}</View></View>;
 }
 
-export function ActivityDetails({ event, occurrenceDate, occurrenceStartDate, kids = [], language = 'en', canEdit, busy, onEdit, onDelete, onDeleteRequest }) {
+export function ActivityDetails({ event, occurrenceDate, occurrenceStartDate, kids = [], language = 'en', canEdit, busy, onEdit, onDuplicate, onDelete, onDeleteRequest }) {
   const { colors, s } = useEditorStyles();
   const t = COPY[language] || COPY.en;
   const activity = event || {}, editable = !!canEdit && !readOnlyEvent(activity);
+  const extra = optionCopy[language] || optionCopy.en;
+  const attendeeNames = Array.isArray(activity.attendees) ? activity.attendees.map(text).filter(value => value && value !== 'all') : [];
   const [confirmDelete, setConfirmDelete] = useState(false), [deleting, setDeleting] = useState(false), [failure, setFailure] = useState('');
   const scroll = useRef(null), active = useRef(true), deletingRequest = useRef(false), identity = useRef(activity.id);
   identity.current = activity.id;
@@ -305,6 +397,13 @@ export function ActivityDetails({ event, occurrenceDate, occurrenceStartDate, ki
       <DetailRow icon={CalendarDays} label={t.when}><Text style={s.detailValue}>{dateText(occurrence?.startDate || chosenDate, language, t.noDate)}</Text>{!!(occurrence?.endDate || (!repeated(activity) && activity.endDate)) && (occurrence?.endDate || activity.endDate) !== (occurrence?.startDate || activity.startDate) && <Text style={s.detailSecondary}>– {dateText(occurrence?.endDate || activity.endDate, language, t.noDate)}</Text>}<Text style={s.detailSecondary}>{time}</Text>{occurrences.length > 1 && <Text style={s.detailSecondary}>{t.overlapping}</Text>}</DetailRow>
       {repeated(activity) && !!activity.startDate && !!chosenDate && chosenDate !== activity.startDate && <Text style={s.seriesDate}>{t.seriesStart}: {dateText(activity.startDate, language, t.noDate)}</Text>}
       <DetailRow icon={Users} label={t.who}>{childLabel}</DetailRow>
+      {!!attendeeNames.length && <DetailRow icon={Users} label={extra.attendees}>{attendeeNames.join(', ')}</DetailRow>}
+      {activity.status === 'tentative' && <DetailRow icon={Flag} label={extra.status}>{extra.tentative}</DetailRow>}
+      {options.types.includes(activity.eventType) && activity.eventType !== 'activity' &&
+        <DetailRow icon={CalendarDays} label={extra.type}>{extra[activity.eventType]}</DetailRow>}
+      {Number(activity.travelMinutes) > 0 && <DetailRow icon={MapPin} label={extra.travel}>{`${activity.travelMinutes} ${extra.minutes}`}</DetailRow>}
+      {Number(activity.bufferBeforeMinutes) > 0 && <DetailRow icon={Clock3} label={extra.before}>{String(activity.bufferBeforeMinutes)}</DetailRow>}
+      {Number(activity.bufferAfterMinutes) > 0 && <DetailRow icon={Clock3} label={extra.after}>{String(activity.bufferAfterMinutes)}</DetailRow>}
       {!!text(activity.location) && <DetailRow icon={MapPin} label={t.where}>{text(activity.location)}</DetailRow>}
       <DetailRow icon={UserRound} label={t.adult}>{text(activity.responsible) || t.notAssigned}</DetailRow>
       {!!text(activity.items) && <DetailRow icon={Package} label={t.supplies}>{text(activity.items)}</DetailRow>}
@@ -323,13 +422,18 @@ export function ActivityDetails({ event, occurrenceDate, occurrenceStartDate, ki
         <Button danger disabled={!!busy || deleting} onPress={remove}>{deleting || busy ? t.deleting : t.confirmDelete}</Button>
       </View>}
     </ScrollView>
-    {editable && <View style={s.footer}><Button secondary icon={Pencil} disabled={!!busy || deleting || typeof onEdit !== 'function'} onPress={() => onEdit(activity)} style={s.saveButton}>{t.edit}</Button><Button danger icon={Trash2} disabled={!!busy || deleting || typeof onDelete !== 'function'} onPress={() => onDeleteRequest ? onDeleteRequest(activity) : setConfirmDelete(true)} style={s.saveButton}>{t.delete}</Button></View>}
+    {editable && <><View style={s.footer}><Button secondary icon={Pencil} disabled={!!busy || deleting || typeof onEdit !== 'function'} onPress={() => onEdit(activity)} style={s.saveButton}>{t.edit}</Button><Button danger icon={Trash2} disabled={!!busy || deleting || typeof onDelete !== 'function'} onPress={() => onDeleteRequest ? onDeleteRequest(activity) : setConfirmDelete(true)} style={s.saveButton}>{t.delete}</Button></View>
+      {!!onDuplicate && <Button secondary icon={Copy} disabled={!!busy || deleting} onPress={() => onDuplicate(activity)}>{(optionCopy[language] || optionCopy.en).duplicate}</Button>}
+    </>}
   </View>;
 }
 
 const createStyles = colors => StyleSheet.create({
   panel: { flexShrink: 1 }, scroll: { flexShrink: 1 }, flex: { flex: 1, minWidth: 0 }, formContent: { paddingHorizontal: 20, paddingTop: 7, paddingBottom: 22 },
   label: { color: colors.ink, fontSize: 14, fontWeight: '600' }, choiceGroup: { gap: 9, marginBottom: 19 }, choiceList: { flexDirection: 'row', gap: 8, paddingBottom: 3 },
+  optionWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 7, marginBottom: 16 },
+  swatchButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  swatch: { width: 29, height: 29, borderRadius: 15, borderWidth: 4 },
   choice: { minHeight: 44, minWidth: 44, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.input, justifyContent: 'center', alignItems: 'center' },
   choiceSelected: { backgroundColor: colors.primary, borderColor: colors.primary }, choiceText: { color: colors.ink, fontSize: 13, fontWeight: '600' }, choiceSelectedText: { color: colors.onPrimary }, dim: { opacity: 0.5 },
   toggleRow: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }, toggleLabel: { fontSize: 15, fontWeight: '600', color: colors.ink }, timeRow: { flexDirection: 'row', gap: 12 },

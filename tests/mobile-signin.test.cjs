@@ -78,3 +78,14 @@ test('sign-in uses bundled family imagery and keeps existing auth/sync ownership
   assert.equal((app.match(/if \(authRequest.current\)/g) || []).length, 3);
   assert.doesNotMatch(screen, /createClient|\.signInWithPassword\(|\.resetPasswordForEmail\(/);
 });
+
+test('mobile sign-in rotates real photos with accessible pause and manual controls', () => {
+  assert.equal((screen.match(/require\('[^']+\.jpg'\)/g) || []).length, 4);
+  assert.match(screen, /kidssync-family-hero\.jpg/);
+  assert.doesNotMatch(screen, /kidssync-auth-family-signin\.jpg/);
+  assert.match(screen, /setInterval\(\(\) => setPhotoIndex\(index => \(index \+ 1\) % signInPhotos\.length\), 6500\)/);
+  assert.match(screen, /return \(\) => clearInterval\(timer\)/);
+  assert.match(screen, /recoveryOpen \|\| photosPaused \|\| reduceMotion \|\| !screenActive/);
+  assert.match(screen, /accessibilityLabel=\{photosPaused \? t\.resumePhotos : t\.pausePhotos\}/);
+  assert.match(screen, /accessibilityLabel=\{`\$\{t\.showPhoto\} \$\{index \+ 1\}`\}/);
+});

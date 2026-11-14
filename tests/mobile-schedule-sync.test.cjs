@@ -296,3 +296,34 @@ test('a delayed outbox acknowledgement keeps a newer online confirmation while a
   assert.deepEqual(sync.getState().confirmedRow, confirmed);
   assert.deepEqual(JSON.parse(device.data.get(keyForUser('a'))).row, confirmed);
 });
+
+test('a Realtime notification during a stale read schedules one fresh catch-up', async () => {
+  const { remote, sync } = setup();
+  await sync.refresh();
+  let release, started;
+  const gate = new Promise(resolve => { release = resolve; });
+  const reading = new Promise(resolve => { started = resolve; });
+  remote.state.onRead = async () => { started(); await gate; };
+  const reads = remote.state.reads;
+  const staleRefresh = sync.refresh();
+  await reading;
+  remote.state.row = row([activity({ title: 'Changed on the website' })]);
+  remote.state.row.updated_at = '2026-10-30T10:01:00Z';
+  const firstNotification = sync.refresh({ afterInFlight: true });
+  const secondNotification = sync.refresh({ afterInFlight: true });
+  release();
+  await Promise.all([staleRefresh, firstNotification, secondNotification]);
+  assert.equal(remote.state.reads - reads, 2);
+  assert.equal(events(sync)[0].title, 'Changed on the website');
+});
+
+test('delayed confirmations cannot regress a newer cache, including same-millisecond server versions', async () => {
+  const { device, sync } = setup();
+  await sync.refresh();
+  const newer = row([activity({ title: 'Newer confirmation' })]);
+  newer.updated_at = '2026-10-30T10:00:00.123459+00:00';
+  await sync.acceptConfirmed(newer);
+  await sync.acceptConfirmed(row());
+  assert.equal(events(sync)[0].title, 'Newer confirmation');
+  assert.deepEqual(JSON.parse(device.data.get(keyForUser('a'))).row, newer);
+});

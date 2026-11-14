@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
 import theme from '../ui/theme';
 import { useAppearance } from '../ui/AppearanceContext';
+import eventOptions from './event-options';
 
 export const colors = theme.colors;
 export const palettes = {
@@ -14,9 +15,13 @@ export const palettes = {
   yellow: { ink: '#85682B', soft: '#F8F0DC', line: '#C8AE71' },
 };
 export function personColor(event, kids = [], currentPalettes = palettes) {
+  if (event?.isBuiltInHoliday) return currentPalettes.green;
+  const explicit = eventOptions.paletteFor(event?.color);
+  if (explicit) return explicit;
   const kid = (Array.isArray(kids) ? kids : []).find(person => person && (person.name === event?.child
     || (person.id != null && event?.child != null && String(person.id) === String(event.child))));
-  return currentPalettes[event?.style] || currentPalettes[kid?.palette] || currentPalettes.blue;
+  const key = kid?.palette === 'gold' ? 'yellow' : kid?.palette;
+  return currentPalettes[event?.style] || currentPalettes[key] || currentPalettes.blue;
 }
 export function useCalendarUi() {
   const appearance = useAppearance();
@@ -47,8 +52,11 @@ export function Field({ label, value, onChangeText, error, multiline, style, inp
 }
 export function ChoiceRow({ options, value, onChange, label, disabled }) {
   const { colors, u } = useCalendarUi();
-  return <View style={u.choices} accessibilityLabel={label}>{options.map(option => <Pressable key={String(option.value)} accessibilityRole="button" accessibilityState={{ selected: value === option.value, disabled: !!disabled }} disabled={disabled} onPress={() => onChange(option.value)}
-    style={[u.choice, value === option.value && u.choiceSelected, disabled && { opacity: 0.5 }]}>{option.color && <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: option.color }} />}<Text style={[u.choiceText, value === option.value && { color: colors.onPrimary }]}>{option.label}</Text></Pressable>)}</View>;
+  return <View style={u.choices} accessibilityLabel={label}>{options.map(option => {
+    const selected = Array.isArray(value) ? value.includes(option.value) : value === option.value;
+    return <Pressable key={String(option.value)} accessibilityRole="button" accessibilityState={{ selected, disabled: !!disabled }} disabled={disabled} onPress={() => onChange(option.value)}
+      style={[u.choice, selected && u.choiceSelected, disabled && { opacity: 0.5 }]}>{option.color && <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: option.color }} />}<Text style={[u.choiceText, selected && { color: colors.onPrimary }]}>{option.label}</Text></Pressable>;
+  })}</View>;
 }
 export function Sheet({ title, closeLabel, onClose, onShow, busy, children, visible = true }) {
   const { u } = useCalendarUi();

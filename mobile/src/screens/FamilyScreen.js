@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import FamilyProfiles from '../family/FamilyProfiles';
+import { ActivityIndicator, AppState, Pressable, RefreshControl, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { Bell, CalendarDays, Check, ChevronRight, Inbox, Link2, MailPlus, MessageCircle, RefreshCw, ShieldCheck, UserRound, UsersRound, X } from 'lucide-react-native';
 import sharing from '../../../shared/backend/mobile-sharing';
 import coordination from '../../../shared/backend/mobile-coordination';
 import calendarTools from '../lib/calendar';
 import homeModel from '../home/model';
 import familyAsync from '../family/async-flow';
-import { Button, ChoiceRow, Field, IconButton, Sheet, u } from '../calendar/ui';
+import { Button, ChoiceRow, Field, IconButton, Sheet, useCalendarUi } from '../calendar/ui';
 import { useAppearance, useThemeStyles } from '../ui/AppearanceContext';
 
 export const familyCopy = {
@@ -24,11 +25,12 @@ export const familyCopy = {
     sharedCalendar: 'Shared calendar', readOnly: 'Viewer access is read-only.', canComment: 'You can view and comment on this calendar.', editorActive: 'Edits require a supported, verified write connection on this device. Without one, this calendar stays read-only.',
     upcoming: 'Upcoming plans', noUpcoming: 'No upcoming plans in this shared calendar.', comments: 'Calendar comments', comment: 'Write a comment', commentHint: 'Keep the whole family updated', sendComment: 'Post comment', noComments: 'No comments yet.', commentsUnavailable: 'Comments could not be loaded. Refresh and try again.',
     handoff: 'Family Handoff Center', handoffBody: 'Ask an accepted calendar member to confirm a pickup.', noPickupEvents: 'No upcoming activities need a handoff.',
-    assign: 'Assign pickup', assignTo: 'Responsible adult', request: 'Request confirmation', awaiting: 'Awaiting confirmation', accepted: 'Accepted', pickupDeclined: 'Declined', cancelled: 'Cancelled', unassigned: 'Not assigned',
+    assign: 'Assign pickup', assignTo: 'Responsible adult', request: 'Request confirmation', requestAgain: 'Request again', reassign: 'Request a different adult', awaiting: 'Awaiting confirmation', accepted: 'Accepted', pickupDeclined: 'Declined', cancelled: 'Cancelled', unassigned: 'Not assigned',
     yourRequests: 'Your pickup requests', requestsBody: 'Confirm or decline requests assigned to you.', noRequests: 'No pickup requests need your response.', pickupAccept: 'I can do it', pickupDecline: 'I cannot',
-    pickupUnavailable: 'Shared pickup coordination is unavailable. The family-coordination database migration may still need to be applied.',
+    pickupUnavailable: 'Could not verify pickup assignments for this calendar.', incomingPickupUnavailable: 'Some of your pickup requests could not be checked.', retryPickups: 'Refresh pickups', showOtherPlans: 'Show other plans', hideOtherPlans: 'Hide other plans', pickupPlanUnavailable: 'This plan is no longer available for pickup.',
+    requestSent: 'Pickup request sent.', responseAccepted: 'Pickup confirmed.', responseDeclined: 'Pickup declined.',
     loadFailed: 'Family access could not be fully loaded. Check your connection and refresh.', sharedLoadFailed: 'Some shared calendars could not be loaded. Open an invitation to try again.', saveFailed: 'That change was not confirmed. Refresh and try again.',
-    familyDetails: 'Family details', familyDetailsBody: 'Keep calendar updates here. Add or rename children on the KidsSync website.', openComments: 'Open calendar comments', ownerCommentHint: 'Use this thread for updates tied to your family calendar.', manageProfiles: 'Manage family profiles (Web)', webFailed: 'The KidsSync website could not be opened. Check your connection and try again.',
+    familyDetails: 'Family details', familyDetailsBody: 'Manage child profiles and calendar comments.', openComments: 'Open calendar comments', ownerCommentHint: 'Use this thread for updates tied to your family calendar.', manageProfiles: 'Manage family profiles',
     close: 'Close', saving: 'Saving…', web: 'Open web calendar', family: 'Family', allDay: 'All day', notAvailable: 'Unavailable',
   },
   zh: {
@@ -39,9 +41,13 @@ export const familyCopy = {
     shareLink: '共享邀请链接', shared: '已打开共享菜单', shareFailed: '无法打开共享菜单。邀请仍会显示在对方的 KidsSync 收件箱中。', noMembers: '尚未与其他人共享。', memberDetails: '权限详情', saveRole: '保存权限', remove: '移除权限', removeConfirm: '从日历中移除此成员？', keep: '保留权限',
     incoming: '日历邀请', incomingBody: '接受邀请后才能查看日历和接送请求。', noInvites: '目前没有日历邀请。', accept: '接受', decline: '拒绝', openShared: '打开共享日历', openCalendar: '在日历中查看', from: '来自', invitationNote: '备注',
     sharedCalendar: '共享日历', readOnly: '查看者权限为只读。', canComment: '你可以查看并评论此日历。', editorActive: '编辑需要此设备具备受支持且已验证的写入连接，否则此日历保持只读。', upcoming: '即将开始', noUpcoming: '此共享日历暂无即将开始的安排。', comments: '日历评论', comment: '写评论', commentHint: '让全家了解最新情况', sendComment: '发布评论', noComments: '暂无评论。', commentsUnavailable: '无法加载评论，请刷新重试。',
-    handoff: '家庭交接中心', handoffBody: '请已接受邀请的日历成员确认接送。', noPickupEvents: '近期没有需要交接的活动。', assign: '安排接送', assignTo: '负责人', request: '请求确认', awaiting: '等待确认', accepted: '已接受', pickupDeclined: '已拒绝', cancelled: '已取消', unassigned: '未安排', yourRequests: '你的接送请求', requestsBody: '确认或拒绝分配给你的接送请求。', noRequests: '目前没有需要回复的接送请求。', pickupAccept: '我可以', pickupDecline: '我无法接送', pickupUnavailable: '共享接送暂不可用，可能仍需应用 family-coordination 数据库迁移。',
+    handoff: '家庭交接中心', handoffBody: '请已接受邀请的日历成员确认接送。', noPickupEvents: '近期没有需要交接的活动。',
+    assign: '安排接送', assignTo: '负责人', request: '请求确认', requestAgain: '重新发送请求', reassign: '请求其他成人接送', awaiting: '等待确认', accepted: '已接受', pickupDeclined: '已拒绝', cancelled: '已取消', unassigned: '未安排',
+    yourRequests: '你的接送请求', requestsBody: '确认或拒绝分配给你的接送请求。', noRequests: '目前没有需要回复的接送请求。', pickupAccept: '我可以', pickupDecline: '我无法接送',
+    pickupUnavailable: '无法核实此日历的接送安排。', incomingPickupUnavailable: '部分接送请求无法查看。', retryPickups: '刷新接送安排', showOtherPlans: '显示其他安排', hideOtherPlans: '隐藏其他安排', pickupPlanUnavailable: '无法再为此日程安排接送。',
+    requestSent: '已发送接送请求。', responseAccepted: '已确认接送。', responseDeclined: '已拒绝接送。',
     loadFailed: '无法完整加载家庭权限，请检查网络后刷新。', sharedLoadFailed: '部分共享日历无法加载。请打开邀请重试。', saveFailed: '服务器未确认此更改，请刷新重试。',
-    familyDetails: '家庭资料', familyDetailsBody: '在这里查看日历更新。请前往 KidsSync 网站添加或重命名孩子。', openComments: '打开日历评论', ownerCommentHint: '使用此讨论串记录与家庭日历相关的更新。', manageProfiles: '管理家庭资料（网页）', webFailed: '无法打开 KidsSync 网站，请检查网络后重试。',
+    familyDetails: '家庭资料', familyDetailsBody: '管理孩子资料及日历评论。', openComments: '打开日历评论', ownerCommentHint: '使用此讨论串记录与家庭日历相关的更新。', manageProfiles: '管理家庭资料',
     close: '关闭', saving: '保存中…', web: '打开网页日历', family: '全家', allDay: '全天', notAvailable: '不可用',
   },
 };
@@ -58,15 +64,29 @@ const dateLabel = (value, language) => {
   return Number.isFinite(date.getTime()) ? date.toLocaleDateString(language === 'zh' ? 'zh-CN' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : value;
 };
 const timeLabel = (event, language, t) => event.allDay ? t.allDay : calendarTools.formatTime(event.start, language) || t.allDay;
+const pickupStatusLabel = (status, t) => status === 'pending' ? t.awaiting : status === 'declined' ? t.pickupDeclined : statusLabel(status, t);
+const pickupKey = (eventId, date) => JSON.stringify([String(eventId), date]);
+
+function pickupPlans(events, kids, pickups, now) {
+  const lookup = new Map(pickups.filter(pickup => pickup.status !== 'cancelled')
+    .map(pickup => [pickupKey(pickup.event_id, pickup.occurrence_date), pickup]));
+  const relevant = homeModel.upcomingOccurrences(events, now, 14)
+    .filter(item => item.event.id != null && item.event.status !== 'cancelled' && !item.event.isBuiltInHoliday
+      && homeModel.eventIsStillRelevant(item, now));
+  return relevant.map(occurrence => {
+    const pickup = lookup.get(pickupKey(occurrence.event.id, occurrence.dateKey));
+    return { occurrence, pickup, needsAttention: !!pickup || homeModel.needsHandoff(occurrence.event, kids) };
+  });
+}
 
 function Badge({ children, tone = 'neutral' }) {
   const { colors } = useAppearance(), s = useThemeStyles(createStyles);
   return <View style={[s.badge, tone === 'good' && s.badgeGood, tone === 'warn' && s.badgeWarn]}><Text style={[s.badgeText, tone === 'good' && s.badgeGoodText, tone === 'warn' && s.badgeWarnText]}>{children}</Text></View>;
 }
 
-function SectionHeading({ icon: Icon, title, body, action, actionLabel }) {
+function SectionHeading({ icon: Icon, title, body, action, actionLabel, actionDisabled }) {
   const { colors } = useAppearance(), s = useThemeStyles(createStyles);
-  return <View style={s.sectionHeading}><View style={s.sectionIcon}><Icon size={19} color={colors.primary} /></View><View style={s.flex}><Text accessibilityRole="header" style={s.sectionTitle}>{title}</Text>{!!body && <Text style={s.body}>{body}</Text>}</View>{!!action && <Pressable accessibilityRole="button" accessibilityLabel={actionLabel} onPress={action} style={({ pressed }) => [s.sectionAction, pressed && s.pressed]}><MailPlus size={17} color={colors.primary} /><Text style={s.sectionActionText}>{actionLabel}</Text></Pressable>}</View>;
+  return <View style={s.sectionHeading}><View style={s.sectionIcon}><Icon size={19} color={colors.primary} /></View><View style={s.flex}><Text accessibilityRole="header" style={s.sectionTitle}>{title}</Text>{!!body && <Text style={s.body}>{body}</Text>}</View>{!!action && <Pressable accessibilityRole="button" accessibilityLabel={actionLabel} accessibilityState={{ disabled: actionDisabled }} disabled={actionDisabled} onPress={action} style={({ pressed }) => [s.sectionAction, (pressed || actionDisabled) && s.pressed]}><MailPlus size={17} color={colors.primary} /><Text style={s.sectionActionText}>{actionLabel}</Text></Pressable>}</View>;
 }
 
 function EmptyState({ icon: Icon, title, body }) {
@@ -81,46 +101,78 @@ function EventLine({ event, occurrenceDate, language, t, trailing, onPress }) {
 }
 
 export default function FamilyScreen({ language = 'en', client, user, calendars = [], calendar, onSelectCalendar,
-  onOpenWebsite, onOpenSharedCalendar, onOpenOwnerComments, onPendingCount, peopleRequest = 0 }) {
+  onOpenWebsite, onOpenSharedCalendar, onOpenOwnerComments, onPendingCount, onOwnerPickups, onSaveProfiles, tabRequest }) {
   const t = familyCopy[String(language).startsWith('zh') ? 'zh' : 'en'];
   const { colors } = useAppearance(), s = useThemeStyles(createStyles);
+  const { u } = useCalendarUi();
   const [tab, setTab] = useState('people'), [members, setMembers] = useState([]), [invitations, setInvitations] = useState([]);
-  const [ownerPickups, setOwnerPickups] = useState([]), [sharedContexts, setSharedContexts] = useState([]);
+  const [ownerPickupState, setOwnerPickupState] = useState(null), [sharedContexts, setSharedContexts] = useState([]);
   const [loading, setLoading] = useState(true), [refreshing, setRefreshing] = useState(false), [busy, setBusy] = useState('');
-  const [error, setError] = useState(''), [pickupError, setPickupError] = useState(''), [notice, setNotice] = useState('');
+  const [error, setError] = useState(''), [incomingPickupError, setIncomingPickupError] = useState(false), [notice, setNotice] = useState('');
+  const [showOtherPlans, setShowOtherPlans] = useState(false);
   const [sheet, setSheet] = useState(null), [sheetError, setSheetError] = useState(''), [removeConfirm, setRemoveConfirm] = useState(false);
   const [invite, setInvite] = useState({ email: '', role: 'viewer', note: '' }), [createdInvite, setCreatedInvite] = useState(null);
   const [memberRole, setMemberRole] = useState('viewer'), [assignee, setAssignee] = useState('');
   const [comments, setComments] = useState([]), [comment, setComment] = useState(''), [commentsError, setCommentsError] = useState(false), [commentsLoading, setCommentsLoading] = useState(false);
-  const request = useRef(0), mounted = useRef(true), handledPeopleRequest = useRef(0), accountScope = useRef('');
+  const request = useRef(0), mutation = useRef(false), mounted = useRef(true), handledTabRequest = useRef(0), accountScope = useRef('');
+  const calendarScope = useRef('');
   const commentRequests = useRef(familyAsync.createLatestRequestGuard());
   const openingShared = useRef(false);
   const account = { id: user?.id || '', email: user?.email || '' };
   accountScope.current = `${account.id}:${account.email}`;
-  const today = calendarTools.dateKey(new Date()), rangeEnd = calendarTools.dateKey(calendarTools.addDays(new Date(), 30));
+  const ownerScope = JSON.stringify([account.id, account.email, calendar?.id]);
+  calendarScope.current = ownerScope;
+  const [clockMinute, setClockMinute] = useState(() => Math.floor(Date.now() / 60000));
+  const now = useMemo(() => new Date(clockMinute * 60000), [clockMinute]);
+  const today = calendarTools.dateKey(now), rangeEnd = calendarTools.dateKey(calendarTools.addDays(now, 30));
   const ownerCalendar = calendar ? { ...calendar, ownerId: user?.id } : null;
   const ownerEvents = safeArray(calendar?.data?.activities);
-  const upcoming = useMemo(() => homeModel.upcomingOccurrences(ownerEvents, calendarTools.parseDateKey(today), 14)
-    .filter(item => item.event.status !== 'cancelled' && !item.event.isBuiltInHoliday), [calendar?.id, calendar?.data, today]);
+  const ownerPickupCurrent = ownerPickupState?.scope === ownerScope;
+  const ownerPickupUnavailable = ownerPickupCurrent && ownerPickupState.status === 'error';
+  const ownerPickupReady = ownerPickupCurrent && ownerPickupState.status === 'ready';
+  const ownerPickups = ownerPickupCurrent ? ownerPickupState.rows : [];
+  const upcoming = useMemo(() => pickupPlans(ownerEvents, safeArray(calendar?.data?.kids), ownerPickups, now),
+    [calendar?.data, ownerPickupCurrent ? ownerPickupState.rows : null, now]);
   const pickupMembers = useMemo(() => [{ email: account.email, label: `${account.email} · ${t.you}` }, ...members
     .filter(member => member.status === 'active').map(member => ({ email: member.member_email, label: member.member_email }))]
     .filter((item, index, all) => item.email && all.findIndex(other => sameEmail(other.email, item.email)) === index), [members, account.email, t.you]);
+  const activePickupPlan = sheet?.type === 'pickup' && sheet.ownerScope === ownerScope
+    ? upcoming.find(item => item.occurrence.key === sheet.occurrence.key) : null;
+  const activePickup = activePickupPlan?.pickup;
+  const alreadyRequested = activePickup && ['pending', 'accepted'].includes(activePickup.status) && sameEmail(activePickup.assignee_email, assignee);
+  const canAssignPickup = !!activePickupPlan && ownerPickupReady && !busy && !refreshing
+    && !alreadyRequested && pickupMembers.some(item => sameEmail(item.email, assignee));
 
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; request.current += 1; }; }, []);
+  useEffect(() => {
+    let timer;
+    function update() {
+      const time = Date.now();
+      setClockMinute(Math.floor(time / 60000));
+      timer = setTimeout(update, 60000 - (time % 60000));
+    }
+    function setAppState(state) {
+      clearTimeout(timer);
+      if (state === 'active') update();
+    }
+    setAppState(AppState.currentState || 'active');
+    const listener = AppState.addEventListener('change', setAppState);
+    return () => { clearTimeout(timer); listener.remove(); };
+  }, []);
 
   useEffect(() => {
-    const next = Number(peopleRequest);
-    if (!Number.isFinite(next) || next <= 0 || next <= handledPeopleRequest.current) return;
+    if (!tabRequest || tabRequest.id <= handledTabRequest.current) return;
     // Preserve any unsaved sheet or in-flight server action. The same request
     // is reconsidered when the sheet closes and busy returns to idle.
     if (sheet || busy) return;
-    handledPeopleRequest.current = next;
-    setTab('people');
-  }, [peopleRequest, sheet, busy]);
+    handledTabRequest.current = tabRequest.id;
+    setTab(tabRequest.tab);
+  }, [tabRequest, sheet, busy]);
 
   useEffect(() => {
     commentRequests.current.invalidate();
     setCommentsLoading(false);
+    setShowOtherPlans(false);
   }, [account.id, account.email, calendar?.id]);
 
   async function loadSharedContext(invitation) {
@@ -132,26 +184,32 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
   }
 
   async function load({ pull = false } = {}) {
-    const ticket = ++request.current, scope = `${account.id}:${calendar?.id || ''}`;
+    if (!mounted.current || calendarScope.current !== ownerScope) return;
+    const ticket = ++request.current;
     if (pull) setRefreshing(true); else setLoading(true);
-    setError(''); setPickupError('');
+    setError('');
     const memberRequest = ownerCalendar ? sharing.listCalendarMembers(client, account, ownerCalendar.id) : Promise.resolve([]);
     const ownerPickupRequest = ownerCalendar ? coordination.listCalendarPickups(client, account, ownerCalendar, { startDate: today, endDate: rangeEnd }) : Promise.resolve([]);
     const [memberResult, invitationResult, pickupResult] = await Promise.allSettled([
       memberRequest, sharing.listCalendarInvitations(client, account), ownerPickupRequest,
     ]);
-    if (!mounted.current || ticket !== request.current || scope !== `${account.id}:${calendar?.id || ''}`) return;
+    if (!mounted.current || ticket !== request.current || calendarScope.current !== ownerScope) return;
     const nextMembers = memberResult.status === 'fulfilled' ? memberResult.value : [];
     const nextInvitations = invitationResult.status === 'fulfilled' ? invitationResult.value : [];
     const nextOwnerPickups = pickupResult.status === 'fulfilled' ? pickupResult.value : [];
-    setMembers(nextMembers); setInvitations(nextInvitations); setOwnerPickups(nextOwnerPickups);
+    setMembers(nextMembers); setInvitations(nextInvitations);
+    setOwnerPickupState({ scope: ownerScope, rows: nextOwnerPickups, status: pickupResult.status === 'fulfilled' ? 'ready' : 'error' });
+    if (ownerCalendar) {
+      onOwnerPickups?.({ ownerId: account.id, calendarId: ownerCalendar.id, rows: pickupResult.status === 'fulfilled' ? nextOwnerPickups : undefined });
+    }
     if (memberResult.status === 'rejected' || invitationResult.status === 'rejected') setError(t.loadFailed);
-    if (pickupResult.status === 'rejected') setPickupError(t.pickupUnavailable);
     const active = nextInvitations.filter(item => item.status === 'active');
     const contextResults = await Promise.allSettled(active.map(loadSharedContext));
-    if (!mounted.current || ticket !== request.current || scope !== `${account.id}:${calendar?.id || ''}`) return;
+    if (!mounted.current || ticket !== request.current || calendarScope.current !== ownerScope) return;
     const contexts = contextResults.filter(item => item.status === 'fulfilled').map(item => item.value);
     setSharedContexts(contexts);
+    setIncomingPickupError(invitationResult.status === 'rejected' || pickupResult.status === 'rejected'
+      || contextResults.some(item => item.status === 'rejected') || contexts.some(context => context.pickupUnavailable));
     if (contextResults.some(item => item.status === 'rejected')) setError(t.sharedLoadFailed);
     const incomingPickupCount = [...nextOwnerPickups, ...contexts.flatMap(item => item.pickups)]
       .filter(item => item.status === 'pending' && sameEmail(item.assignee_email, account.email)).length;
@@ -159,10 +217,18 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
     setLoading(false); setRefreshing(false);
   }
 
-  useEffect(() => { if (account.id && account.email) load(); }, [account.id, account.email, calendar?.id]);
+  useEffect(() => {
+    if (!account.id || !account.email) return;
+    void load();
+    const listener = AppState.addEventListener('change', next => {
+      if (next === 'active') void load({ pull: true });
+    });
+    return () => listener.remove();
+  }, [ownerScope, today]);
 
   async function run(key, work, success) {
-    if (busy) return;
+    if (busy || mutation.current) return;
+    mutation.current = true;
     const sheetAtStart = sheet;
     setBusy(key); setSheetError(''); setError(''); setNotice('');
     try { const result = await work(); if (!mounted.current) return; await success?.(result); return result; }
@@ -173,7 +239,7 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
       }
       return null;
     }
-    finally { if (mounted.current) setBusy(''); }
+    finally { mutation.current = false; if (mounted.current) setBusy(''); }
   }
 
   async function createInvitation() {
@@ -204,14 +270,19 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
   }
 
   async function assignPickup() {
-    if (!sheet?.occurrence) return;
-    await run(`pickup-${sheet.occurrence.key}`, () => coordination.assignCalendarPickup(client, account, ownerCalendar, {
-      eventId: String(sheet.occurrence.event.id), date: sheet.occurrence.dateKey, email: assignee,
-    }), async () => { dismissSheet(); await load(); });
+    if (!canAssignPickup || calendarScope.current !== ownerScope) return;
+    const { occurrence } = activePickupPlan;
+    await run(`pickup-${occurrence.key}`, () => coordination.assignCalendarPickup(client, account, ownerCalendar, {
+      eventId: String(occurrence.event.id), date: occurrence.dateKey, email: assignee,
+    }), async () => { dismissSheet(); setNotice(t.requestSent); await load({ pull: true }); });
   }
 
   async function answerPickup(pickup, status) {
-    await run(`pickup-${pickup.id}`, () => coordination.respondCalendarPickup(client, account, pickup, status), async () => { dismissSheet(); await load(); });
+    await run(`pickup-${pickup.id}`, () => coordination.respondCalendarPickup(client, account, pickup, status), async () => {
+      dismissSheet();
+      setNotice(status === 'accepted' ? t.responseAccepted : t.responseDeclined);
+      await load({ pull: true });
+    });
   }
 
   function commentScope(context) {
@@ -282,13 +353,14 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
     await presentCommentsSheet('comments', context);
   }
 
-  async function openFamilyProfiles() {
-    setError('');
+  async function saveProfiles(changes) {
+    if (typeof onSaveProfiles !== 'function' || !ownerCalendar || busy) return;
+    const scope = calendarScope.current;
+    setBusy('profiles');
     try {
-      if (!onOpenWebsite) throw new Error('Website unavailable');
-      const opened = await onOpenWebsite();
-      if (opened === false) throw new Error('Website unavailable');
-    } catch { if (mounted.current) setError(t.webFailed); }
+      await onSaveProfiles(ownerCalendar.id, changes);
+      if (mounted.current && calendarScope.current === scope) setSheet(null);
+    } finally { if (mounted.current) setBusy(''); }
   }
 
   function beginInvite() {
@@ -317,12 +389,14 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
     .filter(item => item.pickup.status === 'pending' && sameEmail(item.pickup.assignee_email, account.email));
   const inboxPending = invitations.filter(item => item.status === 'pending').length + incomingPickups.length;
   const peopleCount = members.filter(item => item.status === 'active').length + 1;
-  const pickupFor = occurrence => ownerPickups.find(item => String(item.event_id) === String(occurrence.event.id) && item.occurrence_date === occurrence.dateKey && item.status !== 'cancelled');
+  const handoffCount = upcoming.filter(item => item.needsAttention).length;
+  const visiblePickupPlans = showOtherPlans ? upcoming : upcoming.filter(item => item.needsAttention);
 
   return <View style={s.page}>
     <View style={s.header}><View style={s.flex}><Text accessibilityRole="header" style={s.title}>{t.title}</Text><Text style={s.body}>{t.subtitle}</Text></View><IconButton icon={RefreshCw} label={t.refresh} onPress={() => load({ pull: true })} disabled={refreshing || !!busy} /></View>
     {calendars.length > 1 && <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.calendars}>{calendars.map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityState={{ selected: item.id === calendar?.id }} onPress={() => onSelectCalendar?.(item.id)} style={[s.calendarChip, item.id === calendar?.id && s.calendarSelected]}><Text numberOfLines={1} style={[s.calendarText, item.id === calendar?.id && s.calendarTextSelected]}>{item.name}</Text></Pressable>)}</ScrollView>}
-    {!loading && <Text style={s.overview}>{peopleCount} {peopleCount === 1 ? t.summaryPerson : t.summaryPeople} · {inboxPending} {t.summaryPending} · {upcoming.length} {t.summaryHandoffs}</Text>}
+    {!loading && <Text style={s.overview}>{peopleCount} {peopleCount === 1 ? t.summaryPerson : t.summaryPeople}
+      {!incomingPickupError && ` · ${inboxPending} ${t.summaryPending}`}{ownerPickupReady && ` · ${handoffCount} ${t.summaryHandoffs}`}</Text>}
     <View accessibilityRole="tablist" style={s.tabs}>{[
       ['people', t.people, UsersRound, 0], ['inbox', t.inbox, Inbox, inboxPending], ['pickups', t.pickups, Bell, 0],
     ].map(([value, label, Icon, count]) => <Pressable key={value} accessibilityRole="tab" accessibilityState={{ selected: tab === value }} onPress={() => setTab(value)} style={[s.tab, tab === value && s.tabSelected]}><View><Icon size={17} color={tab === value ? colors.onPrimary : colors.muted} />{!!count && <View style={[s.tabBadge, tab === value && s.tabBadgeSelected]}><Text style={[s.tabBadgeText, tab === value && s.tabBadgeTextSelected]}>{count > 9 ? '9+' : count}</Text></View>}</View><Text style={[s.tabText, tab === value && s.tabTextSelected]}>{label}</Text></Pressable>)}</View>
@@ -330,32 +404,42 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
       {!!error && <Text accessibilityRole="alert" style={u.error}>{error}</Text>}
       {!!notice && <Text accessibilityRole="status" style={s.notice}>{notice}</Text>}
       {loading ? <ActivityIndicator color={colors.primary} style={s.loader} /> : tab === 'people' ? <>
-        <SectionHeading icon={ShieldCheck} title={t.members} body={t.membersBody} action={ownerCalendar ? beginInvite : null} actionLabel={t.invite} />
+        <SectionHeading icon={ShieldCheck} title={t.members} body={t.membersBody} action={ownerCalendar ? beginInvite : null} actionLabel={t.invite} actionDisabled={!!busy} />
         <View style={s.personRow}><View style={s.avatar}><UserRound size={19} color={colors.primary} /></View><View style={s.flex}><Text style={s.rowTitle}>{account.email}</Text><Text style={s.body}>{t.you}</Text></View><Badge tone="good">{t.owner}</Badge></View>
-        {members.length ? members.map(member => <Pressable key={member.id} accessibilityRole="button" onPress={() => { setMemberRole(member.role); setRemoveConfirm(false); setSheetError(''); presentSheet({ type: 'member', member }); }} style={({ pressed }) => [s.personRow, pressed && s.pressed]}><View style={s.avatar}><UserRound size={19} color={colors.primary} /></View><View style={s.flex}><Text numberOfLines={1} style={s.rowTitle}>{member.member_email}</Text><Text style={s.body}>{statusLabel(member.status, t)}</Text></View><Badge tone={member.status === 'active' ? 'good' : 'warn'}>{t[member.role] || member.role}</Badge><ChevronRight size={18} color={colors.muted} /></Pressable>) : <EmptyState icon={UsersRound} title={t.noMembers} body={t.membersBody} />}
+        {members.length ? members.map(member => <Pressable key={member.id} accessibilityRole="button" onPress={() => { setMemberRole(member.role); setRemoveConfirm(false); setSheetError(''); presentSheet({ type: 'member', member }); }} style={({ pressed }) => [s.personRow, pressed && s.pressed]}><View style={s.avatar}><UserRound size={19} color={colors.primary} /></View><View style={s.flex}><Text numberOfLines={1} style={s.rowTitle}>{member.member_email}</Text><Text style={s.body}>{statusLabel(member.status, t)}</Text></View><Badge tone={member.status === 'active' ? 'good' : 'warn'}>{t[member.role] || member.role}</Badge><ChevronRight size={18} color={colors.muted} /></Pressable>) : <EmptyState icon={UsersRound} title={t.noMembers} />}
         <SectionHeading icon={UserRound} title={t.familyDetails} body={t.familyDetailsBody} />
         <Button secondary icon={MessageCircle} onPress={openOwnerComments} disabled={!ownerCalendar}>{t.openComments}</Button>
-        <Button secondary icon={UsersRound} onPress={openFamilyProfiles}>{t.manageProfiles}</Button>
+        {!!onSaveProfiles && <Button secondary icon={UsersRound} disabled={!ownerCalendar || !!busy}
+          onPress={() => presentSheet({ type: 'profiles', original: safeArray(calendar?.data?.kids) })}>{t.manageProfiles}</Button>}
       </> : tab === 'inbox' ? <>
         <SectionHeading icon={Bell} title={t.yourRequests} body={t.requestsBody} />
+        {incomingPickupError && <><Text accessibilityRole="alert" style={u.error}>{t.incomingPickupUnavailable}</Text><Button secondary onPress={() => load({ pull: true })} disabled={refreshing || !!busy}>{t.retryPickups}</Button></>}
         {incomingPickups.length ? incomingPickups.map(({ pickup, calendar: pickupCalendar, events }) => {
           const event = safeArray(events).find(item => String(item.id) === String(pickup.event_id));
           return <View key={pickup.id} style={s.request}><Text style={s.rowTitle}>{event?.title || pickupCalendar?.name || t.pickups}</Text><Text style={s.body}>{dateLabel(pickup.occurrence_date, language)} · {pickupCalendar?.name}</Text><View style={s.actions}><Button secondary disabled={!!busy} onPress={() => answerPickup(pickup, 'declined')}>{t.pickupDecline}</Button><Button disabled={!!busy} onPress={() => answerPickup(pickup, 'accepted')}>{t.pickupAccept}</Button></View></View>;
-        }) : <EmptyState icon={Bell} title={t.noRequests} />}
+        }) : !incomingPickupError && <EmptyState icon={Bell} title={t.noRequests} />}
         <SectionHeading icon={Inbox} title={t.incoming} body={t.incomingBody} />
-        {invitations.length ? invitations.map(invitation => <View key={invitation.id} style={s.invitation}><View style={s.rowTop}><View style={s.flex}><Text style={s.rowTitle}>{invitation.calendar_name}</Text><Text style={s.body}>{t.from}: {invitation.owner_email}</Text></View><Badge tone={invitation.status === 'active' ? 'good' : 'warn'}>{t[invitation.role] || invitation.role}</Badge></View>{!!invitation.invitation_note && <Text style={s.note}>{t.invitationNote}: {invitation.invitation_note}</Text>}{invitation.status === 'pending' ? <View style={s.actions}><Button secondary disabled={!!busy} onPress={() => respondInvitation(invitation, 'declined')}>{t.decline}</Button><Button disabled={!!busy} onPress={() => respondInvitation(invitation, 'active')}>{t.accept}</Button></View> : <Button secondary icon={CalendarDays} onPress={() => openShared(invitation)}>{t.openShared}</Button>}</View>) : <EmptyState icon={Inbox} title={t.noInvites} body={t.incomingBody} />}
+        {invitations.length ? invitations.map(invitation => <View key={invitation.id} style={s.invitation}><View style={s.rowTop}><View style={s.flex}><Text style={s.rowTitle}>{invitation.calendar_name}</Text><Text style={s.body}>{t.from}: {invitation.owner_email}</Text></View><Badge tone={invitation.status === 'active' ? 'good' : 'warn'}>{t[invitation.role] || invitation.role}</Badge></View>{!!invitation.invitation_note && <Text style={s.note}>{t.invitationNote}: {invitation.invitation_note}</Text>}{invitation.status === 'pending' ? <View style={s.actions}><Button secondary disabled={!!busy} onPress={() => respondInvitation(invitation, 'declined')}>{t.decline}</Button><Button disabled={!!busy} onPress={() => respondInvitation(invitation, 'active')}>{t.accept}</Button></View> : <Button secondary icon={CalendarDays} onPress={() => openShared(invitation)}>{t.openShared}</Button>}</View>) : <EmptyState icon={Inbox} title={t.noInvites} />}
       </> : <>
         <SectionHeading icon={UsersRound} title={t.handoff} body={t.handoffBody} />
-        {!!pickupError && <Text accessibilityRole="alert" style={u.error}>{pickupError}</Text>}
-        {upcoming.length ? upcoming.map(occurrence => {
-          const pickup = pickupFor(occurrence), mine = pickup && sameEmail(pickup.assignee_email, account.email);
-          const trailing = pickup ? <Badge tone={pickup.status === 'accepted' ? 'good' : 'warn'}>{statusLabel(pickup.status, t)}</Badge> : <Badge>{t.unassigned}</Badge>;
-          return <View key={occurrence.key}><EventLine event={occurrence.event} occurrenceDate={occurrence.dateKey} language={language} t={t} trailing={trailing} onPress={() => { setAssignee(pickup?.assignee_email || pickupMembers[0]?.email || ''); setSheetError(''); presentSheet({ type: 'pickup', occurrence, pickup }); }} />{mine && pickup.status === 'pending' && <View style={s.inlineActions}><Pressable accessibilityRole="button" onPress={() => answerPickup(pickup, 'declined')} style={s.textButton}><Text style={s.textButtonLabel}>{t.pickupDecline}</Text></Pressable><Pressable accessibilityRole="button" onPress={() => answerPickup(pickup, 'accepted')} style={s.textButton}><Text style={s.textButtonLabel}>{t.pickupAccept}</Text></Pressable></View>}</View>;
-        }) : <EmptyState icon={UsersRound} title={t.noPickupEvents} body={t.handoffBody} />}
+        {ownerPickupUnavailable && <><Text accessibilityRole="alert" style={u.error}>{t.pickupUnavailable}</Text><Button secondary onPress={() => load({ pull: true })} disabled={refreshing || !!busy}>{t.retryPickups}</Button></>}
+        {ownerPickupReady && <>
+          {visiblePickupPlans.length ? visiblePickupPlans.map(({ occurrence, pickup }) => {
+            const mine = pickup && sameEmail(pickup.assignee_email, account.email);
+            const trailing = pickup ? <Badge tone={pickup.status === 'accepted' ? 'good' : 'warn'}>{pickupStatusLabel(pickup.status, t)}</Badge> : <Badge>{t.unassigned}</Badge>;
+            return <View key={occurrence.key}><EventLine event={occurrence.event} occurrenceDate={occurrence.dateKey} language={language} t={t} trailing={trailing} onPress={() => {
+              if (busy || refreshing) return;
+              setAssignee(pickup?.assignee_email || pickupMembers[0]?.email || ''); setSheetError('');
+              presentSheet({ type: 'pickup', occurrence, ownerScope });
+            }} />{mine && pickup.status === 'pending' && <View style={s.inlineActions}><Pressable accessibilityRole="button" disabled={!!busy} onPress={() => answerPickup(pickup, 'declined')} style={s.textButton}><Text style={s.textButtonLabel}>{t.pickupDecline}</Text></Pressable><Pressable accessibilityRole="button" disabled={!!busy} onPress={() => answerPickup(pickup, 'accepted')} style={s.textButton}><Text style={s.textButtonLabel}>{t.pickupAccept}</Text></Pressable></View>}</View>;
+          }) : <EmptyState icon={UsersRound} title={t.noPickupEvents} />}
+          {upcoming.length > handoffCount && <Button secondary onPress={() => setShowOtherPlans(previous => !previous)}>{showOtherPlans ? t.hideOtherPlans : t.showOtherPlans}</Button>}
+        </>}
       </>}
     </ScrollView>
 
-    {!!sheet && <Sheet title={sheet.type === 'invite' ? t.invite : sheet.type === 'member' ? t.memberDetails : sheet.type === 'pickup' ? t.assign : sheet.type === 'comments' ? t.comments : t.sharedCalendar} closeLabel={t.close} busy={!!busy} onClose={dismissSheet}>
+    {!!sheet && <Sheet title={sheet.type === 'profiles' ? t.manageProfiles : sheet.type === 'invite' ? t.invite : sheet.type === 'member' ? t.memberDetails : sheet.type === 'pickup' ? t.assign : sheet.type === 'comments' ? t.comments : t.sharedCalendar} closeLabel={t.close} busy={!!busy} onClose={dismissSheet}>
+      {sheet.type === 'profiles' && <FamilyProfiles original={sheet.original} language={language} busy={!!busy} onSave={saveProfiles} />}
       {sheet.type === 'invite' && <ScrollView contentContainerStyle={s.sheetContent} keyboardShouldPersistTaps="handled">
         <Field label={t.email} value={invite.email} onChangeText={value => setInvite(values => ({ ...values, email: value }))} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" maxLength={254} editable={!busy && !createdInvite} />
         <Text style={u.label}>{t.role}</Text><ChoiceRow label={t.role} value={invite.role} disabled={!!busy || !!createdInvite} onChange={value => setInvite(values => ({ ...values, role: value }))} options={roleOptions(t)} />
@@ -365,8 +449,16 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
         {!createdInvite ? <Button icon={MailPlus} disabled={!!busy || !invite.email.trim()} onPress={createInvitation}>{busy ? t.saving : t.sendInvite}</Button> : <><View style={s.success}><Check size={20} color={colors.success} /><Text style={s.successText}>{t.inviteCreated}</Text></View><Button icon={Link2} onPress={shareInvitation}>{t.shareLink}</Button></>}
       </ScrollView>}
       {sheet.type === 'member' && <View style={s.sheetContent}><Text style={s.rowTitle}>{sheet.member.member_email}</Text><Text style={u.label}>{t.role}</Text><ChoiceRow label={t.role} value={memberRole} disabled={!!busy} onChange={setMemberRole} options={roleOptions(t)} /><Text style={s.roleHint}>{memberRole === 'viewer' ? t.viewerHint : memberRole === 'commenter' ? t.commenterHint : t.editorHint}</Text>{!!sheetError && <Text accessibilityRole="alert" style={u.error}>{sheetError}</Text>}<Button disabled={!!busy || memberRole === sheet.member.role} onPress={saveMember}>{busy ? t.saving : t.saveRole}</Button>{removeConfirm ? <View style={s.confirm}><Text style={s.rowTitle}>{t.removeConfirm}</Text><View style={s.actions}><Button secondary disabled={!!busy} onPress={() => setRemoveConfirm(false)}>{t.keep}</Button><Button danger disabled={!!busy} onPress={removeMember}>{t.remove}</Button></View></View> : <Button danger secondary icon={X} disabled={!!busy} onPress={() => setRemoveConfirm(true)}>{t.remove}</Button>}</View>}
-      {sheet.type === 'pickup' && <View style={s.sheetContent}><EventLine event={sheet.occurrence.event} occurrenceDate={sheet.occurrence.dateKey} language={language} t={t} />
-        <Text style={u.label}>{t.assignTo}</Text><View style={s.assignees}>{pickupMembers.map(person => <Pressable key={person.email} accessibilityRole="radio" accessibilityState={{ checked: sameEmail(person.email, assignee) }} onPress={() => setAssignee(person.email)} style={[s.assignee, sameEmail(person.email, assignee) && s.assigneeSelected]}><View style={s.flex}><Text numberOfLines={1} style={s.rowTitle}>{person.label}</Text></View>{sameEmail(person.email, assignee) && <Check size={19} color={colors.primary} />}</Pressable>)}</View>{!!sheetError && <Text accessibilityRole="alert" style={u.error}>{sheetError}</Text>}<Button disabled={!!busy || !assignee} onPress={assignPickup}>{busy ? t.saving : t.request}</Button></View>}
+      {sheet.type === 'pickup' && <ScrollView contentContainerStyle={s.sheetContent}>
+        <EventLine event={sheet.occurrence.event} occurrenceDate={sheet.occurrence.dateKey} language={language} t={t} />
+        {activePickup && <Text style={s.body}>{pickupStatusLabel(activePickup.status, t)} · {activePickup.assignee_email}</Text>}
+        <Text style={u.label}>{t.assignTo}</Text><View style={s.assignees}>{pickupMembers.map(person => <Pressable key={person.email} accessibilityRole="radio" accessibilityState={{ checked: sameEmail(person.email, assignee), disabled: !!busy }} disabled={!!busy} onPress={() => setAssignee(person.email)} style={[s.assignee, sameEmail(person.email, assignee) && s.assigneeSelected]}><View style={s.flex}><Text style={s.rowTitle}>{person.label}</Text></View>{sameEmail(person.email, assignee) && <Check size={19} color={colors.primary} />}</Pressable>)}</View>
+        {ownerPickupUnavailable && <Text accessibilityRole="alert" style={u.error}>{t.pickupUnavailable}</Text>}
+        {!activePickupPlan && ownerPickupReady && <Text accessibilityRole="alert" style={u.error}>{t.pickupPlanUnavailable}</Text>}
+        {!!sheetError && <Text accessibilityRole="alert" style={u.error}>{sheetError}</Text>}
+        <Button disabled={!canAssignPickup}
+          onPress={assignPickup}>{busy ? t.saving : activePickup?.status === 'declined' ? t.requestAgain : activePickup ? t.reassign : t.request}</Button>
+      </ScrollView>}
       {sheet.type === 'shared' && <SharedCalendarContent language={language} t={t} context={sheet.context} comments={comments} commentsLoading={commentsLoading} commentsError={commentsError} comment={comment} setComment={setComment} busy={!!busy} error={sheetError} onPost={postComment} onWebsite={onOpenWebsite} onCalendar={onOpenSharedCalendar ? openSharedInCalendar : null} onPickup={answerPickup} account={account} />}
       {sheet.type === 'comments' && <SharedCalendarContent language={language} t={t} context={sheet.context} comments={comments} commentsLoading={commentsLoading} commentsError={commentsError} comment={comment} setComment={setComment} busy={!!busy} error={sheetError} onPost={postComment} account={account} />}
     </Sheet>}
@@ -375,6 +467,7 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
 
 function SharedCalendarContent({ language, t, context, comments, commentsLoading, commentsError, comment, setComment, busy, error, onPost, onWebsite, onCalendar, onPickup, account }) {
   const { colors } = useAppearance(), s = useThemeStyles(createStyles);
+  const { u } = useCalendarUi();
   const today = calendarTools.parseDateKey(calendarTools.dateKey(new Date()));
   const role = context.role || context.invitation?.role || 'viewer';
   const activities = safeArray(context.calendar?.data?.activities);
@@ -387,6 +480,7 @@ function SharedCalendarContent({ language, t, context, comments, commentsLoading
     <Text style={s.capability}>{capability}</Text>
     {!!onCalendar && <Button icon={CalendarDays} disabled={busy} onPress={() => onCalendar(context)}>{t.openCalendar}</Button>}
     {!!onWebsite && <Button secondary onPress={onWebsite}>{t.web}</Button>}
+    {context.pickupUnavailable && <Text accessibilityRole="alert" style={u.error}>{t.incomingPickupUnavailable}</Text>}
     {myPickups.length > 0 && !!onPickup && <><Text style={s.sheetHeading}>{t.yourRequests}</Text>{myPickups.map(pickup => { const event = activities.find(item => String(item.id) === String(pickup.event_id)); return <View key={pickup.id} style={s.request}><Text style={s.rowTitle}>{event?.title || t.pickups}</Text><Text style={s.body}>{dateLabel(pickup.occurrence_date, language)}</Text><View style={s.actions}><Button secondary disabled={busy} onPress={() => onPickup(pickup, 'declined')}>{t.pickupDecline}</Button><Button disabled={busy} onPress={() => onPickup(pickup, 'accepted')}>{t.pickupAccept}</Button></View></View>; })}</>}
     <Text style={s.sheetHeading}>{t.upcoming}</Text>{occurrences.length ? occurrences.map(item => <EventLine key={item.key} event={item.event} occurrenceDate={item.dateKey} language={language} t={t} />) : <Text style={s.empty}>{t.noUpcoming}</Text>}
     <Text style={s.sheetHeading}>{t.comments}</Text>{commentsLoading ? <ActivityIndicator color={colors.primary} style={s.commentLoader} /> : commentsError ? <Text style={u.error}>{t.commentsUnavailable}</Text> : comments.length ? comments.map(item => <View key={item.id} style={s.comment}><Text style={s.rowTitle}>{item.author_email}</Text><Text style={s.commentBody}>{item.body}</Text></View>) : <Text style={s.empty}>{t.noComments}</Text>}
@@ -401,7 +495,7 @@ function createStyles(colors) { return StyleSheet.create({
   tabs: { marginHorizontal: 16, marginVertical: 9, minHeight: 45, flexDirection: 'row', backgroundColor: colors.surfaceRaised, borderRadius: 8, padding: 3, gap: 3 }, tab: { flex: 1, minHeight: 39, borderRadius: 6, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5 }, tabSelected: { backgroundColor: colors.primary }, tabText: { color: colors.muted, fontSize: 11, fontWeight: '700' }, tabTextSelected: { color: colors.onPrimary },
   tabBadge: { position: 'absolute', top: -7, right: -9, minWidth: 16, height: 16, borderRadius: 8, paddingHorizontal: 3, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.error }, tabBadgeSelected: { backgroundColor: colors.surface }, tabBadgeText: { color: colors.white, fontSize: 9, fontWeight: '700' }, tabBadgeTextSelected: { color: colors.error },
   scroll: { flex: 1 }, content: { padding: 17, paddingBottom: 32, gap: 12 }, loader: { margin: 30 }, notice: { color: colors.success, backgroundColor: colors.successSoft, borderRadius: 8, padding: 11, fontSize: 12, lineHeight: 18 },
-  sectionHeading: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 6, marginBottom: 3 }, sectionIcon: { width: 35, height: 35, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft }, sectionTitle: { color: colors.ink, fontSize: 17, fontWeight: '700', lineHeight: 22 }, sectionAction: { minHeight: 40, flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 9, borderRadius: 8, backgroundColor: colors.primarySoft }, sectionActionText: { color: colors.primary, fontSize: 11, fontWeight: '700' },
+  sectionHeading: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 6, marginBottom: 3 }, sectionIcon: { width: 35, height: 35, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft }, sectionTitle: { color: colors.ink, fontSize: 17, fontWeight: '700', lineHeight: 22 }, sectionAction: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 9, borderRadius: 8, backgroundColor: colors.primarySoft }, sectionActionText: { color: colors.primary, fontSize: 11, fontWeight: '700' },
   personRow: { minHeight: 68, flexDirection: 'row', alignItems: 'center', gap: 10, borderTopWidth: 1, borderTopColor: colors.line, paddingVertical: 11 }, avatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' }, rowTitle: { color: colors.ink, fontSize: 14, lineHeight: 20, fontWeight: '700' }, rowTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   badge: { minHeight: 24, maxWidth: 100, borderRadius: 8, backgroundColor: colors.surfaceRaised, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' }, badgeText: { color: colors.muted, fontSize: 10, fontWeight: '700' }, badgeGood: { backgroundColor: colors.successSoft }, badgeGoodText: { color: colors.success }, badgeWarn: { backgroundColor: colors.warningSoft }, badgeWarnText: { color: colors.warning },
   empty: { color: colors.muted, fontSize: 13, lineHeight: 20, paddingVertical: 16, textAlign: 'center' }, emptyState: { minHeight: 76, flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 13, borderTopWidth: 1, borderTopColor: colors.line }, emptyIcon: { width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft }, emptyTitle: { color: colors.ink, fontSize: 13, lineHeight: 19, fontWeight: '700' }, invitation: { borderTopWidth: 1, borderTopColor: colors.line, paddingVertical: 14, gap: 10 }, note: { color: colors.ink, fontSize: 12, lineHeight: 19, backgroundColor: colors.surface, padding: 10, borderRadius: 8 }, actions: { flexDirection: 'row', gap: 8, alignItems: 'center' }, request: { borderWidth: 1, borderColor: colors.line, borderRadius: 8, padding: 12, gap: 9, backgroundColor: colors.surface },

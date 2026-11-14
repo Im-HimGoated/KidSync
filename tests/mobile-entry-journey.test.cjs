@@ -63,6 +63,13 @@ Module._load = function (request, parent) {
   if (request === '../ui/AppearanceContext' && parent?.filename === path.join(mobile, 'src/screens/OnboardingScreen.js')) {
     return { useAppearance: () => appearance, useThemeStyles: createStyles => createStyles(appearance.colors) };
   }
+  if (parent?.filename === path.join(mobile, 'src/ui/AccountSettings.js')) {
+    if (request === './AppearanceContext') return { useAppearance: () => ({ ...appearance, settings: { mode: 'system', accent: 'forest' } }),
+      useThemeStyles: createStyles => createStyles(appearance.colors) };
+    if (request === '../calendar/ui') return { Button: 'Button', Sheet: 'Sheet' };
+    if (request === './AppearanceSettings') return { default: 'AppearanceSettings', __esModule: true, appearanceCopy: { en: {} } };
+    if (request === './ReminderSettings') return { default: 'ReminderSettings', __esModule: true, reminderCopy: { en: { title: 'Phone reminders', disabled: 'Off' } } };
+  }
   if (parent?.filename === path.join(mobile, 'src/App.js')) {
     if (/\.(png|jpg)$/.test(request)) return 'bundled-image';
     if (request === './lib/supabase') return { supabase: client };
@@ -74,7 +81,6 @@ Module._load = function (request, parent) {
       readSharedCalendar: (_client, _account, source) => sharedRead(source),
       createSharedCalendarAdapter: () => ({})
     };
-    if (request === './ui/ReminderSettings') return { default: 'ReminderSettings', __esModule: true, reminderCopy: { en: { disabled: 'Off' } } };
     if (request === './lib/use-native-trial') return () => ({ data: preview, error: '',
       ...Object.fromEntries(['start', 'saveProfile', 'saveProfileDraft', 'reserveClaim', 'markClaimed'].map(key => [key, async (...args) => { preview = await trialStore[key](...args); return preview; }])) });
     if (request.endsWith('/claim-native-trial')) return { claimNativeTrial: async (_client, userId, data) => {
@@ -156,6 +162,8 @@ test('restored sign-in offers the weekly brief only after the Home schedule is a
   ownerSync.status = 'OFFLINE';
   assert.equal(app.screen('WeeklyBrief').ready, false);
   ownerSync.row = { schedule: { calendars: [{ id: 'sports', name: 'Sports' }], calendarData: { sports: { activities: [] } } } };
+  assert.equal(app.screen('WeeklyBrief').ready, false);
+  ownerSync.row.schedule.calendarData.sports.activities = [{ id: 'practice', title: 'Practice' }];
   let brief = app.screen('WeeklyBrief');
   assert.equal(brief.userId, 'account-a');
   assert.equal(brief.calendar.id, 'sports');
@@ -171,17 +179,43 @@ test('restored sign-in offers the weekly brief only after the Home schedule is a
   assert.equal(app.screen('WeeklyBrief').active, false);
   Object.assign(ownerSync, { row: null, status: 'SUBSCRIBED' });
   brief = app.screen('WeeklyBrief');
-  assert.equal(brief.ready, true);
+  assert.equal(brief.ready, false);
   assert.equal(brief.calendar, undefined);
 });
-test('primary entry reaches questions, review survives signup→preview→welcome→review', async () => {
+test('Home sends scoped create, add, and detail requests to Calendar', async () => {
+  const app = await mount({ user: { id: 'account-a', email: 'test@example.com' } });
+  Object.assign(ownerSync, { row: null, status: 'CONNECTING' });
+  assert.equal(app.screen('HomeScreen').onStartPlan, undefined);
+  ownerSync.status = 'SUBSCRIBED';
+  assert.equal(app.screen('HomeScreen').planAction, 'create');
+  app.screen('HomeScreen').onStartPlan();
+  assert.deepEqual(app.screen('CalendarScreen').actionRequest, {
+    id: 1, type: 'create', ownerId: 'account-a', calendarId: null, date: undefined, eventId: undefined,
+  });
+  ownerSync.row = { schedule: { calendars: [{ id: 'family', name: 'Family' }], calendarData: {} } };
+  assert.equal(app.screen('HomeScreen').planAction, 'new');
+  app.screen('HomeScreen').onStartPlan();
+  assert.equal(app.screen('CalendarScreen').actionRequest.calendarId, 'family');
+  assert.equal(app.screen('CalendarScreen').actionRequest.type, 'new');
+  app.screen('HomeScreen').onOpenDate('2026-11-13', null, 5);
+  assert.equal(app.screen('CalendarScreen').focusDate, '2026-11-13');
+  assert.deepEqual(app.screen('CalendarScreen').actionRequest, {
+    id: 3, type: 'details', ownerId: 'account-a', calendarId: 'family', date: '2026-11-13', eventId: 5,
+  });
+  app.screen('HomeScreen').onOpenCalendar();
+  assert.equal(app.screen('CalendarScreen').actionRequest, null);
+});
+test('primary entry reaches questions, preview returns to signup, and review choices survive', async () => {
   const app = await mount(); await app.screen('WelcomeScreen').onGetStarted();
   assert.ok(app.screen('OnboardingScreen')); assert.equal(preview, null);
   await app.screen('OnboardingScreen').onComplete(answers);
   assert.equal(app.screen('SignUpScreen').hasPreferences, true);
   await app.screen('SignUpScreen').onPreview();
   assert.deepEqual(app.screen('TrialCalendarScreen').preferences, answers);
-  app.screen('TrialCalendarScreen').onBack(); await app.screen('WelcomeScreen').onGetStarted();
+  assert.equal(app.screen('TrialCalendarScreen').backLabel, 'Back to create account');
+  app.screen('TrialCalendarScreen').onBack();
+  assert.equal(app.screen('SignUpScreen').hasPreferences, true);
+  await app.screen('SignUpScreen').onBack();
   assert.equal(app.screen('OnboardingScreen').initialDraft.review, true);
   assert.deepEqual(app.screen('OnboardingScreen').initialDraft.answers, answers);
 });
@@ -191,6 +225,36 @@ test('direct preview does not require questions or an account and resumes the sa
   app.screen('TrialCalendarScreen').onBack(); await app.screen('WelcomeScreen').onPreview();
   assert.equal(app.screen('TrialCalendarScreen').data.events[0].title, 'Preview plan');
   assert.equal(currentSession, null);
+});
+test('leaving personalization after the guest preview expires returns to its entry screen', async () => {
+  const app = await mount(); await app.screen('WelcomeScreen').onGetStarted();
+  await app.screen('OnboardingScreen').onComplete(answers);
+  await app.screen('SignUpScreen').onPreview();
+  preview = await trialStore.advance(nativeTrial.LIMIT_MS);
+  await app.settle();
+  await app.screen('PersonalizeCalendarScreen').onBack({ calendarName: 'QA preview' });
+  assert.equal(app.screen('SignUpScreen').hasPreferences, true);
+  assert.equal((await trialStore.load()).profile.calendarName, 'QA preview');
+});
+test('sign-in offers preview import only when there is preview work to keep', async () => {
+  const cases = [
+    { action: 'start', args: [], importLabel: null, hasDraft: false },
+    { action: 'saveDraft', args: [{ title: 'Unfinished pickup' }], importLabel: 'Make your calendar yours', hasDraft: true },
+    { action: 'saveProfile', args: [{ calendarName: 'My preview' }, false], importLabel: 'Save preview to my account', hasDraft: false },
+  ];
+  for (const { action, args, importLabel, hasDraft } of cases) {
+    const app = await mount(); await app.screen('WelcomeScreen').onPreview();
+    preview = await trialStore[action](...args);
+    app.screen('TrialCalendarScreen').onBack(); await app.screen('WelcomeScreen').onSignIn();
+    app.screen('SignInScreen').onEmailChange('test@example.com'); app.screen('SignInScreen').onPasswordChange('test-password');
+    await app.screen('SignInScreen').onSignIn(); await app.settle();
+    assert.ok(app.screen('HomeScreen'));
+    const tree = app.render();
+    const importAction = find(tree, 'Pressable', element => ['Make your calendar yours', 'Save preview to my account'].includes(element.props.children?.props?.children));
+    assert.equal(importAction?.props.children.props.children ?? null, importLabel);
+    const review = find(tree, 'Pressable', element => element.props.children?.props?.children === 'Review unfinished preview plan');
+    assert.equal(!!review, hasDraft);
+  }
 });
 test('reviewed answers reach the authenticated calendar and remain editable through Account', async () => {
   const app = await mount(); await app.screen('WelcomeScreen').onGetStarted();
@@ -209,13 +273,63 @@ test('reviewed answers reach the authenticated calendar and remain editable thro
   const updated = { ...answers, hours: 'morning' };
   await app.screen('OnboardingScreen').onComplete(updated); await app.settle();
   assert.deepEqual(app.screen('CalendarScreen').preferences, updated);
-  assert.equal(app.screen('CalendarScreen').focusDate, calendarTools.dateKey(new Date()));
-  assert.equal(app.screen('CalendarScreen').focusTime, null);
+  assert.equal(app.screen('CalendarScreen').focusDate, '2026-01-30');
+  assert.equal(app.screen('CalendarScreen').focusTime, '05:00');
+  find(app.render(), BottomNavigation).props.onChange('home');
+  find(app.render(), BottomNavigation).props.onChange('calendar');
+  assert.equal(app.screen('CalendarScreen').focusDate, '2026-01-30');
+  assert.equal(app.screen('CalendarScreen').focusTime, '05:00');
   find(app.render(), BottomNavigation).props.onChange('account');
   app.screen('AccountSettings').onPreferences(); await app.settle();
   app.screen('OnboardingScreen').onBack();
   assert.ok(app.screen('HomeScreen'));
-  assert.equal(app.screen('CalendarScreen').focusTime, null);
+  assert.equal(app.screen('CalendarScreen').focusTime, '05:00');
+});
+test('Account stays open when preferences cannot load and closes after a successful retry', async () => {
+  const app = await mount({ user: { id: 'account-a', email: 'test@example.com' } });
+  find(app.render(), BottomNavigation).props.onChange('account');
+  const read = storage.getItem;
+  storage.getItem = async key => {
+    if (key === `${preferences.keyForUser('account-a')}:draft`) throw new Error('unavailable');
+    return read(key);
+  };
+  try {
+    assert.equal(await app.screen('AccountSettings').onPreferences(), false);
+    assert.ok(app.screen('AccountSettings'));
+    assert.equal(app.screen('OnboardingScreen'), undefined);
+  } finally {
+    storage.getItem = read;
+  }
+  assert.equal(await app.screen('AccountSettings').onPreferences(), true);
+  assert.equal(app.screen('AccountSettings'), undefined);
+  assert.ok(app.screen('OnboardingScreen'));
+});
+test('Account opens and leaves phone reminders through the same settings sheet', () => {
+  const { default: AccountSettings, __Row: Row } = compileScreen('src/ui/AccountSettings.js', '\nexports.__Row = Row;');
+  const state = { cells: [], cursor: 0, effects: [] };
+  const reminders = { state: { status: 'disabled' } };
+  let closes = 0;
+  const openSheet = () => {
+    host = state; state.cursor = 0;
+    const tree = AccountSettings({ language: 'en', email: 'test@example.com', reminders, onClose: () => { closes += 1; } });
+    for (const effect of state.effects.splice(0)) effect();
+    return tree;
+  };
+  const account = openSheet();
+  const reminderRow = find(account, Row, element => element.props.title === 'Phone reminders');
+  assert.equal(account.type, 'Sheet');
+  assert.ok(reminderRow);
+  reminderRow.props.onPress();
+  const phones = openSheet();
+  assert.equal(phones.type, account.type);
+  assert.equal(phones.props.title, 'Phone reminders');
+  assert.equal(find(phones, 'ReminderSettings').props.reminders, reminders);
+  reminders.state.status = 'configuring';
+  assert.equal(openSheet().props.busy, true);
+  reminders.state.status = 'disabled';
+  find(openSheet(), 'Pressable', element => find(element, 'Text')?.props.children === 'Back to settings').props.onPress();
+  assert.equal(openSheet().props.title, 'You & settings');
+  assert.equal(closes, 0);
 });
 test('explicit preview import selects and opens the new real calendar without replacing existing plans', async () => {
   const app = await mount(); await app.screen('WelcomeScreen').onPreview();
@@ -280,8 +394,30 @@ test('Home destinations leave a previously selected shared calendar and owner Sh
   assert.equal(app.screen('CalendarScreen').focusDate, calendarTools.dateKey(new Date()));
   assert.equal(app.screen('CalendarScreen').focusTime, null);
   app.screen('CalendarScreen').onShareCalendar({ id: 'family' });
-  assert.equal(app.screen('FamilyScreen').peopleRequest, 1);
+  assert.deepEqual(app.screen('FamilyScreen').tabRequest, { tab: 'people', id: 1 });
   assert.ok(find(app.render(), 'View', element => element.props.children?.type === 'FamilyScreen' && element.props.style[1] === false));
+  app.screen('HomeScreen').onOpenPickups();
+  assert.deepEqual(app.screen('FamilyScreen').tabRequest, { tab: 'pickups', id: 2 });
+  app.screen('HomeScreen').onOpenPickups();
+  assert.deepEqual(app.screen('FamilyScreen').tabRequest, { tab: 'pickups', id: 3 });
+});
+
+test('Home receives only pickup results for its signed-in calendar', async () => {
+  const app = await mount({ user: { id: 'account-a', email: 'test@example.com' } });
+  ownerSync.row = { schedule: { calendars: [{ id: 'family', name: 'Family' }, { id: 'sports', name: 'Sports' }], calendarData: {} } };
+  const rows = [{ event_id: 'practice', occurrence_date: '2026-11-12', status: 'accepted' }];
+  const receive = app.screen('FamilyScreen').onOwnerPickups;
+  assert.equal(app.screen('HomeScreen').pickups, undefined);
+  receive({ ownerId: 'account-b', calendarId: 'family', rows });
+  assert.equal(app.screen('HomeScreen').pickups, undefined);
+  receive({ ownerId: 'account-a', calendarId: 'family', rows });
+  assert.deepEqual(app.screen('HomeScreen').pickups, rows);
+  app.screen('HomeScreen').onSelectCalendar('sports');
+  assert.equal(app.screen('HomeScreen').pickups, undefined);
+  receive({ ownerId: 'account-a', calendarId: 'sports', rows: [] });
+  assert.deepEqual(app.screen('HomeScreen').pickups, []);
+  receive({ ownerId: 'account-a', calendarId: 'sports', rows: undefined });
+  assert.equal(app.screen('HomeScreen').pickups, undefined);
 });
 test('a delayed shared open cannot replace an explicitly selected owner destination', async () => {
   const app = await mount(); await app.screen('WelcomeScreen').onSignIn();

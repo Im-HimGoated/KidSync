@@ -1,16 +1,24 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAppearance, useThemeStyles } from '../ui/AppearanceContext';
 import {
-  ActivityIndicator, ImageBackground, Keyboard, KeyboardAvoidingView, Platform,
+  AccessibilityInfo, ActivityIndicator, AppState, ImageBackground, Keyboard, KeyboardAvoidingView, Platform,
   Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions
 } from 'react-native';
-import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, CircleAlert, ExternalLink, Eye, EyeOff } from 'lucide-react-native';
+import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, CircleAlert, ExternalLink, Eye, EyeOff, Pause, Play } from 'lucide-react-native';
 import signIn from '../lib/sign-in';
+
+const signInPhotos = [
+  require('../../../assets/kidssync-family-hero.jpg'),
+  require('../../assets/kidssync-family-entryway-signin.jpg'),
+  require('../../assets/kidssync-family-park-signin.jpg'),
+  require('../../assets/kidssync-family-table-signin.jpg'),
+];
 
 export const signInCopy = {
   en: {
     heading: 'Sign in', more: 'More options',
-    photo: 'A child doing homework while a parent prepares food in the kitchen',
+    photo: 'Family planning, school days, and time together',
+    showPhoto: 'Show photo', pausePhotos: 'Pause photos', resumePhotos: 'Resume photos',
     email: 'Email address', password: 'Password', signIn: 'Sign in', signingIn: 'Signing in…',
     emailRequired: 'Enter your email address.', emailInvalid: 'Enter a valid email address.',
     passwordRequired: 'Enter your password.', show: 'Show password', hide: 'Hide password',
@@ -26,7 +34,8 @@ export const signInCopy = {
   },
   zh: {
     heading: '登录', more: '更多选项',
-    photo: '\u5b69\u5b50\u5728\u5199\u4f5c\u4e1a\uff0c\u5bb6\u957f\u5728\u53a8\u623f\u51c6\u5907\u98df\u7269',
+    photo: '家庭计划、校园生活与相聚时光',
+    showPhoto: '显示照片', pausePhotos: '暂停切换照片', resumePhotos: '继续切换照片',
     email: '\u90ae\u7bb1\u5730\u5740', password: '\u5bc6\u7801', signIn: '\u767b\u5f55', signingIn: '\u6b63\u5728\u767b\u5f55\u2026',
     emailRequired: '\u8bf7\u8f93\u5165\u90ae\u7bb1\u5730\u5740\u3002', emailInvalid: '\u8bf7\u8f93\u5165\u6709\u6548\u7684\u90ae\u7bb1\u5730\u5740\u3002',
     passwordRequired: '\u8bf7\u8f93\u5165\u5bc6\u7801\u3002', show: '\u663e\u793a\u5bc6\u7801', hide: '\u9690\u85cf\u5bc6\u7801',
@@ -58,10 +67,41 @@ export default function SignInScreen({
   const [recoveryOpen, setRecoveryOpen] = useState(false);
   const [recoverySent, setRecoverySent] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const [photosPaused, setPhotosPaused] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const [screenActive, setScreenActive] = useState(true);
+  const [photoCycle, setPhotoCycle] = useState(0);
   const errors = signIn.validateSignIn(email, password);
   const emailError = touched.email && errors.email;
   const passwordError = touched.password && errors.password;
   const pending = busy || recovering;
+
+  useEffect(() => {
+    let mounted = true;
+    AccessibilityInfo.isReduceMotionEnabled().then(value => { if (mounted) setReduceMotion(!!value); }).catch(() => {});
+    const subscription = AccessibilityInfo.addEventListener?.('reduceMotionChanged', value => setReduceMotion(!!value));
+    return () => { mounted = false; subscription?.remove?.(); };
+  }, []);
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', value => setScreenActive(value === 'active'));
+    const onVisibility = () => setScreenActive(!globalThis.document.hidden);
+    if (Platform.OS === 'web') globalThis.document?.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      subscription?.remove?.();
+      if (Platform.OS === 'web') globalThis.document?.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, []);
+  useEffect(() => {
+    if (recoveryOpen || photosPaused || reduceMotion || !screenActive) return undefined;
+    const timer = setInterval(() => setPhotoIndex(index => (index + 1) % signInPhotos.length), 6500);
+    return () => clearInterval(timer);
+  }, [recoveryOpen, photosPaused, reduceMotion, screenActive, photoCycle]);
+
+  function selectPhoto(index) {
+    setPhotoIndex(index);
+    setPhotoCycle(value => value + 1);
+  }
 
   function changeRecovery(open) {
     Keyboard.dismiss();
@@ -96,7 +136,7 @@ export default function SignInScreen({
   return <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
     <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} contentContainerStyle={styles.scroll}>
       <View style={styles.inner}>
-        {!recoveryOpen && <ImageBackground source={require('../../assets/kidssync-auth-family-signin.jpg')}
+        {!recoveryOpen && <ImageBackground source={signInPhotos[photoIndex]}
           accessible={false} resizeMode="cover" style={[styles.hero, height < 700 && styles.compactHero]} imageStyle={styles.heroImage}>
           <View accessible accessibilityRole="image" accessibilityLabel={t.photo} pointerEvents="none" style={StyleSheet.absoluteFillObject} />
           <Pressable accessibilityRole="button" accessibilityLabel={backLabel || t.back} disabled={pending}
@@ -104,6 +144,17 @@ export default function SignInScreen({
             <ArrowLeft size={18} color={colors.photoText} aria-hidden={true} />
             <Text style={styles.photoBackText}>{backLabel || t.back}</Text>
           </Pressable>
+          <View style={styles.photoControls} accessibilityRole="group">
+            {signInPhotos.map((_, index) => <Pressable key={index} accessibilityRole="button"
+              accessibilityLabel={`${t.showPhoto} ${index + 1}`} accessibilityState={{ selected: photoIndex === index }}
+              onPress={() => selectPhoto(index)} style={styles.photoDotButton}>
+              <View style={[styles.photoDot, photoIndex === index && styles.photoDotActive]} />
+            </Pressable>)}
+            {!reduceMotion && <Pressable accessibilityRole="button" accessibilityLabel={photosPaused ? t.resumePhotos : t.pausePhotos}
+              accessibilityState={{ selected: photosPaused }} onPress={() => setPhotosPaused(value => !value)} style={styles.photoPause}>
+              {photosPaused ? <Play size={17} color={colors.photoText} /> : <Pause size={17} color={colors.photoText} />}
+            </Pressable>}
+          </View>
         </ImageBackground>}
         <View style={styles.form}>
           {recoveryOpen && <Pressable accessibilityRole="button" disabled={pending} onPress={() => changeRecovery(false)} style={styles.recoveryBack}>
@@ -188,9 +239,14 @@ function createStyles(colors) { return StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
   scroll: { flexGrow: 1, alignItems: 'center', paddingBottom: 20 },
   inner: { width: '100%', maxWidth: 560, flexGrow: 1 },
-  hero: { width: '100%', aspectRatio: 2.3, minHeight: 136, maxHeight: 192, overflow: 'hidden', flexShrink: 0 },
-  compactHero: { minHeight: 112, maxHeight: 136, aspectRatio: 2.6 },
+  hero: { width: '100%', aspectRatio: 2, minHeight: 170, maxHeight: 210, overflow: 'hidden', flexShrink: 0 },
+  compactHero: { minHeight: 136, maxHeight: 160, aspectRatio: 2.3 },
   heroImage: { width: '100%', height: '100%' },
+  photoControls: { position: 'absolute', right: 12, bottom: 10, minHeight: 44, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 4, borderRadius: 24, backgroundColor: colors.photoOverlay },
+  photoDotButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  photoDot: { width: 8, height: 8, borderRadius: 5, borderWidth: 1, borderColor: colors.photoText },
+  photoDotActive: { width: 18, borderRadius: 9, backgroundColor: colors.photoText },
+  photoPause: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   back: { position: 'absolute', top: 12, left: 16, maxWidth: '88%', minHeight: 44, borderRadius: 13, paddingHorizontal: 10, paddingVertical: 6, flexDirection: 'row', gap: 6, alignItems: 'center', backgroundColor: colors.photoOverlay },
   photoBackText: { color: colors.photoText, fontSize: 13, fontWeight: '600', flexShrink: 1 },
   recoveryBack: { alignSelf: 'flex-start', minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6 },

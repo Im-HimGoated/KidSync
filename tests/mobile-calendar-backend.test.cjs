@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { saveActivity, deleteActivity, createCalendar } = require('../shared/backend/mobile-calendar');
+const { saveActivity, deleteActivity, createCalendar, saveFamilyProfiles, restoreCalendarSnapshot, importActivities, deleteCalendar } = require('../shared/backend/mobile-calendar');
 
 const clone = value => value == null ? value : JSON.parse(JSON.stringify(value));
 const event = (extra = {}) => ({ id: 'event-1', title: 'Piano', child: '__family__', startDate: '2026-10-22',
@@ -65,6 +65,53 @@ function fakeClient(initial = row(snapshot()), options = {}) {
 }
 
 const hasCode = code => error => error.code === code;
+
+test('calendar deletion checks the reviewed snapshot, keeps the last calendar and switches compatibility fields', async () => {
+  const initial = snapshot();
+  const client = fakeClient(row(initial));
+  await assert.rejects(deleteCalendar(client, 'owner-1', 'home', { name: 'Home', data: { activities: [] } }), hasCode('CONFLICT'));
+  const confirmed = await deleteCalendar(client, 'owner-1', 'home', { name: 'Home', data: initial.calendarData.home });
+  assert.deepEqual(confirmed.schedule.calendars, [{ id: 'work', name: 'Work' }]);
+  assert.deepEqual(confirmed.schedule.calendarData, { work: initial.calendarData.work });
+  assert.equal(confirmed.schedule.activeCalendarId, 'work');
+  assert.deepEqual(confirmed.schedule.activities, initial.calendarData.work.activities);
+  assert.deepEqual(confirmed.schedule.futureSnapshot, initial.futureSnapshot);
+  assert.equal(confirmed.schedule.audit, undefined);
+  await assert.rejects(deleteCalendar(client, 'owner-1', 'work', { name: 'Work', data: initial.calendarData.work }), hasCode('FORBIDDEN'));
+});
+
+test('family profile rename updates only the selected calendar and keeps its activities on removal', async () => {
+  const original = [{ id: '1', name: 'Casey', palette: 'green', avatar: '🧒', grade: '', school: '' }];
+  const initial = snapshot();
+  initial.calendarData.home.kids = original;
+  initial.calendarData.home.activities = [event({ child: 'Casey', attendees: ['Casey'] })];
+  initial.activities = [...initial.calendarData.home.activities, event({ id: 'mirror-only' })];
+  const client = fakeClient(row(initial));
+  const saved = await saveFamilyProfiles(client, 'owner-1', 'home', { original, profiles: [{ ...original[0], name: 'Riley' }] });
+  assert.equal(saved.schedule.calendarData.home.activities[0].child, 'Riley');
+  assert.deepEqual(saved.schedule.calendarData.home.activities[0].attendees, ['Riley']);
+  assert.deepEqual(saved.schedule.calendarData.work, initial.calendarData.work);
+  assert.equal(saved.schedule.activities[1].id, 'mirror-only');
+  await assert.rejects(saveFamilyProfiles(client, 'owner-1', 'home', { original, profiles: [] }), hasCode('CONFLICT'));
+  const removed = await saveFamilyProfiles(client, 'owner-1', 'home', { original: saved.schedule.calendarData.home.kids, profiles: [] });
+  assert.equal(removed.schedule.calendarData.home.activities[0].child, '__family__');
+});
+
+test('calendar restores keep a checkpoint and imported IDs are idempotent on retry', async () => {
+  const initial = snapshot();
+  initial.calendarData.home.history = [{ id: 'older', label: 'Older', snapshot: { activities: [event({ title: 'Earlier' })], kids: [] } }];
+  const client = fakeClient(row(initial));
+  const baseline = { kids: [], activities: initial.calendarData.home.activities };
+  const restored = await restoreCalendarSnapshot(client, 'owner-1', 'home', { versionId: 'older', collection: 'history', baseline });
+  assert.equal(restored.schedule.calendarData.home.activities[0].title, 'Earlier');
+  assert.deepEqual(restored.schedule.calendarData.home.history[0].snapshot.activities, baseline.activities);
+  await assert.rejects(restoreCalendarSnapshot(client, 'owner-1', 'home', { versionId: 'older', collection: 'history', baseline }), hasCode('CONFLICT'));
+  const imported = event({ id: 'imported' });
+  await importActivities(client, 'owner-1', 'home', [imported]);
+  const confirmed = await importActivities(client, 'owner-1', 'home', [imported]);
+  assert.equal(confirmed.schedule.calendarData.home.activities.length, 2);
+  assert.equal(client.state.updates.length, 2);
+});
 
 test('creates an activity from a fresh row, preserving newer unrelated events and all other fields', async () => {
   const latest = snapshot();

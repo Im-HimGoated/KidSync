@@ -133,7 +133,7 @@ export default function OnboardingScreen({ language, initialDraft, onDraftChange
               <View style={styles.edit}><Text style={styles.whyText}>{t.edit}</Text><ChevronRight size={16} color={colors.primary} aria-hidden /></View>
             </Pressable>;
           })}
-        </View> : <View style={styles.options}>
+        </View> : <View accessibilityRole="radiogroup" accessibilityLabel={current[0]} style={styles.options}>
           {current[2].map(([value, label, description]) => {
             const selected = choice === value;
             const title = value === preferences.DEFAULTS[key] ? `${label} · ${t.defaultOption}` : label;

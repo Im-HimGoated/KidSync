@@ -133,10 +133,13 @@ test('mobile welcome leads with one heading and all actions before the sample ca
 });
 
 test('mobile welcome and sign-in use four genuinely different image files', () => {
-  const imagePaths = [...welcome.matchAll(/require\('([^']+\.jpg)'\)/g), ...signIn.matchAll(/require\('([^']+\.jpg)'\)/g)]
+  const imagesFor = screen => [...screen.matchAll(/require\('([^']+\.jpg)'\)/g)]
     .map(match => path.resolve(root, 'mobile/src/screens', match[1]));
+  const welcomeImages = imagesFor(welcome), signInImages = imagesFor(signIn);
+  assert.equal(new Set(welcomeImages).size, welcomeImages.length);
+  assert.equal(new Set(signInImages).size, signInImages.length);
+  const imagePaths = [...new Set([...welcomeImages, ...signInImages])];
   assert.equal(imagePaths.length, 4);
-  assert.equal(new Set(imagePaths).size, 4);
   const hashes = imagePaths.map(file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'));
   assert.equal(new Set(hashes).size, 4, 'different filenames must not conceal duplicate photos');
 });

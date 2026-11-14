@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { upcomingOccurrences, searchOccurrences, pinnedOccurrences, packingItems, packingKey, dayBrief,
+const { upcomingOccurrences, searchOccurrences, pinnedOccurrences, packingItems, packingKey, packingOccurrences, dayBrief,
   eventIsStillRelevant, needsHandoff, buildHomeModel } = require('../mobile/src/home/model');
 
 const now = new Date(2026, 9, 30, 15, 0);
@@ -48,6 +48,41 @@ test('handoff attention is limited to child-specific timed plans without an assi
   assert.equal(model.handoffCount, 2);
 });
 
+test('ended plans do not crowd upcoming pickups out of Home', () => {
+  const morning = [8, 9, 10].map(hour => ({
+    id: `morning-${hour}`, child: 'a', startDate: '2026-10-30',
+    start: `${String(hour).padStart(2, '0')}:00`, end: `${String(hour).padStart(2, '0')}:30`,
+  }));
+  const ongoing = {
+    id: 'ongoing', child: 'm', startDate: '2026-10-29', endDate: '2026-10-30', start: '18:00', end: '16:00',
+  };
+  const later = { id: 'later', child: 'm', startDate: '2026-11-06', start: '16:00', end: '17:00' };
+  const plans = [...morning, ongoing, events[1], later];
+  const model = buildHomeModel(plans, kids, now);
+  assert.deepEqual(model.handoffs.map(item => item.event.id), ['ongoing', 'soccer']);
+  assert.equal(model.handoffCount, 2);
+  assert.equal(model.today.length, 5);
+  assert.equal(model.sevenDayCount, 5);
+  assert.deepEqual(buildHomeModel(plans, kids, new Date(2026, 9, 30, 16)).handoffs.map(item => item.event.id), ['soccer']);
+});
+
+test('pending and accepted pickups suppress only their own occurrence', () => {
+  const practice = {
+    id: 12, child: 'a', startDate: '2026-10-30', start: '16:00', end: '17:00', recurrence: 'daily',
+  };
+  const pickups = [
+    { event_id: '12', occurrence_date: '2026-10-30', status: 'pending' },
+    { event_id: '12', occurrence_date: '2026-10-31', status: 'accepted' },
+    { event_id: '12', occurrence_date: '2026-11-01', status: 'declined' },
+    { event_id: '12', occurrence_date: '2026-11-02', status: 'cancelled' },
+    { event_id: 'other', occurrence_date: '2026-11-03', status: 'accepted' },
+  ];
+  const model = buildHomeModel([practice], kids, now, pickups);
+  assert.deepEqual(model.handoffs.map(item => item.dateKey), ['2026-11-01', '2026-11-02', '2026-11-03']);
+  assert.equal(model.handoffCount, 5);
+  assert.equal(model.sevenDayCount, 7);
+});
+
 test('home metrics count schedule days and per-child workload without mutating source data', () => {
   const before = JSON.stringify(events), model = buildHomeModel(events, kids, now);
   assert.equal(model.sevenDayCount, 6);
@@ -78,6 +113,23 @@ test('packing and daily brief helpers stay occurrence-scoped without changing ev
   assert.match(message, /Friday, Oct 30/); assert.match(message, /4:00 PM – 5:00 PM — Game/); assert.match(message, /Bring: Cleats/);
 });
 
+test('packing shows a trip once and keeps independently checkable recurring plans', () => {
+  const trip = { id: 'trip', eventType: 'trip', startDate: '2026-11-10', items: 'Passport' };
+  const practice = { id: 'practice', items: 'Cleats' };
+  const firstDay = { event: trip, dateKey: '2026-11-10' };
+  const secondDay = { event: trip, dateKey: '2026-11-11' };
+  const firstPractice = { event: practice, dateKey: '2026-11-12' };
+  const secondPractice = { event: practice, dateKey: '2026-11-19' };
+  const noItems = { event: { id: 'dinner' }, dateKey: '2026-11-20' };
+  assert.deepEqual(packingOccurrences([firstDay, secondDay, firstPractice, secondPractice, noItems]),
+    [firstDay, firstPractice, secondPractice]);
+});
+
+test('packing gracefully handles a calendar that has not loaded occurrences yet', () => {
+  assert.deepEqual(packingOccurrences(), []);
+  assert.deepEqual(packingOccurrences(null), []);
+});
+
 test('signed-in phone shell exposes focused home, calendar, and family navigation', () => {
   const app = fs.readFileSync(path.resolve(__dirname, '../mobile/src/App.js'), 'utf8');
   const screen = fs.readFileSync(path.resolve(__dirname, '../mobile/src/screens/HomeScreen.js'), 'utf8');
@@ -97,10 +149,11 @@ test('signed-in phone shell exposes focused home, calendar, and family navigatio
   assert.match(screen, /todayLabel/);
   assert.match(screen, /workloadAvatar/);
   assert.match(screen, /Coordinate pickups/);
-  assert.match(screen, /function openCurrentDate\(date, time = null\)/);
-  assert.match(screen, /selectCurrentOwnerCalendar\(\);\s*onOpenDate\?\.\(date, time\)/);
+  assert.match(screen, /function openCurrentDate\(date, time = null, eventId\)/);
+  assert.match(screen, /selectCurrentOwnerCalendar\(\);\s*onOpenDate\?\.\(date, time, eventId\)/);
+  assert.match(screen, /model\.workload\.map\(kid => \{ const palette = personColor\(/);
   assert.match(screen, /calendarTools\.daySegment\(item\.event, date\)\?\.start/);
-  assert.match(screen, /openCurrentDate\(item\.dateKey, focusTimeFor\(item\)\)/);
+  assert.match(screen, /openCurrentDate\(item\.dateKey, focusTimeFor\(item\), item\.event\.id\)/);
   assert.match(screen, /selectCurrentOwnerCalendar\(\);\s*onOpenCalendar\?\.\(\)/);
   assert.match(screen, /selectCurrentOwnerCalendar\(\);\s*onOpenFamily\?\.\(\)/);
   assert.match(screen, /Quick planning tools/);

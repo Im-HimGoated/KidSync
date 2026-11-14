@@ -379,3 +379,19 @@ account and iPhone simulator checks remain pending until performed above.
 - The landing page, all five questions, editing and saving an answer, the
   account creation handoff, and password-reset navigation were checked earlier
   on the same simulator. The 721 automated tests passed on release `69b0c20`.
+
+## Mobile UI acceptance (November 12, 2026)
+
+| Environment | Verified |
+| --- | --- |
+| Repository suite and local PostgreSQL | 727 application tests and 12 shared-calendar SQL tests passed. The automated checks cover trial expiry and retention, event recurrence and Undo, offline queues and conflicts, reminder lifecycle, and sharing permissions. |
+| Production bundle exports | Web, iOS, and Android exports passed for the current workspace changes. |
+| iPhone 16 Pro simulator, iOS 26.5, Expo Go | The published build restored an existing session and showed Home and You & settings. After sign-out, Welcome, all five setup questions, review and edit, account creation entry, sign-in navigation, and password reset entry and return worked. Fresh live sign-in and saved preferences were verified as described above. |
+| Phone-width preview, 320 and 390 px | Welcome disclosures, EN/ZH layout and language persistence, appearance save/reload/reset, sign-in and signup validation, guest draft recovery after reload, creation at 01:15, conversion to all-day, and confirmed guest deletion passed. The event appeared in Agenda, Day, Week, and Month. Personalization kept the plan and applied the saved Week preference. |
+| Phone-width preview with local test data | Sign-in, signup confirmation, password-reset feedback, and sign-out cancel/confirm passed against a fake backend. Explicit guest import added a separate calendar and preserved the original. Home search, pinning, packing, and the timed Calendar link passed. Calendar search and person filter, date jump, Today, create/edit/delete, unsaved-change protection, and planning tools were exercised. |
+| Family and Settings with local test data | Calendar Share opened Family. People, Inbox, and Pickups rendered. A local Editor invitation was created. Viewer could read events and comments, Commenter could post, and Editor could save a change. Help expanded, Chinese Settings fit at 320 px, and browser reminder settings correctly showed native-only availability. |
+
+Production signup and recovery email delivery, a live
+two-account invitation/pickup/shared-edit round trip, OS notification delivery,
+and physical iPhone and Android checks are still open. No live invitations,
+comments, schedule writes, or notifications were sent in this pass.

@@ -20,6 +20,7 @@ Module._load = function (request) {
   if (request === 'react-native') return nativeWeb;
   if (request === 'react-native-safe-area-context') return { SafeAreaView: nativeWeb.View, SafeAreaProvider: nativeWeb.View };
   if (request === '@react-native-async-storage/async-storage') return { getItem: async () => null, setItem: async () => {} };
+  if (['expo-document-picker', 'expo-file-system', 'expo-print', 'expo-sharing'].includes(request)) return {};
   if (request === 'lucide-react-native') return new Proxy({}, { get: (_value, key) => key === '__esModule' ? false : () => React.createElement(nativeWeb.View) });
   return load.apply(this, arguments);
 };

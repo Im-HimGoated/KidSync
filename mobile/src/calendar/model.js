@@ -1,6 +1,7 @@
 const calendar = require('../lib/calendar');
 const { buildEvent } = require('../lib/event-form');
 const backend = require('../../../shared/backend/mobile-calendar');
+const options = require('./event-options');
 
 const own = (value, key) => Object.prototype.hasOwnProperty.call(value || {}, key);
 const validDate = value => value instanceof Date && Number.isFinite(value.getTime());
@@ -48,7 +49,7 @@ function displayMonthDays(date, firstDay = 1) {
 function movePeriod(date, mode, amount) {
   if (!validDate(date) || !Number.isFinite(Number(amount))) return new Date(NaN);
   const delta = Math.trunc(Number(amount));
-  if (mode !== 'month') return calendar.addDays(date, delta * (mode === 'week' ? 7 : 1));
+  if (mode !== 'month') return calendar.addDays(date, delta * (mode === 'week' ? 7 : mode === 'four' ? 4 : 1));
   const result = new Date(date);
   const day = result.getDate();
   result.setDate(1);
@@ -187,6 +188,11 @@ function initialEventForm(existing, date, preferences = {}) {
     start: event ? (typeof event.start === 'string' ? event.start : '') : timeAtHour(display.initialHour),
     end: event ? (typeof event.end === 'string' ? event.end : '') : timeAtHour(display.initialHour + 1),
     location: event?.location || '', responsible: event?.responsible || '', items: event?.items || '', notes: event?.notes || '',
+    eventType: event?.eventType || (event?.endDate ? 'trip' : 'activity'),
+    icon: event?.icon || '📖', color: event?.color || 'default',
+    attendees: Array.isArray(event?.attendees) && event.attendees.length ? [...event.attendees] : ['all'],
+    status: event?.status || 'confirmed', travelMinutes: event?.travelMinutes ?? 0,
+    bufferBeforeMinutes: event?.bufferBeforeMinutes ?? 0, bufferAfterMinutes: event?.bufferAfterMinutes ?? 0,
     importance: validImportance.includes(event?.importance) ? event.importance : 'normal',
     reminderMinutes: event ? reminderValue(event.reminderMinutes) ?? null : display.defaultReminderMinutes,
     recurrence: event?.recurrence || (event?.day ? 'weekly' : 'none'),
@@ -210,6 +216,29 @@ function buildCalendarEvent(existing, form = {}, kids = [], preferences = {}) {
   const input = form && typeof form === 'object' ? form : {};
   const base = buildEvent(existing, input, kids);
   const errors = { ...base.errors }, metadata = {};
+  for (const [key, choices] of [['eventType', options.types], ['color', options.colorIds], ['status', options.statuses], ['travelMinutes', options.travelTimes]]) {
+    if (!own(input, key)) continue;
+    if (!choices.includes(input[key])) errors[key] = 'optionInvalid';
+    else metadata[key] = input[key];
+  }
+  for (const key of ['bufferBeforeMinutes', 'bufferAfterMinutes']) {
+    if (!own(input, key)) continue;
+    if (!/^\d{1,3}$/.test(String(input[key])) || Number(input[key]) > 120) errors[key] = 'bufferInvalid';
+    else metadata[key] = Number(input[key]);
+  }
+  if (own(input, 'icon')) {
+    if (typeof input.icon !== 'string' || !input.icon.trim() || Array.from(input.icon.trim()).length > 12) errors.icon = 'iconInvalid';
+    else metadata.icon = input.icon.trim();
+  }
+  if (own(input, 'attendees')) {
+    const known = new Set((Array.isArray(kids) ? kids : []).map(person => person?.name).filter(Boolean));
+    const previous = Array.isArray(existing?.attendees) ? existing.attendees : [];
+    if (!Array.isArray(input.attendees) || input.attendees.some(name => name !== 'all' && !known.has(name) && !previous.includes(name))) errors.attendees = 'optionInvalid';
+    else {
+      const people = [...new Set(input.attendees)];
+      metadata.attendees = !people.length || people.includes('all') ? ['all'] : people;
+    }
+  }
   for (const [field, limit] of [['responsible', 60], ['items', 160]]) {
     if (!own(input, field)) continue;
     if (typeof input[field] !== 'string' || Array.from(input[field].trim()).length > limit) errors[field] = `${field}Invalid`;

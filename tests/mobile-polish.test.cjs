@@ -37,7 +37,7 @@ test('account help is bilingual and is honest about notifications, sharing and g
   assert.match(copy.en.faqs[5][1], /depend on your role and calendar setup/);
   assert.match(copy.en.faqs[3][1], /saved offline changes stay on this device until synced/);
   assert.match(copy.en.faqs[3][1], /Shared changes need an online confirmation/);
-  assert.match(source, /index === 4 && onReminders \? t.remindersHelp/);
+  assert.match(source, /index === 4 && reminders \? t.remindersHelp/);
   assert.match(copy.en.preferencesHint, /edit your setup answers/i);
   assert.match(copy.en.remindersHelp, /confirmed calendars you own/);
   assert.match(copy.en.remindersHelp, /shared with you do not schedule reminders/);

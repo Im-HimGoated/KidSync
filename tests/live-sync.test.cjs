@@ -143,16 +143,19 @@ test('a database change arriving during a read schedules a second catch-up', asy
 
 function reader() {
   let resolve;
+  let baseline = null;
   const stored = new Map();
   const applied = [];
   const ctx = vm.createContext({
     cloudClient: { from: () => ({ select() { return this; }, eq() { return this; }, maybeSingle: () => new Promise(done => { resolve = done; }) }) },
-    cloudSession: { user: { id: 'test-user' } }, activeAccount: { provider: 'supabase' },
+    cloudSession: { user: { id: 'test-user' } }, activeAccount: { id: 'test-user', provider: 'supabase' },
     cloudSyncBusy: false, pending: false, editing: false,
     hasPendingCloudSave: () => ctx.pending,
     navigator: { onLine: true }, cloudUpdatedKey: () => 'updated',
     localStorage: { getItem: key => stored.get(key) ?? null, setItem: (key, value) => stored.set(key, value) },
     applyCloudSnapshot: (value, options) => applied.push({ value, options }),
+    getCloudBaseline: () => baseline, buildCloudSnapshot: () => applied.at(-1)?.value || {},
+    rememberCloudBaseline: (_userId, row) => { baseline = { version: row.updated_at }; },
     setCloudSaveState() {}, reportClientError() {},
     window: { KidsSyncLiveSync: { isEditing: () => ctx.editing }, setTimeout() {} }, openWelcomeBackIfNeeded() {}
   });
@@ -169,6 +172,15 @@ test('live hydration rejects reads that race with an edit, upload, account switc
     assert.equal(await pending, false);
     assert.equal(f.applied.length, 0);
   }
+});
+
+test('a manually requested cloud read does not overwrite edits made before it finishes', async () => {
+  const f = reader();
+  const pending = f.ctx.hydrateCloudSchedule();
+  f.ctx.pending = true;
+  f.finish();
+  assert.equal(await pending, false);
+  assert.equal(f.applied.length, 0);
 });
 
 test('live hydration asks the snapshot renderer to preserve local navigation', async () => {
@@ -201,6 +213,7 @@ test('live snapshots keep the selected calendar, view and child filters', () => 
   let focusCalls = 0;
   const ctx = vm.createContext({
     currentCalendarId: 'local', currentView: 'month', calendars: [], cloudHydrating: false,
+    savedPresets: [{ id: 'old-preset' }], scheduleHistory: [{ id: 'old-history' }], activityAudit: [{ id: 'old-audit' }],
     kidProfiles: [{ name: 'Alex' }, { name: 'Taylor' }],
     state: { visibleKids: new Set(['Alex']), stackFront: new Set() }, palettes: { blue: {} },
     normalizeKidProfile: kid => kid, buildKids: kids => kids,
@@ -208,6 +221,7 @@ test('live snapshots keep the selected calendar, view and child filters', () => 
     calendarStorageKey: (name, id) => `${id}.${name}`, scheduleStorageKey: name => `local.${name}`,
     localStorage: { setItem: (key, value) => storage.set(key, value) },
     persistActiveCalendar() {}, applySettings() {}, updateAccountIdentity() {}, populateFormOptions() {}, renderAll() {}, startNotificationChecks() {},
+    loadSettings: () => ({ showWeekends: true }),
     scheduleSmartCalendarFocus: () => { focusCalls += 1; }
   });
   vm.runInContext(source('applyCloudSnapshot'), ctx);
@@ -222,6 +236,7 @@ test('live snapshots keep the selected calendar, view and child filters', () => 
   assert.equal(ctx.currentView, 'month');
   assert.deepEqual([...ctx.state.visibleKids], ['Alex']);
   assert.equal(ctx.state.activities[0].id, 'incoming');
+  for (const field of ['savedPresets', 'scheduleHistory', 'activityAudit']) assert.equal(ctx[field].length, 0);
   assert.equal(focusCalls, 0);
   assert.equal(ctx.cloudHydrating, false);
 });
@@ -229,7 +244,9 @@ test('live snapshots keep the selected calendar, view and child filters', () => 
 test('live sync is initialized after authentication, bundled offline, and has an idempotent publication migration', () => {
   assert.match(html, /await hydrateCloudSchedule\(\);\s+window.KidsSyncLiveSync\?\.start\(\)/);
   assert.match(html, /else if \(!document.hidden\) \{\s+if \(window.KidsSyncLiveSync\) window.KidsSyncLiveSync.refresh\(\)/);
+  assert(html.indexOf('./assets/cloud-snapshot-sync.js?v=1') < html.indexOf('initializeCloudSync();'));
   assert(html.includes('./assets/live-sync.js?v=2'));
+  assert(fs.readFileSync(path.join(root, 'sw.js'), 'utf8').includes('./assets/cloud-snapshot-sync.js?v=1'));
   assert(fs.readFileSync(path.join(root, 'sw.js'), 'utf8').includes('./assets/live-sync.js?v=2'));
   const sql = fs.readFileSync(path.join(root, 'supabase/live-sync.sql'), 'utf8');
   assert.match(sql, /pg_publication_tables/);

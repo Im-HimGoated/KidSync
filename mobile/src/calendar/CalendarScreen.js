@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, Home, MapPin, MessageCircle, Plus, RefreshCw, Repeat2, Search, Settings2, SlidersHorizontal, Undo2, UserPlus, UserRound, X } from 'lucide-react-native';
 import scheduleReader from '../../../shared/backend/schedules';
 import calendar from '../lib/calendar';
@@ -13,6 +13,16 @@ import PlanningTools, { planningCopy } from './PlanningTools';
 import CalendarToolbox, { toolboxCopy } from '../ui/CalendarToolbox';
 import CalendarComments, { calendarCommentsCopy } from '../ui/CalendarComments';
 import focus from './focus';
+import planning from './planning';
+import eventOptions from './event-options';
+import holidays from './holidays';
+import ActivityLists from './ActivityLists';
+import CalendarRecords from './CalendarRecords';
+import QuickAdd from './QuickAdd';
+import FamilyPoll from './FamilyPoll';
+import FamilyTime from './FamilyTime';
+import CalendarFiles, { calendarFilesAvailable } from './CalendarFiles';
+import websiteTools from '../lib/website-tools';
 
 const planningModes = { 'open-time': 'gaps', 'compare-days': 'compare', 'day-notes': 'notes', 'share-week': 'share', 'saved-views': 'views', 'find-events': 'find' };
 const nativeTools = Object.fromEntries(Object.keys(planningModes).map(id => [id, true]));
@@ -43,9 +53,9 @@ const validDate = date => date instanceof Date && Number.isFinite(date.getTime()
 const repeated = model.isRecurringActivity;
 const displayText = value => typeof value === 'string' ? value : typeof value === 'number' && Number.isFinite(value) ? String(value) : '';
 
-function CalendarAccount({ userId, account, client, calendars, snapshot, calendarId, calendarOwnerId, activeCalendarId, language = 'en', preferences, commentsRequest,
+function CalendarAccount({ userId, account, client, calendars, snapshot, calendarId, calendarOwnerId, activeCalendarId, language = 'en', preferences, commentsRequest, actionRequest,
   loading = false, syncStatus, status, error, onSchedule, onSelectCalendar, onRefresh, onOpenDashboard, onPreferences,
-  onShareCalendar, readOnly = false, initialDate, focusDate, focusTime, focusRequest, activityActions,
+  onShareCalendar, onRestoreSnapshot, onSavePreset, onRenameCalendar, onDeleteCalendar, onImportActivities, readOnly = false, initialDate, focusDate, focusTime, focusRequest, activityActions,
   sharedAccess, sharedActivityActions, onSharedSchedule, onSharedRefresh }) {
   const { colors, palettes } = useAppearance();
   const { u } = useCalendarUi();
@@ -56,6 +66,8 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
   const [date, setDate] = useState(() => validDate(initial) ? new Date(initial) : new Date());
   const [view, setView] = useState(display.view), [person, setPerson] = useState('all'), [query, setQuery] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [category, setCategory] = useState('all');
+  const [hideWeekends, setHideWeekends] = useState(false);
   const [fullMonthOpen, setFullMonthOpen] = useState(display.view === 'month');
   const [localId, setLocalId] = useState(null), [sheet, setSheet] = useState(null), [busy, setBusy] = useState(false);
   const [localOwnerId, setLocalOwnerId] = useState(null);
@@ -69,6 +81,7 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
   const mounted = useRef(true), mutation = useRef(false), refreshingRef = useRef(false), calendarScope = useRef(null);
   const sheetVersion = useRef(0);
   const handledCommentsRequest = useRef(0);
+  const handledActionRequest = useRef(0);
   const viewPreference = useRef(display.view);
   const monthReturnView = useRef(display.view === 'month' ? 'agenda' : display.view);
   const rowSnapshot = snapshot?.schedule || snapshot;
@@ -76,14 +89,28 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
   const selectedId = calendarId ?? activeCalendarId ?? localId ?? rowSnapshot?.activeCalendarId;
   const selectedOwnerId = calendarOwnerId ?? localOwnerId;
   const active = entries.find(item => item.id === selectedId && (!selectedOwnerId || (item.ownerId || userId) === selectedOwnerId)) || entries[0];
+  const activeId = active?.id ?? null;
   const scopeId = JSON.stringify([userId, active?.ownerId || userId, active?.id || '']);
   calendarScope.current = scopeId;
   const events = eventsIn(active?.data), kids = kidsIn(active?.data);
-  const filtered = model.filterActivities(events, kids, { person, query });
+  const year = date.getFullYear();
+  const builtIns = useMemo(() => [year - 1, year, year + 1].flatMap(value => holidays.builtInHolidays(value, language)), [year, language]);
+  const filtered = model.filterActivities([...events, ...builtIns].filter(event => holidays.matchesCategory(event, category)), kids, { person, query });
   const dayEvents = model.sortAgenda(calendar.eventsForDate(filtered, date), date);
-  const searchActive = !!query.trim(), filtersActive = searchActive || person !== 'all';
-  const activeFilterCount = (searchActive ? 1 : 0) + (person !== 'all' ? 1 : 0);
-  const shownEvents = searchActive ? model.sortAgenda(filtered).sort((a, b) => String(a.startDate || '').localeCompare(String(b.startDate || ''))) : dayEvents;
+  const searchActive = !!query.trim();
+  const activeFilterCount = Number(searchActive) + Number(person !== 'all') + Number(category !== 'all');
+  const filtersActive = activeFilterCount > 0;
+  let shownEvents = dayEvents;
+  if (searchActive) {
+    const from = calendar.dateKey(calendar.addDays(date, -30));
+    const through = calendar.dateKey(calendar.addDays(date, 335));
+    try {
+      shownEvents = planning.findEvents(filtered, from, through, '').map(event => ({
+        event: filtered.find(item => String(item.id) === String(event.id)) || event,
+        occurrenceDate: event.occurrenceDate,
+      }));
+    } catch { shownEvents = []; }
+  }
   const access = model.calendarAccess({ userId, client, calendar: active, onSchedule, readOnly, sharedAccess, sharedActivityActions, onSharedSchedule });
   const isShared = access.shared, blocked = sharedBlocked?.scopeId === scopeId;
   const canWrite = access.canWrite && !blocked;
@@ -108,10 +135,29 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
     if (validDate(focused)) {
       setDate(focused); setQuery(''); setPerson('all'); setFiltersOpen(false);
       setFocusedHour(focus.hourForTime(focusTime, display.initialHour));
+      if (typeof focusTime === 'string' && focusTime) { setFullMonthOpen(false); setView('day'); }
       setAcceptedFocusRequest(value => value + 1);
     }
   }, [focusDate, focusTime, focusRequest]);
-  useEffect(() => { setPerson('all'); setQuery(''); setFiltersOpen(false); setSheet(null); setMessage(''); setUndo(null); setSharedBlocked(null); setDiscardConfirm(false); draftDirty.current = false; }, [active?.id, active?.ownerId]);
+  useEffect(() => { setPerson('all'); setQuery(''); setCategory('all'); setFiltersOpen(false); setSheet(null); setMessage(''); setUndo(null); setSharedBlocked(null); setDiscardConfirm(false); draftDirty.current = false; }, [active?.id, active?.ownerId]);
+  useEffect(() => {
+    if (!actionRequest || actionRequest.id <= handledActionRequest.current || sheet || busy || planningBusy || loading
+      || actionRequest.ownerId !== userId || isShared || actionRequest.calendarId !== activeId) return;
+    handledActionRequest.current = actionRequest.id;
+    if (actionRequest.type === 'create' && canCreate && activeId === null) {
+      setName('');
+      open('create');
+    } else if (actionRequest.type === 'new' && canWrite && activeId !== null) {
+      open('new');
+    } else if (actionRequest.type === 'history' && activeId !== null) {
+      open('records', { mode: 'activity' });
+    } else if (actionRequest.type === 'details' && activeId !== null) {
+      const targetDate = calendar.parseDateKey(actionRequest.date);
+      const event = calendar.eventsForDate(events, targetDate).find(item => String(item.id) === String(actionRequest.eventId))
+        || (validDate(targetDate) && holidays.builtInHolidays(targetDate.getFullYear(), language).find(item => item.id === actionRequest.eventId));
+      if (event) showEvent(event, targetDate);
+    }
+  }, [actionRequest, activeId, active?.data, busy, canCreate, canWrite, isShared, language, loading, planningBusy, sheet, userId]);
   useEffect(() => {
     const id = Number(commentsRequest?.id);
     if (!commentsAvailable || !Number.isFinite(id) || id <= handledCommentsRequest.current || sheet || busy || planningBusy
@@ -190,6 +236,11 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
   function open(type, extra = {}) { if (busy) return; sheetVersion.current++; setMessage(''); setConflicted(false); setDiscardConfirm(false); draftDirty.current = false; setSheet({ type, ...extra }); }
   function selectCalendar(item) { if (busy) return; setLocalId(item.id); setLocalOwnerId(item.ownerId || userId); onSelectCalendar?.(item.id, item); setSheet(null); }
   function showEvent(event, occurrence = date, occurrenceStartDate) { open('details', { event, occurrenceDate: calendar.dateKey(occurrence), occurrenceStartDate }); }
+  function openProposedEvent(draft) {
+    if (!canWrite) return;
+    selectDate(calendar.parseDateKey(draft.startDate));
+    open('new', { copyDraft: draft });
+  }
   function chooseScope(operation, event, occurrenceDate = sheet?.occurrenceDate || calendar.dateKey(date)) {
     if (!writableEvent(event)) return;
     if (!repeated(event)) {
@@ -235,16 +286,15 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
   function openFullMonth() {
     if (busy) return;
     monthReturnView.current = view === 'month' ? 'agenda' : view;
-    setQuery(''); setPerson('all'); setFiltersOpen(false); setSheet(null); setView('month'); setFullMonthOpen(true);
+    setQuery(''); setFiltersOpen(false); setSheet(null); setView('month'); setFullMonthOpen(true);
   }
   function closeFullMonth() { setFullMonthOpen(false); setView(monthReturnView.current === 'month' ? 'agenda' : monthReturnView.current); }
   function openMonthDay(value) {
     if (!validDate(value)) return;
-    setPerson('all');
     openDay(value);
   }
   function addFromMonth() { setView('agenda'); setFullMonthOpen(false); open('new'); }
-  function resetFilters() { setPerson('all'); setQuery(''); setFiltersOpen(false); }
+  function resetFilters() { setPerson('all'); setQuery(''); setCategory('all'); setFiltersOpen(false); }
   async function saveActivity(event, options) {
     if (!active || !writableEvent(options?.original)) return false;
     return mutate(() => sheet?.scope === 'occurrence'
@@ -280,7 +330,16 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
   }
 
   const headerDate = dateLabel(date, language, { weekday: 'long', month: 'short', day: 'numeric' });
-  const sheetTitle = { comments: commentsCopy.title, tools: (toolboxCopy[language] || toolboxCopy.en).title, planning: (planningCopy[language] || planningCopy.en).title, calendars: t.calendars, create: t.createCalendar, date: t.datePicker, new: t.add, edit: t.edit, details: t.details, scope: sheet?.operation === 'delete' ? t.deleteScope : t.editScope, delete: t.deleteTitle }[sheet?.type];
+  const toolsCopy = toolboxCopy[language] || toolboxCopy.en;
+  const renameLabel = language === 'zh' ? '重命名日历' : 'Rename calendar';
+  const saveLabel = language === 'zh' ? '保存名称' : 'Save name';
+  const deleteCalendarLabel = language === 'zh' ? '删除日历' : 'Delete calendar';
+  const canDeleteCalendar = canWrite && !isShared && !!onDeleteCalendar && entries.filter(item => !item.ownerId || item.ownerId === userId).length > 1;
+  const canRestore = !isShared && !!onRestoreSnapshot && canWrite;
+  const sheetTitle = { comments: commentsCopy.title, tools: toolsCopy.title, lists: toolsCopy.lists, quick: toolsCopy.quickAdd, poll: toolsCopy.poll, familyTime: toolsCopy.familyTime, files: toolsCopy.export,
+    records: sheet?.mode === 'activity' ? toolsCopy.activityHistory : sheet?.mode === 'presets' ? toolsCopy.presets : toolsCopy.versionHistory,
+    planning: (planningCopy[language] || planningCopy.en).title, calendars: t.calendars, create: t.createCalendar, rename: renameLabel, deleteCalendar: deleteCalendarLabel,
+    date: t.datePicker, new: t.add, edit: t.edit, details: t.details, scope: sheet?.operation === 'delete' ? t.deleteScope : t.editScope, delete: t.deleteTitle }[sheet?.type];
   const occurrences = sheet?.type === 'scope' ? calendar.occurrencesForDate(sheet.event, sheet.occurrenceDate)
     .filter(item => !sheet.occurrenceStartDate || item.startDate === sheet.occurrenceStartDate) : [];
   const occurrenceLabel = item => {
@@ -310,14 +369,14 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
         </Pressable>
         <View style={u.row}><IconButton icon={ChevronLeft} label={t.previousPeriod[view]} onPress={() => selectDate(model.movePeriod(date, view, -1))} /><Pressable accessibilityRole="button" accessibilityLabel={t.goToday} onPress={goToday} style={s.today}><Text style={s.todayText}>{t.today}</Text></Pressable><IconButton icon={ChevronRight} label={t.nextPeriod[view]} onPress={() => selectDate(model.movePeriod(date, view, 1))} /></View>
       </View>
-      <CalendarViewPicker view={view} language={language} onChange={changeView} />
+      <CalendarViewPicker view={view} language={language} onChange={changeView} fourDays />
     </View>}
     {!!notice && <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={s.notice}>{notice}</Text>}
     {!!undo && undo.scopeId === scopeId && <View style={s.undoBanner}><Text style={[u.body, { flex: 1 }]}>{t.deletedUndo}</Text><Button secondary icon={Undo2} disabled={busy} onPress={undoDelete}>{t.undo}</Button><IconButton icon={X} label={t.dismissUndo} disabled={busy} onPress={() => setUndo(null)} /></View>}
     {!!error && <Pressable accessibilityRole="button" accessibilityLabel={`${t.loadFailed} ${t.refresh}`} accessibilityState={{ disabled: refreshing || busy }} disabled={refreshing || busy} onPress={refresh} style={s.errorBanner}><Text style={[u.error, { flex: 1 }]}>{t.loadFailed}</Text><RefreshCw size={18} color={colors.error} /></Pressable>}
-    {showingFullMonth ? <FullMonthPage date={date} firstDay={display.firstDay} events={events} kids={kids} language={language}
+    {showingFullMonth ? <FullMonthPage date={date} firstDay={display.firstDay} events={filtered} kids={kids} language={language}
       calendarName={displayText(active?.name) || t.calendar} canWrite={canWrite} onBack={closeFullMonth} onMonth={selectDate}
-      onDate={openMonthDay} onEvent={showEvent} onAdd={addFromMonth} /> : <ScrollView style={{ flex: 1 }} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />}>
+      onDate={selectDate} onOpenDay={openMonthDay} onEvent={showEvent} onAdd={addFromMonth} /> : <ScrollView nestedScrollEnabled style={{ flex: 1 }} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />}>
       <View style={s.filterBlock}>
         <Pressable accessibilityRole="button" accessibilityState={{ expanded: filtersOpen }} accessibilityHint={t.findFilterHint}
           onPress={() => setFiltersOpen(value => !value)} style={s.filterToggle}>
@@ -328,18 +387,34 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
         </Pressable>
         {filtersOpen && <View style={s.filterPanel}>
           <View style={s.search}><Search size={18} color={colors.muted} /><TextInput accessibilityLabel={t.search} value={query} onChangeText={setQuery} placeholder={t.searchPlaceholder} placeholderTextColor={colors.muted} style={s.searchInput} autoCorrect={false} returnKeyType="search" />{!!query && <IconButton icon={X} label={t.clear} onPress={() => setQuery('')} />}</View>
+          <ChoiceRow label={language === 'zh' ? '活动类别' : 'Event category'} value={category} onChange={setCategory}
+            options={['all', 'holidays', 'special'].map((value, index) => ({ value,
+              label: (language === 'zh' ? ['所有活动', '节日', '特别日期'] : ['All events', 'Holidays', 'Special days'])[index] }))} />
+          {view === 'week' && <View style={u.row}><Text style={u.label}>{language === 'zh' ? '隐藏周末' : 'Hide weekends'}</Text>
+            <Switch accessibilityLabel={language === 'zh' ? '隐藏周末' : 'Hide weekends'} value={hideWeekends} onValueChange={setHideWeekends} /></View>}
           {searchActive && <Text style={s.searchScope}>{t.searchScope}</Text>}
           {!!kids.length && <ScrollView horizontal showsHorizontalScrollIndicator={false}><ChoiceRow options={filters} value={person} onChange={setPerson} label={t.everyone} /></ScrollView>}
         </View>}
       </View>
       {pending ? <View style={u.empty}><ActivityIndicator color={colors.primary} accessibilityLabel={t.loading} /><Text style={u.body}>{t.loading}</Text></View> : !active ? <View style={u.empty}><CalendarDays size={36} color={colors.primary} /><Text style={[u.heading, s.center]}>{t.noCalendar}</Text><Text style={[u.body, s.center]}>{t.noCalendarBody}</Text>{canCreate && <Button icon={Plus} onPress={() => open('create')}>{t.createCalendar}</Button>}</View> : <>
-        {!searchActive && view !== 'week' && <DateStrip date={date} firstDay={display.firstDay} events={filtered} kids={kids}
+        {!searchActive && view !== 'week' && view !== 'four' && <DateStrip date={date} firstDay={display.firstDay} events={filtered} kids={kids}
           language={language} onDate={selectDate} compact={view !== 'agenda'} />}
-        {!searchActive && (view === 'week' || view === 'day') && <WeekGrid key={`focus:${acceptedFocusRequest}`}
-          date={date} dayOnly={view === 'day'} firstDay={display.firstDay} initialHour={focusedHour} events={filtered} kids={kids}
-          language={language} onDate={selectDate} onOpenDay={openDay} onEvent={showEvent} />}
+        {!searchActive && ['week', 'day', 'four'].includes(view) && <WeekGrid key={`focus:${acceptedFocusRequest}`}
+          date={date} dayOnly={view === 'day'} fourDays={view === 'four'} hideWeekends={hideWeekends} firstDay={display.firstDay} initialHour={focusedHour} events={filtered} kids={kids}
+          language={language} onDate={selectDate} onOpenDay={openDay} onEvent={showEvent}
+          onAddAtTime={canWrite && !busy ? (day, hour) => {
+            selectDate(day);
+            const startDate = calendar.dateKey(day);
+            open('new', { initialDraft: { startDate, start: `${String(hour).padStart(2, '0')}:00`,
+              end: `${String((hour + 1) % 24).padStart(2, '0')}:00`, endDate: hour === 23 ? calendar.dateKey(calendar.addDays(day, 1)) : '' } });
+          } : undefined} />}
         <View style={s.agendaHeading}><Text accessibilityRole="header" style={s.agendaTitle}>{searchActive ? t.searchResults : headerDate}</Text><View style={s.agendaActions}><View style={s.count}><Text style={s.countText}>{shownEvents.length}</Text></View>{commentsAvailable && <IconButton icon={MessageCircle} label={commentsCopy.title} disabled={busy || planningBusy} onPress={() => open('comments')} />}</View></View>
-        {shownEvents.length ? shownEvents.map((event, index) => <ActivityCard key={`${event.id ?? 'activity'}:${index}`} event={event} date={date} kids={kids} language={language} showDate={searchActive} onPress={() => showEvent(event, searchActive && validDate(calendar.parseDateKey(event.startDate)) ? calendar.parseDateKey(event.startDate) : date)} />) : <View style={u.empty}><CalendarDays size={28} color={colors.success} /><Text style={[u.heading, s.center]}>{filtersActive ? t.noResults : t.empty}</Text><Text style={[u.body, s.center]}>{filtersActive ? t.filteredBody : t.emptyBody}</Text>{filtersActive ? <Button secondary icon={X} onPress={resetFilters}>{t.resetFilters}</Button> : canWrite && <Button secondary icon={Plus} onPress={() => open('new')}>{t.add}</Button>}</View>}
+        {shownEvents.length ? shownEvents.map((item, index) => {
+          const event = searchActive ? item.event : item;
+          const occurrence = searchActive ? calendar.parseDateKey(item.occurrenceDate) : date;
+          return <ActivityCard key={`${event.id ?? 'activity'}:${searchActive ? item.occurrenceDate : index}`} event={event} date={occurrence} occurrenceDate={searchActive ? item.occurrenceDate : ''}
+            kids={kids} language={language} showDate={searchActive} onPress={() => showEvent(event, occurrence)} />;
+        }) : <View style={u.empty}><CalendarDays size={28} color={colors.success} /><Text style={[u.heading, s.center]}>{filtersActive ? t.noResults : t.empty}</Text><Text style={[u.body, s.center]}>{filtersActive ? t.filteredBody : t.emptyBody}</Text>{filtersActive ? <Button secondary icon={X} onPress={resetFilters}>{t.resetFilters}</Button> : canWrite && <Button secondary icon={Plus} onPress={() => open('new')}>{t.add}</Button>}</View>}
         <View style={s.syncRow}><Text style={s.syncText}>{refreshing ? t.refreshing : t.refresh}</Text><IconButton icon={RefreshCw} label={t.refresh} onPress={refresh} disabled={refreshing || busy} color={colors.muted} /></View>
         {!canWrite && <Text style={[u.body, s.center]}>{isShared && sharedAccess?.stale ? t.sharedStale
           : isShared && (access.setupRequired || sharedBlocked?.code === 'SETUP_REQUIRED') ? t.sharedSetup : t.readOnly}</Text>}
@@ -354,10 +429,56 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
     {sheet.type === 'comments' && commentsAvailable && <View accessibilityElementsHidden={discardConfirm} importantForAccessibility={discardConfirm ? 'no-hide-descendants' : 'auto'} style={{ flexShrink: 1, display: discardConfirm ? 'none' : 'flex' }}><CalendarComments key={scopeId} client={client} account={account}
       calendar={{ id: active.id, ownerId: active.ownerId || userId, name: active.name }} role={commentRole} stale={!!sharedAccess?.stale}
       language={language} onDirtyChange={onDirtyChange} onBusyChange={setPlanningBusy} /></View>}
-    {sheet.type === 'tools' && <CalendarToolbox embedded language={language} onClose={closeSheet} nativeAvailability={nativeTools}
+    {sheet.type === 'tools' && <CalendarToolbox embedded language={language} onClose={closeSheet}
+      nativeAvailability={{ ...nativeTools, 'quick-add': canWrite, 'family-poll': true, 'family-time': true, 'activity-lists': true, 'activity-history': true, 'version-history': canRestore, presets: canRestore,
+        'export-calendar': calendarFilesAvailable, 'print-schedule': calendarFilesAvailable }}
       onPlanning={id => open('planning', { mode: planningModes[id] || 'gaps' })}
+      onTool={id => {
+        if (id === 'activity-lists') open('lists');
+        else if (id === 'quick-add') open('quick');
+        else if (id === 'family-poll') open('poll');
+        else if (id === 'family-time') open('familyTime');
+        else if (id === 'export-calendar' || id === 'print-schedule') open('files', { mode: id === 'print-schedule' ? 'print' : 'export' });
+        else open('records', { mode: id === 'presets' ? 'presets' : id === 'version-history' ? 'versions' : 'activity' });
+      }}
       onPreferences={onPreferences ? () => { closeSheet(); onPreferences(); } : undefined}
-      onWebsite={async () => { const request = sheetVersion.current; await Linking.openURL('https://kid-sync-delta.vercel.app/'); if (mounted.current && calendarScope.current === scopeId && sheetVersion.current === request) closeSheet(); }} />}
+      onWebsite={!isShared ? async id => {
+        const request = sheetVersion.current;
+        const url = websiteTools.toolUrl(id, !isShared ? active?.id : null);
+        if (!url) return false;
+        await Linking.openURL(url);
+        if (mounted.current && calendarScope.current === scopeId && sheetVersion.current === request) closeSheet();
+        return true;
+      } : undefined} />}
+    {sheet.type === 'quick' && <QuickAdd language={language} date={date} onDraft={draft => {
+      selectDate(calendar.parseDateKey(draft.startDate));
+      open('new', { copyDraft: { ...draft, start: draft.start ?? '', end: draft.end ?? '' } });
+    }} />}
+    {sheet.type === 'poll' && <FamilyPoll key={scopeId} scope={scopeId} language={language} initialDate={calendar.dateKey(date)}
+      kids={kids} events={events} canWrite={canWrite} onDraft={openProposedEvent} />}
+    {sheet.type === 'familyTime' && <FamilyTime date={date} kids={kids} events={events} language={language}
+      canWrite={canWrite} onDraft={openProposedEvent} />}
+    {sheet.type === 'files' && active && <CalendarFiles key={scopeId} language={language} active={active} date={date} kids={kids} events={events}
+      firstDay={display.firstDay} initialMode={sheet.mode} onBusyChange={setPlanningBusy}
+      onImport={!isShared && canWrite && onImportActivities ? imported => onImportActivities(active.id, imported) : undefined} />}
+    {sheet.type === 'lists' && <ActivityLists key={scopeId} events={events} language={language} onOpen={(id, day) => {
+      const event = events.find(item => String(item.id) === String(id));
+      if (event) { selectDate(day); showEvent(event, day); }
+    }} />}
+    {sheet.type === 'records' && active && <CalendarRecords key={scopeId} client={client} userId={userId} ownerId={active.ownerId || userId} calendarId={active.id}
+      data={active.data || {}} initialMode={sheet.mode} onRefresh={refresh} busy={busy} language={language}
+      onSavePreset={canRestore && onSavePreset ? async request => {
+        if (mutation.current) throw new Error('Calendar is busy');
+        mutation.current = true; setBusy(true);
+        try { await onSavePreset(active.id, request); }
+        finally { mutation.current = false; if (mounted.current) setBusy(false); }
+      } : undefined}
+      onRestore={canRestore ? async request => {
+        if (mutation.current) throw new Error('Calendar is busy');
+        mutation.current = true; setBusy(true);
+        try { await onRestoreSnapshot(active.id, request); }
+        finally { mutation.current = false; if (mounted.current) setBusy(false); }
+      } : undefined} />}
     {sheet.type === 'planning' && !!active && <View accessibilityElementsHidden={discardConfirm} importantForAccessibility={discardConfirm ? 'no-hide-descendants' : 'auto'} style={{ flexShrink: 1, display: discardConfirm ? 'none' : 'flex' }}><PlanningTools key={scopeId} embedded onDirtyChange={onDirtyChange} onBusyChange={setPlanningBusy} initialMode={sheet.mode} userId={userId} ownerId={active.ownerId || userId} calendarId={active.id}
       events={events} kids={kids} date={date} language={language} firstDay={display.firstDay} canWrite={canWrite}
       selectedView={{ view, date: calendar.dateKey(date), query, person }} onClose={closeSheet}
@@ -367,9 +488,13 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
         if (value.view === 'month') { monthReturnView.current = 'agenda'; setView('month'); setFullMonthOpen(true); }
         else { monthReturnView.current = value.view; setFullMonthOpen(false); setView(value.view); } }} /></View>}
       {!!message && <View style={s.sheetFeedback}><Text accessibilityRole="alert" style={u.error}>{message}</Text>{conflicted && <Button secondary icon={RefreshCw} onPress={refresh} disabled={refreshing}>{t.conflictRefresh}</Button>}</View>}
-      {sheet.type === 'details' && <ActivityDetails event={sheet.event} occurrenceDate={sheet.occurrenceDate} occurrenceStartDate={sheet.occurrenceStartDate} kids={kids} language={language} canEdit={writableEvent(sheet.event)} busy={busy} onEdit={event => chooseScope('edit', event)} onDelete={deleteActivity} onDeleteRequest={repeated(sheet.event) ? event => chooseScope('delete', event) : undefined} />}
+      {sheet.type === 'details' && <ActivityDetails event={sheet.event} occurrenceDate={sheet.occurrenceDate} occurrenceStartDate={sheet.occurrenceStartDate} kids={kids} language={language} canEdit={writableEvent(sheet.event)} busy={busy} onEdit={event => chooseScope('edit', event)}
+        onDuplicate={event => {
+          const occurrence = calendar.parseDateKey(sheet.occurrenceStartDate || sheet.occurrenceDate);
+          open('new', { copyDraft: eventOptions.duplicateDraft(event, validDate(occurrence) ? occurrence : date) });
+        }} onDelete={deleteActivity} onDeleteRequest={repeated(sheet.event) ? event => chooseScope('delete', event) : undefined} />}
       {['new', 'edit'].includes(sheet.type) && (canWrite || isShared) && <View accessibilityElementsHidden={discardConfirm} importantForAccessibility={discardConfirm ? 'no-hide-descendants' : 'auto'} style={{ flexShrink: 1, display: discardConfirm ? 'none' : 'flex' }}>
-        <ActivityEditor event={sheet.type === 'edit' ? sheet.event : null} initialDraft={sheet.type === 'new' ? sheet.initialDraft : undefined} date={date} kids={kids} preferences={preferences} language={language} busy={busy} disabled={!canWrite} error={message} onSave={saveActivity} onCancel={requestClose} onDirtyChange={onDirtyChange} scope={sheet.scope} />
+        <ActivityEditor event={sheet.type === 'edit' ? sheet.event : null} initialDraft={sheet.type === 'new' ? sheet.initialDraft : undefined} copyDraft={sheet.copyDraft} date={date} kids={kids} events={events} preferences={preferences} language={language} busy={busy} disabled={!canWrite} error={message} onSave={saveActivity} onCancel={requestClose} onDirtyChange={onDirtyChange} scope={sheet.scope} />
       </View>}
       {sheet.type === 'scope' && <ScrollView contentContainerStyle={[s.sheetContent, s.scopeContent]}>
         <Text style={u.heading}>{displayText(sheet.event.title) || t.calendar}</Text><Text style={u.body}>{t.scopeBody}</Text>
@@ -384,7 +509,23 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
         <Button secondary disabled={busy} onPress={() => showEvent(sheet.event, calendar.parseDateKey(sheet.occurrenceDate), sheet.occurrenceStartDate)}>{t.keepActivity}</Button>
         <Button danger disabled={busy} onPress={() => deleteActivity(sheet.event, sheet)}>{busy ? t.deleting : sheet.scope === 'occurrence' ? t.deleteThisEvent : t.deleteEntireSeries}</Button>
       </ScrollView>}
-      {sheet.type === 'calendars' && <ScrollView contentContainerStyle={s.sheetContent}>{entries.map(item => <Pressable key={JSON.stringify([item.ownerId || userId, item.id])} accessibilityRole="button" accessibilityState={{ selected: item === active }} onPress={() => selectCalendar(item)} style={s.calendarOption}><CalendarDays size={21} color={colors.primary} /><Text style={[u.label, { flex: 1 }]}>{displayText(item.name) || t.calendar}</Text>{item === active && <Check size={19} color={colors.primary} />}</Pressable>)}{canCreate && <Button secondary icon={Plus} onPress={() => { setName(''); open('create'); }}>{t.createCalendar}</Button>}</ScrollView>}
+      {sheet.type === 'calendars' && <ScrollView contentContainerStyle={s.sheetContent}>{entries.map(item => <Pressable key={JSON.stringify([item.ownerId || userId, item.id])} accessibilityRole="button" accessibilityState={{ selected: item === active }} onPress={() => selectCalendar(item)} style={s.calendarOption}><CalendarDays size={21} color={colors.primary} /><Text style={[u.label, { flex: 1 }]}>{displayText(item.name) || t.calendar}</Text>{item === active && <Check size={19} color={colors.primary} />}</Pressable>)}
+        {canCreate && <Button secondary icon={Plus} onPress={() => { setName(''); open('create'); }}>{t.createCalendar}</Button>}
+        {canCreate && active && !!onRenameCalendar && <Button secondary onPress={() => { setName(active.name); open('rename', { originalName: active.name }); }}>{renameLabel}</Button>}
+        {canDeleteCalendar && active && <Button danger secondary onPress={() => open('deleteCalendar', { baseline: { name: active.name, data: active.data } })}>{deleteCalendarLabel}</Button>}
+      </ScrollView>}
+      {sheet.type === 'rename' && <View style={s.sheetContent}>
+        <Field label={t.calendarName} value={name} onChangeText={setName} maxLength={40} autoFocus editable={!busy} />
+        <Button disabled={busy || !name.trim() || name.trim() === sheet.originalName} onPress={() => mutate(
+          () => onRenameCalendar(active.id, { originalName: sheet.originalName, name }), closeSheet)}>{saveLabel}</Button>
+      </View>}
+      {sheet.type === 'deleteCalendar' && <View style={s.sheetContent}>
+        <Text style={u.heading}>{displayText(sheet.baseline.name)}</Text>
+        <Text style={u.body}>{language === 'zh' ? '此日历中的所有活动将被删除，共享成员将失去访问权限。' : 'This permanently deletes the events in this calendar. Shared members will lose access.'}</Text>
+        <Button secondary disabled={busy} onPress={() => open('calendars')}>{t.cancel}</Button>
+        <Button danger disabled={busy || !canDeleteCalendar} onPress={() => mutate(
+          () => onDeleteCalendar(active.id, sheet.baseline), closeSheet)}>{busy ? t.deleting : deleteCalendarLabel}</Button>
+      </View>}
       {sheet.type === 'create' && <View style={s.sheetContent}><Field label={t.calendarName} value={name} onChangeText={setName} maxLength={100} autoFocus editable={!busy} onSubmitEditing={createCalendar} /><Button disabled={busy || !name.trim()} onPress={createCalendar}>{busy ? t.refreshing : t.createCalendar}</Button></View>}
       {sheet.type === 'date' && <View style={s.sheetContent}><Field label={t.date} value={jump} onChangeText={value => { setJump(value); setMessage(''); }} placeholder={t.dateHint} maxLength={10} autoFocus autoCapitalize="none" keyboardType="numbers-and-punctuation" returnKeyType="go" onSubmitEditing={jumpToDate} /><Button onPress={jumpToDate}>{t.jump}</Button></View>}
     </>}
@@ -393,7 +534,7 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
   </View>;
 }
 
-function ActivityCard({ event, date, kids, language, onPress, showDate }) {
+function ActivityCard({ event, date, kids, language, onPress, showDate, occurrenceDate }) {
   const { colors, palettes } = useAppearance();
   const { u } = useCalendarUi();
   const s = useMemo(() => createStyles(colors), [colors]);
@@ -406,10 +547,11 @@ function ActivityCard({ event, date, kids, language, onPress, showDate }) {
   const startTime = !overlapping && segment?.continuesBefore ? t.continuesBefore : calendar.formatTime(event.start, language) || t.untimed;
   const endTime = !overlapping && segment?.continuesAfter ? t.continuesAfter : calendar.formatTime(event.end, language);
   const time = overlapping ? t.multipleOccurrences : event.allDay ? t.allDay : `${startTime}${endTime ? ` – ${endTime}` : ''}`;
-  const label = [cancelled && t.cancelled, title, showDate && (displayText(event.startDate) || t.noDate), time, person, location, responsible].filter(Boolean).join(', ');
+  const visibleDate = displayText(occurrenceDate) || displayText(event.startDate) || t.noDate;
+  const label = [cancelled && t.cancelled, title, showDate && visibleDate, time, person, location, responsible].filter(Boolean).join(', ');
   return <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={({ pressed }) => [s.activity, { borderLeftColor: palette.line }, (pressed || cancelled) && { opacity: 0.6 }]}>
     <View style={s.cardTop}><Text numberOfLines={2} style={[s.activityTitle, cancelled && { textDecorationLine: 'line-through' }]}>{displayText(event.icon) || '📅'}  {title}</Text>{event.importance === 'high' && <Text style={s.important}>!</Text>}<ChevronRight size={17} color={colors.muted} /></View>
-    {!!showDate && <Text style={s.meta}>{displayText(event.startDate) || t.noDate}</Text>}
+    {!!showDate && <Text style={s.meta}>{visibleDate}</Text>}
     <View style={s.eventSummary}><Text numberOfLines={1} style={[s.time, { color: palette.ink }]}>{time}</Text><View style={[s.dot, { backgroundColor: palette.line }]} /><Text numberOfLines={1} style={[s.person, { color: palette.ink }]}>{person}</Text>{cancelled && <Text style={{ color: colors.error, fontSize: 12 }}>{t.cancelled}</Text>}</View>
     {!!location && <View style={u.row}><MapPin size={14} color={colors.muted} /><Text style={s.meta}>{location}</Text></View>}
     {(!!responsible || (!!event.recurrence && event.recurrence !== 'none')) && <View style={s.cardFooter}>{!!responsible && <><UserRound size={14} color={colors.muted} /><Text numberOfLines={1} style={[s.meta, { flex: 1 }]}>{t.pickup}: {responsible}</Text></>}{!!event.recurrence && event.recurrence !== 'none' && <Repeat2 size={15} color={colors.muted} />}</View>}

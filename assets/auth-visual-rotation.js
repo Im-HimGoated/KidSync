@@ -7,8 +7,8 @@
 
   const slides = [
     {
-      src: "./assets/kidssync-auth-family-signin.jpg",
-      position: "62% center",
+      src: "./assets/kidssync-family-hero.jpg",
+      position: "52% center",
       kicker: "auth.visualKicker",
       title: "auth.visualTitle",
       body: "auth.visualBody"
@@ -45,13 +45,12 @@
     body: document.getElementById("authVisualBody")
   };
   const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-  const rotationDelay = 9000;
+  const rotationDelay = 6500;
   let currentIndex = 0;
   let timer = 0;
   let copyTimer = 0;
   let transitionToken = 0;
   let userPaused = false;
-  let interactionPaused = false;
 
   function translated(key) {
     return typeof t === "function" ? t(key) : key;
@@ -99,7 +98,7 @@
   }
 
   function canRotate() {
-    return !screen.hidden && !document.hidden && !userPaused && !interactionPaused && !reducedMotion?.matches;
+    return !screen.hidden && !document.hidden && !userPaused && !reducedMotion?.matches;
   }
 
   function scheduleRotation() {
@@ -161,24 +160,6 @@
     scheduleRotation();
   });
 
-  visual.addEventListener("mouseenter", () => {
-    interactionPaused = true;
-    stopRotation();
-  });
-  visual.addEventListener("mouseleave", () => {
-    interactionPaused = false;
-    scheduleRotation();
-  });
-  visual.addEventListener("focusin", () => {
-    interactionPaused = true;
-    stopRotation();
-  });
-  visual.addEventListener("focusout", () => {
-    window.setTimeout(() => {
-      interactionPaused = visual.contains(document.activeElement);
-      scheduleRotation();
-    }, 0);
-  });
   document.addEventListener("visibilitychange", scheduleRotation);
   reducedMotion?.addEventListener?.("change", scheduleRotation);
   new MutationObserver(scheduleRotation).observe(screen, { attributes: true, attributeFilter: ["hidden"] });

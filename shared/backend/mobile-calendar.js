@@ -391,4 +391,157 @@ async function createCalendar(client, userId, { name } = {}) {
   return { ...data, calendarId: id };
 }
 
-module.exports = { MobileCalendarError, saveActivity, deleteActivity, createCalendar, mutateActivities, restoreActivities };
+async function saveFamilyProfiles(client, userId, calendarId, { original, profiles } = {}) {
+  if (!Array.isArray(original) || !Array.isArray(profiles) || profiles.length > 50) {
+    fail('INVALID_ACTIVITY', 'Use a valid list of family profiles.');
+  }
+  const names = new Set(), ids = new Set();
+  const kids = jsonCopy(profiles).map(profile => {
+    if (!record(profile) || !validId(profile.id) || ids.has(profile.id) || typeof profile.name !== 'string'
+      || !profile.name.trim() || ['__family__', 'all'].includes(profile.name.trim().toLowerCase()) || profile.name.trim().length > 28
+      || names.has(profile.name.trim().toLowerCase()) || !['blue', 'green', 'coral', 'gold'].includes(profile.palette)
+      || typeof profile.avatar !== 'string' || profile.avatar.length > 16
+      || typeof profile.grade !== 'string' || profile.grade.length > 30
+      || typeof profile.school !== 'string' || profile.school.length > 60) {
+      fail('INVALID_ACTIVITY', 'Check the family profile names and details.');
+    }
+    const name = profile.name.trim();
+    names.add(name.toLowerCase()); ids.add(profile.id);
+    return { ...profile, name, grade: profile.grade.trim(), school: profile.school.trim() };
+  });
+  const row = await loadOwnerRow(client, userId);
+  if (!row) fail('NO_CALENDAR', 'Choose an existing calendar.');
+  const selected = locateCalendar(row.schedule, calendarId);
+  const saved = selected.data.kids ?? [];
+  if (!equal(saved, original)) fail('CONFLICT', 'Family profiles changed. Refresh and try again.');
+  const updatedById = new Map(kids.map(kid => [kid.id, kid.name]));
+  const renamed = new Map(saved.filter(kid => typeof kid?.name === 'string')
+    .map(kid => [kid.name, updatedById.get(kid.id) ?? (kid.id == null && kids.some(next => next.name === kid.name) ? kid.name : null)])
+    .filter(([name, updated]) => name !== updated));
+  const updateActivities = activities => activities.map(activity => {
+    if (!record(activity)) return activity;
+    const child = renamed.has(activity.child) ? renamed.get(activity.child) || '__family__' : activity.child;
+    const attendees = Array.isArray(activity.attendees) && activity.attendees.some(person => renamed.has(person))
+      ? [...new Set(activity.attendees.map(person => renamed.has(person) ? renamed.get(person) : person).filter(Boolean))]
+      : null;
+    return { ...activity, ...(child === activity.child ? {} : { child }),
+      ...(attendees ? { attendees: attendees.length ? attendees : ['all'] } : {}) };
+  });
+  const activities = updateActivities(selected.activities);
+  const schedule = selected.modern ? { ...row.schedule,
+    calendarData: { ...row.schedule.calendarData, [calendarId]: { ...selected.data, kids, activities } },
+    ...(row.schedule.activeCalendarId === calendarId ? { kids,
+      ...(Array.isArray(row.schedule.activities) ? { activities: updateActivities(row.schedule.activities) } : {}) } : {}) } : { ...row.schedule, kids, activities };
+  return compareAndSet(client, userId, row, schedule);
+}
+
+async function restoreCalendarSnapshot(client, userId, id, { versionId, collection, baseline } = {}) {
+  if (!['history', 'presets'].includes(collection) || typeof versionId !== 'string' || !record(baseline)) {
+    fail('INVALID_ACTIVITY', 'Choose a saved calendar version.');
+  }
+  const row = await loadOwnerRow(client, userId);
+  if (!row) fail('NO_CALENDAR', 'Choose an existing calendar.');
+  const selected = locateCalendar(row.schedule, id);
+  const { data, activities } = selected;
+  if (!equal(data.kids ?? [], baseline.kids ?? []) || !equal(activities, baseline.activities ?? [])) {
+    fail('CONFLICT', 'This calendar changed. Refresh and try again.');
+  }
+  const list = data[collection], version = Array.isArray(list) && list.find(item => item?.id === versionId);
+  const restore = version?.snapshot;
+  if (!record(restore) || !Array.isArray(restore.kids) || !Array.isArray(restore.activities)) {
+    fail('INVALID_ACTIVITY', 'This saved calendar version is unavailable.');
+  }
+  if (baseline.snapshot && !equal(restore, baseline.snapshot)) fail('CONFLICT', 'The saved version changed. Refresh and try again.');
+  const kids = jsonCopy(restore.kids), nextActivities = jsonCopy(restore.activities);
+  const current = { kids: data.kids ?? [], activities, visibleKids: data.visibleKids ?? [] };
+  const history = [{ id: calendarId(), label: `Before restore · ${String(version.label || version.name || '').slice(0, 100)}`,
+    savedAt: new Date().toISOString(), snapshot: current }, ...(Array.isArray(data.history) ? data.history : [])].slice(0, 20);
+  const patch = { kids, activities: nextActivities, history,
+    ...(Array.isArray(restore.visibleKids) ? { visibleKids: restore.visibleKids } : {}) };
+  const schedule = selected.modern ? { ...row.schedule,
+    calendarData: { ...row.schedule.calendarData, [id]: { ...data, ...patch } },
+    ...(row.schedule.activeCalendarId === id ? patch : {}) } : { ...row.schedule, ...patch };
+  return compareAndSet(client, userId, row, schedule);
+}
+
+async function importActivities(client, userId, id, events) {
+  if (!Array.isArray(events) || !events.length || events.length > 300) fail('INVALID_ACTIVITY', 'Choose valid activities to import.');
+  const row = await loadOwnerRow(client, userId);
+  if (!row) fail('NO_CALENDAR', 'Choose an existing calendar.');
+  const selected = locateCalendar(row.schedule, id);
+  const ids = new Set(), additions = [];
+  for (const event of jsonCopy(events)) {
+    validateActivity(event);
+    if (ids.has(event.id) || event.externalSource || event.isBuiltInHoliday) fail('INVALID_ACTIVITY', 'Use distinct calendar activities.');
+    ids.add(event.id);
+    const index = findActivity(selected.activities, event.id);
+    if (index === -1) additions.push(event);
+    else if (!equal(selected.activities[index], event)) fail('CONFLICT', 'An imported activity has changed.');
+  }
+  if (!additions.length) return row;
+  const activities = [...selected.activities, ...additions];
+  const schedule = selected.modern ? { ...row.schedule,
+    calendarData: { ...row.schedule.calendarData, [id]: { ...selected.data, activities } },
+    ...(row.schedule.activeCalendarId === id && Array.isArray(row.schedule.activities)
+      ? { activities: [...row.schedule.activities, ...additions.filter(event => findActivity(row.schedule.activities, event.id) < 0)] } : {}),
+  } : { ...row.schedule, activities };
+  return compareAndSet(client, userId, row, schedule);
+}
+
+async function renameCalendar(client, userId, id, { originalName, name } = {}) {
+  if (typeof name !== 'string' || !name.trim() || name.trim().length > 40) fail('INVALID_ACTIVITY', 'Enter a calendar name.');
+  const row = await loadOwnerRow(client, userId);
+  if (!row) fail('NO_CALENDAR', 'Choose an existing calendar.');
+  const selected = locateCalendar(row.schedule, id);
+  let schedule = row.schedule;
+  if (!selected.modern) {
+    schedule = { ...schedule, activeCalendarId: id, calendars: [{ id, name: 'Family' }], calendarData: { [id]: selected.data } };
+  }
+  const current = schedule.calendars.find(item => item.id === id);
+  if (current.name !== originalName) fail('CONFLICT', 'The calendar name changed. Refresh and try again.');
+  const calendars = schedule.calendars.map(item => item.id === id ? { ...item, name: name.trim() } : item);
+  return compareAndSet(client, userId, row, { ...schedule, calendars });
+}
+
+async function deleteCalendar(client, userId, id, { name, data } = {}) {
+  if (typeof name !== 'string' || !record(data)) fail('INVALID_ACTIVITY', 'Review the calendar before deleting it.');
+  const row = await loadOwnerRow(client, userId);
+  if (!row) fail('NO_CALENDAR', 'Choose an existing calendar.');
+  const selected = locateCalendar(row.schedule, id);
+  const { calendars, calendarData } = row.schedule;
+  if (!selected.modern || calendars.length < 2) fail('FORBIDDEN', 'Keep at least one owned calendar.');
+  const current = calendars.find(item => item?.id === id);
+  if (current.name !== name || !equal(selected.data, data)) fail('CONFLICT', 'The calendar changed. Refresh and try again.');
+  const remaining = calendars.filter(item => item?.id !== id);
+  const nextData = { ...calendarData };
+  delete nextData[id];
+  const replacement = remaining.find(item => typeof item?.id === 'string' && item.name && record(nextData[item.id]));
+  if (!replacement) fail('FORBIDDEN', 'Keep at least one owned calendar.');
+  const next = { ...row.schedule, calendarData: nextData, calendars: remaining };
+  if (next.activeCalendarId === id) {
+    next.activeCalendarId = replacement.id;
+    const alternate = nextData[replacement.id];
+    for (const key of ['kids', 'activities', 'history', 'presets', 'audit', 'settings', 'view']) {
+      if (own(alternate, key)) next[key] = alternate[key];
+      else delete next[key];
+    }
+  }
+  return compareAndSet(client, userId, row, next);
+}
+
+async function saveCalendarPreset(client, userId, id, { name, presetId } = {}) {
+  if (typeof name !== 'string' || !name.trim() || name.trim().length > 100 || !validId(presetId)) fail('INVALID_ACTIVITY', 'Enter a preset name.');
+  const row = await loadOwnerRow(client, userId);
+  if (!row) fail('NO_CALENDAR', 'Choose an existing calendar.');
+  const { data, activities, modern } = locateCalendar(row.schedule, id);
+  const list = Array.isArray(data.presets) ? data.presets : [];
+  if (list.some(item => item?.id === presetId)) return row;
+  const presets = [{ id: presetId, name: name.trim(), savedAt: new Date().toISOString(),
+    snapshot: { kids: data.kids ?? [], activities, visibleKids: data.visibleKids ?? [] } }, ...list].slice(0, 30);
+  const schedule = modern ? { ...row.schedule, calendarData: { ...row.schedule.calendarData, [id]: { ...data, presets } },
+    ...(row.schedule.activeCalendarId === id ? { presets } : {}) } : { ...row.schedule, presets };
+  return compareAndSet(client, userId, row, schedule);
+}
+
+module.exports = { MobileCalendarError, saveActivity, deleteActivity, createCalendar, mutateActivities, restoreActivities,
+  saveFamilyProfiles, restoreCalendarSnapshot, importActivities, renameCalendar, deleteCalendar, saveCalendarPreset };
