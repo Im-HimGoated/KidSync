@@ -395,3 +395,28 @@ Production signup and recovery email delivery, a live
 two-account invitation/pickup/shared-edit round trip, OS notification delivery,
 and physical iPhone and Android checks are still open. No live invitations,
 comments, schedule writes, or notifications were sent in this pass.
+
+## Signed-in Day and Week acceptance (November 21, 2026)
+
+- Used Xcode UI automation against the existing Expo Go session on **iPhone 16
+  Pro / iOS 26.5**, explicitly targeting simulator
+  `9981DAB2-482C-4EDD-A152-19A6CD6B95AF`. No iPhone 17 Pro was selected.
+- Restored native control independently of the Device Hub window bridge. The
+  weekly-preview sheet covered Home and exposed a second Open calendar button;
+  choosing the hittable control opened the account's actual calendar. No user
+  reopen or sign-in handoff was needed.
+- Visually inspected native screenshots of Day and Week at Today, after vertical
+  scrolling from morning to afternoon, and after next-day/next-week navigation.
+  Hourly lines remained visible across Day's full width and across highlighted
+  and unselected Week columns. Time labels stayed aligned; the current-time line
+  appeared on Today and disappeared on the future day/week.
+- Today restored the actual date/current-time focus after navigation and
+  scrolling. The simulator was left on signed-in Day at Today. The native
+  navigation/selected-view test passed with zero failures; seven screenshots
+  were separately inspected for visual acceptance.
+- Added `scripts/check-ios-calendar.sh` and the small Xcode UI test project for
+  reproducible control pinned to the booted iPhone 16 Pro. Results and account
+  screenshots are kept outside Git. No account records, invitations, comments
+  or notification settings were changed. This completes the native hourly-line
+  visual check for the fix already published in `a21b857`; the other release
+  acceptance gaps listed above remain separate.

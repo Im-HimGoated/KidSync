@@ -251,6 +251,22 @@ From the root run `node --test tests/*.test.cjs`. From mobile run
 `pnpm check` and `pnpm export`. Bundle export and browser checks are not an
 interactive simulator test. Record the release checks in `QA.md`.
 
+For the signed-in Day/Week check, leave KidsSync open in English in Expo Go on
+the booted **iPhone 16 Pro**, keep Metro running, and run from the repository root:
+
+```sh
+bash mobile/scripts/check-ios-calendar.sh
+```
+
+This uses Xcode's native UI test connection and an explicit simulator ID rather
+than the frontmost Device Hub window. It refuses to choose another model. It
+activates the existing Expo Go session, opens the visible calendar button even
+when the weekly preview covers Home, checks Day/Week selection, scrolls hours,
+visits the next day/week and returns to Today in Day. It does not write calendar
+records or sign out. The `.xcresult`, log and screenshots stay in the printed
+temporary directory; inspect the screenshots to verify hourly-line visibility
+and scrolling. A passing navigation test alone does not establish visual quality.
+
 Choose final application identifiers, signing credentials and Expo release
 profiles before store distribution. Preserve the existing static-root Vercel
 configuration; the mobile package does not change the website deployment.
