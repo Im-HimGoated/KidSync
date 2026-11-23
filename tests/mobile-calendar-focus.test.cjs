@@ -9,17 +9,17 @@ const source = fs.readFileSync(require.resolve('../mobile/src/calendar/CalendarS
 const focusEffect = source.match(/useEffect\(\(\) => \{\s*const focused = calendar\.parseDateKey\(focusDate\);[^]*?\}, \[focusDate, focusTime, focusRequest\]\);/)[0];
 const actionEffect = source.match(/useEffect\(\(\) => \{\s*if \(!actionRequest[^]*?\}, \[actionRequest,[^\n]+\]\);/)[0];
 function mount() {
-  let date = '2026-11-01', query = '', person = 'all', filtersOpen = false, hour = 8, accepted = 0;
+  let date = '2026-11-01', query = '', person = 'all', filtersOpen = false, category = 'all', hideWeekends = false, hour = 8, accepted = 0;
   let view = 'week', fullMonthOpen = true, previous;
-  return { state: () => ({ date, query, person, filtersOpen }), navigate: next => { date = next; },
+  return { state: () => ({ date, query, person, category, hideWeekends, filtersOpen }), navigate: next => { date = next; },
     focus: () => ({ hour, accepted, view, fullMonthOpen }),
-    filter: (nextQuery, nextPerson) => { query = nextQuery; person = nextPerson; filtersOpen = true; },
+    filter: (nextQuery, nextPerson) => { query = nextQuery; person = nextPerson; category = 'trip'; hideWeekends = true; filtersOpen = true; },
     render(focusDate, focusRequest, focusTime = null, initialHour = 8) {
       vm.runInNewContext(focusEffect, { calendar, focus, focusDate, focusTime, focusRequest, display: { initialHour },
         validDate: value => Number.isFinite(value.getTime()),
         setDate: value => { date = calendar.dateKey(value); },
         setQuery: value => { query = value; }, setPerson: value => { person = value; },
-        setFiltersOpen: value => { filtersOpen = value; },
+        setFiltersOpen: value => { filtersOpen = value; }, setCategory: value => { category = value; }, setHideWeekends: value => { hideWeekends = value; },
         setView: value => { view = value; }, setFullMonthOpen: value => { fullMonthOpen = value; },
         setFocusedHour: value => { hour = value; }, setAcceptedFocusRequest: value => { accepted = typeof value === 'function' ? value(accepted) : value; },
         useEffect: (effect, deps) => { if (!previous || deps.some((value, index) => !Object.is(value, previous[index]))) effect(); previous = deps; }
@@ -58,24 +58,35 @@ test('Calendar opens Home actions once in the requested owner scope and preserve
 test('fresh Home focus requests reveal the requested date by clearing search and person filters, including a repeated date', () => {
   const app = mount(); app.filter('no matching activity', 'Robin');
   app.render('2026-11-03', 1);
-  assert.deepEqual(app.state(), { date: '2026-11-03', query: '', person: 'all', filtersOpen: false });
+  assert.deepEqual(app.state(), { date: '2026-11-03', query: '', person: 'all', category: 'all', hideWeekends: true, filtersOpen: false });
   app.navigate('2026-11-04'); app.filter('piano', 'Casey');
   app.render('2026-11-03', 1);
-  assert.deepEqual(app.state(), { date: '2026-11-04', query: 'piano', person: 'Casey', filtersOpen: true });
+  assert.deepEqual(app.state(), { date: '2026-11-04', query: 'piano', person: 'Casey', category: 'trip', hideWeekends: true, filtersOpen: true });
   app.render('2026-11-03', 2);
-  assert.deepEqual(app.state(), { date: '2026-11-03', query: '', person: 'all', filtersOpen: false });
+  assert.deepEqual(app.state(), { date: '2026-11-03', query: '', person: 'all', category: 'all', hideWeekends: true, filtersOpen: false });
   assert.deepEqual(app.focus(), { hour: 8, accepted: 2, view: 'week', fullMonthOpen: true });
 });
 test('ordinary rerenders preserve manual dates and filters, and invalid focus requests change neither', () => {
   const app = mount(); app.render('2026-11-03', undefined); app.navigate('2026-11-05');
   app.filter('soccer', 'Robin');
-  const manual = { date: '2026-11-05', query: 'soccer', person: 'Robin', filtersOpen: true };
+  const manual = { date: '2026-11-05', query: 'soccer', person: 'Robin', category: 'trip', hideWeekends: true, filtersOpen: true };
   app.render('2026-11-03', undefined); assert.deepEqual(app.state(), manual);
   for (const [index, invalid] of [undefined, null, 'invalid', '2026-02-30'].entries()) {
     app.render(invalid, index + 3); assert.deepEqual(app.state(), manual);
   }
   app.render('2026-11-06', 7);
-  assert.deepEqual(app.state(), { date: '2026-11-06', query: '', person: 'all', filtersOpen: false });
+  assert.deepEqual(app.state(), { date: '2026-11-06', query: '', person: 'all', category: 'all', hideWeekends: true, filtersOpen: false });
+});
+
+test('Home targets on weekends reveal their day while weekday targets retain weekend display choices', () => {
+  const app = mount(); app.filter('', 'all');
+  app.render('2026-11-06', 1);
+  assert.equal(app.state().hideWeekends, true);
+  app.render('2026-11-07', 2);
+  assert.equal(app.state().hideWeekends, false);
+  app.filter('', 'all');
+  app.render('2026-11-08', 3);
+  assert.equal(app.state().hideWeekends, false);
 });
 
 test('valid event times override the saved hour and repeated requests re-center Week', () => {

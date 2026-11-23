@@ -1,6 +1,7 @@
 const calendar = require('../lib/calendar');
 const model = require('./model');
 const options = require('./event-options');
+const profileOptions = require('../../../shared/family-profiles');
 const weekdays = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
 const frequencies = ['daily', 'weekly', 'monthly', 'yearly'];
 const valid = value => Number.isFinite(calendar.parseDateKey(value).getTime());
@@ -9,6 +10,17 @@ const text = value => typeof value === 'string' ? value : '';
 const escape = value => text(value).replace(/\\/g, '\\\\').replace(/\r?\n|\r/g, '\\n').replace(/[;,]/g, '\\$&');
 const unescape = value => text(value).replace(/\\([nN,;\\])/g, (_, character) => character.toLowerCase() === 'n' ? '\n' : character);
 const clock = value => model.timeMinutes(value) !== null ? value.replace(':', '') + '00' : '';
+
+function foldLine(line) {
+  let result = '', bytes = 0;
+  for (const character of line) {
+    const point = character.codePointAt(0);
+    const size = point <= 0x7f ? 1 : point <= 0x7ff ? 2 : point <= 0xffff ? 3 : 4;
+    if (bytes + size > 75) { result += '\r\n '; bytes = 1; }
+    result += character; bytes += size;
+  }
+  return result;
+}
 
 function exportIcs(events, name) {
   const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//KidsSync//Family Calendar//EN', 'CALSCALE:GREGORIAN', `X-WR-CALNAME:${escape(name)}`];
@@ -41,7 +53,7 @@ function exportIcs(events, name) {
     }
     lines.push('END:VEVENT');
   }
-  return [...lines, 'END:VCALENDAR', ''].join('\r\n');
+  return [...lines, 'END:VCALENDAR', ''].map(foldLine).join('\r\n');
 }
 
 function readDate(value, zone) {
@@ -68,19 +80,29 @@ function readIcs(source) {
       return { name: name.toUpperCase(), params, value: colon >= 0 ? line.slice(colon + 1) : '' };
     });
     const prop = name => properties.find(item => item.name === name);
+    const zone = property => property.params.find(param => param.startsWith('TZID='))?.slice(5).replace(/^"|"$/g, '');
     const date = name => {
       const value = prop(name);
-      return value && readDate(value.value, value.params.find(param => param.startsWith('TZID='))?.slice(5).replace(/^"|"$/g, ''));
+      return value && readDate(value.value, zone(value));
     };
     const start = date('DTSTART'), end = date('DTEND'), title = unescape(prop('SUMMARY')?.value);
     const allDay = !!start && !start.time;
-    if (!start || !title || (!allDay && !end?.time)) return null;
+    if (!start || !title || (!allDay && !end?.time) || (end && (end.date < start.date || (allDay && end.date === start.date)))) return null;
     const rule = Object.fromEntries(text(prop('RRULE')?.value).split(';').map(part => part.split('=')));
     const recurrence = text(rule.FREQ).toLowerCase() || 'none';
-    if (!['none', ...frequencies].includes(recurrence) || Object.keys(rule).some(key => !['', 'FREQ', 'INTERVAL', 'UNTIL', 'BYDAY', 'WKST'].includes(key))
-      || (rule.BYDAY && !rule.BYDAY.split(',').every(day => weekdays.includes(day)))) throw new Error('UNSUPPORTED_RECURRENCE');
-    const exclusions = properties.filter(item => item.name === 'EXDATE').flatMap(item => item.value.split(','))
-      .map(value => readDate(value)?.date).filter(Boolean);
+    if (prop('RECURRENCE-ID') || prop('RDATE') || !['none', ...frequencies].includes(recurrence)
+      || Object.keys(rule).some(key => !['', 'FREQ', 'INTERVAL', 'UNTIL', 'BYDAY', 'WKST'].includes(key))
+      || (rule.BYDAY && (recurrence !== 'weekly' || !rule.BYDAY.split(',').every(day => weekdays.includes(day))))
+      || (rule.UNTIL && !readDate(rule.UNTIL))
+      || (rule.INTERVAL && (!/^\d+$/.test(rule.INTERVAL) || Number(rule.INTERVAL) < 1 || Number(rule.INTERVAL) > 12))
+      || (rule.WKST && rule.WKST !== weekdays[calendar.parseDateKey(start.date).getDay()] && Number(rule.INTERVAL) > 1)) {
+      throw new Error('UNSUPPORTED_RECURRENCE');
+    }
+    const exclusions = properties.filter(item => item.name === 'EXDATE').flatMap(item => item.value.split(',').map(value => {
+      const excluded = readDate(value, zone(item));
+      if (!excluded) throw new Error('UNSUPPORTED_RECURRENCE');
+      return excluded.date;
+    }));
     const last = end ? allDay ? calendar.dateKey(calendar.addDays(calendar.parseDateKey(end.date), -1)) : end.date : start.date;
     const eventType = prop('X-KIDSYNC-EVENT-TYPE')?.value;
     const status = text(prop('STATUS')?.value).toLowerCase(), priority = Number(prop('PRIORITY')?.value);
@@ -96,21 +118,46 @@ function readIcs(source) {
 
 function readImport(source, kids = []) {
   if (typeof source !== 'string' || source.length > 2_000_000) throw new Error('INVALID_FILE');
-  let raw;
+  let raw, profiles = [];
+  const names = new Map(kids.filter(kid => typeof kid?.name === 'string').map(kid => [kid.name.trim().toLowerCase(), kid.name]));
+  const profileIds = new Map(kids.filter(kid => kid?.id != null && typeof kid.name === 'string').map(kid => [String(kid.id), kid.name]));
   if (/^\s*BEGIN:VCALENDAR/i.test(source)) raw = readIcs(source);
-  else { const backup = JSON.parse(source); raw = Array.isArray(backup) ? backup : backup?.activities; }
+  else {
+    const backup = JSON.parse(source);
+    raw = Array.isArray(backup) ? backup : backup?.activities;
+    if (Array.isArray(backup?.kids)) {
+      for (const kid of backup.kids) {
+        const name = text(kid?.name).trim();
+        if (!name || name.length > 28 || ['all', '__family__'].includes(name.toLowerCase())) continue;
+        if (kid.id != null) profileIds.set(String(kid.id), names.get(name.toLowerCase()) || name);
+        if (names.has(name.toLowerCase())) continue;
+        if (names.size >= 50) throw new Error('PROFILE_LIMIT');
+        names.set(name.toLowerCase(), name);
+        profiles.push({ id: globalThis.crypto?.randomUUID?.() || `kid-${Date.now()}-${Math.random().toString(36).slice(2)}`, name,
+          palette: profileOptions.PALETTES.includes(kid.palette) ? kid.palette : 'blue',
+          avatar: profileOptions.AVATARS.includes(kid.avatar) ? kid.avatar : profileOptions.AVATARS[0],
+          grade: text(kid.grade).slice(0, 30), school: text(kid.school).slice(0, 60) });
+      }
+    }
+  }
   if (!Array.isArray(raw) || !raw.length || raw.length > 300) throw new Error('INVALID_FILE');
-  const events = [], names = new Set(kids.map(kid => kid.name));
+  const events = [], allKids = [...kids, ...profiles];
+  const person = name => (typeof name === 'string' ? names.get(name.trim().toLowerCase()) : null) || profileIds.get(String(name));
+  let reassigned = 0;
   for (const event of raw) {
     if (!event?.title || event.externalSource || event.isBuiltInHoliday) continue;
     const { id, externalSource, isBuiltInHoliday, ...details } = event;
-    const result = model.buildCalendarEvent(null, { ...details, child: names.has(event.child) ? event.child : '__family__',
-      ...(Array.isArray(event.attendees) ? { attendees: event.attendees.filter(name => names.has(name) || name === 'all') } : {}) }, kids);
-    if (result.event) events.push({ ...result.event,
+    const child = person(event.child) || '__family__';
+    const result = model.buildCalendarEvent(null, { ...details, child,
+      ...(Array.isArray(event.attendees) ? { attendees: event.attendees.map(name => name === 'all' ? name : person(name)).filter(Boolean) } : {}) }, allKids);
+    if (result.event) {
+      if (event.child && event.child !== '__family__' && child === '__family__') reassigned++;
+      events.push({ ...details, ...result.event,
       ...(Array.isArray(event.excludedDates) ? { excludedDates: [...new Set(event.excludedDates.filter(valid))] } : {}) });
+    }
   }
   if (!events.length) throw new Error('INVALID_FILE');
-  return { events, skipped: raw.length - events.length };
+  return { events, profiles, originalKids: kids, reassigned, skipped: raw.length - events.length };
 }
 
 function printHtml(name, agenda) {

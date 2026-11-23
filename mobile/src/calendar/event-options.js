@@ -3,16 +3,16 @@ const scheduler = require('../../../assets/smart-scheduling');
 const colors = {
   default: ['#4285f4', '#e4efff', '#174a9e'],
   red: ['#ea4335', '#fde9e7', '#9d2118'],
-  yellow: ['#fbbc04', '#fff5d8', '#7c5500'],
+  yellow: ['#d99a00', '#fff5d8', '#7c5500'],
   purple: ['#9334e6', '#f2e7ff', '#5b168e'],
-  coral: ['#e87972', '#fdebea', '#8a2e29'],
-  green: ['#34a853', '#e3f4e7', '#17662b'],
-  orange: ['#f4511e', '#ffebe4', '#8b260d'],
+  coral: ['#d65d55', '#fdebea', '#8a2e29'],
+  green: ['#249342', '#e3f4e7', '#17662b'],
+  orange: ['#dd3e10', '#ffebe4', '#8b260d'],
   teal: ['#00897b', '#dff5f1', '#006258'],
   gray: ['#6b7280', '#edf0f3', '#3e4650'],
   indigo: ['#5c6bc0', '#e9ebfb', '#303d8e'],
-  cyan: ['#03a9f4', '#e2f5fd', '#05648d'],
-  brown: ['#a87845', '#f5ece3', '#694521'],
+  cyan: ['#0395d7', '#e2f5fd', '#05648d'],
+  brown: ['#976c3d', '#f5ece3', '#694521'],
 };
 const colorIds = Object.keys(colors);
 const icons = ['📖', '✏️', '🏫', '🧪', '🤖', '√x', '💻', '🎓', '🎨', '🎵', '🎹', '🎸', '💃', '🎭',

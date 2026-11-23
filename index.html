@@ -17033,9 +17033,14 @@
 
     function updateWeekLabel() {
       if (currentView === "today") {
-        document.getElementById("weekLabel").textContent = formatFullDate(selectedDate);
+        const label = document.getElementById("weekLabel");
+        label.textContent = selectedDate.toLocaleDateString(currentLanguage === "zh" ? "zh-CN" : "en-US", {
+          weekday: "short", year: "numeric", month: "short", day: "numeric"
+        });
+        label.title = formatFullDate(selectedDate);
         return;
       }
+      document.getElementById("weekLabel").removeAttribute("title");
       if (currentView === "month") {
         document.getElementById("weekLabel").textContent = currentMonthStart.toLocaleDateString(
           currentLanguage === "zh" ? "zh-CN" : "en-US",

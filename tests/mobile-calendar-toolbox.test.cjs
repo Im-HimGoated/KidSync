@@ -8,8 +8,8 @@ const pure = source.slice(source.indexOf('export const toolboxCopy'), source.ind
 const { toolboxCopy, toolboxSections, resolveToolAction, runToolAction } = vm.runInNewContext(`${pure}; ({toolboxCopy, toolboxSections, resolveToolAction, runToolAction})`);
 const plain = value => JSON.parse(JSON.stringify(value));
 const nativeIds = ['open-time', 'compare-days', 'day-notes', 'share-week', 'find-events', 'saved-views'];
-const workspaceIds = ['quick-add', 'family-poll', 'family-time', 'activity-lists', 'activity-history', 'version-history', 'presets', 'export-calendar', 'print-schedule'];
-const webIds = ['scan-document', 'connected-calendars', 'google-import'];
+const workspaceIds = ['quick-add', 'family-poll', 'family-time', 'activity-lists', 'activity-history', 'version-history', 'presets', 'export-calendar', 'print-schedule', 'scan-document', 'import-calendar'];
+const webIds = ['connected-calendars', 'google-import'];
 
 test('tool directory covers each agreed native and website intent once with complete EN/ZH copy', () => {
   assert.deepEqual(Object.keys(toolboxCopy.en), Object.keys(toolboxCopy.zh));
@@ -76,7 +76,7 @@ test('workspace tools use native routes only when enabled and supported', async 
   assert.deepEqual(calls, workspaceIds);
 });
 
-test('scanning and provider connections remain explicit Web actions', async () => {
+test('provider connections remain explicit Web actions', async () => {
   const calls = [], options = { nativeAvailability: Object.fromEntries(webIds.map(id => [id, true])), onPlanning: () => { throw new Error('wrong route'); }, onTool: () => { throw new Error('wrong route'); }, onWebsite: id => calls.push(id) };
   for (const id of webIds) {
     assert.equal(resolveToolAction(id, options).kind, 'web');

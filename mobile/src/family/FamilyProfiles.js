@@ -1,9 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { Button, ChoiceRow, Field, useCalendarUi } from '../calendar/ui';
+import profileOptions from '../../../shared/family-profiles';
 
-const avatars = ['🧒', '👧', '👦', '🧑‍🚀', '🧑‍🎨', '🧑‍🔬', '🦸', '🐼', '🦊', '🐯'];
-const palettes = ['blue', 'green', 'coral', 'gold'];
+const avatars = profileOptions.AVATARS;
+const palettes = profileOptions.PALETTES;
 const copy = {
   en: {
     name: 'Name', color: 'Color', avatar: 'Avatar', grade: 'Grade', school: 'School', profiles: 'Family profiles',
@@ -35,7 +36,7 @@ function normalize(profile, index) {
 
 export default function FamilyProfiles({ original, language, busy, onSave }) {
   const t = copy[language] || copy.en;
-  const { u } = useCalendarUi();
+  const { u, palettes: familyPalettes } = useCalendarUi();
   const baseline = useRef(original);
   const [profiles, setProfiles] = useState(() => original.map(normalize));
   const [index, setIndex] = useState(-1);
@@ -65,7 +66,7 @@ export default function FamilyProfiles({ original, language, busy, onSave }) {
       <Field label={t.name} value={profile.name} onChangeText={value => change('name', value)} maxLength={28} />
       <Text style={u.label}>{t.color}</Text>
       <ChoiceRow label={t.color} value={profile.palette} onChange={value => change('palette', value)}
-        options={palettes.map((value, i) => ({ value, label: t.colors[i] }))} />
+        options={palettes.map((value, i) => ({ value, label: t.colors[i], color: familyPalettes[value]?.line }))} />
       <Text style={u.label}>{t.avatar}</Text>
       <ChoiceRow label={t.avatar} value={profile.avatar} onChange={value => change('avatar', value)}
         options={avatars.map(value => ({ value, label: value }))} />

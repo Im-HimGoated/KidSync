@@ -24,7 +24,8 @@ export const toolboxCopy = {
     quickAdd: 'Quick Add', quickAddHint: 'Turn a sentence into an event draft.', quickAddWeb: 'Open Smart scheduling on the website.',
     presets: 'Presets', presetsHint: 'Review saved calendar presets.', presetsWeb: 'Open Presets & Rewind on the website.',
     preferences: 'Calendar preferences', preferencesHint: 'Review or edit your setup answers.', preferencesWeb: 'Change calendar preferences on the website.',
-    scan: 'Scan document', scanWeb: 'Add plans from a flyer or school notice on the website.',
+    scan: 'Import document text', scanHint: 'Review details from a flyer, email, or copied photo text.', scanWeb: 'Scan a flyer or school notice on the website.',
+    importFile: 'Import calendar file', importFileHint: 'Choose events from an iCalendar or KidsSync backup.', importFileWeb: 'Import a calendar file on the website.',
     poll: 'Family poll', pollHint: 'Compare times and record replies on this device.', pollWeb: 'Collect votes on proposed times.',
     familyTime: 'Find family time', familyTimeHint: 'Find a time that works for the people you choose.', familyTimeWeb: 'Find family time on the website.',
     connections: 'Connected calendars', connectionsWeb: 'Set up Google or Outlook read-only connections.',
@@ -53,7 +54,8 @@ export const toolboxCopy = {
     quickAdd: '快速添加', quickAddHint: '用一句话创建活动草稿。', quickAddWeb: '在网页中打开智能排程。',
     presets: '预设', presetsHint: '查看已保存的日历预设。', presetsWeb: '在网页中打开预设与回退。',
     preferences: '日历偏好', preferencesHint: '核对或修改最初的设置答案。', preferencesWeb: '在网页中修改日历偏好。',
-    scan: '扫描文件', scanWeb: '在网页中从活动传单或学校通知添加安排。',
+    scan: '导入文档文字', scanHint: '从传单、邮件或复制的照片文字中核对活动详情。', scanWeb: '在网页中扫描活动传单或学校通知。',
+    importFile: '导入日历文件', importFileHint: '从 iCalendar 或 KidsSync 备份中选择活动。', importFileWeb: '在网页中导入日历文件。',
     poll: '家庭投票', pollHint: '比较时段并在本设备记录回复。', pollWeb: '对建议的时间进行投票。',
     familyTime: '查找家庭空闲时间', familyTimeHint: '为所选家庭成员查找合适的时间。', familyTimeWeb: '在网页中查找家庭空闲时间。',
     connections: '已连接日历', connectionsWeb: '设置 Google 或 Outlook 只读连接。',
@@ -84,7 +86,8 @@ export const toolboxSections = Object.freeze([
     Object.freeze({ id: 'calendar-preferences', label: 'preferences', native: 'preferences' })
   ]) }),
   Object.freeze({ id: 'connect', tools: Object.freeze([
-    Object.freeze({ id: 'scan-document', label: 'scan' }),
+    Object.freeze({ id: 'scan-document', label: 'scan', native: 'workspace' }),
+    Object.freeze({ id: 'import-calendar', label: 'importFile', native: 'workspace' }),
     Object.freeze({ id: 'connected-calendars', label: 'connections' }),
     Object.freeze({ id: 'google-import', label: 'googleImport' })
   ]) }),
@@ -174,7 +177,7 @@ const toolIcons = {
   'open-time': Clock, 'compare-days': CalendarDays, 'day-notes': NotebookPen, 'share-week': Share2,
   'find-events': Search, 'saved-views': ListFilter, 'calendar-preferences': Settings2,
   'activity-lists': ListFilter, 'quick-add': CalendarDays, presets: Archive,
-  'scan-document': ScanLine, 'connected-calendars': Plug, 'google-import': CalendarDays,
+  'scan-document': ScanLine, 'import-calendar': FileDown, 'connected-calendars': Plug, 'google-import': CalendarDays,
   'family-poll': ListFilter, 'family-time': CalendarDays,
   'activity-history': History, 'version-history': Archive, 'export-calendar': FileDown, 'print-schedule': Printer
 };

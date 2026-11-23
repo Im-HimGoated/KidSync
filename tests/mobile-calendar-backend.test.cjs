@@ -113,6 +113,24 @@ test('calendar restores keep a checkpoint and imported IDs are idempotent on ret
   assert.equal(client.state.updates.length, 2);
 });
 
+test('backup import writes new profiles and chosen events atomically and handles a lost response retry', async () => {
+  const initial = snapshot();
+  const client = fakeClient(row(initial));
+  const profile = { id: 'new-kid', name: 'Riley', palette: 'coral', avatar: '🦊', grade: '', school: '' };
+  const request = { originalKids: [], profiles: [profile], events: [event({ id: 'imported', child: 'Riley' })] };
+  const saved = await importActivities(client, 'owner-1', 'home', request);
+  assert.deepEqual(saved.schedule.calendarData.home.kids, [profile]);
+  assert.deepEqual(saved.schedule.kids, [profile]);
+  assert.equal(saved.schedule.calendarData.home.activities.at(-1).child, 'Riley');
+  assert.deepEqual(saved.schedule.calendarData.work, initial.calendarData.work);
+  await importActivities(client, 'owner-1', 'home', request);
+  assert.equal(client.state.updates.length, 1);
+  const concurrent = fakeClient(row(initial), { beforeUpdate(state) { state.row.updated_at = '2026-11-28T17:00:00Z'; } });
+  await assert.rejects(importActivities(concurrent, 'owner-1', 'home', request), hasCode('CONFLICT'));
+  assert.deepEqual(concurrent.state.row.schedule, initial);
+  await assert.rejects(importActivities(client, 'owner-1', 'home', { ...request, profiles: [{ ...profile, name: 'Changed' }] }), hasCode('CONFLICT'));
+});
+
 test('creates an activity from a fresh row, preserving newer unrelated events and all other fields', async () => {
   const latest = snapshot();
   latest.calendarData.home.activities.push(event({ id: 'web-new', title: 'Added on the website' }));

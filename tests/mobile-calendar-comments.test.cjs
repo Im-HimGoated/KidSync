@@ -122,6 +122,7 @@ test('comments have complete bilingual copy and use the existing modal host', ()
   assert.doesNotMatch(source, /<Modal|<Sheet/);
   const calendar = fs.readFileSync(require.resolve('../mobile/src/calendar/CalendarScreen.js'), 'utf8');
   assert.match(calendar, /<Sheet visible=\{!!sheet\}/);
-  assert.match(calendar, /'planning', 'comments'\]\.includes/);
+  const guardedSheets = vm.runInNewContext(calendar.match(/if \((\[[^\n]+?\])\.includes\(sheet\?\.type\) && draftDirty\.current\)/)[1]);
+  assert.ok(guardedSheets.includes('comments'), 'unsent comments retain close protection when more sheet types are added');
   assert.match(calendar, /<CalendarComments key=\{scopeId\}/);
 });

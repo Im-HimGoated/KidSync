@@ -1,6 +1,7 @@
 const web = require('../../../assets/calendar-planning');
 const calendar = require('../lib/calendar');
 const model = require('./model');
+const holidays = require('./holidays');
 const validDate = value => typeof value === 'string' && Number.isFinite(calendar.parseDateKey(value).getTime());
 const text = value => typeof value === 'string' ? value : typeof value === 'number' && Number.isFinite(value) ? String(value) : '';
 const clock = minutes => `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
@@ -55,7 +56,10 @@ function weekAgenda(events, date, { language = 'en', firstDay = 1, kids = [], in
 function normalizeView(value) {
   if (!value || !['agenda', 'day', 'week', 'four', 'month'].includes(value.view) || !validDate(value.date)
     || typeof value.query !== 'string' || value.query.length > 120 || typeof value.person !== 'string' || value.person.length > 100) throw new Error('INVALID_VIEW');
-  return { view: value.view, date: value.date, query: value.query, person: value.person };
+  const category = holidays.normalizeCategory(value.category);
+  if (category === null || (value.hideWeekends !== undefined && typeof value.hideWeekends !== 'boolean')) throw new Error('INVALID_VIEW');
+  return { view: value.view, date: value.date, query: value.query, person: value.person,
+    category, hideWeekends: value.hideWeekends ?? false };
 }
 const locks = new WeakMap();
 function createPlanningStore(storage, { userId, ownerId = userId, calendarId } = {}) {

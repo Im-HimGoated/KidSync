@@ -21,6 +21,7 @@ import TrialCalendarScreen, { trialCopy } from './screens/TrialCalendarScreen';
 import PersonalizeCalendarScreen from './screens/PersonalizeCalendarScreen';
 import trialImport from '../../shared/backend/claim-native-trial';
 import mobileCalendar from '../../shared/backend/mobile-calendar';
+import mobileSettings from '../../shared/backend/mobile-settings';
 import CalendarScreen from './calendar/CalendarScreen';
 import phoneAccess from './lib/phone-access';
 import HomeScreen from './screens/HomeScreen';
@@ -146,6 +147,7 @@ function Workspace() {
   const [trialReturnScreen, setTrialReturnScreen] = useState('welcome');
   const [trialSaving, setTrialSaving] = useState(false), [trialImportError, setTrialImportError] = useState('');
   const importRequest = useRef(false), accountScope = useRef(null), sharedRequest = useRef(0), sharedScope = useRef('');
+  const displayScope = useRef(null);
   const clearSharedCalendar = useCallback(() => {
     sharedRequest.current += 1;
     sharedScope.current = '';
@@ -171,8 +173,12 @@ function Workspace() {
     if (!actor) throw new Error('Sign in first');
     const state = await ownerSync.refresh();
     if (accountScope.current !== actor || state?.pendingCount) throw new Error('Calendar is not ready');
+    if (request?.isCurrent && !request.isCurrent()) {
+      const failure = new Error('This calendar is no longer open.'); failure.code = 'STALE_SCOPE'; throw failure;
+    }
     const row = await method(supabase, actor, id, request);
-    if (accountScope.current === actor) await ownerSync.acceptConfirmed(row);
+    if (accountScope.current === actor && (!request?.isCurrent || request.isCurrent())) await ownerSync.acceptConfirmed(row);
+    return row;
   }
   const confirmedOwnerEntries = useMemo(() => ownerSync.userId === session?.user.id && ownerSync.confirmedRow?.schedule
     ? schedules.calendarEntries(ownerSync.confirmedRow.schedule) : [], [ownerSync.userId, ownerSync.confirmedRow, session?.user.id]);
@@ -549,6 +555,26 @@ function Workspace() {
   const selectedCalendarOwnerId = calendarOwnerId || session?.user.id || null;
   const sharedSelected = !!sharedEntry && selectedCalendarOwnerId === actorSharedAccess.ownerId && selectedCalendarId === actorSharedAccess.calendarId;
   const activePreferences = preferences.forAccount(accountPreferences, session?.user.id);
+  const selectedCalendar = calendarEntries.find(item => item.id === selectedCalendarId
+    && (item.ownerId || session?.user.id) === selectedCalendarOwnerId) || calendar;
+  const calendarPreferences = mobileSettings.mergeDisplayPreferences(activePreferences, selectedCalendar?.data);
+  const displayScopeKey = JSON.stringify([session?.user.id, selectedCalendarOwnerId, selectedCalendar?.id]);
+  if (displayScope.current?.key !== displayScopeKey) displayScope.current = { key: displayScopeKey };
+  const displayTicket = displayScope.current;
+  const displayAvailable = !!calendar && !sharedSelected && loaded && status === 'SUBSCRIBED' && !ownerSync.pendingCount;
+  async function saveDisplaySettings(request) {
+    const actor = session?.user.id, id = calendar?.id;
+    const isCurrent = () => accountScope.current === actor && displayScope.current === displayTicket;
+    if (!displayAvailable || !id || !isCurrent()) {
+      const failure = new Error('This calendar is not ready.'); failure.code = 'STALE_SCOPE'; throw failure;
+    }
+    try {
+      return await updateOwnerCalendar(mobileSettings.saveCalendarSettings, id, { ...request, isCurrent });
+    } catch (failure) {
+      if (isCurrent()) void ownerSync.refresh();
+      throw failure;
+    }
+  }
   const briefCached = ['OFFLINE', 'ERROR', 'STORAGE_ERROR'].includes(status);
   const hasPlans = Array.isArray(calendar?.data?.activities) && calendar.data.activities.some(event => event && !event.isBuiltInHoliday && event.status !== 'cancelled');
   const briefReady = hasPlans && loaded && accountPreferences?.userId === session?.user.id
@@ -636,7 +662,7 @@ function Workspace() {
           <View style={[styles.workspaceScreen, workspaceView !== 'calendar' && styles.hiddenScreen]}>
             <CalendarScreen key={session.user.id} language={language} userId={session.user.id} account={session.user} client={supabase}
               calendars={calendarEntries} calendarId={selectedCalendarId} calendarOwnerId={selectedCalendarOwnerId}
-              preferences={activePreferences} loading={!loaded}
+              preferences={calendarPreferences} loading={!loaded}
               actionRequest={workspaceView === 'calendar' ? calendarActionRequest : null}
               focusDate={calendarFocusDate} focusTime={calendarFocusTime} focusRequest={calendarFocusRequest} commentsRequest={calendarCommentsRequest} syncStatus={status} error={sharedSelected ? '' : syncError} onRefresh={ownerSync.refresh}
               onSelectCalendar={(id, item) => {
@@ -691,6 +717,7 @@ function Workspace() {
           ready={briefReady} cached={briefCached} firstDay={activePreferences.week === 'sunday' ? 0 : 1} onOpenCalendar={openOwnerCalendar} />
       </View>}
     {session && accountOpen && <AccountSettings key={session.user.id} language={language} email={session.user.email || ''} onClose={() => setAccountOpen(false)}
+      calendarDisplay={{ scope: displayScopeKey, calendar: sharedSelected ? null : calendar, preferences: activePreferences, available: displayAvailable, onSave: saveDisplaySettings }}
       onPreferences={() => openAccountPreferences('settings')} reminders={reminders} onSignOut={signOut} onLanguage={setLanguage} onWebsite={openWebsite} />}
     {previewDraftOpen && accountPreview?.draft && <PreviewDraftReview key={session.user.id} language={language} draft={accountPreview.draft} onClose={() => setPreviewDraftOpen(false)} />}
   </SafeAreaView>}</AppearanceProvider>;

@@ -15,7 +15,7 @@ test('Month opens a dedicated full-calendar page and preserves the other calenda
   assert.match(screen, /onDate=\{selectDate\} onOpenDay=\{openMonthDay\}/);
   assert.match(screen, /onEvent=\{showEvent\}/);
   assert.match(screen, /function openMonthDay\(value\) \{[^}]*openDay\(value\)/);
-  assert.match(screen, /if \(value\.view === 'month'\).*setFullMonthOpen\(true\)/s);
+  assert.match(screen, /function applySavedView\(value\)[^]*?const next = planning\.normalizeView\(value\)[^]*?if \(next\.view === 'month'\).*setFullMonthOpen\(true\)/s);
 });
 
 test('the full-calendar page renders month weeks and a selected-day agenda', () => {

@@ -32,7 +32,10 @@ test('account help is bilingual and is honest about notifications, sharing and g
     assert.equal(copy[language].faqs.length, 6);
     for (const [title, answer] of copy[language].faqs) { assert(title); assert(answer.length > 30); }
   }
-  assert.match(copy.en.faqs[4][1], /not scheduled/);
+  assert.match(copy.en.faqs[4][1], /Enable Phone reminders for confirmed calendars you own/);
+  assert.match(copy.en.faqs[4][1], /Local reminders refresh when the app reconnects/);
+  assert.match(copy.en.faqs[4][1], /Shared calendars, remote push and email alerts are not included/);
+  assert.match(copy.zh.faqs[4][1], /本地提醒/);
   assert.match(copy.en.faqs[5][1], /Open Family/);
   assert.match(copy.en.faqs[5][1], /depend on your role and calendar setup/);
   assert.match(copy.en.faqs[3][1], /saved offline changes stay on this device until synced/);
@@ -42,7 +45,7 @@ test('account help is bilingual and is honest about notifications, sharing and g
   assert.match(copy.en.remindersHelp, /confirmed calendars you own/);
   assert.match(copy.en.remindersHelp, /shared with you do not schedule reminders/);
   assert.match(source, /accessibilityState=\{\{ expanded: question === index \}\}/);
-  assert.match(source, /closeLabel=\{t.close\}[^]*onClose=\{onClose\}/);
+  assert.match(source, /closeLabel=\{t.close\}[^]*onClose=\{\(\) => requestLeave\('close'\)\}/);
 });
 test('account sign out has an explicit cancel path, synchronous duplicate guard and retained failure feedback', () => {
   const source = read('ui/AccountSettings.js');

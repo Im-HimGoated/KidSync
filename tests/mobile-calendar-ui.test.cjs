@@ -54,13 +54,13 @@ function fakeClient(initial = { schedule: snapshot(), updated_at: '2026-10-29T10
 
 test('saved display choices determine opening view, first weekday, visible hours and new reminder metadata', () => {
   assert.deepEqual(normalizeDisplayPreferences({ people: 'children', view: 'week', week: 'sunday', hours: 'afternoon', reminders: '30' }),
-    { people: 'children', view: 'week', firstDay: 0, initialHour: 12, defaultReminderMinutes: 30 });
+    { people: 'children', view: 'week', firstDay: 0, initialHour: 12, defaultReminderMinutes: 30, defaultEventDuration: 60, showWeekends: true });
   assert.equal(normalizeDisplayPreferences({ view: 'today', hours: 'morning', reminders: 'start' }).view, 'agenda');
   assert.equal(normalizeDisplayPreferences({ hours: 'morning', reminders: 'start' }).initialHour, 6);
   assert.equal(normalizeDisplayPreferences({ hours: 'evening', reminders: '10' }).initialHour, 18);
   assert.equal(normalizeDisplayPreferences({ reminders: '10' }).defaultReminderMinutes, 10);
   for (const bad of [null, undefined, 'week', { people: 'invalid', view: 'invalid', week: 8, hours: 'night', reminders: 'danger' }]) {
-    assert.deepEqual(normalizeDisplayPreferences(bad), { people: 'family', view: 'agenda', firstDay: 1, initialHour: 8, defaultReminderMinutes: null });
+    assert.deepEqual(normalizeDisplayPreferences(bad), { people: 'family', view: 'agenda', firstDay: 1, initialHour: 8, defaultReminderMinutes: null, defaultEventDuration: 60, showWeekends: true });
   }
 });
 

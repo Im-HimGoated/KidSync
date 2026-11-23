@@ -25,11 +25,27 @@ function builtInHolidays(year, language = 'en') {
   });
 }
 
-function matchesCategory(event, category) {
-  if (category === 'holidays') return event.eventType === 'holiday' || !!event.isBuiltInHoliday;
-  if (category === 'special') return ['holiday', 'birthday', 'deadline', 'trip'].includes(event.eventType)
-    || !!event.isBuiltInHoliday || event.importance === 'high';
-  return true;
+const categories = ['all', 'activity', 'trip', 'important', 'holidays'];
+function normalizeCategory(value = 'all') {
+  // Older phone views called the website's Important category "special".
+  const category = value === 'special' ? 'important' : value;
+  return categories.includes(category) ? category : null;
+}
+function categoryOptions(language = 'en') {
+  const labels = language === 'zh'
+    ? ['所有活动', '日常活动', '旅行', '重要日程', '仅节日']
+    : ['All events', 'Activities', 'Trips', 'Important', 'Holidays only'];
+  return categories.map((value, index) => ({ value, label: labels[index] }));
+}
+function matchesCategory(event, value) {
+  if (!event || typeof event !== 'object' || Array.isArray(event)) return false;
+  const category = normalizeCategory(value);
+  const type = event.isBuiltInHoliday ? 'holiday' : event.eventType || 'activity';
+  if (category === 'all') return true;
+  if (category === 'activity' || category === 'trip') return type === category;
+  if (category === 'holidays') return type === 'holiday';
+  if (category === 'important') return ['holiday', 'birthday', 'deadline'].includes(type) || event.importance === 'high';
+  return false;
 }
 
-module.exports = { builtInHolidays, matchesCategory };
+module.exports = { builtInHolidays, matchesCategory, normalizeCategory, categoryOptions };

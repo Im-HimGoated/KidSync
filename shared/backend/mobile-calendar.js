@@ -1,6 +1,7 @@
 // Native owner writes use the existing web snapshot. No creation or sample-data
 // fallback happens while saving activities: calendar creation is an explicit API.
 const { SCHEDULE_TABLE, readSchedule } = require('./schedules');
+const { PALETTES } = require('../family-profiles');
 
 class MobileCalendarError extends Error {
   constructor(code, message) {
@@ -395,20 +396,7 @@ async function saveFamilyProfiles(client, userId, calendarId, { original, profil
   if (!Array.isArray(original) || !Array.isArray(profiles) || profiles.length > 50) {
     fail('INVALID_ACTIVITY', 'Use a valid list of family profiles.');
   }
-  const names = new Set(), ids = new Set();
-  const kids = jsonCopy(profiles).map(profile => {
-    if (!record(profile) || !validId(profile.id) || ids.has(profile.id) || typeof profile.name !== 'string'
-      || !profile.name.trim() || ['__family__', 'all'].includes(profile.name.trim().toLowerCase()) || profile.name.trim().length > 28
-      || names.has(profile.name.trim().toLowerCase()) || !['blue', 'green', 'coral', 'gold'].includes(profile.palette)
-      || typeof profile.avatar !== 'string' || profile.avatar.length > 16
-      || typeof profile.grade !== 'string' || profile.grade.length > 30
-      || typeof profile.school !== 'string' || profile.school.length > 60) {
-      fail('INVALID_ACTIVITY', 'Check the family profile names and details.');
-    }
-    const name = profile.name.trim();
-    names.add(name.toLowerCase()); ids.add(profile.id);
-    return { ...profile, name, grade: profile.grade.trim(), school: profile.school.trim() };
-  });
+  const kids = normalizeProfiles(profiles);
   const row = await loadOwnerRow(client, userId);
   if (!row) fail('NO_CALENDAR', 'Choose an existing calendar.');
   const selected = locateCalendar(row.schedule, calendarId);
@@ -433,6 +421,23 @@ async function saveFamilyProfiles(client, userId, calendarId, { original, profil
     ...(row.schedule.activeCalendarId === calendarId ? { kids,
       ...(Array.isArray(row.schedule.activities) ? { activities: updateActivities(row.schedule.activities) } : {}) } : {}) } : { ...row.schedule, kids, activities };
   return compareAndSet(client, userId, row, schedule);
+}
+
+function normalizeProfiles(profiles) {
+  const names = new Set(), ids = new Set();
+  return jsonCopy(profiles).map(profile => {
+    if (!record(profile) || !validId(profile.id) || ids.has(profile.id) || typeof profile.name !== 'string'
+      || !profile.name.trim() || ['__family__', 'all'].includes(profile.name.trim().toLowerCase()) || profile.name.trim().length > 28
+      || names.has(profile.name.trim().toLowerCase()) || !PALETTES.includes(profile.palette)
+      || typeof profile.avatar !== 'string' || profile.avatar.length > 16
+      || typeof profile.grade !== 'string' || profile.grade.length > 30
+      || typeof profile.school !== 'string' || profile.school.length > 60) {
+      fail('INVALID_ACTIVITY', 'Check the family profile names and details.');
+    }
+    const name = profile.name.trim();
+    names.add(name.toLowerCase()); ids.add(profile.id);
+    return { ...profile, name, grade: profile.grade.trim(), school: profile.school.trim() };
+  });
 }
 
 async function restoreCalendarSnapshot(client, userId, id, { versionId, collection, baseline } = {}) {
@@ -464,11 +469,26 @@ async function restoreCalendarSnapshot(client, userId, id, { versionId, collecti
   return compareAndSet(client, userId, row, schedule);
 }
 
-async function importActivities(client, userId, id, events) {
+async function importActivities(client, userId, id, request) {
+  const events = Array.isArray(request) ? request : request?.events;
   if (!Array.isArray(events) || !events.length || events.length > 300) fail('INVALID_ACTIVITY', 'Choose valid activities to import.');
   const row = await loadOwnerRow(client, userId);
   if (!row) fail('NO_CALENDAR', 'Choose an existing calendar.');
   const selected = locateCalendar(row.schedule, id);
+  const originalKids = request?.originalKids;
+  const importedProfiles = request?.profiles ?? [];
+  if (!Array.isArray(importedProfiles) || importedProfiles.length > 50) fail('INVALID_ACTIVITY', 'Choose valid family profiles.');
+  let kids = selected.data.kids ?? [];
+  if (importedProfiles.length) {
+    const profiles = normalizeProfiles(importedProfiles);
+    if (!Array.isArray(originalKids) || originalKids.length + profiles.length > 50) fail('INVALID_ACTIVITY', 'Review the family profiles before importing.');
+    const expected = [...originalKids, ...profiles];
+    if (!equal(kids, originalKids) && !equal(kids, expected)) fail('CONFLICT', 'Family profiles changed. Review the file again.');
+    const names = expected.map(profile => String(profile?.name || '').trim().toLowerCase());
+    const profileIds = expected.map(profile => profile?.id).filter(value => value != null);
+    if (new Set(names).size !== names.length || new Set(profileIds).size !== profileIds.length) fail('CONFLICT', 'A family profile already uses that name.');
+    kids = expected;
+  }
   const ids = new Set(), additions = [];
   for (const event of jsonCopy(events)) {
     validateActivity(event);
@@ -478,13 +498,15 @@ async function importActivities(client, userId, id, events) {
     if (index === -1) additions.push(event);
     else if (!equal(selected.activities[index], event)) fail('CONFLICT', 'An imported activity has changed.');
   }
-  if (!additions.length) return row;
+  if (!additions.length && equal(kids, selected.data.kids ?? [])) return row;
   const activities = [...selected.activities, ...additions];
   const schedule = selected.modern ? { ...row.schedule,
-    calendarData: { ...row.schedule.calendarData, [id]: { ...selected.data, activities } },
-    ...(row.schedule.activeCalendarId === id && Array.isArray(row.schedule.activities)
-      ? { activities: [...row.schedule.activities, ...additions.filter(event => findActivity(row.schedule.activities, event.id) < 0)] } : {}),
-  } : { ...row.schedule, activities };
+    calendarData: { ...row.schedule.calendarData, [id]: { ...selected.data, activities, ...(importedProfiles.length ? { kids } : {}) } },
+    ...(row.schedule.activeCalendarId === id ? {
+      ...(Array.isArray(row.schedule.activities) ? { activities: [...row.schedule.activities, ...additions.filter(event => findActivity(row.schedule.activities, event.id) < 0)] } : {}),
+      ...(importedProfiles.length ? { kids } : {}),
+    } : {}),
+  } : { ...row.schedule, activities, ...(importedProfiles.length ? { kids } : {}) };
   return compareAndSet(client, userId, row, schedule);
 }
 

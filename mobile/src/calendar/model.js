@@ -22,11 +22,13 @@ function normalizeDisplayPreferences(value = {}) {
   const reminder = own(preferences, 'defaultReminderMinutes')
     ? reminderValue(preferences.defaultReminderMinutes) : reminderValue(preferences.reminders);
   return {
-    view: ['day', 'week', 'month'].includes(preferences.view) ? preferences.view : 'agenda',
+    view: ['day', 'week', 'four', 'month'].includes(preferences.view) ? preferences.view : 'agenda',
     firstDay: preferences.week === 'sunday' || preferences.firstDay === 0 ? 0 : 1,
     initialHour: ({ morning: 6, afternoon: 12, evening: 18, daytime: 8 })[preferences.hours]
       ?? ([6, 12, 18, 8].includes(preferences.initialHour) ? preferences.initialHour : 8),
     defaultReminderMinutes: reminder === undefined ? null : reminder,
+    defaultEventDuration: [30, 45, 60, 90, 120].includes(preferences.defaultEventDuration) ? preferences.defaultEventDuration : 60,
+    showWeekends: typeof preferences.showWeekends === 'boolean' ? preferences.showWeekends : true,
     people: validPeople.includes(preferences.people) ? preferences.people : 'family',
   };
 }
@@ -168,6 +170,16 @@ function layoutDay(events, options = {}) {
     height: Math.max(hourHeight * 24, ...timed.map(item => item.visualEnd)) };
 }
 
+function newEventWindow(date, hour, preferences = {}) {
+  const selected = validDate(date) ? date : calendar.parseDateKey(date);
+  if (!validDate(selected) || !Number.isInteger(hour) || hour < 0 || hour > 23) throw new Error('INVALID_EVENT_WINDOW');
+  const duration = normalizeDisplayPreferences(preferences).defaultEventDuration;
+  const start = hour * 60, end = start + duration;
+  const clock = minutes => `${String(Math.floor(minutes / 60) % 24).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+  return { startDate: calendar.dateKey(selected), start: clock(start), end: clock(end),
+    endDate: end >= 1440 ? calendar.dateKey(calendar.addDays(selected, 1)) : '' };
+}
+
 function initialEventForm(existing, date, preferences = {}) {
   const event = existing && typeof existing === 'object' ? existing : null;
   const selected = validDate(date) ? date : calendar.parseDateKey(date);
@@ -178,15 +190,15 @@ function initialEventForm(existing, date, preferences = {}) {
   const repeatDays = Array.isArray(event?.repeatDays) && event.repeatDays.length ? [...event.repeatDays]
     : [legacyDay >= 0 ? legacyDay : validDate(anchor) ? anchor.getDay() : 1];
   const display = normalizeDisplayPreferences(preferences);
-  const timeAtHour = hour => `${String(hour).padStart(2, '0')}:00`;
+  const window = event ? null : newEventWindow(startDate, display.initialHour, display);
   return {
     date: startDate,
-    endDate: event?.endDate || '',
+    endDate: event ? event.endDate || '' : window.endDate,
     title: event?.title || '',
     child: event?.child || '__family__',
     allDay: Boolean(event?.allDay),
-    start: event ? (typeof event.start === 'string' ? event.start : '') : timeAtHour(display.initialHour),
-    end: event ? (typeof event.end === 'string' ? event.end : '') : timeAtHour(display.initialHour + 1),
+    start: event ? (typeof event.start === 'string' ? event.start : '') : window.start,
+    end: event ? (typeof event.end === 'string' ? event.end : '') : window.end,
     location: event?.location || '', responsible: event?.responsible || '', items: event?.items || '', notes: event?.notes || '',
     eventType: event?.eventType || (event?.endDate ? 'trip' : 'activity'),
     icon: event?.icon || '📖', color: event?.color || 'default',
@@ -392,7 +404,7 @@ function createCalendarActions({ client, userId, onSchedule, onSelectCalendar, i
 
 module.exports = {
   normalizeDisplayPreferences, startOfDisplayWeek, displayMonthDays, movePeriod,
-  filterActivities, timeMinutes, sortAgenda, layoutDay, initialEventForm, buildCalendarEvent, createCalendarActions,
+  filterActivities, timeMinutes, sortAgenda, layoutDay, initialEventForm, newEventWindow, buildCalendarEvent, createCalendarActions,
   eventFormChanged,
   isRecurringActivity, occurrenceDraft, planOccurrenceChange,
   calendarAccess, checkedSharedResult,

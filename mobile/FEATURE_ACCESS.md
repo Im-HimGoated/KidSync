@@ -36,6 +36,7 @@ views and collaboration tools are available after authentication.
 | Week view | Scrollable 24-hour grid, tap an hour to add, GMT offset, optional weekend columns and a holiday band |
 | Calendar → sliders → Plan & review | Quick Add, family poll, find family time, open time, compare days, private day notes and review/share a week |
 | Calendar → sliders → Find & customize | Event finder, upcoming/past activities, saved views and setup preferences |
+| Calendar → sliders → Connect & import | Paste flyer, email or copied photo text, review extracted details, then finish in the normal event editor. Import selected events from an iCalendar or KidsSync file |
 | Calendar → sliders → History & files | Activity history and acknowledgements, owner version restore and presets, phone calendar-file import/export, weekly PDF, printing and email draft |
 | Calendar → Share | Family → People for that owned calendar |
 | Family bottom tab → People | Access management, owner comments in the real calendar and family profiles |
@@ -43,6 +44,7 @@ views and collaboration tools are available after authentication.
 | Calendar → Comments | Comments for the selected real calendar; posting follows owner/commenter/editor permissions |
 | Family → Pickups | Assign and review occurrence-based pickup coordination |
 | Avatar → Account & settings | Original setup answers, appearance, phone reminders, language, help, web calendar and confirmed sign-out |
+| Account → Calendar display | Opening Day/Week/4 days/Month, new-event length and Week weekend visibility saved with the owned calendar and applied on the website |
 
 Shared Viewer/Commenter calendars remain read-only. Editor changes require
 verified checked-write support. Source-managed events remain read-only. Owner
@@ -56,9 +58,12 @@ Back returns directly to the calling workspace. Appearance offers device default
 light/dark and four accent palettes. Phone reminders are opt-in and apply to
 confirmed calendars the user owns; shared recipient calendars are excluded.
 
-Scan document, connected Google or Outlook calendars and Google import use the
-browser. Once the matching website change is deployed, those links open the
-requested tool after website sign-in. Provider configuration may be required.
+Document text imports run on the phone. Photo OCR and connected Google/Outlook
+account tools use the browser and require the existing provider configuration.
+Calendar files support iCalendar exports and KidsSync backups. The review lists
+dates, times, people and locations and allows event selection. New backup
+profiles and selected events are added together, with conflict checks and retry
+protection. Unsupported recurrence and mismatched time zones produce an error.
 The weekly email action opens a draft in the phone's email app.
 
 Day notes, saved views, polls, pins, packing progress, appearance and setup preferences
@@ -66,3 +71,8 @@ are device-local with account/calendar scope where applicable. Calendar activity
 data uses the existing account sync. Private day notes are excluded from shared
 agendas. Activity acknowledgements and edits by other accounts require the
 existing Supabase family coordination migration.
+
+Saved views include event category and weekend visibility. Activities, Trips
+and Important match the website category rules. Holidays only shows holidays
+throughout the timeline, daily list and Month page. Opening a found event clears
+filters so it can be seen.

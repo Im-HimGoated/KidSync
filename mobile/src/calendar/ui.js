@@ -7,21 +7,14 @@ import { useAppearance } from '../ui/AppearanceContext';
 import eventOptions from './event-options';
 
 export const colors = theme.colors;
-export const palettes = {
-  blue: { ink: '#245D83', soft: '#E4F0F7', line: '#88AEC5' },
-  green: { ink: '#315F43', soft: '#E7F2EB', line: '#94B9A3' },
-  purple: { ink: '#72528D', soft: '#F0E7F8', line: '#BE9DD5' },
-  pink: { ink: '#985168', soft: '#F9EAF0', line: '#D9A2B5' },
-  yellow: { ink: '#85682B', soft: '#F8F0DC', line: '#C8AE71' },
-};
+export const palettes = theme.lightPalettes;
 export function personColor(event, kids = [], currentPalettes = palettes) {
   if (event?.isBuiltInHoliday) return currentPalettes.green;
   const explicit = eventOptions.paletteFor(event?.color);
   if (explicit) return explicit;
   const kid = (Array.isArray(kids) ? kids : []).find(person => person && (person.name === event?.child
     || (person.id != null && event?.child != null && String(person.id) === String(event.child))));
-  const key = kid?.palette === 'gold' ? 'yellow' : kid?.palette;
-  return currentPalettes[event?.style] || currentPalettes[key] || currentPalettes.blue;
+  return currentPalettes[event?.style] || currentPalettes[kid?.palette] || currentPalettes.blue;
 }
 export function useCalendarUi() {
   const appearance = useAppearance();

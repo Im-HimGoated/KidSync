@@ -67,6 +67,33 @@ test('personal storage corruption and write failures preserve existing records a
   assert.throws(() => tools.createPlanningStore(storage, { ...scope, userId: '' }), /INVALID_SCOPE/);
   await assert.rejects(store.saveNote('2026-02-30', 'bad'), /INVALID_NOTE/);
 });
+test('saved views round trip category/weekend choices and normalize legacy views without losing notes', async () => {
+  const storage = device(), store = tools.createPlanningStore(storage, scope);
+  await store.saveView('Trips on weekdays', { ...view, category: 'trip', hideWeekends: true });
+  const reopened = await tools.createPlanningStore(storage, scope).read();
+  assert.deepEqual(reopened.views[0], { name: 'Trips on weekdays', ...view, category: 'trip', hideWeekends: true });
+  storage.values.set(store.key, JSON.stringify({ version: 1, notes: { '2026-11-04': 'Keep this note' }, views: [{ name: 'Legacy', ...view }] }));
+  assert.deepEqual((await store.read()).views[0], { name: 'Legacy', ...view, category: 'all', hideWeekends: false });
+  await store.saveView('Holidays', { ...view, category: 'holidays', hideWeekends: false });
+  const migrated = await store.read();
+  assert.equal(migrated.notes['2026-11-04'], 'Keep this note');
+  assert.equal(migrated.views[1].category, 'holidays');
+  assert.deepEqual(tools.normalizeView({ ...view, category: 'special' }), { ...view, category: 'important', hideWeekends: false });
+});
+test('invalid saved-view filters fail before writes and corrupt stored filters do not reset personal data', async () => {
+  const storage = device(), store = tools.createPlanningStore(storage, scope);
+  await store.saveNote('2026-11-04', 'Retain');
+  const before = storage.values.get(store.key);
+  for (const patch of [{ category: 'unknown' }, { category: null }, { hideWeekends: 'false' }, { hideWeekends: 1 }, { hideWeekends: null }]) {
+    assert.throws(() => store.saveView('Invalid', { ...view, ...patch }), /INVALID_VIEW/);
+    assert.equal(storage.values.get(store.key), before);
+    const corrupt = JSON.stringify({ version: 1, notes: { '2026-11-04': 'Retain' }, views: [{ name: 'Corrupt', ...view, ...patch }] });
+    storage.values.set(store.key, corrupt);
+    await assert.rejects(store.read(), /INVALID_STORED_PLANNING/);
+    assert.equal(storage.values.get(store.key), corrupt);
+    storage.values.set(store.key, before);
+  }
+});
 test('planning tools are bilingual, theme-aware and wired to native calendar with safe unsaved drafts', () => {
   const source = fs.readFileSync(require.resolve('../mobile/src/calendar/PlanningTools.js'), 'utf8');
   const copy = vm.runInNewContext(`(${source.match(/export const planningCopy = (\{[^]*?\n\});/)[1]})`);
@@ -90,7 +117,8 @@ test('iOS tools, planning and editor keep one native sheet, including dirty-note
   assert.match(screen, /<CalendarToolbox embedded/);
   assert.match(screen, /<PlanningTools key=\{scopeId\} embedded onDirtyChange=\{onDirtyChange\} onBusyChange=\{setPlanningBusy\}/);
   assert.match(screen, /if \(busy \|\| planningBusy\) return/);
-  assert.match(screen, /\['new', 'edit', 'planning', 'comments'\]\.includes\(sheet\?\.type\) && draftDirty\.current/);
+  const guardedSheets = vm.runInNewContext(screen.match(/if \((\[[^\n]+?\])\.includes\(sheet\?\.type\) && draftDirty\.current\)/)[1]);
+  for (const type of ['new', 'edit', 'planning', 'comments']) assert.ok(guardedSheets.includes(type), `${type} retains draft protection`);
   for (const source of [panel, toolbox]) {
     assert.match(source, /embedded = false/);
     assert.match(source, /return embedded \? content : <Sheet/);

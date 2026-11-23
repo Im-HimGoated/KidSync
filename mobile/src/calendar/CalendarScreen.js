@@ -21,6 +21,7 @@ import CalendarRecords from './CalendarRecords';
 import QuickAdd from './QuickAdd';
 import FamilyPoll from './FamilyPoll';
 import FamilyTime from './FamilyTime';
+import DocumentImport, { documentCopy } from './DocumentImport';
 import CalendarFiles, { calendarFilesAvailable } from './CalendarFiles';
 import websiteTools from '../lib/website-tools';
 
@@ -67,7 +68,7 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
   const [view, setView] = useState(display.view), [person, setPerson] = useState('all'), [query, setQuery] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [category, setCategory] = useState('all');
-  const [hideWeekends, setHideWeekends] = useState(false);
+  const [hideWeekends, setHideWeekends] = useState(!display.showWeekends);
   const [fullMonthOpen, setFullMonthOpen] = useState(display.view === 'month');
   const [localId, setLocalId] = useState(null), [sheet, setSheet] = useState(null), [busy, setBusy] = useState(false);
   const [localOwnerId, setLocalOwnerId] = useState(null);
@@ -82,7 +83,7 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
   const sheetVersion = useRef(0);
   const handledCommentsRequest = useRef(0);
   const handledActionRequest = useRef(0);
-  const viewPreference = useRef(display.view);
+  const viewPreference = useRef(null);
   const monthReturnView = useRef(display.view === 'month' ? 'agenda' : display.view);
   const rowSnapshot = snapshot?.schedule || snapshot;
   const entries = Array.isArray(calendars) ? calendars : scheduleReader.calendarEntries(rowSnapshot);
@@ -98,7 +99,7 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
   const filtered = model.filterActivities([...events, ...builtIns].filter(event => holidays.matchesCategory(event, category)), kids, { person, query });
   const dayEvents = model.sortAgenda(calendar.eventsForDate(filtered, date), date);
   const searchActive = !!query.trim();
-  const activeFilterCount = Number(searchActive) + Number(person !== 'all') + Number(category !== 'all');
+  const activeFilterCount = Number(searchActive) + Number(person !== 'all') + Number(category !== 'all') + Number(view === 'week' && hideWeekends);
   const filtersActive = activeFilterCount > 0;
   let shownEvents = dayEvents;
   if (searchActive) {
@@ -123,17 +124,21 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
 
   useLayoutEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   useEffect(() => {
-    if (viewPreference.current !== display.view) {
-      viewPreference.current = display.view;
+    if (viewPreference.current?.view !== display.view || viewPreference.current?.scopeId !== scopeId) {
+      viewPreference.current = { view: display.view, scopeId };
       if (display.view === 'month') { monthReturnView.current = 'agenda'; setView('month'); setFullMonthOpen(true); }
       else { monthReturnView.current = display.view; setView(display.view); setFullMonthOpen(false); }
     }
     setFocusedHour(display.initialHour);
-  }, [display.view, display.initialHour]);
+  }, [display.view, display.initialHour, scopeId]);
+  useEffect(() => {
+    setHideWeekends(!display.showWeekends);
+  }, [scopeId, display.showWeekends]);
   useEffect(() => {
     const focused = calendar.parseDateKey(focusDate);
     if (validDate(focused)) {
-      setDate(focused); setQuery(''); setPerson('all'); setFiltersOpen(false);
+      setDate(focused); setQuery(''); setPerson('all'); setCategory('all'); setFiltersOpen(false);
+      if (focused.getDay() === 0 || focused.getDay() === 6) setHideWeekends(false);
       setFocusedHour(focus.hourForTime(focusTime, display.initialHour));
       if (typeof focusTime === 'string' && focusTime) { setFullMonthOpen(false); setView('day'); }
       setAcceptedFocusRequest(value => value + 1);
@@ -230,7 +235,7 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
   function requestClose() {
     if (busy || planningBusy) return;
     if (discardConfirm) { setDiscardConfirm(false); return; }
-    if (['new', 'edit', 'planning', 'comments'].includes(sheet?.type) && draftDirty.current) { setDiscardConfirm(true); return; }
+    if (['new', 'edit', 'planning', 'comments', 'document'].includes(sheet?.type) && draftDirty.current) { setDiscardConfirm(true); return; }
     closeSheet();
   }
   function open(type, extra = {}) { if (busy) return; sheetVersion.current++; setMessage(''); setConflicted(false); setDiscardConfirm(false); draftDirty.current = false; setSheet({ type, ...extra }); }
@@ -294,7 +299,17 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
     openDay(value);
   }
   function addFromMonth() { setView('agenda'); setFullMonthOpen(false); open('new'); }
-  function resetFilters() { setPerson('all'); setQuery(''); setCategory('all'); setFiltersOpen(false); }
+  function resetFilters() { setPerson('all'); setQuery(''); setCategory('all'); setHideWeekends(false); setFiltersOpen(false); }
+  function applySavedView(value) {
+    const next = planning.normalizeView(value);
+    const nextPerson = filters.some(item => item.value === next.person) ? next.person : 'all';
+    setDate(calendar.parseDateKey(next.date)); setQuery(next.query); setPerson(nextPerson);
+    setCategory(next.category); setHideWeekends(next.hideWeekends);
+    setFiltersOpen(!!next.query.trim() || nextPerson !== 'all' || next.category !== 'all' || (next.view === 'week' && next.hideWeekends));
+    closeSheet();
+    if (next.view === 'month') { monthReturnView.current = 'agenda'; setView('month'); setFullMonthOpen(true); }
+    else { monthReturnView.current = next.view; setFullMonthOpen(false); setView(next.view); }
+  }
   async function saveActivity(event, options) {
     if (!active || !writableEvent(options?.original)) return false;
     return mutate(() => sheet?.scope === 'occurrence'
@@ -336,7 +351,8 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
   const deleteCalendarLabel = language === 'zh' ? '删除日历' : 'Delete calendar';
   const canDeleteCalendar = canWrite && !isShared && !!onDeleteCalendar && entries.filter(item => !item.ownerId || item.ownerId === userId).length > 1;
   const canRestore = !isShared && !!onRestoreSnapshot && canWrite;
-  const sheetTitle = { comments: commentsCopy.title, tools: toolsCopy.title, lists: toolsCopy.lists, quick: toolsCopy.quickAdd, poll: toolsCopy.poll, familyTime: toolsCopy.familyTime, files: toolsCopy.export,
+  const sheetTitle = { comments: commentsCopy.title, tools: toolsCopy.title, lists: toolsCopy.lists, quick: toolsCopy.quickAdd, poll: toolsCopy.poll, familyTime: toolsCopy.familyTime,
+    document: (documentCopy[language] || documentCopy.en).title, files: toolsCopy.export,
     records: sheet?.mode === 'activity' ? toolsCopy.activityHistory : sheet?.mode === 'presets' ? toolsCopy.presets : toolsCopy.versionHistory,
     planning: (planningCopy[language] || planningCopy.en).title, calendars: t.calendars, create: t.createCalendar, rename: renameLabel, deleteCalendar: deleteCalendarLabel,
     date: t.datePicker, new: t.add, edit: t.edit, details: t.details, scope: sheet?.operation === 'delete' ? t.deleteScope : t.editScope, delete: t.deleteTitle }[sheet?.type];
@@ -388,12 +404,12 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
         {filtersOpen && <View style={s.filterPanel}>
           <View style={s.search}><Search size={18} color={colors.muted} /><TextInput accessibilityLabel={t.search} value={query} onChangeText={setQuery} placeholder={t.searchPlaceholder} placeholderTextColor={colors.muted} style={s.searchInput} autoCorrect={false} returnKeyType="search" />{!!query && <IconButton icon={X} label={t.clear} onPress={() => setQuery('')} />}</View>
           <ChoiceRow label={language === 'zh' ? '活动类别' : 'Event category'} value={category} onChange={setCategory}
-            options={['all', 'holidays', 'special'].map((value, index) => ({ value,
-              label: (language === 'zh' ? ['所有活动', '节日', '特别日期'] : ['All events', 'Holidays', 'Special days'])[index] }))} />
+            options={holidays.categoryOptions(language)} />
           {view === 'week' && <View style={u.row}><Text style={u.label}>{language === 'zh' ? '隐藏周末' : 'Hide weekends'}</Text>
             <Switch accessibilityLabel={language === 'zh' ? '隐藏周末' : 'Hide weekends'} value={hideWeekends} onValueChange={setHideWeekends} /></View>}
           {searchActive && <Text style={s.searchScope}>{t.searchScope}</Text>}
           {!!kids.length && <ScrollView horizontal showsHorizontalScrollIndicator={false}><ChoiceRow options={filters} value={person} onChange={setPerson} label={t.everyone} /></ScrollView>}
+          {filtersActive && <Button secondary icon={X} onPress={resetFilters}>{t.resetFilters}</Button>}
         </View>}
       </View>
       {pending ? <View style={u.empty}><ActivityIndicator color={colors.primary} accessibilityLabel={t.loading} /><Text style={u.body}>{t.loading}</Text></View> : !active ? <View style={u.empty}><CalendarDays size={36} color={colors.primary} /><Text style={[u.heading, s.center]}>{t.noCalendar}</Text><Text style={[u.body, s.center]}>{t.noCalendarBody}</Text>{canCreate && <Button icon={Plus} onPress={() => open('create')}>{t.createCalendar}</Button>}</View> : <>
@@ -404,9 +420,7 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
           language={language} onDate={selectDate} onOpenDay={openDay} onEvent={showEvent}
           onAddAtTime={canWrite && !busy ? (day, hour) => {
             selectDate(day);
-            const startDate = calendar.dateKey(day);
-            open('new', { initialDraft: { startDate, start: `${String(hour).padStart(2, '0')}:00`,
-              end: `${String((hour + 1) % 24).padStart(2, '0')}:00`, endDate: hour === 23 ? calendar.dateKey(calendar.addDays(day, 1)) : '' } });
+            open('new', { initialDraft: model.newEventWindow(day, hour, preferences) });
           } : undefined} />}
         <View style={s.agendaHeading}><Text accessibilityRole="header" style={s.agendaTitle}>{searchActive ? t.searchResults : headerDate}</Text><View style={s.agendaActions}><View style={s.count}><Text style={s.countText}>{shownEvents.length}</Text></View>{commentsAvailable && <IconButton icon={MessageCircle} label={commentsCopy.title} disabled={busy || planningBusy} onPress={() => open('comments')} />}</View></View>
         {shownEvents.length ? shownEvents.map((item, index) => {
@@ -431,6 +445,7 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
       language={language} onDirtyChange={onDirtyChange} onBusyChange={setPlanningBusy} /></View>}
     {sheet.type === 'tools' && <CalendarToolbox embedded language={language} onClose={closeSheet}
       nativeAvailability={{ ...nativeTools, 'quick-add': canWrite, 'family-poll': true, 'family-time': true, 'activity-lists': true, 'activity-history': true, 'version-history': canRestore, presets: canRestore,
+        'scan-document': canWrite, 'import-calendar': canWrite && !isShared && calendarFilesAvailable,
         'export-calendar': calendarFilesAvailable, 'print-schedule': calendarFilesAvailable }}
       onPlanning={id => open('planning', { mode: planningModes[id] || 'gaps' })}
       onTool={id => {
@@ -438,6 +453,8 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
         else if (id === 'quick-add') open('quick');
         else if (id === 'family-poll') open('poll');
         else if (id === 'family-time') open('familyTime');
+        else if (id === 'scan-document') open('document');
+        else if (id === 'import-calendar') open('files', { mode: 'import' });
         else if (id === 'export-calendar' || id === 'print-schedule') open('files', { mode: id === 'print-schedule' ? 'print' : 'export' });
         else open('records', { mode: id === 'presets' ? 'presets' : id === 'version-history' ? 'versions' : 'activity' });
       }}
@@ -454,6 +471,15 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
       selectDate(calendar.parseDateKey(draft.startDate));
       open('new', { copyDraft: { ...draft, start: draft.start ?? '', end: draft.end ?? '' } });
     }} />}
+    {sheet.type === 'document' && <View accessibilityElementsHidden={discardConfirm} importantForAccessibility={discardConfirm ? 'no-hide-descendants' : 'auto'}
+      style={{ flexShrink: 1, display: discardConfirm ? 'none' : 'flex' }}>
+      <DocumentImport embedded language={language} kids={kids} defaultDuration={display.defaultEventDuration || 60}
+        onDirtyChange={onDirtyChange} onReview={draft => {
+          if (!canWrite) return false;
+          openProposedEvent(draft);
+          return true;
+        }} />
+    </View>}
     {sheet.type === 'poll' && <FamilyPoll key={scopeId} scope={scopeId} language={language} initialDate={calendar.dateKey(date)}
       kids={kids} events={events} canWrite={canWrite} onDraft={openProposedEvent} />}
     {sheet.type === 'familyTime' && <FamilyTime date={date} kids={kids} events={events} language={language}
@@ -481,12 +507,10 @@ function CalendarAccount({ userId, account, client, calendars, snapshot, calenda
       } : undefined} />}
     {sheet.type === 'planning' && !!active && <View accessibilityElementsHidden={discardConfirm} importantForAccessibility={discardConfirm ? 'no-hide-descendants' : 'auto'} style={{ flexShrink: 1, display: discardConfirm ? 'none' : 'flex' }}><PlanningTools key={scopeId} embedded onDirtyChange={onDirtyChange} onBusyChange={setPlanningBusy} initialMode={sheet.mode} userId={userId} ownerId={active.ownerId || userId} calendarId={active.id}
       events={events} kids={kids} date={date} language={language} firstDay={display.firstDay} canWrite={canWrite}
-      selectedView={{ view, date: calendar.dateKey(date), query, person }} onClose={closeSheet}
+      selectedView={{ view, date: calendar.dateKey(date), query, person, category, hideWeekends }} onClose={closeSheet}
       onPlan={draft => { setDate(calendar.parseDateKey(draft.startDate)); open('new', { initialDraft: draft }); }}
-      onShowDate={value => { setDate(calendar.parseDateKey(value)); setFullMonthOpen(false); setView('agenda'); setQuery(''); setPerson('all'); setFiltersOpen(false); closeSheet(); }}
-      onApplyView={value => { const nextPerson = filters.some(item => item.value === value.person) ? value.person : 'all'; setDate(calendar.parseDateKey(value.date)); setQuery(value.query); setPerson(nextPerson); setFiltersOpen(!!value.query?.trim() || nextPerson !== 'all'); closeSheet();
-        if (value.view === 'month') { monthReturnView.current = 'agenda'; setView('month'); setFullMonthOpen(true); }
-        else { monthReturnView.current = value.view; setFullMonthOpen(false); setView(value.view); } }} /></View>}
+      onShowDate={value => { setDate(calendar.parseDateKey(value)); setFullMonthOpen(false); setView('agenda'); resetFilters(); closeSheet(); }}
+      onApplyView={applySavedView} /></View>}
       {!!message && <View style={s.sheetFeedback}><Text accessibilityRole="alert" style={u.error}>{message}</Text>{conflicted && <Button secondary icon={RefreshCw} onPress={refresh} disabled={refreshing}>{t.conflictRefresh}</Button>}</View>}
       {sheet.type === 'details' && <ActivityDetails event={sheet.event} occurrenceDate={sheet.occurrenceDate} occurrenceStartDate={sheet.occurrenceStartDate} kids={kids} language={language} canEdit={writableEvent(sheet.event)} busy={busy} onEdit={event => chooseScope('edit', event)}
         onDuplicate={event => {

@@ -78,7 +78,7 @@ function eventLabel(event, date, kids, language, t, occurrenceStartDate) {
 
 function usePhoneWidth(minimum) {
   const { width } = useWindowDimensions();
-  return Math.max(minimum, Math.min(width, 640) - 40);
+  return Math.max(minimum, Math.min(width, 640) - 32);
 }
 
 function useRevealSelectedDay(scroll, width, index) {
@@ -107,7 +107,7 @@ export function CalendarViewPicker({ view, language, onChange, fourDays = false 
 export function DateStrip({ date, firstDay = 1, events = [], kids = [], language = 'en', onDate, compact = false }) {
   const { colors, palettes, s } = useViewStyles();
   const selected = ownDate(date), first = model.startOfDisplayWeek(selected, firstDayValue(firstDay));
-  const width = usePhoneWidth(7 * 44);
+  const width = usePhoneWidth(7 * (compact ? 40 : 44));
   const t = viewCopy(language), scroll = useRef(null);
   const selectedIndex = (selected.getDay() - firstDayValue(firstDay) + 7) % 7;
   const onLayout = useRevealSelectedDay(scroll, width, selectedIndex);
@@ -137,7 +137,7 @@ export function MonthGrid({ date, firstDay = 1, events = [], kids = [], language
   const { colors, palettes, s } = useViewStyles();
   const selected = ownDate(date), start = model.startOfDisplayWeek(selected, firstDayValue(firstDay));
   const days = model.displayMonthDays(selected, firstDayValue(firstDay));
-  const width = usePhoneWidth(7 * 44), cell = width / 7;
+  const width = usePhoneWidth(7 * 40), cell = width / 7;
   const today = calendar.dateKey(new Date()), selectedKey = calendar.dateKey(selected), t = viewCopy(language);
   const scroll = useRef(null), selectedIndex = (selected.getDay() - firstDayValue(firstDay) + 7) % 7;
   const onLayout = useRevealSelectedDay(scroll, width, selectedIndex);
@@ -145,11 +145,12 @@ export function MonthGrid({ date, firstDay = 1, events = [], kids = [], language
     <View style={[s.month, { width }]}>
       <View style={s.weekdays}>{Array.from({ length: 7 }, (_, i) => <Text key={i}
         style={[s.monthWeekday, { width: cell }]}>{formatDate(calendar.addDays(start, i), language, { weekday: 'short' }).replace('周', '')}</Text>)}</View>
-      <View style={s.monthGrid}>{days.map(day => {
+      <View style={s.monthGrid}>{days.map((day, index) => {
         const key = calendar.dateKey(day), chosen = key === selectedKey, items = calendar.eventsForDate(events, day);
         return <Pressable key={key} accessibilityRole="button" accessibilityState={{ selected: chosen }}
           accessibilityLabel={`${formatDate(day, language, { weekday: 'long', month: 'long', day: 'numeric' })}, ${t.activities(items.length)}`}
-          onPress={() => onDate?.(day)} style={[s.monthCell, { width: cell }]}>
+          onPress={() => onDate?.(day)} style={[s.monthCell, { width: cell }, index >= 7 && s.monthCellRow,
+            index % 7 !== 6 && s.monthCellColumn, chosen && s.monthCellSelected]}>
           <View style={[s.monthDate, chosen && s.selectedDay]}>
             <Text style={[s.monthNumber, day.getMonth() !== selected.getMonth() && s.outsideMonth,
               key === today && s.todayNumber, chosen && s.selectedText]}>{day.getDate()}</Text>
@@ -170,7 +171,7 @@ export function FullMonthPage({ date, firstDay = 1, events = [], kids = [], lang
   const selected = ownDate(date), first = model.startOfDisplayWeek(selected, firstDayValue(firstDay));
   const fullDays = model.displayMonthDays(selected, firstDayValue(firstDay));
   const days = fullDays.slice(35).some(day => day.getMonth() === selected.getMonth()) ? fullDays : fullDays.slice(0, 35);
-  const gridWidth = Math.max(280, Math.min(width, 640) - 24), cellWidth = (gridWidth - 2) / 7;
+  const gridWidth = Math.max(280, Math.min(width, 640) - 24), cellWidth = gridWidth / 7;
   const cellHeight = Math.max(64, Math.min(72, cellWidth * 1.25));
   const maxItems = 2;
   const today = calendar.dateKey(new Date()), selectedKey = calendar.dateKey(selected), t = viewCopy(language);
@@ -401,7 +402,9 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
             onPress={() => onOpenDay ? openDay(day) : onDate?.(day)} style={[s.gridDayHeader, { width: colWidth }, chosen && s.currentColumn]}>
             <Text style={s.weekday}>{formatDate(day, language, { weekday: 'short' }).replace('周', '')}</Text>
             <View style={[s.gridDate, chosen && s.selectedDay]}><Text style={[s.dateNumber, key === today && s.todayNumber, chosen && s.selectedText]}>{day.getDate()}</Text></View>
-            {!!dayEvents[index].length && <View style={[s.dayCount, chosen && s.dayCountSelected]}><Text style={[s.dayCountText, chosen && s.dayCountTextSelected]}>{dayEvents[index].length}</Text></View>}
+            <View accessible={false} style={[s.dayCount, chosen && s.dayCountSelected, !dayEvents[index].length && s.dayCountEmpty]}>
+              {!!dayEvents[index].length && <Text style={[s.dayCountText, chosen && s.dayCountTextSelected]}>{dayEvents[index].length}</Text>}
+            </View>
           </Pressable>;
         })}</View>
       </ScrollView>
@@ -504,10 +507,14 @@ const createStyles = colors => StyleSheet.create({
   dateNumber: { color: colors.ink, fontSize: 18, lineHeight: 24, fontWeight: '700' },
   selectedDay: { backgroundColor: colors.primary }, selectedText: { color: colors.onPrimary },
   dots: { flexDirection: 'row', gap: 2, minHeight: 4, justifyContent: 'center' }, dot: { width: 4, height: 4, borderRadius: 2 },
-  monthScroll: { flexGrow: 0, marginBottom: 17 }, month: { backgroundColor: colors.surface, borderRadius: 16, overflow: 'hidden', paddingVertical: 5 },
-  weekdays: { flexDirection: 'row' }, monthWeekday: { color: colors.muted, fontSize: 12, paddingVertical: 10, textAlign: 'center' },
-  monthGrid: { flexDirection: 'row', flexWrap: 'wrap' }, monthCell: { minHeight: 49, alignItems: 'center', justifyContent: 'center' },
-  monthDate: { width: 42, minHeight: 44, borderRadius: 13, alignItems: 'center', justifyContent: 'center', gap: 4 },
+  monthScroll: { flexGrow: 0, marginBottom: 17 }, month: { backgroundColor: colors.surface, borderTopWidth: 1, borderBottomWidth: 1,
+    borderColor: colors.line, borderRadius: 8, overflow: 'hidden' },
+  weekdays: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.line, backgroundColor: colors.surfaceRaised },
+  monthWeekday: { color: colors.muted, fontSize: 12, paddingVertical: 9, textAlign: 'center' },
+  monthGrid: { flexDirection: 'row', flexWrap: 'wrap' }, monthCell: { minHeight: 52, alignItems: 'center', justifyContent: 'center' },
+  monthCellRow: { borderTopWidth: 1, borderTopColor: colors.line }, monthCellColumn: { borderRightWidth: 1, borderRightColor: colors.line },
+  monthCellSelected: { backgroundColor: colors.primarySoft },
+  monthDate: { width: 38, minHeight: 44, borderRadius: 13, alignItems: 'center', justifyContent: 'center', gap: 4 },
   monthNumber: { color: colors.ink, fontSize: 15, lineHeight: 20 }, outsideMonth: { color: colors.muted, opacity: 0.65 }, todayNumber: { color: colors.primary, fontWeight: '700' },
   weekContainer: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, borderRadius: 16, overflow: 'hidden', marginBottom: 14 },
   dayHeaders: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.line },
@@ -517,9 +524,10 @@ const createStyles = colors => StyleSheet.create({
   compactStrip: { marginBottom: 8 },
   compactStripDay: { minWidth: 0, minHeight: 60, gap: 1, borderRadius: 11 },
   stripCount: { color: colors.muted, fontSize: 11, fontVariant: ['tabular-nums'] },
-  gridDayHeader: { minHeight: 58, alignItems: 'center', justifyContent: 'center', gap: 1, paddingVertical: 3, borderLeftWidth: 1, borderLeftColor: colors.line },
+  gridDayHeader: { height: 76, alignItems: 'center', justifyContent: 'center', gap: 1, paddingVertical: 3, borderLeftWidth: 1, borderLeftColor: colors.line },
   gridDate: { width: 35, height: 35, borderRadius: 12, alignItems: 'center', justifyContent: 'center' }, currentColumn: { backgroundColor: colors.primarySoft },
   dayCount: { minWidth: 22, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6, backgroundColor: colors.surfaceRaised }, dayCountSelected: { backgroundColor: colors.surface },
+  dayCountEmpty: { opacity: 0 },
   dayCountText: { color: colors.muted, fontSize: 10, lineHeight: 13, fontWeight: '700' }, dayCountTextSelected: { color: colors.primary },
   nonTimed: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.line }, nonTimedGutter: { width: GUTTER, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3 },
   nonTimedLabel: { color: colors.muted, fontSize: 10, lineHeight: 14, textAlign: 'center' }, nonTimedDays: { flexDirection: 'row' },

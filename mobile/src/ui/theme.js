@@ -16,6 +16,8 @@ const accentColors = Object.freeze({
 const lightPalettes = Object.freeze({
   blue: { ink: '#245D83', soft: '#E4F0F7', line: '#88AEC5' },
   green: { ink: '#315F43', soft: '#E7F2EB', line: '#94B9A3' },
+  coral: { ink: '#673530', soft: '#F8E9E7', line: '#CE9A94' },
+  gold: { ink: '#594514', soft: '#F8F0DC', line: '#C8AE71' },
   purple: { ink: '#72528D', soft: '#F0E7F8', line: '#BE9DD5' },
   pink: { ink: '#985168', soft: '#F9EAF0', line: '#D9A2B5' },
   yellow: { ink: '#85682B', soft: '#F8F0DC', line: '#C8AE71' },
@@ -23,6 +25,8 @@ const lightPalettes = Object.freeze({
 const darkPalettes = Object.freeze({
   blue: { ink: '#B7DDF5', soft: '#243C4A', line: '#6CA8CD' },
   green: { ink: '#BDE8C9', soft: '#293E31', line: '#7DBA92' },
+  coral: { ink: '#F7CCC6', soft: '#482F2D', line: '#D79E96' },
+  gold: { ink: '#F1D99F', soft: '#453D29', line: '#C6AE70' },
   purple: { ink: '#DDC9FA', soft: '#3A304B', line: '#B498D3' },
   pink: { ink: '#F5C5D7', soft: '#48303D', line: '#CA90A8' },
   yellow: { ink: '#F1D99F', soft: '#453D29', line: '#C6AE70' },

@@ -7,6 +7,10 @@ const holidays = require('../mobile/src/calendar/holidays');
 const files = require('../mobile/src/calendar/calendar-files');
 const quick = require('../mobile/src/calendar/quick-add');
 const history = require('../mobile/src/calendar/calendar-history');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const theme = require('../mobile/src/ui/theme');
+const profileOptions = require('../shared/family-profiles');
 const { toolUrl } = require('../mobile/src/lib/website-tools');
 
 test('event options use web-compatible fields and duplication creates a distinct one-off draft', () => {
@@ -68,6 +72,45 @@ test('ICS round trip retains overnight times, exclusive all-day ends and recurre
   assert.deepEqual(imported[1].excludedDates, ['2027-11-13']);
   assert.notEqual(imported[0].id, 'night');
   assert.match(files.printHtml('<script>', '<img>'), /&lt;img&gt;/);
+});
+
+test('calendar backups import missing profiles, match existing names and retain future event fields', () => {
+  const originalKids = [{ id: 'existing', name: 'Casey', palette: 'green', avatar: '🧒' }];
+  const backup = { kids: [...originalKids, { id: 'old-riley', name: 'Riley', palette: 'coral', avatar: '🦊', grade: '4', school: 'School' }], activities: [
+    { id: 'source', title: 'Piano', startDate: '2026-11-28', start: '16:00', end: '17:00', child: 'old-riley', attendees: ['existing', 'old-riley'], futureMetadata: { keep: true } },
+    { id: 'second', title: 'Pickup', startDate: '2026-11-28', start: '17:30', end: '18:00', child: 'casey' },
+  ] };
+  const result = files.readImport(JSON.stringify(backup), originalKids);
+  assert.equal(result.profiles.length, 1);
+  assert.notEqual(result.profiles[0].id, 'old-riley');
+  assert.equal(result.profiles[0].palette, 'coral');
+  assert.equal(result.events[0].child, 'Riley');
+  assert.deepEqual(result.events[0].attendees, ['Casey', 'Riley']);
+  assert.deepEqual(result.events[0].futureMetadata, { keep: true });
+  assert.equal(result.events[1].child, 'Casey');
+  assert.deepEqual(result.originalKids, originalKids);
+  assert.equal(result.reassigned, 0);
+});
+
+test('iCalendar export folds Unicode lines and rejects repeating rules that would change imported dates', () => {
+  const title = '家庭旅行🦊'.repeat(30);
+  const source = files.exportIcs([{ id: 'long', title, startDate: '2026-11-28', allDay: true }], 'Family');
+  assert(source.split('\r\n').every(line => Buffer.byteLength(line, 'utf8') <= 75));
+  assert.equal(files.readImport(source).events[0].title, title);
+  const calendarText = rule => `BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nSUMMARY:Monthly class\r\nDTSTART:20261128T160000\r\nDTEND:20261128T170000\r\n${rule}\r\nEND:VEVENT\r\nEND:VCALENDAR`;
+  assert.throws(() => files.readImport(calendarText('RRULE:FREQ=MONTHLY;BYDAY=SA')), /UNSUPPORTED_RECURRENCE/);
+  assert.throws(() => files.readImport(calendarText('RECURRENCE-ID:20261128T160000')), /UNSUPPORTED_RECURRENCE/);
+  assert.throws(() => files.readImport(calendarText('RRULE:FREQ=WEEKLY\r\nEXDATE;TZID=Invalid/Zone:20261205T160000')), /UNSUPPORTED_TIME_ZONE/);
+  assert.throws(() => files.readImport(calendarText('RRULE:FREQ=WEEKLY\r\nEXDATE;VALUE=DATE:20261399')), /UNSUPPORTED_RECURRENCE/);
+});
+
+test('family and event color identities match the website in every appearance', () => {
+  const web = fs.readFileSync(require.resolve('../index.html'), 'utf8');
+  const webPalettes = vm.runInNewContext(`(${web.match(/const palettes = (\{[^]*?\n    \});/)[1]})`);
+  const eventColors = vm.runInNewContext(`(${web.match(/const EVENT_COLOR_OPTIONS = (\[[^]*?\n    \]);/)[1]})`);
+  assert.deepEqual(profileOptions.PALETTES, Object.keys(webPalettes));
+  for (const key of profileOptions.PALETTES) for (const mode of ['light', 'dark']) assert(theme.createTheme({ mode }).palettes[key], `${mode}/${key}`);
+  for (const color of eventColors) assert.equal(options.colors[color.id][0], color.line, color.id);
 });
 
 test('Quick Add creates a reviewable event and web tools keep fixed, encoded destinations', () => {

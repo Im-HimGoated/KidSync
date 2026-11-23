@@ -69,6 +69,8 @@ Module._load = function (request, parent) {
     if (request === '../calendar/ui') return { Button: 'Button', Sheet: 'Sheet' };
     if (request === './AppearanceSettings') return { default: 'AppearanceSettings', __esModule: true, appearanceCopy: { en: {} } };
     if (request === './ReminderSettings') return { default: 'ReminderSettings', __esModule: true, reminderCopy: { en: { title: 'Phone reminders', disabled: 'Off' } } };
+    if (request === './CalendarDisplaySettings') return { default: 'CalendarDisplaySettings', __esModule: true,
+      calendarDisplayCopy: { en: { title: 'Calendar display', noCalendar: 'Choose a calendar you own' } } };
   }
   if (parent?.filename === path.join(mobile, 'src/App.js')) {
     if (/\.(png|jpg)$/.test(request)) return 'bundled-image';
@@ -118,6 +120,7 @@ async function mount(session = null) {
   for (const cell of previousHost?.cells || []) cell?.cleanup?.();
   values.clear(); currentSession = session; preview = null; lastImport = null; websiteFails = false;
   Object.assign(ownerSync, { loaded: true, row: { schedule: {} }, status: 'SUBSCRIBED' });
+  ownerSync.refresh = async () => ({ pendingCount: 0 });
   ownerSync.acceptConfirmed = async () => {};
   sharedRead = async source => ({ ownerId: source.ownerId, calendarId: source.id, canWrite: false,
     calendar: { id: source.id, name: source.name, ownerId: source.ownerId, data: {} } });
@@ -350,6 +353,120 @@ test('explicit preview import selects and opens the new real calendar without re
   await app.settle();
   assert.equal(app.screen('PreviewDraftReview'), undefined);
   assert.equal(find(app.render(), 'Pressable', element => element.props.children?.props?.children === 'Review unfinished preview plan'), null);
+});
+
+test('selected calendar cloud display defaults preserve local onboarding week, hours and reminders', async () => {
+  const app = await mount({ user: { id: 'account-a', email: 'test@example.com' } });
+  await app.screen('HomeScreen').onPreferences();
+  await app.screen('OnboardingScreen').onComplete(answers); await app.settle();
+  ownerSync.row = { schedule: { calendars: [{ id: 'home', name: 'Home' }, { id: 'work', name: 'Work' }],
+    calendarData: {
+      home: { activities: [], settings: { defaultView: 'four', defaultEventDuration: 45, showWeekends: false, notifications: true } },
+      work: { activities: [], settings: { defaultView: 'today', defaultEventDuration: 90, showWeekends: true } },
+    } } };
+  app.screen('CalendarScreen').onSelectCalendar('home', { id: 'home' });
+  assert.deepEqual(app.screen('CalendarScreen').preferences, { ...answers, view: 'four', defaultEventDuration: 45, showWeekends: false });
+  app.screen('CalendarScreen').onSelectCalendar('work', { id: 'work' });
+  assert.deepEqual(app.screen('CalendarScreen').preferences, { ...answers, view: 'day', defaultEventDuration: 90, showWeekends: true });
+  find(app.render(), BottomNavigation).props.onChange('account');
+  assert.equal(app.screen('AccountSettings').calendarDisplay.calendar.id, 'work');
+  assert.equal(app.screen('AccountSettings').calendarDisplay.available, true);
+  ownerSync.status = 'OFFLINE';
+  assert.equal(app.screen('AccountSettings').calendarDisplay.available, false);
+  ownerSync.status = 'SUBSCRIBED';
+  await app.screen('FamilyScreen').onOpenSharedCalendar({ calendar: { id: 'shared', ownerId: 'other-owner', name: 'Shared' }, invitation: { id: 'invite' } });
+  assert.equal(app.screen('AccountSettings').calendarDisplay.calendar, null);
+  assert.equal(app.screen('AccountSettings').calendarDisplay.available, false);
+});
+
+test('Account display saves accept a confirmed row and reject calendar switches while refreshing', async () => {
+  const backend = require('../shared/backend/mobile-settings'), originalSave = backend.saveCalendarSettings;
+  const app = await mount({ user: { id: 'account-a', email: 'test@example.com' } });
+  ownerSync.row = { schedule: { calendars: [{ id: 'home', name: 'Home' }, { id: 'work', name: 'Work' }],
+    calendarData: { home: { activities: [] }, work: { activities: [] } } } };
+  app.screen('CalendarScreen').onSelectCalendar('home', { id: 'home' });
+  find(app.render(), BottomNavigation).props.onChange('account');
+  let calls = 0, accepted = 0;
+  const confirmed = { ...ownerSync.row, updated_at: '2026-11-23T12:00:00Z' };
+  ownerSync.acceptConfirmed = async row => { assert.equal(row, confirmed); accepted++; };
+  backend.saveCalendarSettings = async (_client, userId, id, request) => {
+    calls++; assert.equal(userId, 'account-a'); assert.equal(id, 'home');
+    assert.equal(request.isCurrent(), true); assert.deepEqual(request.changes, { showWeekends: false }); return confirmed;
+  };
+  try {
+    assert.equal(await app.screen('AccountSettings').calendarDisplay.onSave({ original: {}, changes: { showWeekends: false } }), confirmed);
+    assert.equal(calls, 1); assert.equal(accepted, 1);
+    let finish;
+    ownerSync.refresh = () => new Promise(resolve => { finish = resolve; });
+    const pending = app.screen('AccountSettings').calendarDisplay.onSave({ original: {}, changes: { showWeekends: false } });
+    app.screen('CalendarScreen').onSelectCalendar('work', { id: 'work' }); app.render();
+    finish({ pendingCount: 0 });
+    await assert.rejects(pending, { code: 'STALE_SCOPE' });
+    assert.equal(calls, 1); assert.equal(accepted, 1);
+  } finally { backend.saveCalendarSettings = originalSave; }
+});
+
+test('Account opens calendar display in the existing sheet and keeps it busy during saves', () => {
+  const { default: AccountSettings, __Row: Row } = compileScreen('src/ui/AccountSettings.js', '\nexports.__Row = Row;');
+  const state = { cells: [], cursor: 0, effects: [] };
+  const calendarDisplay = { scope: 'account/home', calendar: { id: 'home', name: 'Home' }, available: true };
+  const render = () => {
+    host = state; state.cursor = 0;
+    const tree = AccountSettings({ language: 'en', email: 'test@example.com', calendarDisplay });
+    for (const effect of state.effects.splice(0)) effect(); return tree;
+  };
+  find(render(), Row, node => node.props.title === 'Calendar display').props.onPress();
+  const panel = find(render(), 'CalendarDisplaySettings');
+  assert.equal(render().type, 'Sheet'); assert.equal(render().props.title, 'Calendar display');
+  assert.equal(panel.props.calendar, calendarDisplay.calendar);
+  panel.props.onBusyChange(true); assert.equal(render().props.busy, true);
+  panel.props.onBusyChange(false); assert.equal(render().props.busy, false);
+});
+
+test('Back and Close protect unsaved display choices while Keep editing retains the mounted draft', () => {
+  const { default: AccountSettings, __Row: Row } = compileScreen('src/ui/AccountSettings.js', '\nexports.__Row = Row;');
+  for (const destination of ['back', 'close']) {
+    const state = { cells: [], cursor: 0, effects: [] }; let closes = 0;
+    const calendarDisplay = { scope: 'account/home', calendar: { id: 'home', name: 'Home' }, available: true };
+    const render = () => {
+      host = state; state.cursor = 0;
+      const tree = AccountSettings({ language: 'en', email: 'test@example.com', calendarDisplay, onClose: () => { closes++; } });
+      for (const effect of state.effects.splice(0)) effect(); return tree;
+    };
+    find(render(), Row, node => node.props.title === 'Calendar display').props.onPress();
+    const panel = find(render(), 'CalendarDisplaySettings');
+    panel.props.onDirtyChange(true);
+    const attemptLeave = () => {
+      if (destination === 'close') render().props.onClose();
+      else find(render(), 'Pressable', node => find(node, 'Text')?.props.children === 'Back to settings').props.onPress();
+    };
+    attemptLeave();
+    assert.equal(closes, 0); assert.equal(render().props.title, 'Discard display changes?');
+    const hidden = find(render(), 'View', node => node.props.accessibilityElementsHidden === true);
+    assert.ok(hidden); assert.equal(find(hidden, 'CalendarDisplaySettings').key, panel.key);
+    find(render(), 'Button', node => node.props.children === 'Keep editing').props.onPress();
+    assert.equal(render().props.title, 'Calendar display');
+    assert.equal(find(render(), 'CalendarDisplaySettings').key, panel.key);
+    attemptLeave();
+    find(render(), 'Button', node => node.props.children === 'Discard changes').props.onPress();
+    if (destination === 'close') assert.equal(closes, 1);
+    else { assert.equal(render().props.title, 'You & settings'); assert.equal(find(render(), 'CalendarDisplaySettings'), null); }
+  }
+});
+
+test('clean display exits immediately and an in-flight save cannot leave Settings', () => {
+  const { default: AccountSettings, __Row: Row } = compileScreen('src/ui/AccountSettings.js', '\nexports.__Row = Row;');
+  const state = { cells: [], cursor: 0, effects: [] }; let closes = 0;
+  const render = () => {
+    host = state; state.cursor = 0;
+    const tree = AccountSettings({ language: 'en', calendarDisplay: { scope: 'home', calendar: { id: 'home' } }, onClose: () => { closes++; } });
+    for (const effect of state.effects.splice(0)) effect(); return tree;
+  };
+  find(render(), Row, node => node.props.title === 'Calendar display').props.onPress();
+  find(render(), 'CalendarDisplaySettings').props.onBusyChange(true);
+  render().props.onClose(); assert.equal(closes, 0);
+  find(render(), 'CalendarDisplaySettings').props.onBusyChange(false);
+  render().props.onClose(); assert.equal(closes, 1);
 });
 test('failed website handoff reports failure to the caller for visible retry feedback', async () => {
   const app = await mount(); websiteFails = true;
