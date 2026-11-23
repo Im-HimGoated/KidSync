@@ -97,6 +97,76 @@ test('family profile rename updates only the selected calendar and keeps its act
   assert.equal(removed.schedule.calendarData.home.activities[0].child, '__family__');
 });
 
+test('profile changes resolve numeric and string IDs, names and legacy child references atomically', async () => {
+  const original = [{ id: 7, name: 'Casey', palette: 'green', avatar: '🧒', grade: '', school: '' }];
+  const initial = snapshot();
+  const legacy = event({ id: 'legacy', childId: '7', attendees: ['7'] });
+  delete legacy.child;
+  initial.calendarData.home.kids = original;
+  initial.calendarData.home.activities = [
+    event({ id: 'number', child: 7, attendees: [7, '7', 'Casey'], future: { keep: true } }),
+    event({ id: 'string', child: '7', attendees: ['Unlisted', '7'] }),
+    event({ id: 'array', child: [7, '7', 'Casey', 'Unlisted', null], attendees: ['Casey'] }),
+    legacy,
+    event({ id: 'unknown', child: 'Unlisted', attendees: ['Unlisted', 'Unlisted', null] }),
+    event({ id: 'family', child: '__family__', attendees: ['all'] }),
+  ];
+  initial.activities = clone(initial.calendarData.home.activities);
+  const client = fakeClient(row(initial));
+  const renamed = await saveFamilyProfiles(client, 'owner-1', 'home', {
+    original, profiles: [{ ...original[0], id: '7', name: 'Riley' }],
+  });
+  const changed = renamed.schedule.calendarData.home.activities;
+  assert.equal(changed[0].child, 'Riley');
+  assert.deepEqual(changed[0].attendees, ['Riley']);
+  assert.deepEqual(changed[0].future, { keep: true });
+  assert.equal(changed[1].child, 'Riley');
+  assert.deepEqual(changed[1].attendees, ['Unlisted', 'Riley']);
+  assert.deepEqual(changed[2].child, ['Riley', 'Unlisted', null]);
+  assert.equal(changed[3].childId, 'Riley');
+  assert.equal(Object.hasOwn(changed[3], 'child'), false);
+  assert.deepEqual(changed.slice(4), initial.calendarData.home.activities.slice(4));
+  assert.deepEqual(renamed.schedule.activities, changed);
+  assert.deepEqual(renamed.schedule.calendarData.work, initial.calendarData.work);
+  assert.equal(client.state.updates.length, 1);
+
+  const removed = await saveFamilyProfiles(client, 'owner-1', 'home', {
+    original: renamed.schedule.calendarData.home.kids, profiles: [],
+  });
+  const remaining = removed.schedule.calendarData.home.activities;
+  assert.equal(remaining[0].child, '__family__');
+  assert.deepEqual(remaining[0].attendees, ['all']);
+  assert.deepEqual(remaining[1].attendees, ['Unlisted']);
+  assert.deepEqual(remaining[2].child, ['Unlisted', null]);
+  assert.equal(remaining[3].childId, '__family__');
+  assert.deepEqual(removed.schedule.activities, remaining);
+  assert.deepEqual(remaining.slice(4), initial.calendarData.home.activities.slice(4));
+});
+
+test('inactive profile ID edits preserve the active mirror and stale profile edits cannot write', async () => {
+  const original = [{ id: 'kid-a', name: 'Casey', palette: 'blue', avatar: '🧒', grade: '', school: '' }];
+  const initial = snapshot();
+  initial.calendarData.work.kids = original;
+  initial.calendarData.work.activities = [event({ id: 'work-event', child: 'kid-a', attendees: ['kid-a'] })];
+  const client = fakeClient(row(initial));
+  const saved = await saveFamilyProfiles(client, 'owner-1', 'work', {
+    original, profiles: [{ ...original[0], name: 'Riley' }],
+  });
+  assert.equal(saved.schedule.calendarData.work.activities[0].child, 'Riley');
+  assert.deepEqual(saved.schedule.calendarData.home, initial.calendarData.home);
+  assert.deepEqual(saved.schedule.activities, initial.activities);
+  assert.deepEqual(saved.schedule.kids, initial.kids);
+  await assert.rejects(saveFamilyProfiles(client, 'owner-1', 'work', { original, profiles: [] }), hasCode('CONFLICT'));
+  assert.equal(client.state.updates.length, 1);
+
+  const legacy = { activities: [event({ child: 7, attendees: ['7'] })], kids: [{ ...original[0], id: 7 }], future: { keep: true } };
+  const legacyClient = fakeClient(row(legacy));
+  const removed = await saveFamilyProfiles(legacyClient, 'owner-1', 'family', { original: legacy.kids, profiles: [] });
+  assert.equal(removed.schedule.activities[0].child, '__family__');
+  assert.deepEqual(removed.schedule.activities[0].attendees, ['all']);
+  assert.deepEqual(removed.schedule.future, legacy.future);
+});
+
 test('calendar restores keep a checkpoint and imported IDs are idempotent on retry', async () => {
   const initial = snapshot();
   initial.calendarData.home.history = [{ id: 'older', label: 'Older', snapshot: { activities: [event({ title: 'Earlier' })], kids: [] } }];

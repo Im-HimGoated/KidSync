@@ -2,8 +2,27 @@
 #appShell .mini-calendar-day.has-events { position: relative; padding-bottom: 5px; }
 #appShell .mini-calendar-event-dots { position: absolute; bottom: 3px; left: 50%; display: flex; gap: 2px; translate: -50% 0; pointer-events: none; }
 #appShell .mini-calendar-event-dots i { width: 3px; height: 3px; border-radius: 50%; background: currentColor; }
+#appShell .mini-calendar-event-dots.has-overflow { bottom: 1px; align-items: center; gap: 1px; max-width: calc(100% - 4px); white-space: nowrap; }
+#appShell .mini-calendar-event-dots.has-overflow i { flex: 0 0 2px; width: 2px; height: 2px; }
+#appShell .mini-calendar-event-overflow { overflow: hidden; font-size: 10px; font-weight: 700; line-height: 10px; font-variant-numeric: tabular-nums; }
 #appShell .mini-calendar-marker-key { display: flex; align-items: center; gap: 6px; margin: 8px 0 0; color: var(--muted); font-size: 11px; line-height: 1.4; }
 #appShell .mini-calendar-marker-key > span:first-child { color: var(--blue); letter-spacing: 2px; }
+
+/* A quiet date cue; selection, today, hover and drag feedback keep priority. */
+#appShell { --calendar-weekend-bg: color-mix(in srgb, var(--ink) 3%, var(--panel)); }
+#appShell #weekSchedule .day-head.is-weekend:not(.is-today):not(.is-selected):not(:hover),
+#appShell #weekSchedule .all-day-cell.is-weekend:not(.is-today):not(.is-selected):not(.is-drop-target),
+#appShell .month-day.is-weekend:not(.is-today):not(.is-selected),
+#appShell .mini-calendar-day.is-weekend:not(.is-today):not(.is-selected):not(:hover),
+#appShell #mobileAgenda .day-card.is-weekend:not(.is-today):not(.is-selected) > .agenda-day-heading {
+  background-color: var(--calendar-weekend-bg);
+}
+#appShell #weekSchedule .day-column.is-weekend:not(.is-today):not(.is-selected):not(.is-drop-target) {
+  --week-column-bg: var(--calendar-weekend-bg);
+}
+
+html.dark-mode #appShell #todayHeading { color: var(--ink); }
+
 .event-duration-controls { margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
 .event-duration-controls[hidden] { display: none !important; }
 .event-duration-heading { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }

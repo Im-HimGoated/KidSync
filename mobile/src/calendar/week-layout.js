@@ -26,4 +26,23 @@ function weekOffset(selectedIndex, dayWidth, viewportWidth, days = 7) {
   return Math.max(0, Math.min(left, dayWidth * days - viewportWidth));
 }
 
-module.exports = { GUTTER_WIDTH, MIN_DAY_WIDTH, MAX_DAY_WIDTH, INITIAL_LEAD_MINUTES, weekGeometry, initialScrollOffset, weekOffset };
+function nextTimedTarget(columns, dateKeys, selectedKey, todayKey, nowMinutes) {
+  if (!Array.isArray(columns) || !Array.isArray(dateKeys)) return null;
+  const fromKey = selectedKey > todayKey ? selectedKey : todayKey;
+  let next = null;
+  columns.forEach((column, index) => {
+    const dateKey = dateKeys[index];
+    if (!dateKey || dateKey < fromKey) return;
+    for (const item of column?.timed || []) {
+      const start = Number(item.start);
+      if (!Number.isFinite(start) || item.event?.status === 'cancelled'
+        || (dateKey === todayKey && start < nowMinutes)) continue;
+      if (!next || dateKey < next.dateKey || (dateKey === next.dateKey && start < next.start)) {
+        next = { index, dateKey, start };
+      }
+    }
+  });
+  return next;
+}
+
+module.exports = { GUTTER_WIDTH, MIN_DAY_WIDTH, MAX_DAY_WIDTH, INITIAL_LEAD_MINUTES, weekGeometry, initialScrollOffset, weekOffset, nextTimedTarget };

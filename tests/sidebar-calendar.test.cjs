@@ -162,3 +162,36 @@ test('normal date navigation keeps the chosen view and counts only the active ca
   assert.equal(count('2026-03-19'), 0);
   assert.equal(count('2026-03-17'), 1); // Built-in holiday is still available.
 });
+
+test('mini calendar shows exact overflow beyond three matching events and retains accessible totals', () => {
+  const { context, state, day } = setup();
+  for (let index = 0; index < 5; index++) state.activities.push({
+    id: `Extra ${index}`, title: `Extra ${index}`, child: 'Andrew', eventType: 'activity',
+    startDate: '2026-03-19', recurrence: 'none', status: 'confirmed'
+  });
+  context.renderMiniCalendar();
+  const button = day('2026-03-19');
+  assert.equal(button.attributes['aria-label'].split(' · ').at(-1), '6 events');
+  const markers = button.children[0];
+  assert.equal(markers.attributes['aria-hidden'], 'true');
+  assert.equal(markers.children.length, 4);
+  assert.equal(markers.children[3].textContent, '+3');
+  assert(markers.className.includes('has-overflow'));
+
+  state.searchQuery = 'Extra';
+  context.renderMiniCalendar();
+  assert.equal(day('2026-03-19').children[0].children[3].textContent, '+2');
+  state.visibleKids.delete('Andrew');
+  context.renderMiniCalendar();
+  assert.equal(day('2026-03-19').children.length, 0);
+});
+
+test('weekend markers follow local dates and preserve selected and today classes', () => {
+  const { context, day } = setup();
+  context.selectedDate = new Date(2026, 2, 21);
+  context.renderMiniCalendar();
+  assert(day('2026-03-21').className.includes('is-weekend'));
+  assert(day('2026-03-21').className.includes('is-selected'));
+  assert(day('2026-03-22').className.includes('is-weekend'));
+  assert(!day('2026-03-20').className.includes('is-weekend'));
+});

@@ -39,7 +39,7 @@
     en: {
       summary: 'Current view', ribbon: 'Quick date navigator', previous: 'Previous seven days', next: 'Next seven days',
       today: 'Today', openDay: 'Open {date}: {count}', noEvents: 'no events', oneEvent: '1 event', events: '{count} events',
-      nextUp: 'Next event', noUpcoming: 'No upcoming events', openNext: 'Open next event',
+      nextUp: 'Next event', noUpcoming: 'No upcoming events', openNext: 'Jump to next event',
       collapseFamily: 'Collapse child filters', expandFamily: 'Expand child filters', familySummary: '{visible} of {total} shown',
       dock: 'Quick calendar actions', search: 'Search', add: 'Add', more: 'More',
       workspace: 'Workspace', dateTools: 'Dates & calendar tools', openDateTools: 'Open dates and calendar tools'
@@ -47,7 +47,7 @@
     zh: {
       summary: '当前视图', ribbon: '快速日期导航', previous: '前七天', next: '后七天',
       today: '今天', openDay: '打开 {date}：{count}', noEvents: '无日程', oneEvent: '1 个日程', events: '{count} 个日程',
-      nextUp: '下一个日程', noUpcoming: '没有即将开始的日程', openNext: '打开下一个日程',
+      nextUp: '下一个日程', noUpcoming: '没有即将开始的日程', openNext: '跳转到下一个日程',
       collapseFamily: '收起孩子筛选', expandFamily: '展开孩子筛选', familySummary: '显示 {visible}/{total}',
       dock: '日历快捷操作', search: '搜索', add: '添加', more: '更多',
       workspace: '工作区', dateTools: '日期与日历工具', openDateTools: '打开日期与日历工具'
@@ -58,7 +58,6 @@
   let preferences;
   try { preferences = normalizeInterfacePreferences(JSON.parse(localStorage.getItem(prefKey)), matchMedia('(max-width: 740px)').matches); }
   catch { preferences = normalizeInterfacePreferences(null, matchMedia('(max-width: 740px)').matches); }
-  let highlightedEvent = null;
 
   function savePreferences() {
     try { localStorage.setItem(prefKey, JSON.stringify(preferences)); } catch { /* Session-only is still useful. */ }
@@ -107,9 +106,8 @@
       pulse.append(quickUtilities);
     }
     document.getElementById('calendarNextSpotlight').addEventListener('click', () => {
-      if (!highlightedEvent) return;
       showCalendarPage();
-      showEventDetails(highlightedEvent);
+      jumpToNextEvent();
     });
   }
 
@@ -295,7 +293,7 @@
     document.querySelector('[data-ribbon-shift="7"]').setAttribute('aria-label', tx('next'));
     document.querySelector('[data-ribbon-shift="7"]').title = tx('next');
 
-    highlightedEvent = upcomingOccurrences(90)[0] || null;
+    const highlightedEvent = nextOverviewOccurrence?.activity || null;
     const spotlight = document.getElementById('calendarNextSpotlight');
     document.getElementById('calendarNextKicker').textContent = tx('nextUp');
     document.getElementById('calendarNextTitle').textContent = highlightedEvent ? activityCompactTitle(highlightedEvent) : tx('noUpcoming');

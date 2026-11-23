@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
-import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, Home, MapPin, MessageCircle, Plus, RefreshCw, Repeat2, Search, Settings2, SlidersHorizontal, Undo2, UserPlus, UserRound, X } from 'lucide-react-native';
+import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, Home, MapPin, MessageCircle, Package, Plus, RefreshCw, Repeat2, Search, Settings2, SlidersHorizontal, Undo2, UserPlus, UserRound, X } from 'lucide-react-native';
 import scheduleReader from '../../../shared/backend/schedules';
 import calendar from '../lib/calendar';
 import model from './model';
@@ -565,20 +565,22 @@ function ActivityCard({ event, date, kids, language, onPress, showDate, occurren
   const t = getCopy(language), palette = personColor(event, kids, palettes), cancelled = event.status === 'cancelled';
   const people = calendar.kidsForEvent(event, kids).map(kid => displayText(kid.name)).filter(Boolean).join(', ');
   const person = isFamily(event) ? t.family : people || displayText(event.child) || t.family;
-  const title = displayText(event.title) || t.calendar, location = displayText(event.location), responsible = displayText(event.responsible);
+  const title = displayText(event.title) || t.calendar, location = displayText(event.location), responsible = displayText(event.responsible), items = displayText(event.items);
   const segment = showDate ? null : calendar.daySegment(event, date);
   const overlapping = (segment?.occurrences.length || 0) > 1;
   const startTime = !overlapping && segment?.continuesBefore ? t.continuesBefore : calendar.formatTime(event.start, language) || t.untimed;
   const endTime = !overlapping && segment?.continuesAfter ? t.continuesAfter : calendar.formatTime(event.end, language);
   const time = overlapping ? t.multipleOccurrences : event.allDay ? t.allDay : `${startTime}${endTime ? ` – ${endTime}` : ''}`;
   const visibleDate = displayText(occurrenceDate) || displayText(event.startDate) || t.noDate;
-  const label = [cancelled && t.cancelled, title, showDate && visibleDate, time, person, location, responsible].filter(Boolean).join(', ');
+  const label = [cancelled && t.cancelled, title, showDate && visibleDate, time, person, location,
+    responsible && `${t.pickup}: ${responsible}`, items && `${t.bring}: ${items}`].filter(Boolean).join(', ');
   return <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={({ pressed }) => [s.activity, { borderLeftColor: palette.line }, (pressed || cancelled) && { opacity: 0.6 }]}>
     <View style={s.cardTop}><Text numberOfLines={2} style={[s.activityTitle, cancelled && { textDecorationLine: 'line-through' }]}>{displayText(event.icon) || '📅'}  {title}</Text>{event.importance === 'high' && <Text style={s.important}>!</Text>}<ChevronRight size={17} color={colors.muted} /></View>
     {!!showDate && <Text style={s.meta}>{visibleDate}</Text>}
     <View style={s.eventSummary}><Text numberOfLines={1} style={[s.time, { color: palette.ink }]}>{time}</Text><View style={[s.dot, { backgroundColor: palette.line }]} /><Text numberOfLines={1} style={[s.person, { color: palette.ink }]}>{person}</Text>{cancelled && <Text style={{ color: colors.error, fontSize: 12 }}>{t.cancelled}</Text>}</View>
     {!!location && <View style={u.row}><MapPin size={14} color={colors.muted} /><Text style={s.meta}>{location}</Text></View>}
     {(!!responsible || (!!event.recurrence && event.recurrence !== 'none')) && <View style={s.cardFooter}>{!!responsible && <><UserRound size={14} color={colors.muted} /><Text numberOfLines={1} style={[s.meta, { flex: 1 }]}>{t.pickup}: {responsible}</Text></>}{!!event.recurrence && event.recurrence !== 'none' && <Repeat2 size={15} color={colors.muted} />}</View>}
+    {!!items && <View style={s.cardFooter}><Package size={14} color={colors.muted} /><Text numberOfLines={1} style={[s.meta, { flex: 1 }]}>{t.bring}: {items}</Text></View>}
   </Pressable>;
 }
 

@@ -7,6 +7,9 @@ import coordination from '../../../shared/backend/mobile-coordination';
 import calendarTools from '../lib/calendar';
 import homeModel from '../home/model';
 import familyAsync from '../family/async-flow';
+import pickupRequests from '../family/pickup-requests';
+import familyRefresh from '../family/foreground-refresh';
+import schedules from '../../../shared/backend/schedules';
 import { Button, ChoiceRow, Field, IconButton, Sheet, useCalendarUi } from '../calendar/ui';
 import { useAppearance, useThemeStyles } from '../ui/AppearanceContext';
 
@@ -31,6 +34,7 @@ export const familyCopy = {
     requestSent: 'Pickup request sent.', responseAccepted: 'Pickup confirmed.', responseDeclined: 'Pickup declined.',
     loadFailed: 'Family access could not be fully loaded. Check your connection and refresh.', sharedLoadFailed: 'Some shared calendars could not be loaded. Open an invitation to try again.', saveFailed: 'That change was not confirmed. Refresh and try again.',
     familyDetails: 'Family details', familyDetailsBody: 'Manage child profiles and calendar comments.', openComments: 'Open calendar comments', ownerCommentHint: 'Use this thread for updates tied to your family calendar.', manageProfiles: 'Manage family profiles',
+    discardProfiles: 'Discard profile changes?', profilesUnsaved: 'Your family profile changes have not been saved.', keepEditing: 'Keep editing', discardChanges: 'Discard changes',
     close: 'Close', saving: 'Saving…', web: 'Open web calendar', family: 'Family', allDay: 'All day', notAvailable: 'Unavailable',
   },
   zh: {
@@ -48,6 +52,7 @@ export const familyCopy = {
     requestSent: '已发送接送请求。', responseAccepted: '已确认接送。', responseDeclined: '已拒绝接送。',
     loadFailed: '无法完整加载家庭权限，请检查网络后刷新。', sharedLoadFailed: '部分共享日历无法加载。请打开邀请重试。', saveFailed: '服务器未确认此更改，请刷新重试。',
     familyDetails: '家庭资料', familyDetailsBody: '管理孩子资料及日历评论。', openComments: '打开日历评论', ownerCommentHint: '使用此讨论串记录与家庭日历相关的更新。', manageProfiles: '管理家庭资料',
+    discardProfiles: '放弃资料更改？', profilesUnsaved: '你的家庭资料更改尚未保存。', keepEditing: '继续编辑', discardChanges: '放弃更改',
     close: '关闭', saving: '保存中…', web: '打开网页日历', family: '全家', allDay: '全天', notAvailable: '不可用',
   },
 };
@@ -111,6 +116,7 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
   const [error, setError] = useState(''), [incomingPickupError, setIncomingPickupError] = useState(false), [notice, setNotice] = useState('');
   const [showOtherPlans, setShowOtherPlans] = useState(false);
   const [sheet, setSheet] = useState(null), [sheetError, setSheetError] = useState(''), [removeConfirm, setRemoveConfirm] = useState(false);
+  const [profilesDirty, setProfilesDirty] = useState(false), [discardProfiles, setDiscardProfiles] = useState(false);
   const [invite, setInvite] = useState({ email: '', role: 'viewer', note: '' }), [createdInvite, setCreatedInvite] = useState(null);
   const [memberRole, setMemberRole] = useState('viewer'), [assignee, setAssignee] = useState('');
   const [comments, setComments] = useState([]), [comment, setComment] = useState(''), [commentsError, setCommentsError] = useState(false), [commentsLoading, setCommentsLoading] = useState(false);
@@ -118,6 +124,8 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
   const calendarScope = useRef('');
   const commentRequests = useRef(familyAsync.createLatestRequestGuard());
   const openingShared = useRef(false);
+  const incomingCurrent = useRef(null), quietRefresh = useRef(null), quietRefreshAllowed = useRef(false), profileSheet = useRef(null);
+  profileSheet.current = sheet;
   const account = { id: user?.id || '', email: user?.email || '' };
   accountScope.current = `${account.id}:${account.email}`;
   const ownerScope = JSON.stringify([account.id, account.email, calendar?.id]);
@@ -183,11 +191,11 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
     return { invitation, calendar: sharedCalendar, pickups, pickupUnavailable };
   }
 
-  async function load({ pull = false } = {}) {
+  async function load({ pull = false, quiet = false } = {}) {
     if (!mounted.current || calendarScope.current !== ownerScope) return;
     const ticket = ++request.current;
-    if (pull) setRefreshing(true); else setLoading(true);
-    setError('');
+    if (pull) setRefreshing(true); else if (!quiet) setLoading(true);
+    if (!quiet) setError('');
     const memberRequest = ownerCalendar ? sharing.listCalendarMembers(client, account, ownerCalendar.id) : Promise.resolve([]);
     const ownerPickupRequest = ownerCalendar ? coordination.listCalendarPickups(client, account, ownerCalendar, { startDate: today, endDate: rangeEnd }) : Promise.resolve([]);
     const [memberResult, invitationResult, pickupResult] = await Promise.allSettled([
@@ -211,11 +219,18 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
     setIncomingPickupError(invitationResult.status === 'rejected' || pickupResult.status === 'rejected'
       || contextResults.some(item => item.status === 'rejected') || contexts.some(context => context.pickupUnavailable));
     if (contextResults.some(item => item.status === 'rejected')) setError(t.sharedLoadFailed);
-    const incomingPickupCount = [...nextOwnerPickups, ...contexts.flatMap(item => item.pickups)]
-      .filter(item => item.status === 'pending' && sameEmail(item.assignee_email, account.email)).length;
-    onPendingCount?.(nextInvitations.filter(item => item.status === 'pending').length + incomingPickupCount);
+    if (memberResult.status === 'fulfilled' && invitationResult.status === 'fulfilled'
+      && contextResults.every(item => item.status === 'fulfilled')) setError('');
     setLoading(false); setRefreshing(false);
   }
+
+  quietRefresh.current = () => load({ quiet: true });
+  quietRefreshAllowed.current = !!account.id && !!account.email && !loading && !refreshing && !busy && !sheet;
+  useEffect(() => familyRefresh.startForegroundRefresh({
+    refresh: () => quietRefresh.current?.(),
+    canRefresh: () => mounted.current && quietRefreshAllowed.current && !mutation.current
+      && (AppState.currentState || 'active') === 'active',
+  }), [ownerScope, today]);
 
   useEffect(() => {
     if (!account.id || !account.email) return;
@@ -232,10 +247,11 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
     const sheetAtStart = sheet;
     setBusy(key); setSheetError(''); setError(''); setNotice('');
     try { const result = await work(); if (!mounted.current) return; await success?.(result); return result; }
-    catch {
+    catch (failure) {
       if (mounted.current) {
-        if (sheetAtStart) setSheetError(t.saveFailed);
-        else setError(t.saveFailed);
+        const message = failure?.code === 'PICKUP_UNAVAILABLE' ? t.pickupPlanUnavailable : t.saveFailed;
+        if (sheetAtStart) setSheetError(message);
+        else setError(message);
       }
       return null;
     }
@@ -278,7 +294,30 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
   }
 
   async function answerPickup(pickup, status) {
-    await run(`pickup-${pickup.id}`, () => coordination.respondCalendarPickup(client, account, pickup, status), async () => {
+    const actorScope = `${account.id}:${account.email}`, scope = ownerScope;
+    const current = incomingCurrent.current;
+    if (!mounted.current || current?.actorScope !== actorScope || calendarScope.current !== scope) return;
+    const pending = current.requests.find(item => item.pickup.id === pickup?.id
+      && item.pickup.owner_id === pickup.owner_id && item.pickup.calendar_id === pickup.calendar_id);
+    if (!pending?.event || pending.pickup.updated_at !== pickup.updated_at) {
+      if (sheet) setSheetError(t.pickupPlanUnavailable); else setError(t.pickupPlanUnavailable);
+      return;
+    }
+    await run(`pickup-${pickup.id}`, () => pickupRequests.respondToCurrentPickup({
+      pickup: pending.pickup, status,
+      isCurrent: () => mounted.current && accountScope.current === actorScope && calendarScope.current === scope,
+      readCalendar: async () => {
+        if (pickup.owner_id === account.id) {
+          const row = await schedules.readSchedule(client, account.id);
+          const target = schedules.calendarEntries(row?.schedule).find(item => item.id === pickup.calendar_id);
+          return target ? { ...target, ownerId: account.id } : null;
+        }
+        const context = sharedContexts.find(item => item.calendar.id === pickup.calendar_id
+          && item.calendar.ownerId === pickup.owner_id);
+        return context ? sharing.readMemberCalendar(client, account, context.invitation.id) : null;
+      },
+      respond: (request, response) => coordination.respondCalendarPickup(client, account, request, response),
+    }), async () => {
       dismissSheet();
       setNotice(status === 'accepted' ? t.responseAccepted : t.responseDeclined);
       await load({ pull: true });
@@ -293,13 +332,21 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
   function presentSheet(next) {
     commentRequests.current.invalidate();
     setCommentsLoading(false);
+    setProfilesDirty(false); setDiscardProfiles(false);
     setSheet(next);
   }
 
   function dismissSheet() {
     commentRequests.current.invalidate();
     setCommentsLoading(false);
+    setProfilesDirty(false); setDiscardProfiles(false);
     setSheet(null); setSheetError(''); setRemoveConfirm(false);
+  }
+
+  function requestDismissSheet() {
+    if (busy || mutation.current) return;
+    if (sheet?.type === 'profiles' && profilesDirty) setDiscardProfiles(true);
+    else dismissSheet();
   }
 
   async function presentCommentsSheet(type, context) {
@@ -354,13 +401,19 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
   }
 
   async function saveProfiles(changes) {
-    if (typeof onSaveProfiles !== 'function' || !ownerCalendar || busy) return;
-    const scope = calendarScope.current;
+    if (typeof onSaveProfiles !== 'function' || !ownerCalendar || busy || mutation.current) return false;
+    const sheetAtStart = sheet, scope = sheetAtStart?.ownerScope;
+    const current = () => mounted.current && profileSheet.current === sheetAtStart
+      && calendarScope.current === scope && sheetAtStart?.calendarId === ownerCalendar.id;
+    const stale = () => { const error = new Error('Reopen profiles for the selected calendar.'); error.code = 'STALE_SCOPE'; return error; };
+    if (sheetAtStart?.type !== 'profiles' || scope !== ownerScope || !current()) throw stale();
+    mutation.current = true;
     setBusy('profiles');
     try {
-      await onSaveProfiles(ownerCalendar.id, changes);
-      if (mounted.current && calendarScope.current === scope) setSheet(null);
-    } finally { if (mounted.current) setBusy(''); }
+      await onSaveProfiles(sheetAtStart.calendarId, changes);
+      if (!current()) throw stale();
+      setProfilesDirty(false); setDiscardProfiles(false); setSheet(null);
+    } finally { mutation.current = false; if (mounted.current) setBusy(''); }
   }
 
   function beginInvite() {
@@ -386,8 +439,11 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
 
   const incomingPickups = [...ownerPickups.map(pickup => ({ pickup, calendar: ownerCalendar, events: ownerEvents })),
     ...sharedContexts.flatMap(context => context.pickups.map(pickup => ({ pickup, calendar: context.calendar, events: context.calendar.data.activities })))]
-    .filter(item => item.pickup.status === 'pending' && sameEmail(item.pickup.assignee_email, account.email));
-  const inboxPending = invitations.filter(item => item.status === 'pending').length + incomingPickups.length;
+    .filter(item => item.pickup.status === 'pending' && sameEmail(item.pickup.assignee_email, account.email))
+    .map(item => ({ ...item, event: pickupRequests.resolvePickupEvent(item.events, item.pickup) }));
+  incomingCurrent.current = { actorScope: `${account.id}:${account.email}`, requests: incomingPickups };
+  const inboxPending = invitations.filter(item => item.status === 'pending').length + incomingPickups.filter(item => item.event).length;
+  useEffect(() => { onPendingCount?.(inboxPending); }, [inboxPending, onPendingCount]);
   const peopleCount = members.filter(item => item.status === 'active').length + 1;
   const handoffCount = upcoming.filter(item => item.needsAttention).length;
   const visiblePickupPlans = showOtherPlans ? upcoming : upcoming.filter(item => item.needsAttention);
@@ -410,13 +466,12 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
         <SectionHeading icon={UserRound} title={t.familyDetails} body={t.familyDetailsBody} />
         <Button secondary icon={MessageCircle} onPress={openOwnerComments} disabled={!ownerCalendar}>{t.openComments}</Button>
         {!!onSaveProfiles && <Button secondary icon={UsersRound} disabled={!ownerCalendar || !!busy}
-          onPress={() => presentSheet({ type: 'profiles', original: safeArray(calendar?.data?.kids) })}>{t.manageProfiles}</Button>}
+          onPress={() => presentSheet({ type: 'profiles', original: safeArray(calendar?.data?.kids), ownerScope, calendarId: ownerCalendar.id })}>{t.manageProfiles}</Button>}
       </> : tab === 'inbox' ? <>
         <SectionHeading icon={Bell} title={t.yourRequests} body={t.requestsBody} />
         {incomingPickupError && <><Text accessibilityRole="alert" style={u.error}>{t.incomingPickupUnavailable}</Text><Button secondary onPress={() => load({ pull: true })} disabled={refreshing || !!busy}>{t.retryPickups}</Button></>}
-        {incomingPickups.length ? incomingPickups.map(({ pickup, calendar: pickupCalendar, events }) => {
-          const event = safeArray(events).find(item => String(item.id) === String(pickup.event_id));
-          return <View key={pickup.id} style={s.request}><Text style={s.rowTitle}>{event?.title || pickupCalendar?.name || t.pickups}</Text><Text style={s.body}>{dateLabel(pickup.occurrence_date, language)} · {pickupCalendar?.name}</Text><View style={s.actions}><Button secondary disabled={!!busy} onPress={() => answerPickup(pickup, 'declined')}>{t.pickupDecline}</Button><Button disabled={!!busy} onPress={() => answerPickup(pickup, 'accepted')}>{t.pickupAccept}</Button></View></View>;
+        {incomingPickups.length ? incomingPickups.map(({ pickup, calendar: pickupCalendar, event }) => {
+          return <View key={pickup.id} style={s.request}><Text style={s.rowTitle}>{event?.title || pickupCalendar?.name || t.pickups}</Text><Text style={s.body}>{dateLabel(pickup.occurrence_date, language)} · {pickupCalendar?.name}</Text>{event ? <View style={s.actions}><Button secondary disabled={!!busy} onPress={() => answerPickup(pickup, 'declined')}>{t.pickupDecline}</Button><Button disabled={!!busy} onPress={() => answerPickup(pickup, 'accepted')}>{t.pickupAccept}</Button></View> : <Text style={u.error}>{t.pickupPlanUnavailable}</Text>}</View>;
         }) : !incomingPickupError && <EmptyState icon={Bell} title={t.noRequests} />}
         <SectionHeading icon={Inbox} title={t.incoming} body={t.incomingBody} />
         {invitations.length ? invitations.map(invitation => <View key={invitation.id} style={s.invitation}><View style={s.rowTop}><View style={s.flex}><Text style={s.rowTitle}>{invitation.calendar_name}</Text><Text style={s.body}>{t.from}: {invitation.owner_email}</Text></View><Badge tone={invitation.status === 'active' ? 'good' : 'warn'}>{t[invitation.role] || invitation.role}</Badge></View>{!!invitation.invitation_note && <Text style={s.note}>{t.invitationNote}: {invitation.invitation_note}</Text>}{invitation.status === 'pending' ? <View style={s.actions}><Button secondary disabled={!!busy} onPress={() => respondInvitation(invitation, 'declined')}>{t.decline}</Button><Button disabled={!!busy} onPress={() => respondInvitation(invitation, 'active')}>{t.accept}</Button></View> : <Button secondary icon={CalendarDays} onPress={() => openShared(invitation)}>{t.openShared}</Button>}</View>) : <EmptyState icon={Inbox} title={t.noInvites} />}
@@ -438,8 +493,9 @@ export default function FamilyScreen({ language = 'en', client, user, calendars 
       </>}
     </ScrollView>
 
-    {!!sheet && <Sheet title={sheet.type === 'profiles' ? t.manageProfiles : sheet.type === 'invite' ? t.invite : sheet.type === 'member' ? t.memberDetails : sheet.type === 'pickup' ? t.assign : sheet.type === 'comments' ? t.comments : t.sharedCalendar} closeLabel={t.close} busy={!!busy} onClose={dismissSheet}>
-      {sheet.type === 'profiles' && <FamilyProfiles original={sheet.original} language={language} busy={!!busy} onSave={saveProfiles} />}
+    {!!sheet && <Sheet title={discardProfiles ? t.discardProfiles : sheet.type === 'profiles' ? t.manageProfiles : sheet.type === 'invite' ? t.invite : sheet.type === 'member' ? t.memberDetails : sheet.type === 'pickup' ? t.assign : sheet.type === 'comments' ? t.comments : t.sharedCalendar} closeLabel={t.close} busy={!!busy} onClose={requestDismissSheet}>
+      {discardProfiles && <View style={s.sheetContent}><Text style={s.body}>{t.profilesUnsaved}</Text><Button onPress={() => setDiscardProfiles(false)}>{t.keepEditing}</Button><Button danger onPress={dismissSheet}>{t.discardChanges}</Button></View>}
+      {sheet.type === 'profiles' && <View style={{ flexShrink: 1, display: discardProfiles ? 'none' : 'flex' }} accessibilityElementsHidden={discardProfiles} importantForAccessibility={discardProfiles ? 'no-hide-descendants' : 'auto'}><FamilyProfiles original={sheet.original} language={language} busy={!!busy} onSave={saveProfiles} onDirtyChange={setProfilesDirty} /></View>}
       {sheet.type === 'invite' && <ScrollView contentContainerStyle={s.sheetContent} keyboardShouldPersistTaps="handled">
         <Field label={t.email} value={invite.email} onChangeText={value => setInvite(values => ({ ...values, email: value }))} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" maxLength={254} editable={!busy && !createdInvite} />
         <Text style={u.label}>{t.role}</Text><ChoiceRow label={t.role} value={invite.role} disabled={!!busy || !!createdInvite} onChange={value => setInvite(values => ({ ...values, role: value }))} options={roleOptions(t)} />
@@ -481,7 +537,7 @@ function SharedCalendarContent({ language, t, context, comments, commentsLoading
     {!!onCalendar && <Button icon={CalendarDays} disabled={busy} onPress={() => onCalendar(context)}>{t.openCalendar}</Button>}
     {!!onWebsite && <Button secondary onPress={onWebsite}>{t.web}</Button>}
     {context.pickupUnavailable && <Text accessibilityRole="alert" style={u.error}>{t.incomingPickupUnavailable}</Text>}
-    {myPickups.length > 0 && !!onPickup && <><Text style={s.sheetHeading}>{t.yourRequests}</Text>{myPickups.map(pickup => { const event = activities.find(item => String(item.id) === String(pickup.event_id)); return <View key={pickup.id} style={s.request}><Text style={s.rowTitle}>{event?.title || t.pickups}</Text><Text style={s.body}>{dateLabel(pickup.occurrence_date, language)}</Text><View style={s.actions}><Button secondary disabled={busy} onPress={() => onPickup(pickup, 'declined')}>{t.pickupDecline}</Button><Button disabled={busy} onPress={() => onPickup(pickup, 'accepted')}>{t.pickupAccept}</Button></View></View>; })}</>}
+    {myPickups.length > 0 && !!onPickup && <><Text style={s.sheetHeading}>{t.yourRequests}</Text>{myPickups.map(pickup => { const event = pickupRequests.resolvePickupEvent(activities, pickup); return <View key={pickup.id} style={s.request}><Text style={s.rowTitle}>{event?.title || t.pickups}</Text><Text style={s.body}>{dateLabel(pickup.occurrence_date, language)}</Text>{event ? <View style={s.actions}><Button secondary disabled={busy} onPress={() => onPickup(pickup, 'declined')}>{t.pickupDecline}</Button><Button disabled={busy} onPress={() => onPickup(pickup, 'accepted')}>{t.pickupAccept}</Button></View> : <Text style={u.error}>{t.pickupPlanUnavailable}</Text>}</View>; })}</>}
     <Text style={s.sheetHeading}>{t.upcoming}</Text>{occurrences.length ? occurrences.map(item => <EventLine key={item.key} event={item.event} occurrenceDate={item.dateKey} language={language} t={t} />) : <Text style={s.empty}>{t.noUpcoming}</Text>}
     <Text style={s.sheetHeading}>{t.comments}</Text>{commentsLoading ? <ActivityIndicator color={colors.primary} style={s.commentLoader} /> : commentsError ? <Text style={u.error}>{t.commentsUnavailable}</Text> : comments.length ? comments.map(item => <View key={item.id} style={s.comment}><Text style={s.rowTitle}>{item.author_email}</Text><Text style={s.commentBody}>{item.body}</Text></View>) : <Text style={s.empty}>{t.noComments}</Text>}
     {canComment && <><Field label={t.comment} value={comment} onChangeText={setComment} placeholder={t.commentHint} multiline maxLength={1000} editable={!busy} />{!!error && <Text accessibilityRole="alert" style={u.error}>{error}</Text>}<Button icon={MessageCircle} disabled={busy || !comment.trim()} onPress={onPost}>{busy ? t.saving : t.sendComment}</Button></>}

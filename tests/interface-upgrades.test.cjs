@@ -55,7 +55,8 @@ test('all five upgrades are present, responsive, and connected to the normal ren
 test('the interface layer only reads calendar events and keeps labels bilingual', () => {
   assert.doesNotMatch(script, /state\.activities\s*(?:=|\.|\[)/);
   assert.match(script, /occurrencesOnDate\(date\)/);
-  assert.match(script, /upcomingOccurrences\(90\)/);
+  assert.match(script, /nextOverviewOccurrence\?\.activity/);
+  assert.match(script, /jumpToNextEvent\(\)/);
   const dictionarySource = script.slice(script.indexOf('  const words ='), script.indexOf('  const tx =')) + '\nwords';
   const words = vm.runInNewContext(dictionarySource);
   assert.deepEqual(Object.keys(words.en).sort(), Object.keys(words.zh).sort());

@@ -9814,7 +9814,7 @@
   <link rel="stylesheet" href="./assets/command-palette.css">
   <link rel="stylesheet" href="./assets/event-drafts.css">
   <link rel="stylesheet" href="./assets/calendar-insights.css">
-  <link rel="stylesheet" href="./assets/calendar-extras.css">
+  <link rel="stylesheet" href="./assets/calendar-extras.css?v=1">
   <link rel="stylesheet" href="./assets/week-calendar.css">
   <link rel="stylesheet" href="./assets/planner-tools.css">
   <link rel="stylesheet" href="./assets/ui-features.css">
@@ -17553,7 +17553,7 @@
         const isToday = isSameDate(date, new Date());
         const countLabel = t(dayActivities.length === 1 ? "overview.eventOne" : "overview.events", { count: dayActivities.length });
         const head = document.createElement("div");
-        head.className = `day-head ${day.theme}${isToday ? " is-today" : ""}`;
+        head.className = `day-head ${day.theme}${[0, 6].includes(date.getDay()) ? " is-weekend" : ""}${isToday ? " is-today" : ""}`;
         head.dataset.calendarDate = dateKey(date);
         head.innerHTML = `<span class="day-head-label"><span class="day-head-label-row"><span>${dayLabel(day)}</span>${isToday ? `<span class="day-today-badge">${escapeHtml(t("calendar.today"))}</span>` : ""}</span><span class="day-head-date" aria-hidden="true">${date.getDate()}</span></span>${dayActivities.length ? `<span class="day-event-count" aria-label="${escapeHtml(countLabel)}">${dayActivities.length}</span>` : ""}`;
         head.tabIndex = 0;
@@ -17579,7 +17579,7 @@
           const targetDate = calendarDateForDay(day);
           const cell = document.createElement("div");
           // Reuse the existing drop surface while keeping holiday presentation separate.
-          cell.className = `holiday-cell all-day-cell${isSameDate(targetDate, new Date()) ? " is-today" : ""}`;
+          cell.className = `holiday-cell all-day-cell${[0, 6].includes(targetDate.getDay()) ? " is-weekend" : ""}${isSameDate(targetDate, new Date()) ? " is-today" : ""}`;
           setupDropTarget(cell, targetDate, true);
           cell.dataset.holidayDrop = "true";
           cell.setAttribute("aria-label", `${t("sidebar.holidays")} · ${formatFullDate(targetDate)}`);
@@ -17618,7 +17618,7 @@
       displayDays.forEach(day => {
         const targetDate = calendarDateForDay(day);
         const cell = document.createElement("div");
-        cell.className = `all-day-cell${isSameDate(targetDate, new Date()) ? " is-today" : ""}`;
+        cell.className = `all-day-cell${[0, 6].includes(targetDate.getDay()) ? " is-weekend" : ""}${isSameDate(targetDate, new Date()) ? " is-today" : ""}`;
         setupDropTarget(cell, targetDate, true);
         activities
           .filter(activity => activity.day === day.key && activity.allDay && !isHolidayActivity(activity))
@@ -17661,7 +17661,7 @@
       displayDays.forEach(day => {
         const targetDate = calendarDateForDay(day);
         const column = document.createElement("div");
-        column.className = `day-column${isSameDate(targetDate, new Date()) ? " is-today" : ""}`;
+        column.className = `day-column${[0, 6].includes(targetDate.getDay()) ? " is-weekend" : ""}${isSameDate(targetDate, new Date()) ? " is-today" : ""}`;
         setupDropTarget(column, targetDate);
         column.addEventListener("click", event => {
           if (Date.now() <= suppressEventClickUntil || event.target.closest(".event")) return;
@@ -17761,7 +17761,7 @@
         const isToday = isSameDate(date, new Date());
         const countLabel = t(items.length === 1 ? "overview.eventOne" : "overview.events", { count: items.length });
         const card = document.createElement("article");
-        card.className = `day-card${isToday ? " is-today" : ""}${items.length ? "" : " is-empty"}`;
+        card.className = `day-card${[0, 6].includes(date.getDay()) ? " is-weekend" : ""}${isToday ? " is-today" : ""}${items.length ? "" : " is-empty"}`;
         card.dataset.calendarDate = dateKey(date);
         card.innerHTML = `<h2 class="agenda-day-heading"><span>${day.weather} ${dayLabel(day)} · ${formatShortDate(date)}</span>${isToday ? `<span class="day-today-badge">${escapeHtml(t("calendar.today"))}</span>` : ""}${items.length ? `<span class="day-event-count" aria-label="${escapeHtml(countLabel)}">${items.length}</span>` : ""}</h2><div class="agenda-list"></div>`;
         const list = card.querySelector(".agenda-list");
@@ -17989,9 +17989,27 @@
       if (!item) return t("overview.noUpcoming");
       const activity = item.activity;
       const date = parseDateKey(activity.occurrenceDate || activity.startDate);
-      const dateLabel = currentView === "today" ? "" : `${formatShortDate(date)} · `;
+      const dateLabel = currentView === "today" && isSameDate(date, selectedDate) ? "" : `${formatShortDate(date)} · `;
       const time = activity.allDay ? t("calendar.allDay") : formatTimeLabel(minutes(activity.start));
       return `${dateLabel}${time} ${displayIcon(activity)} ${activityCompactTitle(activity)} · ${displayChild(activity)}`;
+    }
+
+    function nextCalendarOccurrence() {
+      const now = new Date();
+      const start = new Date(dateSerial(selectedDate) > dateSerial(now) ? selectedDate : now);
+      start.setHours(0, 0, 0, 0);
+      // Keep the existing spotlight's 90-day horizon, starting at the browsed date.
+      for (let offset = 0; offset < 90; offset += 1) {
+        const date = addDays(start, offset);
+        if (currentView === "week" && !state.showWeekends && [0, 6].includes(date.getDay())) continue;
+        const next = occurrencesOnDate(date)
+          .filter(activity => activityStatus(activity) !== "cancelled")
+          .map(activity => ({ activity, date: occurrenceDateTime(activity) }))
+          .filter(item => item.date && (item.activity.allDay || item.date >= now))
+          .sort((first, second) => first.date - second.date)[0];
+        if (next) return next;
+      }
+      return null;
     }
 
     function calendarInsightActivities() {
@@ -18085,7 +18103,7 @@
         : t("overview.noTightTrips");
       jumpTravelButton.disabled = travelCount === 0;
       jumpTravelButton.title = travelCount ? t("overview.jumpTravel") : "";
-      nextOverviewOccurrence = nextPeriodOccurrence(visibleActivitiesForPeriod);
+      nextOverviewOccurrence = nextCalendarOccurrence();
       document.getElementById("overviewNextEvent").textContent = nextOccurrenceLabel(nextOverviewOccurrence);
       jumpNextEventButton.disabled = !nextOverviewOccurrence;
       jumpNextEventButton.title = nextOverviewOccurrence ? t("overview.jumpNext") : "";
@@ -18136,9 +18154,15 @@
 
     function jumpToNextEvent() {
       if (!nextOverviewOccurrence) return;
-      const key = occurrenceKey(nextOverviewOccurrence.activity);
-      const target = [...document.querySelectorAll("[data-occurrence-key]")]
+      const occurrence = nextOverviewOccurrence;
+      const key = occurrenceKey(occurrence.activity);
+      const findTarget = () => [...document.querySelectorAll("[data-occurrence-key]")]
         .find(element => element.dataset.occurrenceKey === key && element.getClientRects().length > 0);
+      let target = findTarget();
+      if (!target) {
+        openCalendarDay(parseDateKey(occurrence.activity.occurrenceDate || occurrence.activity.startDate));
+        target = findTarget();
+      }
       if (!target) return;
       target.classList.add("next-focus");
       target.scrollIntoView({
@@ -18210,7 +18234,7 @@
         const conflicts = findConflicts(activities);
         const cell = document.createElement("div");
         const outside = date.getMonth() !== currentMonthStart.getMonth();
-        cell.className = `month-day${outside ? " is-outside" : ""}${isSameDate(date, today) ? " is-today" : ""}${isSameDate(date, selectedDate) ? " is-selected" : ""}`;
+        cell.className = `month-day${[0, 6].includes(date.getDay()) ? " is-weekend" : ""}${outside ? " is-outside" : ""}${isSameDate(date, today) ? " is-today" : ""}${isSameDate(date, selectedDate) ? " is-selected" : ""}`;
 
         const dateButton = document.createElement("button");
         dateButton.type = "button";
@@ -18301,7 +18325,7 @@
         const isSelected = isSameDate(date, selectedDate);
         const isOutside = date.getMonth() !== miniCalendarMonth.getMonth();
         button.type = "button";
-        button.className = `mini-calendar-day${isOutside ? " is-outside" : ""}${isSelected ? " is-selected" : ""}${isToday ? " is-today" : ""}`;
+        button.className = `mini-calendar-day${[0, 6].includes(date.getDay()) ? " is-weekend" : ""}${isOutside ? " is-outside" : ""}${isSelected ? " is-selected" : ""}${isToday ? " is-today" : ""}`;
         button.textContent = date.getDate();
         button.dataset.date = dateKey(date);
         button.tabIndex = button.dataset.date === tabStopDate ? 0 : -1;
@@ -18312,9 +18336,15 @@
         if (eventCount > 0) {
           button.classList.add("has-events");
           const dots = document.createElement("span");
-          dots.className = "mini-calendar-event-dots";
+          dots.className = `mini-calendar-event-dots${eventCount > 3 ? " has-overflow" : ""}`;
           dots.setAttribute("aria-hidden", "true");
           for (let dot = 0; dot < Math.min(eventCount, 3); dot += 1) dots.appendChild(document.createElement("i"));
+          if (eventCount > 3) {
+            const overflow = document.createElement("span");
+            overflow.className = "mini-calendar-event-overflow";
+            overflow.textContent = `+${eventCount - 3}`;
+            dots.appendChild(overflow);
+          }
           button.appendChild(dots);
         }
         button.setAttribute("aria-pressed", String(isSelected));
@@ -23251,7 +23281,7 @@
   <script src="./assets/mobile-agenda.js"></script>
   <script src="./assets/planner-tools.js?v=2"></script>
   <script src="./assets/ui-features.js"></script>
-  <script src="./assets/interface-upgrades.js?v=5"></script>
+  <script src="./assets/interface-upgrades.js?v=6"></script>
   <script src="./assets/smart-scheduling.js?v=4"></script>
   <script src="./assets/family-polls.js?v=2"></script>
   <script src="./assets/experience.js?v=2"></script>

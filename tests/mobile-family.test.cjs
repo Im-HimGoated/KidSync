@@ -91,8 +91,9 @@ test('pickup fetch errors do not render a misleading empty inbox or permit reass
 
 test('inline Family failures stay visible while sheet failures stay in their sheet', () => {
   assert.match(family, /const sheetAtStart = sheet/);
-  assert.match(family, /if \(sheetAtStart\) setSheetError\(t\.saveFailed\)/);
-  assert.match(family, /else setError\(t\.saveFailed\)/);
+  assert.match(family, /if \(sheetAtStart\) setSheetError\(message\)/);
+  assert.match(family, /else setError\(message\)/);
+  assert.match(family, /failure\?\.code === 'PICKUP_UNAVAILABLE' \? t\.pickupPlanUnavailable : t\.saveFailed/);
 });
 
 test('Family tab requests wait for open sheets and in-flight work', () => {
@@ -119,8 +120,9 @@ test('owners can reach calendar comments and the scoped family-profile editor', 
   assert.match(family, /sharing\.listCalendarComments\(client, account, context\.calendar\)/);
   assert.match(family, /presentSheet\(\{ type: 'profiles', original: safeArray\(calendar\?\.data\?\.kids\)/);
   assert.match(family, /<FamilyProfiles original=\{sheet\.original\}/);
-  assert.match(family, /await onSaveProfiles\(ownerCalendar\.id, changes\)/);
-  assert.match(family, /calendarScope\.current === scope\) setSheet\(null\)/);
+  assert.match(family, /await onSaveProfiles\(sheetAtStart\.calendarId, changes\)/);
+  assert.match(family, /if \(!current\(\)\) throw stale\(\)/);
+  assert.match(family, /ownerScope, calendarId: ownerCalendar\.id/);
 });
 
 test('comment reads are scoped to the latest visible account and calendar sheet', () => {
@@ -128,7 +130,7 @@ test('comment reads are scoped to the latest visible account and calendar sheet'
   assert.match(family, /commentRequests\.current\.invalidate\(\)/);
   assert.match(family, /commentRequests\.current\.isCurrent\(token, scope\)/);
   assert.match(family, /accountScope\.current === actorScope/);
-  assert.match(family, /onClose=\{dismissSheet\}/);
+  assert.match(family, /onClose=\{requestDismissSheet\}/);
   assert.match(family, /commentsLoading \? <ActivityIndicator/);
   assert.match(family, /supported, verified write connection/);
 });

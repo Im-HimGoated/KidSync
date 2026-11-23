@@ -420,3 +420,82 @@ comments, schedule writes, or notifications were sent in this pass.
   or notification settings were changed. This completes the native hourly-line
   visual check for the fix already published in `a21b857`; the other release
   acceptance gaps listed above remain separate.
+
+## Live calendar display sync acceptance (November 23, 2026)
+
+- Tested the authenticated KidsSync app in Expo Go on the **iPhone 16 Pro
+  simulator, iOS 26.5**, against the same calendar on the production website.
+  The test used the existing Supabase project and actual account data.
+- Saved **4 days**, **45 minutes**, and **weekends hidden** in the phone app.
+  Reloading the website showed the same calendar settings. The native calendar
+  opened in 4 days, and a new unsaved activity draft had a 45-minute duration.
+- Restored **Week**, **30 minutes**, and **weekends shown** on the website.
+  The phone's Calendar display panel received those original values. The test
+  left the account's original settings restored and created no activity from
+  the duration-check draft.
+- Xcode results `settings-applied-final.xcresult` and
+  `settings-restored-final.xcresult` each passed with zero failures on simulator
+  `9981DAB2-482C-4EDD-A152-19A6CD6B95AF`. Screenshots and account-specific test
+  results remain outside Git under the local integration evidence folders.
+- This completes the live round trip for opening view, new-event duration and
+  weekend visibility. Physical-phone delivery of notifications, external
+  provider connections and live collaboration role changes retain their
+  separate acceptance requirements.
+
+## Native document and event sync acceptance (November 23, 2026)
+
+- On the same authenticated iPhone 16 Pro simulator, imported a disposable
+  document draft, reviewed it in the native editor, saved it and reopened its
+  details. The responsible adult, all three packing items and source notes
+  survived. A fresh production website reload independently showed those fields.
+- Edited the test activity to **High** importance and **weekly on Saturday**.
+  Native details and the website's event editor agreed, while the responsible
+  adult and packing items remained intact.
+- Deleted the entire test series in the app. The native result passed, and a
+  fresh website reload showed zero test-event buttons while an existing
+  Thanksgiving event remained visible. No disposable document event remains.
+- Xcode runs `document-live3`, `doc-edit` and `doc-cleanup` each passed one test
+  with zero failures. Account screenshots and test artifacts remain outside Git.
+  This verifies the saved details; it does not claim native photo OCR or physical
+  phone notification delivery.
+
+## Combined release validation (November 23, 2026)
+
+- The final source passed **872/872** repository tests with zero failures,
+  skips or cancellations, and fresh Expo exports for iOS, Android and web.
+  `git diff --check` passed. Test logs and compiled bundles remain outside Git.
+- Regression coverage includes profile name/numeric-ID/string-ID reassignment,
+  unchanged calendars and compatibility mirrors, invalid pickup occurrences,
+  fresh pickup response checks, quiet foreground refresh, unsaved profile
+  protection and calendar-scoped profile saves.
+- Actual iPhone simulator input confirmed that Keep editing retained an unsaved
+  profile name and Discard restored the original after reopening. No profile
+  save ran. A follow-up Close/Inbox/Pickups/Calendar navigation test passed.
+  The runner's reopened-modal Close hit test needed an observed-point fallback;
+  a direct touch on the visible X worked without a product change.
+- The native Holidays-only saved-view round trip passed. Reopening restored
+  its selected filters, and the disposable saved view was removed afterward.
+- Native Account checks passed for Light/Dark appearance, Chinese/English
+  labels, reminder-status display and the calendar setup review/Why we ask
+  flow. Dark and English were restored, setup edits were cancelled, and no
+  notification permission or delivery preference was changed.
+- Native iCalendar sharing displayed the actual OS sheet with the exported
+  file and Copy/Save to Files actions. Cancelling re-enabled the Calendar files
+  controls and allowed return to Day. The rebuilt cancellation test executed
+  one test with zero failures; no external share target was selected.
+- The native Calendar display unsaved-exit test passed: Back/Keep editing
+  retained a changed duration draft, and Close/Discard returned without saving.
+- The exact release source passed the final native Day/Week test. Inspected
+  captures retained hourly lines, today's highlight and the current-time line;
+  vertical scrolling, next day/week and Today navigation worked.
+- An ordinary Expo Go cold reopen preserved the existing signed-in session.
+  The same Day/Week navigation and scrolling check passed again; the simulator
+  was left on Day/Today with the original account preferences restored.
+- A separate phone-size runtime check verified a cross-date 4-day Next event
+  jump reaches the 5 PM plan and keeps that hour after rerendering. The functional
+  regression also verifies content-size changes do not reset it to 8 AM and
+  ordinary date navigation retains its normal opening hour.
+- Live two-account sharing/pickup acceptance still needs a distinct recipient
+  account. A newly proposed disposable calendar/profile write-and-cleanup test
+  remains pending explicit authorization. Physical-phone notification delivery
+  remains separate; none of those checks is represented as passed here.
