@@ -11,5 +11,7 @@ mobile/android/
 *.jks
 *.keystore
 *.p12
+*.p8
 *.mobileprovision
+credentials.json
 .pnpm-store/

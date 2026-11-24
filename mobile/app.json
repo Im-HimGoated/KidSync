@@ -2,12 +2,29 @@
   "expo": {
     "name": "KidsSync",
     "slug": "kidssync",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "orientation": "default",
     "userInterfaceStyle": "light",
-    "icon": "../assets/kidssync-app-icon-512.png",
-    "ios": { "supportsTablet": false, "bundleIdentifier": "com.kidssync.app" },
+    "icon": "../assets/kidssync-app-icon-1024.png",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.kidssync.app"
+    },
     "android": {},
-    "plugins": [["expo-notifications", { "enableRemoteNotifications": false, "enableBackgroundRemoteNotifications": false }]]
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "enableRemoteNotifications": false,
+          "enableBackgroundRemoteNotifications": false
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ffbe07cb-b90c-423c-9a27-39a1a3a5b585"
+      }
+    },
+    "owner": "itzandrew"
   }
 }
