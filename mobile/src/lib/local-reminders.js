@@ -59,8 +59,11 @@ function notificationTarget(notice, currentUserId) {
   return { calendarId: data.calendarId, eventId: data.eventId, date: data.date };
 }
 
+const erasure = require('./account-erasure');
 function createLocalReminderService({ notifications: sdk, storage, platform, now = Date.now } = {}) {
   let queue = Promise.resolve();
+  const identity = {};
+  const track = userId => erasure.registerQueue(storage, userId, identity, () => queue);
   const enqueue = work => { const next = queue.catch(() => {}).then(work); queue = next; return next; };
   const available = () => ['ios', 'android'].includes(platform) && sdk && ['getPermissionsAsync', 'requestPermissionsAsync', 'getAllScheduledNotificationsAsync', 'scheduleNotificationAsync', 'cancelScheduledNotificationAsync'].every(name => typeof sdk[name] === 'function');
   function authorized(permission) {
@@ -69,13 +72,15 @@ function createLocalReminderService({ notifications: sdk, storage, platform, now
     return permission?.granted === true || permission?.status === 'granted';
   }
   async function readPreference(userId) {
+    if (erasure.isErased(storage, userId)) return { enabled: false, showTitles: false };
+    track(userId);
     const raw = await storage.getItem(preferenceKey(userId));
     if (!raw) return { enabled: false, showTitles: false };
     let value; try { value = JSON.parse(raw); } catch { fail('INVALID_PREFERENCE'); }
     if (value?.version !== 1 || typeof value.enabled !== 'boolean' || typeof value.showTitles !== 'boolean') fail('INVALID_PREFERENCE');
     return { enabled: value.enabled, showTitles: value.showTitles };
   }
-  async function writePreference(userId, value) { await storage.setItem(preferenceKey(userId), JSON.stringify({ version: 1, ...value })); }
+  async function writePreference(userId, value) { erasure.assertActive(storage, userId); await storage.setItem(preferenceKey(userId), JSON.stringify({ version: 1, ...value })); }
   async function channel() {
     if (platform === 'android') {
       if (typeof sdk.setNotificationChannelAsync !== 'function') fail('UNSUPPORTED');
@@ -99,6 +104,7 @@ function createLocalReminderService({ notifications: sdk, storage, platform, now
     // request permission. Do not invoke this in tests against a real device.
     configure: (userId, { enabled, showTitles = false, userInitiated = false } = {}) => enqueue(async () => {
       preferenceKey(userId);
+      track(userId);
       if (userInitiated !== true) fail('USER_ACTION_REQUIRED');
       if (typeof enabled !== 'boolean' || typeof showTitles !== 'boolean') fail('INVALID_INPUT');
       if (!available()) return { status: 'unsupported' };
@@ -115,8 +121,11 @@ function createLocalReminderService({ notifications: sdk, storage, platform, now
     }),
     // Call after confirmed CRUD/import, fresh sync, foreground, timezone changes
     // and account changes. Supply a complete, successfully loaded calendar list.
-    synchronize: ({ userId, calendars, language = 'en', privateContent = false, isCurrent = () => true } = {}) => enqueue(async () => {
+    synchronize: ({ userId, calendars, language = 'en', privateContent = false, isCurrent: scopeIsCurrent = () => true } = {}) => enqueue(async () => {
       if (!available()) return { status: 'unsupported', scheduled: 0 };
+      const isCurrent = () => !erasure.isErased(storage, userId) && scopeIsCurrent();
+      if (userId && erasure.isErased(storage, userId)) { await cancelWhere(data => data.userId === userId); return { status: 'signed-out', scheduled: 0 }; }
+      if (userId) track(userId);
       if (!isCurrent()) return { status: 'stale', scheduled: 0 };
       if (!userId) { await cancelWhere(() => true); return { status: 'signed-out', scheduled: 0 }; }
       preferenceKey(userId);

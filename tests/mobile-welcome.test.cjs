@@ -12,7 +12,8 @@ const preview = fs.readFileSync(path.join(root, 'mobile/src/ui/CalendarPreview.j
 
 test('native entry defaults to welcome after auth restores, and existing sessions bypass it', () => {
   assert.match(app, /\[entryScreen, setEntryScreen\] = useState\('welcome'\)/);
-  assert.match(app, /booting \? <ActivityIndicator[^]*!session && entryScreen === 'welcome' \?/);
+  // Auth restoration and pending-deletion recovery are exercised through the
+  // actual Workspace component in mobile-entry-journey.test.cjs.
   assert.match(app, /<WelcomeScreen language=\{language\}/);
   assert.match(app, /setEntryScreen\('signin'\)/);
   assert.match(app, /setPassword\(''\); setEntryScreen\(trialAuthIntent \? 'personalize' : signInFromSignUp \? 'signup' : 'welcome'\)/);

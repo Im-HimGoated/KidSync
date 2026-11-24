@@ -6,6 +6,7 @@ import reminders from './local-reminders';
 import lifecycleHelpers from './reminder-lifecycle';
 
 const service = reminders.createLocalReminderService({ notifications: Notifications, storage: AsyncStorage, platform: Platform.OS });
+export const cancelRemindersForAccount = userId => service.cancelForUser(userId);
 
 // Mount once in the signed-in app shell (also keep mounted during sign-out).
 // ready means a complete, confirmed owner snapshot, not cached optimistic edits.

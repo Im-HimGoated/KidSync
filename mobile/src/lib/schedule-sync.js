@@ -3,6 +3,7 @@
 const schedules = require('../../../shared/backend/schedules');
 const backend = require('../../../shared/backend/mobile-calendar');
 const dates = require('./calendar');
+const erasure = require('./account-erasure');
 
 const MAX_PENDING = 50;
 const MAX_BYTES = 8 * 1024 * 1024;
@@ -130,10 +131,11 @@ function createScheduleSync({ client, storage, userId, onChange = () => {}, isCu
   if (!deviceLocks) { deviceLocks = new Map(); locks.set(storage, deviceLocks); }
   if (!deviceLocks.has(key)) deviceLocks.set(key, { tail: Promise.resolve(), confirmedGeneration: 0 });
   const lock = deviceLocks.get(key);
+  erasure.registerQueue(storage, userId, lock, () => lock.tail);
   let state = { schema: 1, userId, row: null, cachedAt: null, pending: [] };
   let loaded = false, ready = false, stopped = false, status = 'CONNECTING', error = null, offline = false, syncing = null;
   let queuedRefresh = null;
-  function current() { return !stopped && isCurrent(); }
+  function current() { return !stopped && !erasure.isErased(storage, userId) && isCurrent(); }
   function assertCurrent() { if (!current()) throw failure('STALE_SCOPE'); }
   function info() {
     return { userId, row: project(state), confirmedRow: copy(state.row), loaded, status,
@@ -151,8 +153,10 @@ function createScheduleSync({ client, storage, userId, onChange = () => {}, isCu
   }
   async function persist(change, allowStopped = false) {
     return exclusive(async () => {
+      erasure.assertActive(storage, userId);
       if (!allowStopped) assertCurrent();
       const before = await readStored();
+      erasure.assertActive(storage, userId);
       const next = change(copy(before));
       const raw = JSON.stringify(next);
       if (raw.length > MAX_BYTES) throw failure('STORAGE_FULL');

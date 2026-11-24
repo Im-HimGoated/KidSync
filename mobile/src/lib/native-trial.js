@@ -69,8 +69,11 @@ function decodeTrial(raw) {
     draft: data.draft && typeof data.draft === 'object' ? { ...cleanEvent(data.draft), id: text(data.draft.id, 100) } : null,
     claimedBy: text(data.claimedBy, 200), claimOwner: text(data.claimOwner, 200), calendarId: text(data.calendarId, 100), clockExpired: data.clockExpired === true };
 }
+const erasure = require('./account-erasure');
 function createTrialStore(storage) {
   let queue = Promise.resolve();
+  const identity = {};
+  function guard(userId) { erasure.registerQueue(storage, userId, identity, () => queue); }
   const failedClocks = new Set();
   const enqueue = work => { const next = queue.catch(() => {}).then(work); queue = next; return next; };
   async function read() {
@@ -134,19 +137,23 @@ function createTrialStore(storage) {
     })),
     saveProfileDraft: profile => enqueue(() => mutate(data => ({ ...data, profile: normalizeProfile(profile) }))),
     reserveClaim: userId => enqueue(async () => {
+      if (typeof userId === 'string' && userId) guard(userId);
       const data = await read();
       if (!data || typeof userId !== 'string' || !userId || (data.claimedBy && data.claimedBy !== userId)
         || (data.claimOwner && data.claimOwner !== userId)) return fail('alreadyClaimed');
       const next = { ...data, claimOwner: userId };
       const { elapsedMs, ...persisted } = next;
+      guard(userId);
       await storage.setItem(TRIAL_KEY, JSON.stringify(persisted));
       return next;
     }),
     markClaimed: (userId, calendarId) => enqueue(async () => {
+      if (typeof userId === 'string' && userId) guard(userId);
       const data = await read();
       if (!data || !userId || !calendarId || (data.claimedBy && data.claimedBy !== userId) || (data.claimOwner && data.claimOwner !== userId)) return fail('alreadyClaimed');
       const next = { ...data, claimedBy: userId, claimOwner: userId, calendarId };
       const { elapsedMs, ...persisted } = next;
+      guard(userId);
       await storage.setItem(TRIAL_KEY, JSON.stringify(persisted));
       return next;
     })

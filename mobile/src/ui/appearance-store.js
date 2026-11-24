@@ -1,4 +1,5 @@
 const { normalizeAppearance, DEFAULT_APPEARANCE } = require('./theme');
+const erasure = require('../lib/account-erasure');
 const queues = new WeakMap();
 function scopeFor(accountId) {
   if (accountId == null) return 'guest';
@@ -17,18 +18,22 @@ function createAppearanceStore(storage) {
   let queue = queues.get(storage);
   if (!queue) { queue = { tail: Promise.resolve() }; queues.set(storage, queue); }
   const enqueue = work => { const next = queue.tail.catch(() => {}).then(work); queue.tail = next; return next; };
+  function guard(accountId) { if (accountId != null) erasure.registerQueue(storage, accountId, queue, () => queue.tail); }
   return {
     read: accountId => enqueue(async () => decode(await storage.getItem(keyFor(accountId)))),
     // Merge against the latest stored scope so simultaneous mode/accent changes
     // or multiple provider instances cannot drop the other selection.
     save: (accountId, patch) => enqueue(async () => {
+      guard(accountId);
       const key = keyFor(accountId), current = decode(await storage.getItem(key));
       if (!patch || typeof patch !== 'object' || Array.isArray(patch)) throw new Error('INVALID_APPEARANCE');
       const next = normalizeAppearance({ ...current, ...patch });
+      guard(accountId);
       await storage.setItem(key, JSON.stringify({ version: 1, settings: next }));
       return next;
     }),
     reset: accountId => enqueue(async () => {
+      guard(accountId);
       const settings = { ...DEFAULT_APPEARANCE };
       await storage.setItem(keyFor(accountId), JSON.stringify({ version: 1, settings }));
       return settings;

@@ -18,9 +18,11 @@ const preferences = require('../mobile/src/lib/preferences');
 const nativeTrial = require('../mobile/src/lib/native-trial');
 const calendarTools = require('../mobile/src/lib/calendar');
 const values = new Map();
-const storage = { getItem: async key => values.get(key) ?? null, setItem: async (key, value) => values.set(key, value), removeItem: async key => values.delete(key) };
+const storage = { getItem: async key => values.get(key) ?? null, setItem: async (key, value) => values.set(key, value), removeItem: async key => values.delete(key),
+  getAllKeys: async () => [...values.keys()], multiRemove: async keys => { for (const key of keys) values.delete(key); } };
 let host, authListener, currentSession, preview, trialStore, lastImport, websiteFails = false;
 let sharedRead;
+let deletionReply, cancelledReminderUsers = [];
 let previousHost;
 const appearance = { colors: {}, settings: {} };
 const hooks = { ...React,
@@ -48,9 +50,11 @@ const ownerSync = { userId: null, loaded: true, row: { schedule: {} }, confirmed
 const client = { auth: {
   onAuthStateChange(fn) { authListener = fn; return { data: { subscription: { unsubscribe() {} } } }; },
   getSession: async () => ({ data: { session: currentSession } }), startAutoRefresh() {}, stopAutoRefresh() {},
+  getUser: async () => ({ data: { user: currentSession?.user } }),
   async signInWithPassword() { currentSession = { user: { id: 'account-a', email: 'test@example.com' } }; authListener('SIGNED_IN', currentSession); return { data: { session: currentSession } }; },
   async signOut() { currentSession = null; authListener('SIGNED_OUT', null); return {}; }
-} };
+}, functions: { invoke: async (_name, options) => options.method === 'GET'
+  ? { data: { available: true, version: 1 } } : typeof deletionReply === 'function' ? deletionReply(options) : { data: { deleted: true } } } };
 const realLoad = Module._load;
 Module._load = function (request, parent) {
   if (request === 'react') return hooks;
@@ -66,7 +70,7 @@ Module._load = function (request, parent) {
   if (parent?.filename === path.join(mobile, 'src/ui/AccountSettings.js')) {
     if (request === './AppearanceContext') return { useAppearance: () => ({ ...appearance, settings: { mode: 'system', accent: 'forest' } }),
       useThemeStyles: createStyles => createStyles(appearance.colors) };
-    if (request === '../calendar/ui') return { Button: 'Button', Sheet: 'Sheet' };
+    if (request === '../calendar/ui') return { Button: 'Button', Sheet: 'Sheet', Field: 'Field' };
     if (request === './AppearanceSettings') return { default: 'AppearanceSettings', __esModule: true, appearanceCopy: { en: {} } };
     if (request === './ReminderSettings') return { default: 'ReminderSettings', __esModule: true, reminderCopy: { en: { title: 'Phone reminders', disabled: 'Off' } } };
     if (request === './CalendarDisplaySettings') return { default: 'CalendarDisplaySettings', __esModule: true,
@@ -78,7 +82,8 @@ Module._load = function (request, parent) {
     if (request === './ui/AppearanceContext') return { AppearanceProvider: 'AppearanceProvider', useAppearance: () => appearance };
     if (request === './ui/use-device-language') return () => ['en', () => {}];
     if (request === './lib/use-schedule-sync') return () => { ownerSync.userId = currentSession?.user.id; return ownerSync; };
-    if (request === './lib/use-local-reminders') return () => ({ state: { status: 'disabled' } });
+    if (request === './lib/use-local-reminders') return { __esModule: true, default: () => ({ state: { status: 'disabled' } }),
+      cancelRemindersForAccount: async userId => { cancelledReminderUsers.push(userId); } };
     if (request.endsWith('/mobile-shared-calendar')) return {
       readSharedCalendar: (_client, _account, source) => sharedRead(source),
       createSharedCalendarAdapter: () => ({})
@@ -93,7 +98,7 @@ Module._load = function (request, parent) {
       './screens/PersonalizeCalendarScreen': 'PersonalizeCalendarScreen', './screens/HomeScreen': 'HomeScreen',
       './screens/FamilyScreen': 'FamilyScreen', './calendar/CalendarScreen': 'CalendarScreen', './ui/AccountSettings': 'AccountSettings', './ui/SyncStatus': 'SyncStatus',
       './ui/PreviewDraftReview': 'PreviewDraftReview', './ui/WeeklyBrief': 'WeeklyBrief' };
-    if (names[request]) return { __esModule: true, default: names[request], signInCopy: { en: { backToCreate: 'Back to create account' } }, signUpCopy: { en: {} }, trialCopy: { en: {} } };
+    if (names[request]) return { __esModule: true, default: names[request], AccountDeletionReceipt: 'AccountDeletionReceipt', signInCopy: { en: { backToCreate: 'Back to create account' } }, signUpCopy: { en: {} }, trialCopy: { en: {} } };
   }
   return realLoad.apply(this, arguments);
 };
@@ -116,9 +121,10 @@ function find(element, type, predicate = () => true) {
   for (const child of [children].flat(Infinity)) { const result = find(child, type, predicate); if (result) return result; }
   return null;
 }
-async function mount(session = null) {
+async function mount(session = null, seed = () => {}) {
   for (const cell of previousHost?.cells || []) cell?.cleanup?.();
   values.clear(); currentSession = session; preview = null; lastImport = null; websiteFails = false;
+  deletionReply = null; cancelledReminderUsers = []; seed(values);
   Object.assign(ownerSync, { loaded: true, row: { schedule: {} }, status: 'SUBSCRIBED' });
   ownerSync.refresh = async () => ({ pendingCount: 0 });
   ownerSync.acceptConfirmed = async () => {};
@@ -133,6 +139,74 @@ async function mount(session = null) {
   await app.settle(); return app;
 }
 const answers = { people: 'children', view: 'week', week: 'sunday', hours: 'evening', reminders: '30' };
+function deletionSettings(initial = {}) {
+  const { default: AccountSettings, __Row: Row } = compileScreen('src/ui/AccountSettings.js', '\nexports.__Row = Row;');
+  const state = { cells: [], cursor: 0, effects: [] };
+  let props = { language: 'en', email: 'parent@example.com', onClose() {}, onCheckDeletion: async () => true,
+    onDeleteAccount: async () => ({ deleted: true }), ...initial };
+  const render = () => {
+    host = state; state.cursor = 0;
+    const tree = AccountSettings(props);
+    for (const effect of state.effects.splice(0)) effect(); return tree;
+  };
+  return { render, props(patch) { props = { ...props, ...patch }; },
+    row: title => find(render(), Row, node => node.props.title === title),
+    button: label => find(render(), 'Button', node => node.props.children === label),
+    field: () => find(render(), 'Field'),
+    consent: () => find(render(), 'Pressable', node => node.props.accessibilityRole === 'checkbox'),
+    back: () => find(render(), 'Pressable', node => find(node, 'Text')?.props.children === 'Back to settings'),
+  };
+}
+test('account deletion stays unavailable until the deployed endpoint confirms readiness', async () => {
+  const app = deletionSettings({ onCheckDeletion: async () => { throw Error('not deployed'); } });
+  await app.row('Delete account').props.onPress();
+  assert.equal(app.render().props.title, 'Delete your KidsSync account?');
+  assert.equal(app.field(), null); assert.ok(app.button('Check again'));
+  app.props({ onCheckDeletion: async () => true }); await app.button('Check again').props.onPress();
+  assert.ok(app.field()); assert.equal(app.field().props.secureTextEntry, true);
+  assert.equal(app.button('Delete account').props.disabled, true);
+});
+test('deletion requires both a password and explicit confirmation before dispatch', async () => {
+  const received = []; const app = deletionSettings({ onDeleteAccount: async value => { received.push(value); return { deleted: true }; } });
+  await app.row('Delete account').props.onPress();
+  await app.button('Delete account').props.onPress(); assert.deepEqual(received, []);
+  app.field().props.onChangeText('correct-password');
+  assert.equal(app.button('Delete account').props.disabled, true);
+  app.consent().props.onPress(); assert.equal(app.button('Delete account').props.disabled, false);
+  await app.button('Delete account').props.onPress();
+  assert.deepEqual(received, [{ password: 'correct-password', confirmationEmail: 'parent@example.com' }]);
+  assert.equal(app.field().props.value, '', 'password must be cleared after the attempt');
+});
+test('pending deletion blocks duplicate taps and Back/Close, then surfaces retryable failure', async () => {
+  let finish, calls = 0, closes = 0;
+  const app = deletionSettings({ onClose: () => { closes++; }, onDeleteAccount: () => { calls++; return new Promise((_resolve, reject) => { finish = reject; }); } });
+  await app.row('Delete account').props.onPress(); app.field().props.onChangeText('password'); app.consent().props.onPress();
+  const handler = app.button('Delete account').props.onPress, pending = handler(); await handler();
+  assert.equal(calls, 1); assert.equal(app.render().props.busy, true); assert.equal(app.field().props.editable, false);
+  app.render().props.onClose(); app.back().props.onPress(); assert.equal(closes, 0);
+  finish(Object.assign(new Error('wrong password'), { code: 'REAUTH_FAILED' })); await pending;
+  assert.equal(app.render().props.busy, false); assert.equal(app.field().props.value, '');
+  assert.ok(find(app.render(), 'Text', node => node.props.children === 'The password was not accepted. Try again.'));
+});
+test('a late readiness response cannot reopen a deletion form after Back', async () => {
+  let finish;
+  const app = deletionSettings({ onCheckDeletion: () => new Promise(resolve => { finish = resolve; }) });
+  const checking = app.row('Delete account').props.onPress(); app.back().props.onPress(); finish(true); await checking;
+  assert.equal(app.render().props.title, 'You & settings'); assert.equal(app.field(), null);
+});
+test('Chinese deletion copy, readiness and confirmation use the same guarded flow', async () => {
+  let calls = 0;
+  const app = deletionSettings({ language: 'zh', onDeleteAccount: async () => { calls++; return { deleted: true }; } });
+  await app.row('删除账户').props.onPress(); assert.equal(app.render().props.title, '删除你的 KidsSync 账户？');
+  assert.equal(app.field().props.label, '当前密码');
+  app.field().props.onChangeText('password'); app.consent().props.onPress(); await app.button('删除账户').props.onPress();
+  assert.equal(calls, 1); assert.equal(app.field().props.value, '');
+});
+test('privacy overview is readable without making an account deletion or network request', () => {
+  const app = deletionSettings({ onCheckDeletion: () => { throw Error('must not run'); } });
+  app.row('Privacy & your data').props.onPress(); assert.equal(app.render().props.title, 'Privacy & your data');
+  assert.ok(find(app.render(), 'Text', node => typeof node.props.children === 'string' && node.props.children.includes('Supabase')));
+});
 test('early setup review keeps the selected answer and applies only confirmed edits', async () => {
   const { default: OnboardingScreen } = compileScreen('src/screens/OnboardingScreen.js');
   const state = { cells: [], cursor: 0, effects: [] };
@@ -594,3 +668,124 @@ test('Family owner comments opens the real owned calendar with a fresh scope-bou
   assert.ok(app.screen('CalendarScreen').commentsRequest.id > request.id);
 });
 test.after(() => { for (const cell of previousHost?.cells || []) cell?.cleanup?.(); Module._load = realLoad; });
+
+test('confirmed account deletion erases only that account and returns a signed-out receipt', async () => {
+  const id = 'delete-success'; const app = await mount({ user: { id, email: 'test@example.com' } });
+  values.set(`kidssync:mobile:schedule:v1:${id}`, 'private'); values.set('kidssync:mobile:schedule:v1:another', 'keep');
+  values.set(preferences.PENDING_KEY, 'guest');
+  find(app.render(), BottomNavigation).props.onChange('account');
+  assert.equal(await app.screen('AccountSettings').onCheckDeletion(), true);
+  assert.equal((await app.screen('AccountSettings').onDeleteAccount({ password: 'password', confirmationEmail: 'test@example.com' })).deleted, true);
+  await app.settle();
+  assert.equal(currentSession, null); assert.equal(values.has(`kidssync:mobile:schedule:v1:${id}`), false);
+  assert.equal(values.get('kidssync:mobile:schedule:v1:another'), 'keep'); assert.equal(values.get(preferences.PENDING_KEY), 'guest');
+  assert.deepEqual(cancelledReminderUsers, [id]); assert.equal(app.screen('AccountDeletionReceipt').needsCleanup, false);
+  app.screen('AccountDeletionReceipt').onClose(); assert.ok(app.screen('WelcomeScreen'));
+});
+
+test('a rejected deletion preserves the account and local schedule', async () => {
+  const id = 'delete-rejected'; const app = await mount({ user: { id, email: 'test@example.com' } });
+  values.set(`kidssync:mobile:schedule:v1:${id}`, 'keep');
+  deletionReply = async () => ({ error: { context: new Response(JSON.stringify({ code: 'REAUTH_FAILED' }), { status: 401 }) } });
+  find(app.render(), BottomNavigation).props.onChange('account');
+  await assert.rejects(app.screen('AccountSettings').onDeleteAccount({ password: 'wrong', confirmationEmail: 'test@example.com' }), { code: 'REAUTH_FAILED' });
+  assert.equal(currentSession.user.id, id); assert.equal(values.get(`kidssync:mobile:schedule:v1:${id}`), 'keep');
+  assert.equal(app.screen('AccountDeletionReceipt'), undefined); assert.deepEqual(cancelledReminderUsers, []);
+});
+
+test('a deletion response after switching accounts cannot sign out or clear the new account', async () => {
+  const oldId = 'delete-switched-old', newId = 'delete-switched-new';
+  const app = await mount({ user: { id: oldId, email: 'test@example.com' } });
+  values.set(`kidssync:mobile:schedule:v1:${oldId}`, 'old'); values.set(`kidssync:mobile:schedule:v1:${newId}`, 'new');
+  let finish; deletionReply = () => new Promise(resolve => { finish = resolve; });
+  find(app.render(), BottomNavigation).props.onChange('account');
+  const pending = app.screen('AccountSettings').onDeleteAccount({ password: 'password', confirmationEmail: 'test@example.com' });
+  while (!finish) await new Promise(resolve => setImmediate(resolve));
+  currentSession = { user: { id: newId, email: 'new@example.com' } }; authListener('SIGNED_IN', currentSession); await app.settle();
+  finish({ data: { deleted: true } }); await pending; await app.settle();
+  assert.equal(currentSession.user.id, newId); assert.equal(values.get(`kidssync:mobile:schedule:v1:${newId}`), 'new');
+  assert.equal(values.has(`kidssync:mobile:schedule:v1:${oldId}`), false);
+  assert.equal(app.screen('AccountDeletionReceipt'), undefined); assert.deepEqual(cancelledReminderUsers, [oldId]);
+});
+
+test('failed local cleanup retries without sending another account deletion request', async () => {
+  const id = 'delete-cleanup-retry'; const app = await mount({ user: { id, email: 'test@example.com' } });
+  values.set(`kidssync:mobile:schedule:v1:${id}`, 'old');
+  let calls = 0; deletionReply = async () => { calls++; return { data: { deleted: true } }; };
+  const remove = storage.multiRemove; storage.multiRemove = async () => { throw Error('storage unavailable'); };
+  try {
+    find(app.render(), BottomNavigation).props.onChange('account');
+    await app.screen('AccountSettings').onDeleteAccount({ password: 'password', confirmationEmail: 'test@example.com' }); await app.settle();
+    assert.equal(app.screen('AccountDeletionReceipt').needsCleanup, true); assert.equal(currentSession, null);
+    storage.multiRemove = remove; await app.screen('AccountDeletionReceipt').onRetry(); await app.settle();
+    assert.equal(app.screen('AccountDeletionReceipt').needsCleanup, false); assert.equal(calls, 1);
+    assert.equal(values.has(`kidssync:mobile:schedule:v1:${id}`), false);
+  } finally { storage.multiRemove = remove; }
+});
+
+test('a confirmed cleanup marker restores a receipt after restarting without repeating remote deletion', async () => {
+  const id = 'delete-recovery'; const app = await mount({ user: { id, email: 'test@example.com' } }, map => {
+    map.set(`kidssync:mobile:deletion:v1:${id}`, JSON.stringify({ version: 1, userId: id, confirmedDeleted: true }));
+    map.set(`kidssync:mobile:schedule:v1:${id}`, 'private');
+  });
+  let calls = 0; deletionReply = async () => { calls++; throw Error('must not request'); };
+  assert.ok(app.screen('AccountDeletionReceipt')); assert.equal(app.screen('HomeScreen'), undefined);
+  await app.screen('AccountDeletionReceipt').onRetry(); await app.settle();
+  assert.equal(currentSession, null); assert.equal(calls, 0); assert.equal(app.screen('AccountDeletionReceipt').needsCleanup, false);
+});
+
+test('startup offers every confirmed account cleanup in one session and preserves the current account', async () => {
+  const ids = ['delete-recovery-first', 'delete-recovery-second'], current = 'delete-recovery-current';
+  const marker = id => `kidssync:mobile:deletion:v1:${id}`, cache = id => `kidssync:mobile:schedule:v1:${id}`;
+  const app = await mount({ user: { id: current, email: 'current@example.com' } }, map => {
+    for (const id of ids) {
+      map.set(marker(id), JSON.stringify({ version: 1, userId: id, confirmedDeleted: true })); map.set(cache(id), id);
+    }
+    map.set(cache(current), 'keep current');
+  });
+  let calls = 0; deletionReply = async () => { calls++; throw Error('must not request'); };
+  assert.equal(app.screen('AccountDeletionReceipt').userId, ids[0]);
+  await app.screen('AccountDeletionReceipt').onRetry(); await app.settle();
+  assert.equal(app.screen('AccountDeletionReceipt').needsCleanup, false);
+  assert.equal(values.has(marker(ids[0])), false); assert.equal(values.has(cache(ids[0])), false);
+  const finishFirst = app.screen('AccountDeletionReceipt').onClose;
+  finishFirst(); finishFirst(); await app.settle();
+  assert.equal(app.screen('AccountDeletionReceipt').userId, ids[1]);
+  assert.equal(app.screen('AccountDeletionReceipt').needsCleanup, true);
+  await app.screen('AccountDeletionReceipt').onRetry(); await app.settle();
+  app.screen('AccountDeletionReceipt').onClose(); await app.settle();
+  assert.equal(app.screen('AccountDeletionReceipt'), undefined);
+  assert.equal(values.has(marker(ids[1])), false); assert.equal(values.has(cache(ids[1])), false);
+  assert.equal(values.get(cache(current)), 'keep current'); assert.equal(currentSession.user.id, current);
+  assert.deepEqual(cancelledReminderUsers, ids); assert.equal(calls, 0);
+});
+
+test('a failed cleanup marker survives dismissal while the next account can finish recovery', async () => {
+  const first = 'delete-recovery-failed', second = 'delete-recovery-after-failure';
+  const marker = id => `kidssync:mobile:deletion:v1:${id}`, cache = id => `kidssync:mobile:schedule:v1:${id}`;
+  const app = await mount(null, map => {
+    for (const id of [first, second]) {
+      map.set(marker(id), JSON.stringify({ version: 1, userId: id, confirmedDeleted: true })); map.set(cache(id), id);
+    }
+  });
+  let calls = 0; deletionReply = async () => { calls++; throw Error('must not request'); };
+  const remove = storage.multiRemove; let release;
+  storage.multiRemove = keys => keys.includes(cache(first)) ? new Promise((_resolve, reject) => {
+    release = () => reject(Error('storage unavailable'));
+  }) : remove(keys);
+  try {
+    const cleanup = app.screen('AccountDeletionReceipt').onRetry();
+    while (!release) await new Promise(resolve => setImmediate(resolve));
+    app.screen('AccountDeletionReceipt').onClose();
+    assert.equal(app.screen('AccountDeletionReceipt').userId, first); assert.equal(app.screen('AccountDeletionReceipt').busy, true);
+    release(); await cleanup; await app.settle();
+    assert.equal(app.screen('AccountDeletionReceipt').needsCleanup, true);
+    app.screen('AccountDeletionReceipt').onClose(); await app.settle();
+    assert.equal(app.screen('AccountDeletionReceipt').userId, second);
+    await app.screen('AccountDeletionReceipt').onRetry(); await app.settle();
+    app.screen('AccountDeletionReceipt').onClose(); await app.settle();
+    assert.equal(app.screen('AccountDeletionReceipt'), undefined);
+    assert.ok(values.has(marker(first))); assert.equal(values.get(cache(first)), first);
+    assert.equal(values.has(marker(second)), false); assert.equal(values.has(cache(second)), false); assert.equal(calls, 0);
+  } finally { storage.multiRemove = remove; }
+});

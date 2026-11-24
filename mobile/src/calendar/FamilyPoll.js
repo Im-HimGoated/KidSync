@@ -22,6 +22,7 @@ const copy = {
 const answers = ['pending', 'yes', 'maybe', 'no'];
 const id = () => globalThis.crypto?.randomUUID?.() || `poll-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
+import erasure from '../lib/account-erasure';
 export default function FamilyPoll({ language, scope, initialDate, kids, events, onDraft, canWrite }) {
   const t = copy[language] || copy.en, { u } = useCalendarUi();
   const key = `kidssync:mobile:poll:v1:${scope}`;
@@ -30,6 +31,7 @@ export default function FamilyPoll({ language, scope, initialDate, kids, events,
   const [date, setDate] = useState(initialDate), [start, setStart] = useState('16:00'), [end, setEnd] = useState('17:00');
   const [error, setError] = useState(''), [busy, setBusy] = useState(false), [confirm, setConfirm] = useState(false);
   const writing = useRef(false), mounted = useRef(true);
+  const pendingSave = useRef(Promise.resolve());
   useEffect(() => {
     mounted.current = true;
     AsyncStorage.getItem(key).then(raw => {
@@ -43,12 +45,18 @@ export default function FamilyPoll({ language, scope, initialDate, kids, events,
   async function save(next) {
     if (writing.current) return;
     writing.current = true; setBusy(true); setError('');
+    const operation = (async () => {
     try {
+      const actor = JSON.parse(scope)?.[0];
+      erasure.registerQueue(AsyncStorage, actor, key, () => pendingSave.current);
       if (next) await AsyncStorage.setItem(key, JSON.stringify(next));
       else await AsyncStorage.removeItem(key);
       if (mounted.current) { setPoll(next); setConfirm(false); }
     } catch { if (mounted.current) setError(t.failed); }
     finally { writing.current = false; if (mounted.current) setBusy(false); }
+    })();
+    pendingSave.current = operation;
+    await operation;
   }
   function add() {
     const option = { id: id(), date, start, end };

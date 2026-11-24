@@ -28,6 +28,7 @@ function buildWeeklyBrief(events, now) {
   return { end: calendar.addDays(now, DAYS - 1), days: [...days.values()] };
 }
 
+const erasure = require('../lib/account-erasure');
 function createWeeklyBriefStore(storage) {
   const shown = new Map();
   const key = userId => `kidssync:mobile:weekly-brief:v1:${encodeURIComponent(userId)}`;
@@ -41,10 +42,11 @@ function createWeeklyBriefStore(storage) {
       return shown.get(userId) ?? saved;
     },
     markShown(userId, date) {
+      erasure.registerQueue(storage, userId, shown, () => writes);
       const value = calendar.dateKey(date);
       if (!value || shown.get(userId) === value) return writes;
       shown.set(userId, value);
-      writes = writes.then(() => storage.setItem(key(userId), value)).catch(() => {});
+      writes = writes.then(() => { erasure.assertActive(storage, userId); return storage.setItem(key(userId), value); }).catch(() => {});
       return writes;
     }
   };

@@ -2,6 +2,7 @@ const web = require('../../../assets/calendar-planning');
 const calendar = require('../lib/calendar');
 const model = require('./model');
 const holidays = require('./holidays');
+const erasure = require('../lib/account-erasure');
 const validDate = value => typeof value === 'string' && Number.isFinite(calendar.parseDateKey(value).getTime());
 const text = value => typeof value === 'string' ? value : typeof value === 'number' && Number.isFinite(value) ? String(value) : '';
 const clock = minutes => `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
@@ -67,7 +68,9 @@ function createPlanningStore(storage, { userId, ownerId = userId, calendarId } =
   const key = `kidssync:mobile:planning:v1:${[userId, ownerId, calendarId].map(encodeURIComponent).join(':')}`;
   if (!locks.has(storage)) locks.set(storage, new Map());
   const queues = locks.get(storage);
+  erasure.registerQueue(storage, userId, key, () => queues.get(key));
   async function read() {
+    erasure.assertActive(storage, userId);
     const raw = await storage.getItem(key);
     if (raw == null) return { version: 1, notes: {}, views: [] };
     try {
@@ -84,8 +87,10 @@ function createPlanningStore(storage, { userId, ownerId = userId, calendarId } =
     } catch { throw new Error('INVALID_STORED_PLANNING'); }
   }
   function change(update) {
+    erasure.assertActive(storage, userId);
     const pending = (queues.get(key) || Promise.resolve()).catch(() => {}).then(async () => {
       const next = update(await read());
+      erasure.assertActive(storage, userId);
       await storage.setItem(key, JSON.stringify(next));
       return next;
     });

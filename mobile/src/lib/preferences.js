@@ -26,8 +26,11 @@ function normalizeDraft(value) {
   return { answers: normalizePreferences(value?.answers), step, review: value?.review === true,
     editing: value?.editing === true, choice: OPTIONS[key].includes(value?.choice) ? value.choice : null };
 }
+const erasure = require('./account-erasure');
 function createPreferenceStore(storage) {
   let writes = Promise.resolve();
+  const identity = {};
+  function guard(userId) { erasure.registerQueue(storage, userId, identity, () => writes); }
   // Serialize draft writes so fast taps cannot let an older step replace the latest one.
   const enqueue = work => { const next = writes.catch(() => {}).then(work); writes = next; return next; };
   const encode = preferences => JSON.stringify({ version: 1, completed: true, preferences: normalizePreferences(preferences) });
@@ -43,8 +46,9 @@ function createPreferenceStore(storage) {
   return {
     readDraftForUser(userId) { return readDraftAt(`${keyForUser(userId)}:draft`); },
     saveDraftForUser(userId, draft) {
+      guard(userId);
       const key = `${keyForUser(userId)}:draft`, raw = draftRaw(draft);
-      return enqueue(() => storage.setItem(key, raw));
+      return enqueue(() => { guard(userId); return storage.setItem(key, raw); });
     },
     async readDraft() {
       await writes.catch(() => {});
@@ -66,20 +70,26 @@ function createPreferenceStore(storage) {
     },
     async readForUser(userId) { return decode(await storage.getItem(keyForUser(userId))); },
     async saveForUser(userId, preferences) {
+      guard(userId);
       const key = keyForUser(userId), raw = encode(preferences);
       await enqueue(async () => {
+        guard(userId);
         await storage.setItem(key, raw);
         try { await storage.removeItem(`${key}:draft`); } catch { /* Saved choices remain durable. */ }
       });
     },
     async adoptPending(userId, expected) {
+      guard(userId);
+      return enqueue(async () => {
       const raw = await storage.getItem(PENDING_KEY), preferences = decode(raw);
       if (!preferences || JSON.stringify(preferences) !== JSON.stringify(normalizePreferences(expected))) throw new Error('Setup choices changed; please review them again');
+      guard(userId);
       await storage.setItem(keyForUser(userId), encode(preferences));
       // Never consume another setup completed while this write was in flight.
       try { if (await storage.getItem(PENDING_KEY) === raw) await storage.removeItem(PENDING_KEY); }
       catch { /* The account write succeeded; pending cleanup can be retried on the next explicit setup. */ }
       return preferences;
+      });
     }
   };
 }

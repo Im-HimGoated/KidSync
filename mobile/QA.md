@@ -553,3 +553,44 @@ comments, schedule writes, or notifications were sent in this pass.
 - All 901 repository tests passed with zero failures or skips, and iOS, Android
   and web exports passed. Local preview and build artifacts are outside Git under
   `/private/tmp/kidssync-event-cards-20261124*`.
+
+## Account deletion release preparation (November 24, 2026)
+
+- Implemented the native English/Chinese Account → Delete account flow with
+  a deployed-backend readiness check, password reauthentication, explicit
+  confirmation and duplicate/busy guards. Unavailable readiness keeps the
+  password and deletion action hidden. Rejected or uncertain server requests
+  preserve the account and its local data.
+- The new server function verifies the authenticated actor, reauthenticates that
+  same account and permits no client-selected target ID. Its migration performs
+  account-data cleanup in the Auth deletion transaction and restricts stale-token
+  access. Actual isolated PostgreSQL tests verify rollback, retention of other
+  families' events and identity precedence over recycled email addresses.
+- Independent review identified two readiness/recovery gaps, now repaired:
+  readiness rejects disabled row security and a disabled, rebound or incorrectly
+  configured cleanup trigger; startup offers every confirmed pending account
+  cleanup in the same session. Repeated Done taps cannot skip the next account.
+- Confirmed device cleanup drains pending account writes, invalidates retained
+  account stores, cancels only that account's managed reminders and erases its
+  scoped caches, outbox, preferences, notes, polls and packing data. Other
+  accounts, guest previews and device language are retained. Failed cleanup
+  markers survive dismissal/restart, and retries never repeat remote deletion.
+- The exact reviewed source passed 943/943 repository tests, with zero failures,
+  skips or cancellations, plus 8/8 tests applying the actual migrations in an
+  isolated PGlite PostgreSQL database. The native settings and App-shell tests
+  execute compiled components with fake authentication/network/native boundaries;
+  these are not claims of signed-device or live deletion acceptance.
+- Evidence remains outside Git: `/private/tmp/ks-account-deletion-release-suite.log`,
+  `/private/tmp/ks-account-postgres-review-fixes.log` and
+  `/private/tmp/ks-account-review-fixes.log`.
+- Local iOS, Android and web exports of that exact source also passed. Artifacts
+  are in `/private/tmp/ks-account-deletion-final-export`, with the export log at
+  `/private/tmp/ks-account-deletion-final-export.log`. These exports do not create
+  a signed App Store build or upload anything to Apple or Expo.
+- No migration or Edge Function was deployed, and no live account was deleted
+  by this preparation. Deployment with JWT validation enabled, separately
+  authorized disposable-account acceptance and signed-device testing remain
+  release gates. The in-app Privacy & your data overview does not replace an
+  owner-approved public privacy policy; publisher/support contact details and
+  approved public URLs have not been supplied. See the deployment instructions
+  in `supabase/functions/delete-account/README.md`.

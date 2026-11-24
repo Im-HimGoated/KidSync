@@ -26,13 +26,14 @@ import CalendarScreen from './calendar/CalendarScreen';
 import phoneAccess from './lib/phone-access';
 import HomeScreen from './screens/HomeScreen';
 import FamilyScreen from './screens/FamilyScreen';
-import AccountSettings from './ui/AccountSettings';
+import AccountSettings, { AccountDeletionReceipt } from './ui/AccountSettings';
+import accountDeletion from './lib/account-deletion';
 import useDeviceLanguage from './ui/use-device-language';
 import useScheduleSync from './lib/use-schedule-sync';
 import SyncStatus from './ui/SyncStatus';
 import WeeklyBrief from './ui/WeeklyBrief';
 import { AppearanceProvider, useAppearance } from './ui/AppearanceContext';
-import useLocalReminders from './lib/use-local-reminders';
+import useLocalReminders, { cancelRemindersForAccount } from './lib/use-local-reminders';
 import PreviewDraftReview from './ui/PreviewDraftReview';
 import calendarTools from './lib/calendar';
 import sharedCalendar from '../../shared/backend/mobile-shared-calendar';
@@ -130,6 +131,9 @@ function Workspace() {
   const [calendarCommentsRequest, setCalendarCommentsRequest] = useState(null);
   const commentsRequestId = useRef(0);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [deletionReceipt, setDeletionReceipt] = useState(null), [deletionRecovery, setDeletionRecovery] = useState(true);
+  const deletionRequest = useRef(false);
+  const deletionRecoveryQueue = useRef([]);
   const [previewDraftOpen, setPreviewDraftOpen] = useState(false);
   const [syncReviewOpen, setSyncReviewOpen] = useState(false);
   const [onboardingInitial, setOnboardingInitial] = useState(null);
@@ -162,6 +166,17 @@ function Workspace() {
     setCalendarFocusRequest(current => current + 1);
   }, []);
   accountScope.current = session?.user.id || null;
+  useEffect(() => {
+    let active = true;
+    if (typeof AsyncStorage.getAllKeys !== 'function') { setDeletionRecovery(false); return; }
+    accountDeletion.pendingCleanup(AsyncStorage).then(ids => {
+      if (active && ids.length) {
+        deletionRecoveryQueue.current = ids;
+        setDeletionReceipt({ userId: ids[0], needsCleanup: true, busy: false });
+      }
+    }).catch(() => { if (active) setError(t.failed); }).finally(() => { if (active) setDeletionRecovery(false); });
+    return () => { active = false; };
+  }, []);
   const ownerSync = useScheduleSync({ client: supabase, userId: session?.user.id });
   const ownerActivityActions = useMemo(() => ({
     ...mobileCalendar,
@@ -534,6 +549,69 @@ function Workspace() {
     return true;
   }
 
+  async function cleanDeletedAccount(userId) {
+    let needsCleanup = false;
+    try { await accountDeletion.forgetAccount(AsyncStorage, userId, { cancelReminders: cancelRemindersForAccount }); }
+    catch { needsCleanup = true; }
+    try {
+      const cached = await supabase.auth.getSession();
+      if (cached.error) throw cached.error;
+      if (cached.data?.session?.user?.id === userId && (!accountScope.current || accountScope.current === userId)) {
+        const result = await supabase.auth.signOut({ scope: 'local' });
+        if (result.error) throw result.error;
+      }
+    } catch { needsCleanup = true; }
+    if (accountScope.current === userId) {
+      setSession(null); setAccountOpen(false); setEntryScreen('welcome'); setPassword(''); setError('');
+    }
+    if (!needsCleanup) {
+      try { await accountDeletion.finishCleanup(AsyncStorage, userId); } catch { needsCleanup = true; }
+    }
+    const showReceipt = !accountScope.current || accountScope.current === userId;
+    setDeletionReceipt(previous => showReceipt || previous?.userId === userId ? { userId, needsCleanup, busy: false } : previous);
+    if (showReceipt) {
+      setAccountOpen(false);
+      try { if (typeof trial.reload === 'function') await trial.reload(); } catch { /* Backend deletion remains confirmed. */ }
+    }
+    return { deleted: true, needsCleanup };
+  }
+
+  async function deleteAccount(request) {
+    const userId = session?.user.id;
+    if (!userId || deletionRequest.current) throw Object.assign(new Error('Account unavailable'), { code: 'STALE_SCOPE' });
+    deletionRequest.current = true;
+    try {
+      await accountDeletion.deleteAccount(supabase, userId, { ...request, isCurrent: () => accountScope.current === userId });
+      // Keep a receipt of a confirmed deletion so a failed local cleanup can
+      // be retried after reopening. No password or authentication token is saved.
+      try { await accountDeletion.rememberDeletedAccount(AsyncStorage, userId); } catch { /* Still attempt every cleanup step. */ }
+      return await cleanDeletedAccount(userId);
+    } finally { deletionRequest.current = false; }
+  }
+
+  async function retryDeletionCleanup() {
+    if (!deletionReceipt || deletionRequest.current) return;
+    deletionRequest.current = true;
+    const userId = deletionReceipt.userId;
+    setDeletionReceipt(value => ({ ...value, busy: true }));
+    try { await cleanDeletedAccount(userId); }
+    finally {
+      deletionRequest.current = false;
+      setDeletionReceipt(value => value?.userId === userId ? { ...value, busy: false } : value);
+    }
+  }
+
+  function closeDeletionReceipt() {
+    if (deletionReceipt?.busy || deletionRequest.current) return;
+    // Each confirmed account is offered once in this session. A dismissed or
+    // failed cleanup keeps its persistent marker for a later retry.
+    const queue = deletionRecoveryQueue.current;
+    if (queue.length && queue[0] !== deletionReceipt?.userId) return;
+    if (queue.length) queue.shift();
+    const nextUserId = queue[0];
+    setDeletionReceipt(nextUserId ? { userId: nextUserId, needsCleanup: true, busy: false } : null);
+  }
+
   const syncCurrent = ownerSync.userId === session?.user.id;
   const snapshot = syncCurrent ? ownerSync.row?.schedule : null;
   const loaded = syncCurrent && ownerSync.loaded;
@@ -612,7 +690,8 @@ function Workspace() {
           <Text style={[styles.languageText, { color: appearance.colors.primary }]}>{language === 'en' ? '\u4e2d\u6587' : 'EN'}</Text>
         </Pressable></View>}
     </View>
-    {booting ? <ActivityIndicator accessibilityLabel={t.loading} color={appearance.colors.primary} style={styles.loader} /> : entryScreen === 'personalize' && trial.data && !trial.data.claimedBy ?
+    {booting || deletionRecovery ? <ActivityIndicator accessibilityLabel={t.loading} color={appearance.colors.primary} style={styles.loader} /> : deletionReceipt ?
+      <AccountDeletionReceipt language={language} {...deletionReceipt} onRetry={retryDeletionCleanup} onClose={closeDeletionReceipt} /> : entryScreen === 'personalize' && trial.data && !trial.data.claimedBy ?
       <PersonalizeCalendarScreen language={language} data={trial.data} signedIn={!!session} error={trial.error || (trialImportError ? 'saveFailed' : '')}
         onContinue={continueTrial} onPreferences={configureTrial} onBack={returnFromPersonalize} /> : !session && entryScreen === 'trial' && trial.data ?
       <TrialCalendarScreen language={language} data={trial.data} preferences={guestPreferences} error={trial.error} onSave={trial.saveEvent} onDraft={trial.saveDraft}
@@ -718,6 +797,8 @@ function Workspace() {
       </View>}
     {session && accountOpen && <AccountSettings key={session.user.id} language={language} email={session.user.email || ''} onClose={() => setAccountOpen(false)}
       calendarDisplay={{ scope: displayScopeKey, calendar: sharedSelected ? null : calendar, preferences: activePreferences, available: displayAvailable, onSave: saveDisplaySettings }}
+      onCheckDeletion={() => accountDeletion.availability(supabase, session.user.id, { isCurrent: () => accountScope.current === session.user.id })}
+      onDeleteAccount={deleteAccount}
       onPreferences={() => openAccountPreferences('settings')} reminders={reminders} onSignOut={signOut} onLanguage={setLanguage} onWebsite={openWebsite} />}
     {previewDraftOpen && accountPreview?.draft && <PreviewDraftReview key={session.user.id} language={language} draft={accountPreview.draft} onClose={() => setPreviewDraftOpen(false)} />}
   </SafeAreaView>}</AppearanceProvider>;

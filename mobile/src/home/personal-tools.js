@@ -35,6 +35,7 @@ function decode(raw) {
   return normalize(value.state);
 }
 
+const erasure = require('../lib/account-erasure');
 function createStore(storage) {
   if (!storage || typeof storage.getItem !== 'function' || typeof storage.setItem !== 'function') throw new Error('INVALID_STORAGE');
   let queue = queues.get(storage);
@@ -46,9 +47,12 @@ function createStore(storage) {
   };
   async function update(scope, change) {
     const key = keyFor(scope);
+    erasure.registerQueue(storage, scope.accountId, queue, () => queue.tail);
     return enqueue(async () => {
+      erasure.assertActive(storage, scope.accountId);
       const current = decode(await storage.getItem(key));
       const next = normalize(change(current));
+      erasure.assertActive(storage, scope.accountId);
       await storage.setItem(key, JSON.stringify({ version: VERSION, state: next }));
       return next;
     });
