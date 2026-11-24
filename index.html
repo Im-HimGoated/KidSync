@@ -11719,6 +11719,7 @@
   <script src="./shared/backend/config.js"></script>
   <script src="./supabase-config.js"></script>
   <script src="./assets/cloud-snapshot-sync.js?v=1"></script>
+  <script src="./shared/family-profile-links.js?v=1"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./assets/jspdf.umd.min.js"></script>
   <script src="./assets/lucide.min.js"></script>
@@ -12849,6 +12850,7 @@
         "feedback.eventCreated": "{title} was added.",
         "feedback.eventUpdated": "{title} was updated.",
         "feedback.kidsSaved": "Family profiles saved.",
+        "feedback.kidsSaveFailed": "Could not update family profiles. Reload KidsSync and try again.",
         "feedback.exampleLoaded": "Example schedule loaded.",
         "overview.events": "{count} events",
         "overview.eventOne": "1 event",
@@ -14030,6 +14032,7 @@
         "feedback.eventCreated": "已添加“{title}”。",
         "feedback.eventUpdated": "已更新“{title}”。",
         "feedback.kidsSaved": "家庭成员资料已保存。",
+        "feedback.kidsSaveFailed": "无法更新家庭资料。请重新加载 KidsSync 后重试。",
         "feedback.exampleLoaded": "示例日程已载入。",
         "overview.events": "{count} 项活动",
         "overview.eventOne": "1 项活动",
@@ -15992,7 +15995,8 @@
 
     function normalizeKidProfile(kid, index = 0) {
       return {
-        id: kid.id || makeId("kid"),
+        ...kid,
+        id: kid.id ?? makeId("kid"),
         name: kid.name || defaultChildName(index + 1),
         palette: palettes[kid.palette] ? kid.palette : "blue",
         avatar: KID_AVATARS.includes(kid.avatar) ? kid.avatar : KID_AVATARS[index % KID_AVATARS.length],
@@ -23018,9 +23022,7 @@
       event.preventDefault();
       const rows = [...kidEditorList.querySelectorAll(".kid-editor-row")];
       const seen = new Set();
-      const renamed = new Map();
       const updatedKids = rows.map((row, index) => {
-        const originalName = row.dataset.originalName;
         let name = row.querySelector(".kid-name-input").value.trim();
         if (!name) name = defaultChildName(index + 1);
         let uniqueName = name;
@@ -23030,11 +23032,10 @@
           suffix += 1;
         }
         seen.add(uniqueName.toLowerCase());
-        if (originalName && originalName !== uniqueName) {
-          renamed.set(originalName, uniqueName);
-        }
+        const previous = kidProfiles.find(profile => profile?.id != null && String(profile.id) === row.dataset.id);
         return {
-          id: row.dataset.id || makeId("kid"),
+          ...previous,
+          id: previous?.id ?? (row.dataset.id || makeId("kid")),
           name: uniqueName,
           palette: row.querySelector(".kid-palette-select").value,
           avatar: row.querySelector(".kid-avatar-select").value,
@@ -23043,14 +23044,20 @@
         };
       });
 
+      let updatedActivities;
+      try {
+        if (typeof window.KidsSyncFamilyProfileLinks?.remapProfileActivities !== "function") throw new Error("PROFILE_TOOLS_UNAVAILABLE");
+        updatedActivities = window.KidsSyncFamilyProfileLinks.remapProfileActivities(state.activities, kidProfiles, updatedKids);
+      } catch {
+        showFeedbackToast(t("feedback.kidsSaveFailed"));
+        return;
+      }
       if (JSON.stringify(kidProfiles) !== JSON.stringify(updatedKids)) {
         rememberCurrentSchedule(t("versions.beforeKids"));
       }
       kidProfiles = updatedKids;
       kids = buildKids(kidProfiles);
-      state.activities = state.activities
-        .map(activity => renamed.has(activity.child) ? { ...activity, child: renamed.get(activity.child) } : activity)
-        .filter(activity => activity.child === FAMILY_CHILD || kids[activity.child]);
+      state.activities = updatedActivities;
       state.visibleKids = new Set(kidProfiles.map(kid => kid.name));
       saveKids();
       saveActivities();

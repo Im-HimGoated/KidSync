@@ -1,8 +1,9 @@
-const CACHE_NAME = "kidssync-shell-v149";
+const CACHE_NAME = "kidssync-shell-v150";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./shared/backend/config.js",
+  "./shared/family-profile-links.js?v=1",
   "./assets/ui-polish.css",
   "./assets/ui-refinement.css?v=2",
   "./assets/marketing-auth.css?v=4",

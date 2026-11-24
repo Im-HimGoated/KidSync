@@ -2,6 +2,7 @@
 // fallback happens while saving activities: calendar creation is an explicit API.
 const { SCHEDULE_TABLE, readSchedule } = require('./schedules');
 const { PALETTES } = require('../family-profiles');
+const profileLinks = require('../family-profile-links');
 
 class MobileCalendarError extends Error {
   constructor(code, message) {
@@ -402,40 +403,7 @@ async function saveFamilyProfiles(client, userId, calendarId, { original, profil
   const selected = locateCalendar(row.schedule, calendarId);
   const saved = selected.data.kids ?? [];
   if (!equal(saved, original)) fail('CONFLICT', 'Family profiles changed. Refresh and try again.');
-  const updatedById = new Map(kids.map(kid => [String(kid.id), kid.name]));
-  const names = new Map(), ids = new Map();
-  for (const kid of saved) {
-    if (typeof kid?.name !== 'string') continue;
-    const updated = kid.id == null ? (kids.some(next => next.name === kid.name) ? kid.name : null)
-      : updatedById.get(String(kid.id)) ?? null;
-    names.set(kid.name, updated);
-    if (kid.id != null && updated !== kid.name) ids.set(String(kid.id), updated);
-  }
-  const updateReference = reference => {
-    if (reference === 'all' || reference === '__family__') return reference;
-    if (names.has(reference)) return names.get(reference);
-    return (typeof reference === 'string' || typeof reference === 'number') && ids.has(String(reference))
-      ? ids.get(String(reference)) : reference;
-  };
-  const updateReferences = references => {
-    const updated = references.map(updateReference);
-    if (equal(updated, references)) return references;
-    return [...new Set(updated.filter((value, index) => value != null || references[index] == null))];
-  };
-  const updateActivities = activities => activities.map(activity => {
-    if (!record(activity)) return activity;
-    const next = { ...activity };
-    for (const field of ['child', 'childId']) {
-      if (!own(activity, field)) continue;
-      const child = Array.isArray(activity[field]) ? updateReferences(activity[field]) : updateReference(activity[field]);
-      if (!equal(child, activity[field])) next[field] = child == null || Array.isArray(child) && !child.length ? '__family__' : child;
-    }
-    if (Array.isArray(activity.attendees)) {
-      const attendees = updateReferences(activity.attendees);
-      if (!equal(attendees, activity.attendees)) next.attendees = attendees.length ? attendees : ['all'];
-    }
-    return next;
-  });
+  const updateActivities = activities => profileLinks.remapProfileActivities(activities, saved, kids);
   const activities = updateActivities(selected.activities);
   const schedule = selected.modern ? { ...row.schedule,
     calendarData: { ...row.schedule.calendarData, [calendarId]: { ...selected.data, kids, activities } },
