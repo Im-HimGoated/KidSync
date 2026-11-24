@@ -496,6 +496,44 @@ comments, schedule writes, or notifications were sent in this pass.
   regression also verifies content-size changes do not reset it to 8 AM and
   ordinary date navigation retains its normal opening hour.
 - Live two-account sharing/pickup acceptance still needs a distinct recipient
-  account. A newly proposed disposable calendar/profile write-and-cleanup test
-  remains pending explicit authorization. Physical-phone notification delivery
-  remains separate; none of those checks is represented as passed here.
+  account. The subsequently approved disposable calendar/profile lifecycle is
+  recorded below. Physical-phone notification delivery remains separate; neither
+  distinct-account collaboration nor physical delivery is represented as passed.
+
+## Approved calendar/profile lifecycle sync (November 23–24, 2026)
+
+- Created only the approved Mobile QA Nov 23 calendar, test child and event on
+  the authenticated iPhone 16 Pro simulator. The production website independently
+  received the calendar, child and assigned event.
+- Website title/location edits appeared on the iPhone. Native and website child
+  renames each appeared on the other client with event links intact. These native
+  round-trip and website-rename receipt tests each executed one test with zero
+  failures.
+- Removed the last test child through the repaired production website editor.
+  The event remained assigned to Family with its edited title and location on
+  both clients; native details and the event label independently confirmed this.
+- Deleted the exact test event and captured temporary calendar through normal
+  website controls. Cloud save and a fresh reload confirmed the event was absent
+  and only the original Family calendar remained selected.
+- Reopened the same signed-in iPhone 16 Pro after restarting its stopped local
+  Expo server. Home received the test event's deletion in history; the calendar
+  showed zero activities on November 23, and Your calendars contained only Family,
+  selected. English and Dark remained intact. No test calendar, child or event
+  remains. The existing Family records were not edited.
+- Native cleanup was verified through actual Device Hub controls and screenshots.
+  Earlier cleanup runner attempts failed on navigation/confirmation selectors;
+  they are not recorded as passing deletion tests. The final website deletion
+  and native readback above are the actual cleanup evidence.
+- Fixed profile-removal data loss, last-child removal parity, profile reference
+  preservation and native event metadata loss during website edits. Regression
+  coverage also protects numeric event ID zero from becoming a duplicate.
+- Final source passed 901/901 repository tests with zero failures, skips or
+  cancellations. iOS, Android and web exports passed. Local evidence remains
+  outside Git: `kidssync-approved-lifecycle-final-tests.log`,
+  `kidssync-profile-fix-export-20261123`,
+  `kidssync-lifecycle-cleanup-20261124.jpg` and
+  `kidssync-lifecycle-native-cleanup-20261124.png` under `/private/tmp`; earlier
+  native round-trip results are under `/tmp/kidssync-integration-native`.
+- No invitation, message, OS permission or notification setting was changed.
+  Distinct-account collaboration and physical-phone notification delivery are
+  not claimed by this acceptance.

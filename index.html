@@ -19590,7 +19590,7 @@
       document.getElementById("dialogTitle").textContent = isEdit ? t("dialog.editTitle") : t("dialog.addTitle");
       deleteButton.hidden = !isEdit;
       duplicateButton.hidden = !isEdit;
-      fields.id.value = activity?.id || "";
+      fields.id.value = activity?.id ?? "";
       fields.child.value = activity?.child || preferredNewEventChild();
       const legacyDayIndex = days.findIndex(day => day.key === activity?.day);
       fields.date.value = activity?.startDate || activity?.occurrenceDate || (legacyDayIndex >= 0 ? dateKey(addDays(currentWeekStart, legacyDayIndex)) : defaultEventDate());

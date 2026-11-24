@@ -9,6 +9,9 @@ const start = html.indexOf('    form.addEventListener("submit", event => {');
 const end = html.indexOf('    kidsForm.addEventListener("submit"', start);
 assert(start >= 0 && end > start, 'use the actual production event submit handler');
 const source = html.slice(start, end);
+const openStart = html.indexOf('    function openDialog(');
+const idInitialization = html.slice(openStart).match(/fields\.id\.value = [^;]+;/)?.[0];
+assert(idInitialization, 'exercise the actual event-editor ID initialization');
 
 const baseFields = {
   id: 'plan', child: 'Casey', date: '2026-11-23', endDate: '', eventType: 'activity', importance: 'normal',
@@ -24,7 +27,7 @@ const existing = (extra = {}) => ({
   notes: '', location: '', responsible: '', items: '', ...extra,
 });
 
-function submit({ activities = [], fields = {}, attendees = ['Casey'], weekdays = [], icon = '⚽', saved = true } = {}) {
+function submit({ activities = [], fields = {}, attendees = ['Casey'], weekdays = [], icon = '⚽', saved = true, openExisting = false } = {}) {
   const context = vm.createContext({ seedJSON: JSON.stringify({ activities, fields, attendees, weekdays, icon, saved, defaults: baseFields }) });
   vm.runInContext(`
     const seed = JSON.parse(seedJSON), trace = [], checkpoints = [], audits = [], savedSnapshots = [], validations = [];
@@ -62,7 +65,7 @@ function submit({ activities = [], fields = {}, attendees = ['Casey'], weekdays 
     const scheduleSmartCalendarFocus = () => trace.push('focus');
     const showFeedbackToast = message => trace.push(message);
   `, context);
-  vm.runInContext(source + `
+  vm.runInContext(source + (openExisting ? '\nconst activity = state.activities[0];\n' + idInitialization : '') + `
     handler({preventDefault() {trace.push('preventDefault');}});
     const clonedExclusions = state.activities.length && originalRows.length && state.activities[0].excludedDates !== originalRows[0].excludedDates;
     globalThis.result = { activities:state.activities, originalRows, trace, checkpoints, audits, savedSnapshots, validations, clonedExclusions };
@@ -104,6 +107,13 @@ test('numeric activity IDs stay numeric and update their existing row instead of
     assert.deepEqual(result.activities[1], unrelated);
     assert.equal(result.audits[0].action, 'updated');
   }
+});
+
+test('opening and submitting an existing zero-ID event preserves its identity and native metadata', () => {
+  const original = existing({ id: 0, reminderMinutes: 10, future: { keep: true } });
+  const result = submit({ activities: [original], fields: { title: 'Edited zero plan' }, openExisting: true });
+  assert.deepEqual(result.activities, [{ ...original, title: 'Edited zero plan' }]);
+  assert.equal(result.audits[0].action, 'updated');
 });
 
 test('new events inherit no metadata from existing plans', () => {
