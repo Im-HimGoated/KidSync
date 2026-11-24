@@ -112,5 +112,5 @@ test('profile reference tools load before the website handler and ship in the up
   const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
   assert(html.indexOf('src="./shared/family-profile-links.js?v=1"') < start);
   assert.match(worker, /"\.\/shared\/family-profile-links\.js\?v=1"/);
-  assert.match(worker, /kidssync-shell-v150/);
+  assert.match(worker, /kidssync-shell-v151/);
 });

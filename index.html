@@ -11141,6 +11141,7 @@
       <button class="close-btn" type="button" id="closeKidsDialog" aria-label="Close" data-i18n-aria="aria.close">×</button>
     </div>
     <form id="kidsForm">
+      <p class="field-hint" data-i18n="kids.removalHint">Removing a child keeps their activities as family plans.</p>
       <div class="kid-editor-list" id="kidEditorList"></div>
       <button class="ghost-btn" type="button" id="addKidRow" data-i18n="kids.add">＋ Add Child</button>
       <div class="form-actions">
@@ -12772,6 +12773,8 @@
         "kids.color": "Color",
         "kids.remove": "Remove {name}",
         "kids.removeAction": "Remove child",
+        "kids.removalHint": "Removing a child keeps their activities as family plans.",
+        "kids.empty": "No child profiles. Family plans are kept.",
         "kids.avatar": "Avatar",
         "kids.grade": "Grade",
         "kids.gradePlaceholder": "5th grade",
@@ -13954,6 +13957,8 @@
         "kids.color": "颜色",
         "kids.remove": "移除 {name}",
         "kids.removeAction": "移除孩子",
+        "kids.removalHint": "移除孩子后，其活动会保留为全家活动。",
+        "kids.empty": "暂无孩子资料。全家活动仍会保留。",
         "kids.avatar": "头像",
         "kids.grade": "年级",
         "kids.gradePlaceholder": "五年级",
@@ -19827,7 +19832,7 @@
     }
 
     function renderKidEditor() {
-      kidEditorList.innerHTML = "";
+      kidEditorList.innerHTML = kidDraft.length ? "" : `<p class="field-hint">${t("kids.empty")}</p>`;
       kidDraft.forEach((kid, index) => {
         const row = document.createElement("div");
         row.className = "kid-editor-row";
@@ -19850,7 +19855,7 @@
               ${Object.entries(palettes).map(([key]) => `<option value="${key}"${kid.palette === key ? " selected" : ""}>${t(`color.${key}`)}</option>`).join("")}
             </select>
           </label>
-          <button class="remove-kid" type="button" aria-label="${t("kids.remove", { name: escapeHtml(kid.name) })}" ${kidDraft.length === 1 ? "disabled" : ""}><span aria-hidden="true">×</span><span class="remove-kid-label">${t("kids.removeAction")}</span></button>
+          <button class="remove-kid" type="button" aria-label="${t("kids.remove", { name: escapeHtml(kid.name) })}"><span aria-hidden="true">×</span><span class="remove-kid-label">${t("kids.removeAction")}</span></button>
           <div class="kid-profile-details">
             <label>
               ${t("kids.grade")}
@@ -22959,8 +22964,14 @@
         return;
       }
       fields.end.setCustomValidity("");
+      const requestedId = fields.id.value;
+      const existingIndex = requestedId === "" ? -1 : state.activities.findIndex(item => item
+        && (typeof item.id === "string" || typeof item.id === "number" && Number.isFinite(item.id))
+        && String(item.id) === String(requestedId));
+      const previousActivity = existingIndex >= 0 ? { ...state.activities[existingIndex] } : null;
       const activity = {
-        id: fields.id.value || makeId("activity"),
+        ...previousActivity,
+        id: previousActivity ? previousActivity.id : requestedId || makeId("activity"),
         child: fields.child.value,
         startDate: fields.date.value,
         endDate: fields.eventType.value === "trip" ? fields.endDate.value : "",
@@ -22990,8 +23001,6 @@
         items: fields.items.value.trim()
       };
 
-      const existingIndex = state.activities.findIndex(item => item.id === activity.id);
-      const previousActivity = existingIndex >= 0 ? { ...state.activities[existingIndex] } : null;
       if (previousActivity?.excludedDates) activity.excludedDates = [...previousActivity.excludedDates];
       if (!previousActivity || JSON.stringify(previousActivity) !== JSON.stringify(activity)) {
         rememberCurrentSchedule(t(previousActivity ? "versions.beforeEdit" : "versions.beforeCreate", { title: activityTitle(activity) }));
