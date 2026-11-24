@@ -537,3 +537,19 @@ comments, schedule writes, or notifications were sent in this pass.
 - No invitation, message, OS permission or notification setting was changed.
   Distinct-account collaboration and physical-phone notification delivery are
   not claimed by this acceptance.
+
+## Mobile event card refinement (November 24, 2026)
+
+- Replaced the heavy event fill with a neutral surface, subtle person-color tint
+  and an inset accent rail. Wide Day cards now show a larger title, the time range
+  and, when height permits, the person and location on a separate line.
+- Tight Week lanes and short appointments retain compact text. Event start,
+  duration, overlap grouping and accessibility labels remain intact; only the
+  horizontal gap between cards changes.
+- Inspected an isolated browser fixture of the actual before/after mobile
+  components in light and dark themes. The 36-pixel short cards and overlapping
+  cards retained their text within the duration bounds. This is component visual
+  coverage, not a new signed-in native or live-sync acceptance pass.
+- All 901 repository tests passed with zero failures or skips, and iOS, Android
+  and web exports passed. Local preview and build artifacts are outside Git under
+  `/private/tmp/kidssync-event-cards-20261124*`.

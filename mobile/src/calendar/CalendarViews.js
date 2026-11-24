@@ -272,25 +272,33 @@ export function FullMonthPage({ date, firstDay = 1, events = [], kids = [], lang
   </View>;
 }
 
-function EventBlock({ event, date, kids, language, t, onEvent, style, compact = false, narrow = false, occurrenceStartDate, time, overlapCount = 0 }) {
+function EventBlock({ event, date, kids, language, t, onEvent, style, compact = false, narrow = false, occurrenceStartDate, time, endTime, overlapCount = 0 }) {
   const { colors, palettes, s } = useViewStyles();
   const palette = colorFor(event, kids, palettes, colors), cancelled = event.status === 'cancelled';
   const segment = calendar.daySegment(event, date, occurrenceStartDate);
   const important = event.importance === 'high' && !cancelled;
+  const roomy = !compact && !narrow && style?.width >= 180;
+  const short = !compact && style?.height < 54;
+  const detail = roomy && style?.height >= 88
+    ? [attendee(event, kids, t), text(event.location)].filter(Boolean).join(' · ') : '';
+  const displayTime = roomy && endTime ? `${time} – ${endTime}` : time;
   const label = [eventLabel(event, date, kids, language, t, occurrenceStartDate),
     important && t.important, overlapCount > 0 && t.overlap(overlapCount)].filter(Boolean).join(', ');
   return <Pressable accessibilityRole="button" accessibilityLabel={label}
     accessibilityHint={overlapCount ? t.openDay : t.details} onPress={() => onEvent?.(event, date, occurrenceStartDate)}
-    style={({ pressed }) => [s.eventBlock, { backgroundColor: palette.soft, borderLeftColor: palette.line },
+    style={({ pressed }) => [s.eventBlock, roomy && s.roomyBlock, short && s.shortBlock,
       compact && s.compactBlock, style, (pressed || cancelled) && { opacity: 0.6 }]}>
-    <Text style={[s.blockTitle, narrow && s.narrowBlockTitle, { color: palette.ink }, cancelled && s.cancelled]}
+    <View accessible={false} pointerEvents="none" style={[StyleSheet.absoluteFillObject, s.blockTint, { backgroundColor: palette.soft }]} />
+    <View accessible={false} pointerEvents="none" style={[s.blockAccent, { backgroundColor: palette.line }]} />
+    <Text style={[s.blockTitle, roomy && !short && s.roomyBlockTitle, narrow && s.narrowBlockTitle, cancelled && s.cancelled]}
       numberOfLines={narrow || time || overlapCount ? 1 : 2} ellipsizeMode="tail">
       {important ? '★ ' : ''}{segment?.continuesBefore ? '← ' : ''}{text(event.title) || t.activity}{segment?.continuesAfter ? ' →' : ''}
     </Text>
     {!!(time || overlapCount) && <View style={s.blockMeta}>
-      {!!time && <Text numberOfLines={1} style={[s.blockTime, { color: palette.ink }]}>{time}</Text>}
+      {!!time && <Text numberOfLines={1} style={[s.blockTime, roomy && !short && s.roomyBlockTime]}>{displayTime}</Text>}
       {!!overlapCount && <Text style={[s.overlapCount, { color: palette.ink }]}>+{overlapCount}</Text>}
     </View>}
+    {!!detail && <Text numberOfLines={1} ellipsizeMode="tail" style={s.blockDetail}>{detail}</Text>}
   </Pressable>;
 }
 
@@ -476,10 +484,10 @@ export function WeekGrid({ date, firstDay = 1, initialHour = 8, events = [], kid
                 const laneWidth = colWidth / Math.max(1, item.lanes);
                 return <EventBlock key={`${item.event.id ?? 'event'}:${item.occurrenceStartDate || ''}:${j}`} event={item.event} date={day}
                   kids={kids} language={language} t={t} occurrenceStartDate={item.occurrenceStartDate} narrow={item.lanes > 1}
-                  time={laneWidth >= 66 ? clock(item.start) : undefined} overlapCount={item.overlapCount}
+                  time={laneWidth >= 66 ? clock(item.start) : undefined} endTime={clock(item.end % 1440)} overlapCount={item.overlapCount}
                   onEvent={item.overlapCount ? () => onOpenDay(day, item.overlapStart / 60) : onEvent}
                   style={{ position: 'absolute', top: item.top, height: item.height,
-                    left: item.lane * laneWidth + 1, width: Math.max(1, laneWidth - 2) }} />;
+                    left: item.lane * laneWidth + 3, width: Math.max(1, laneWidth - 6) }} />;
               })}
               {calendar.dateKey(day) === today && <View pointerEvents="none" accessible accessibilityLabel={`${t.now}, ${clock(nowMinutes)}`}
                 style={[s.nowLine, { top: nowMinutes / 60 * HOUR_HEIGHT }]}><View style={s.nowDot} /></View>}
@@ -579,10 +587,14 @@ const createStyles = colors => StyleSheet.create({
   hourLine: { position: 'absolute', height: 1, backgroundColor: colors.line, left: 0 }, dayColumn: { position: 'absolute', top: 0, borderLeftWidth: 1, borderLeftColor: colors.line },
   nowLine: { position: 'absolute', left: 0, right: 0, height: 2, backgroundColor: colors.error, zIndex: 2, justifyContent: 'center' },
   nowDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.error },
-  eventBlock: { borderLeftWidth: 3, borderRadius: 8, paddingVertical: 2, paddingHorizontal: 4, overflow: 'hidden' },
-  compactBlock: { minHeight: 44, justifyContent: 'center' }, blockTitle: { fontSize: 12, lineHeight: 16, fontWeight: '600' }, narrowBlockTitle: { fontSize: 11, lineHeight: 15 },
+  eventBlock: { backgroundColor: colors.surfaceRaised, borderRadius: 10, paddingVertical: 5, paddingHorizontal: 7, overflow: 'hidden' },
+  blockTint: { opacity: 0.42 }, blockAccent: { position: 'absolute', left: 0, top: 6, bottom: 6, width: 2, borderRadius: 2 },
+  roomyBlock: { paddingHorizontal: 12, paddingVertical: 7, gap: 3 }, shortBlock: { paddingVertical: 3, paddingHorizontal: 5, borderRadius: 7, gap: 0 },
+  compactBlock: { minHeight: 44, justifyContent: 'center' }, blockTitle: { fontSize: 12, lineHeight: 16, fontWeight: '600', color: colors.ink }, narrowBlockTitle: { fontSize: 11, lineHeight: 15 },
+  roomyBlockTitle: { fontSize: 15, lineHeight: 20, fontWeight: '600' },
   blockMeta: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  blockTime: { fontSize: 10, lineHeight: 13, flexShrink: 1 },
+  blockTime: { color: colors.muted, fontSize: 10, lineHeight: 13, flexShrink: 1, fontVariant: ['tabular-nums'] },
+  roomyBlockTime: { fontSize: 12, lineHeight: 16 }, blockDetail: { color: colors.muted, fontSize: 12, lineHeight: 17 },
   overlapCount: { fontSize: 10, lineHeight: 13, fontWeight: '800' },
   cancelled: { textDecorationLine: 'line-through' },
 });
